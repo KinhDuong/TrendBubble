@@ -249,6 +249,7 @@ function App() {
             rank: index + 1,
             url: topic.url || existing.url,
             pub_date: earliestPubDate,
+            category: topic.category || existing.category,
             created_at: existing.created_at
           });
 
@@ -268,7 +269,8 @@ function App() {
             search_volume_raw: topic.searchVolumeRaw,
             rank: index + 1,
             url: topic.url,
-            pub_date: topic.pubDate
+            pub_date: topic.pubDate,
+            category: topic.category
           });
         }
       }
