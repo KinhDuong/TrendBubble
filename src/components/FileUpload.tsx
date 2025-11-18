@@ -4,10 +4,28 @@ import { TrendingTopic } from '../types';
 
 interface FileUploadProps {
   onUpload: (topics: TrendingTopic[]) => void;
+  theme: 'dark' | 'light';
 }
 
-export default function FileUpload({ onUpload }: FileUploadProps) {
+const COMMON_CATEGORIES = [
+  'Politics',
+  'Sports',
+  'Entertainment',
+  'Technology',
+  'Business',
+  'Health',
+  'Science',
+  'World News',
+  'Local News',
+  'Weather',
+  'Other'
+];
+
+export default function FileUpload({ onUpload, theme }: FileUploadProps) {
   const [fileName, setFileName] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [categorySearch, setCategorySearch] = useState('');
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -17,10 +35,24 @@ export default function FileUpload({ onUpload }: FileUploadProps) {
       reader.onload = (e) => {
         const text = e.target?.result as string;
         const parsedTopics = parseCSV(text);
-        onUpload(parsedTopics);
+        const topicsWithCategory = parsedTopics.map(topic => ({
+          ...topic,
+          category: selectedCategory || undefined
+        }));
+        onUpload(topicsWithCategory);
       };
       reader.readAsText(file);
     }
+  };
+
+  const filteredCategories = COMMON_CATEGORIES.filter(cat =>
+    cat.toLowerCase().includes(categorySearch.toLowerCase())
+  );
+
+  const handleCategorySelect = (category: string) => {
+    setSelectedCategory(category);
+    setCategorySearch(category);
+    setShowCategoryDropdown(false);
   };
 
   const parseCSV = (csvText: string): TrendingTopic[] => {
@@ -100,10 +132,52 @@ export default function FileUpload({ onUpload }: FileUploadProps) {
   };
 
   return (
-    <div className="mb-8">
+    <div className="mb-8 w-full max-w-md mx-auto space-y-4">
+      <div className="relative">
+        <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+          Category (Optional)
+        </label>
+        <input
+          type="text"
+          value={categorySearch}
+          onChange={(e) => {
+            setCategorySearch(e.target.value);
+            setShowCategoryDropdown(true);
+          }}
+          onFocus={() => setShowCategoryDropdown(true)}
+          placeholder="Search or select category..."
+          className={`w-full px-4 py-2 rounded-lg border ${
+            theme === 'dark'
+              ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
+              : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
+          } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+        />
+        {showCategoryDropdown && filteredCategories.length > 0 && (
+          <div className={`absolute z-10 w-full mt-1 rounded-lg border shadow-lg max-h-60 overflow-y-auto ${
+            theme === 'dark'
+              ? 'bg-gray-700 border-gray-600'
+              : 'bg-white border-gray-300'
+          }`}>
+            {filteredCategories.map((category) => (
+              <button
+                key={category}
+                onClick={() => handleCategorySelect(category)}
+                className={`w-full px-4 py-2 text-left transition-colors ${
+                  theme === 'dark'
+                    ? 'hover:bg-gray-600 text-white'
+                    : 'hover:bg-gray-100 text-gray-900'
+                }`}
+              >
+                {category}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
       <label
         htmlFor="file-upload"
-        className="flex items-center justify-center cursor-pointer bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors duration-200 w-full max-w-md mx-auto"
+        className="flex items-center justify-center cursor-pointer bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors duration-200 w-full"
       >
         <Upload className="mr-2" size={20} />
         {fileName || 'Upload CSV File'}
@@ -115,7 +189,7 @@ export default function FileUpload({ onUpload }: FileUploadProps) {
           className="hidden"
         />
       </label>
-      <p className="text-gray-400 text-sm text-center mt-2">
+      <p className={`text-sm text-center ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
         CSV format: Topic Name, Search Volume, Explore Link (optional), Started (optional)
       </p>
     </div>

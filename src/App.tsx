@@ -406,7 +406,7 @@ function App() {
             </div>
           </div>
         )}
-        <FileUpload onUpload={handleFileUpload} />
+        <FileUpload onUpload={handleFileUpload} theme={theme} />
         {loading && (
           <div className={`text-center py-8 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>Loading...</div>
         )}
