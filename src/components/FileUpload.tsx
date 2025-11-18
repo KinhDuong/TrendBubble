@@ -56,6 +56,24 @@ export default function FileUpload({ onUpload, theme }: FileUploadProps) {
   };
 
   const parseCSV = (csvText: string): TrendingTopic[] => {
+    const decodeHtmlEntities = (text: string): string => {
+      const entities: Record<string, string> = {
+        '&amp;': '&',
+        '&lt;': '<',
+        '&gt;': '>',
+        '&quot;': '"',
+        '&#39;': "'",
+        '&apos;': "'",
+        '&#x27;': "'",
+        '&#x2F;': '/',
+        '&nbsp;': ' ',
+      };
+
+      return text.replace(/&[#\w]+;/g, (match) => {
+        return entities[match] || match;
+      });
+    };
+
     const parseCSVLine = (line: string): string[] => {
       const result: string[] = [];
       let current = '';
@@ -66,13 +84,13 @@ export default function FileUpload({ onUpload, theme }: FileUploadProps) {
         if (char === '"') {
           inQuotes = !inQuotes;
         } else if (char === ',' && !inQuotes) {
-          result.push(current.trim());
+          result.push(decodeHtmlEntities(current.trim()));
           current = '';
         } else {
           current += char;
         }
       }
-      result.push(current.trim());
+      result.push(decodeHtmlEntities(current.trim()));
       return result;
     };
 

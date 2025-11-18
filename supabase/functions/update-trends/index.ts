@@ -52,9 +52,28 @@ Deno.serve(async (req: Request) => {
     const traffics: string[] = [];
     const pubDates: string[] = [];
 
+    // Decode HTML entities helper
+    const decodeHtmlEntities = (text: string): string => {
+      const entities: Record<string, string> = {
+        '&amp;': '&',
+        '&lt;': '<',
+        '&gt;': '>',
+        '&quot;': '"',
+        '&#39;': "'",
+        '&apos;': "'",
+        '&#x27;': "'",
+        '&#x2F;': '/',
+        '&nbsp;': ' ',
+      };
+
+      return text.replace(/&[#\w]+;/g, (match) => {
+        return entities[match] || match;
+      });
+    };
+
     let match;
     while ((match = titleRegex.exec(xmlText)) !== null) {
-      const title = match[1].trim();
+      const title = decodeHtmlEntities(match[1].trim());
       if (title && title !== "Daily Search Trends") {
         titles.push(title);
       }
