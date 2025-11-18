@@ -9,6 +9,8 @@ function App() {
   const isMobile = window.innerWidth < 768;
   const [maxBubbles, setMaxBubbles] = useState<number>(isMobile ? 40 : 60);
   const [dateFilter, setDateFilter] = useState<'now' | 'all' | '24h' | 'week' | 'month' | 'year'>('now');
+  const [categoryFilter, setCategoryFilter] = useState<string>('all');
+  const [categories, setCategories] = useState<string[]>([]);
   const [viewMode, setViewMode] = useState<'bubble' | 'list'>('bubble');
   const [loading, setLoading] = useState(true);
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
@@ -18,11 +20,12 @@ function App() {
   useEffect(() => {
     loadTopics();
     loadThemePreference();
+    loadCategories();
   }, []);
 
   useEffect(() => {
     loadTopics();
-  }, [dateFilter]);
+  }, [dateFilter, categoryFilter]);
 
   const loadThemePreference = async () => {
     try {
@@ -89,6 +92,10 @@ function App() {
         query = query.gte('first_seen', startDate.toISOString());
       }
 
+      if (categoryFilter !== 'all') {
+        query = query.eq('category', categoryFilter);
+      }
+
       const { data, error } = await query.order('rank', { ascending: true });
 
       if (error) throw error;
@@ -111,6 +118,25 @@ function App() {
       console.error('Error loading topics:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadCategories = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('trending_topics')
+        .select('category')
+        .not('category', 'is', null)
+        .order('category');
+
+      if (error) throw error;
+
+      if (data) {
+        const uniqueCategories = [...new Set(data.map(item => item.category).filter(Boolean))] as string[];
+        setCategories(uniqueCategories);
+      }
+    } catch (error) {
+      console.error('Error loading categories:', error);
     }
   };
 
@@ -437,6 +463,21 @@ function App() {
                     <div className={`w-px h-4 md:h-6 ${theme === 'dark' ? 'bg-gray-600' : 'bg-gray-300'}`}></div>
                   </>
                 )}
+                <label htmlFor="categoryFilter" className="text-xs md:text-sm font-medium">
+                  Category:
+                </label>
+                <select
+                  id="categoryFilter"
+                  value={categoryFilter}
+                  onChange={(e) => setCategoryFilter(e.target.value)}
+                  className={`${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} border rounded px-2 md:px-3 py-1 md:py-1.5 text-xs md:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                >
+                  <option value="all">All</option>
+                  {categories.map(category => (
+                    <option key={category} value={category}>{category}</option>
+                  ))}
+                </select>
+                <div className={`w-px h-4 md:h-6 ${theme === 'dark' ? 'bg-gray-600' : 'bg-gray-300'}`}></div>
                 <label htmlFor="dateFilter" className="text-xs md:text-sm font-medium">
                   Date:
                 </label>
