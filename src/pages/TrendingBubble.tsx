@@ -318,7 +318,7 @@ function TrendingBubble() {
         .select('*');
 
       const existingMap = new Map(
-        (existingTopics || []).map(t => [t.name.toLowerCase(), t])
+        (existingTopics || []).map(t => [t.name.trim().toLowerCase(), t])
       );
 
       const topicsToInsert = [];
@@ -327,7 +327,7 @@ function TrendingBubble() {
 
       for (let index = 0; index < parsedTopics.length; index++) {
         const topic = parsedTopics[index];
-        const existing = existingMap.get(topic.name.toLowerCase());
+        const existing = existingMap.get(topic.name.trim().toLowerCase());
 
         if (existing) {
           const earliestPubDate = !topic.pubDate ? existing.pub_date :
@@ -412,8 +412,10 @@ function TrendingBubble() {
       }
 
       await loadTopics();
+      alert(`Upload complete! ${topicsToUpdate.length} topics updated, ${topicsToInsert.length} topics added.`);
     } catch (error) {
       console.error('Error saving topics:', error);
+      alert(`Upload failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 
