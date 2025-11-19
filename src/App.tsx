@@ -26,12 +26,26 @@ function App() {
     loadCategories();
     updateCountdown();
     const interval = setInterval(updateCountdown, 1000);
-    const bubbleInterval = setInterval(updateBubbleCountdown, 100);
-    return () => {
-      clearInterval(interval);
-      clearInterval(bubbleInterval);
-    };
+    return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    const bubbleInterval = setInterval(() => {
+      if (oldestBubbleTime) {
+        const now = Date.now();
+        const remaining = oldestBubbleTime - now;
+        if (remaining > 0) {
+          const seconds = Math.ceil(remaining / 1000);
+          setNextBubbleIn(`${seconds}s`);
+        } else {
+          setNextBubbleIn('0s');
+        }
+      } else {
+        setNextBubbleIn('--');
+      }
+    }, 100);
+    return () => clearInterval(bubbleInterval);
+  }, [oldestBubbleTime]);
 
   useEffect(() => {
     loadTopics();
@@ -77,21 +91,6 @@ function App() {
     const minutes = Math.floor(diff / 60000);
     const seconds = Math.floor((diff % 60000) / 1000);
     setNextUpdateIn(`${minutes}:${seconds.toString().padStart(2, '0')}`);
-  };
-
-  const updateBubbleCountdown = () => {
-    if (oldestBubbleTime) {
-      const now = Date.now();
-      const remaining = oldestBubbleTime - now;
-      if (remaining > 0) {
-        const seconds = Math.ceil(remaining / 1000);
-        setNextBubbleIn(`${seconds}s`);
-      } else {
-        setNextBubbleIn('0s');
-      }
-    } else {
-      setNextBubbleIn('--');
-    }
   };
 
   const handleBubbleTimingUpdate = (nextPopTime: number | null) => {
