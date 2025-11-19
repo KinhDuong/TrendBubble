@@ -666,7 +666,7 @@ function TrendingBubble() {
                         <div className={`text-center ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>{topic.searchVolumeRaw.replace(/"/g, '')}</div>
                         <div className={`text-center ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>#{index + 1}</div>
                         <div className={`text-center text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-                          {topic.pubDate ? new Date(topic.pubDate).toLocaleString('en-US', {
+                          {(topic.pubDate || topic.createdAt) ? new Date(topic.pubDate || topic.createdAt).toLocaleString('en-US', {
                             timeZone: 'America/New_York',
                             month: 'short',
                             day: 'numeric',
