@@ -328,7 +328,7 @@ function HomePage() {
       const topicsToInsert = [];
       const topicsToUpdate = [];
       const historySnapshots = [];
-      const seenInCSV = new Map();
+      const seenInCSV = new Map<string, number[]>();
       let duplicatesSkipped = 0;
 
       for (let index = 0; index < parsedTopics.length; index++) {
@@ -337,9 +337,10 @@ function HomePage() {
 
         if (seenInCSV.has(normalizedName)) {
           duplicatesSkipped++;
+          seenInCSV.get(normalizedName)!.push(index + 1);
           continue;
         }
-        seenInCSV.set(normalizedName, true);
+        seenInCSV.set(normalizedName, [index + 1]);
 
         const existing = existingMap.get(normalizedName);
 
@@ -476,7 +477,38 @@ function HomePage() {
 
       await loadTopics();
 
-      const message = `Upload complete!\nTotal in CSV: ${parsedTopics.length}\nDuplicates in CSV: ${duplicatesSkipped}\nUpdated: ${updateCount}\nInserted: ${insertCount}\nFailed: ${insertErrors}`;
+      const duplicatesReport = Array.from(seenInCSV.entries())
+        .filter(([_, rows]) => rows.length > 1)
+        .map(([name, rows]) => `"${parsedTopics[rows[0] - 1].name}" appears on rows: ${rows.join(', ')}`)
+        .join('\n');
+
+      console.log('=== DUPLICATE ANALYSIS ===');
+      console.log(`Total rows in CSV: ${parsedTopics.length}`);
+      console.log(`Unique topics: ${seenInCSV.size}`);
+      console.log(`Duplicate instances: ${duplicatesSkipped}`);
+      if (duplicatesReport) {
+        console.log('\nDuplicate topics and their row numbers:');
+        console.log(duplicatesReport);
+      }
+
+      if (parsedTopics.length >= 222) {
+        const row222 = parsedTopics[221];
+        const row222Name = row222.name.trim().toLowerCase();
+        const row222Rows = seenInCSV.get(row222Name) || [];
+        console.log('\n=== ROW 222 ANALYSIS ===');
+        console.log(`Row 222 topic: "${row222.name}"`);
+        console.log(`Volume: ${row222.searchVolumeRaw}`);
+        console.log(`All occurrences on rows: ${row222Rows.join(', ')}`);
+        if (row222Rows.length > 1) {
+          console.log('\nAll instances:');
+          row222Rows.forEach(rowNum => {
+            const t = parsedTopics[rowNum - 1];
+            console.log(`  Row ${rowNum}: "${t.name}" - Volume: ${t.searchVolumeRaw}`);
+          });
+        }
+      }
+
+      const message = `Upload complete!\nTotal in CSV: ${parsedTopics.length}\nDuplicates in CSV: ${duplicatesSkipped}\nUpdated: ${updateCount}\nInserted: ${insertCount}\nFailed: ${insertErrors}\n\nCheck console for duplicate analysis.`;
       setUploadMessage(message);
     } catch (error) {
       console.error('Error saving topics:', error);
