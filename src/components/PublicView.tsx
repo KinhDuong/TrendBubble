@@ -347,7 +347,7 @@ export default function PublicView() {
               </div>
             </div>
             {viewMode === 'bubble' ? (
-              <BubbleChart topics={filteredTopics} theme={theme} />
+              <BubbleChart topics={filteredTopics} maxDisplay={maxBubbles} theme={theme} />
             ) : (
               <div className="max-w-7xl mx-auto">
                 <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-lg border shadow-sm overflow-hidden`}>
