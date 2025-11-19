@@ -252,6 +252,7 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
           bubble.spawnProgress = Math.min((bubble.spawnProgress || 0) + 0.05, 1);
           if (bubble.spawnProgress >= 1) {
             bubble.isSpawning = false;
+            bubble.createdAt = Date.now();
           }
         }
 
