@@ -404,12 +404,15 @@ function HomePage() {
         for (const topic of topicsToInsert) {
           const { data, error } = await supabase
             .from('trending_topics')
-            .insert(topic)
+            .upsert(topic, {
+              onConflict: 'name',
+              ignoreDuplicates: false
+            })
             .select('id, name, search_volume, search_volume_raw, rank, url')
             .maybeSingle();
 
           if (error) {
-            console.error(`Error inserting topic ${topic.name}:`, error);
+            console.error(`Error upserting topic ${topic.name}:`, error);
             insertErrors++;
           } else if (data) {
             insertCount++;
