@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Upload } from 'lucide-react';
+import { Upload, Loader2 } from 'lucide-react';
 import { TrendingTopic } from '../types';
 
 interface FileUploadProps {
@@ -26,11 +26,13 @@ export default function FileUpload({ onUpload, theme }: FileUploadProps) {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [categorySearch, setCategorySearch] = useState('');
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       setFileName(file.name);
+      setIsUploading(true);
       const reader = new FileReader();
       reader.onload = (e) => {
         const text = e.target?.result as string;
@@ -40,6 +42,8 @@ export default function FileUpload({ onUpload, theme }: FileUploadProps) {
           category: selectedCategory || undefined
         }));
         onUpload(topicsWithCategory);
+        setIsUploading(false);
+        setFileName('');
       };
       reader.readAsText(file);
     }
@@ -195,16 +199,28 @@ export default function FileUpload({ onUpload, theme }: FileUploadProps) {
 
       <label
         htmlFor="file-upload"
-        className="flex items-center justify-center cursor-pointer bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors duration-200 w-full"
+        className={`flex items-center justify-center text-white px-6 py-3 rounded-lg transition-colors duration-200 w-full ${
+          isUploading ? 'bg-blue-500 cursor-wait' : 'bg-blue-600 hover:bg-blue-700 cursor-pointer'
+        }`}
       >
-        <Upload className="mr-2" size={20} />
-        {fileName || 'Upload CSV File'}
+        {isUploading ? (
+          <>
+            <Loader2 className="mr-2 animate-spin" size={20} />
+            Uploading...
+          </>
+        ) : (
+          <>
+            <Upload className="mr-2" size={20} />
+            Upload CSV File
+          </>
+        )}
         <input
           id="file-upload"
           type="file"
           accept=".csv"
           onChange={handleFileChange}
           className="hidden"
+          disabled={isUploading}
         />
       </label>
       <p className={`text-sm text-center ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
