@@ -155,18 +155,24 @@ Deno.serve(async (req: Request) => {
         topicId = existing.id;
       } else {
         // Insert new topic
+        const insertData: any = {
+          name: title,
+          search_volume: searchVolume,
+          search_volume_raw: searchVolumeRaw,
+          rank: index + 1,
+          first_seen: now,
+          last_seen: now,
+          url: trendsUrl,
+          pub_date: pubDate,
+        };
+
+        if (pubDate) {
+          insertData.created_at = pubDate;
+        }
+
         const { data: newTopic } = await supabase
           .from("trending_topics")
-          .insert({
-            name: title,
-            search_volume: searchVolume,
-            search_volume_raw: searchVolumeRaw,
-            rank: index + 1,
-            first_seen: now,
-            last_seen: now,
-            url: trendsUrl,
-            pub_date: pubDate,
-          })
+          .insert(insertData)
           .select("id")
           .single();
         newTopicsCount++;

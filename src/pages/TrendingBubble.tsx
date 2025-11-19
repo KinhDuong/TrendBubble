@@ -367,7 +367,7 @@ function TrendingBubble() {
             snapshot_at: now
           });
         } else {
-          topicsToInsert.push({
+          const insertData: any = {
             name: topic.name,
             search_volume: topic.searchVolume,
             search_volume_raw: topic.searchVolumeRaw,
@@ -375,7 +375,13 @@ function TrendingBubble() {
             url: topic.url,
             pub_date: topic.pubDate,
             category: topic.category
-          });
+          };
+
+          if (topic.pubDate) {
+            insertData.created_at = topic.pubDate;
+          }
+
+          topicsToInsert.push(insertData);
         }
       }
 
