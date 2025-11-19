@@ -113,8 +113,8 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
 
       const exponentialScale = Math.pow(normalizedScale, 0.5);
 
-      const baseMin = (isMobile ? 18 : 24) * densityFactor;
-      const baseMax = (isMobile ? 60 : 80) * densityFactor;
+      const baseMin = (isMobile ? 18 : 32) * densityFactor;
+      const baseMax = (isMobile ? 60 : 100) * densityFactor;
 
       const scaledSize = baseMin + exponentialScale * (baseMax - baseMin);
 
