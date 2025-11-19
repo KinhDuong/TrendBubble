@@ -35,6 +35,7 @@ function HomePage() {
   const [oldestBubbleLifetime, setOldestBubbleLifetime] = useState<number | null>(null);
   const [sortField, setSortField] = useState<SortField>('rank');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
+  const [uploadMessage, setUploadMessage] = useState<string | null>(null);
 
   useEffect(() => {
     loadTopics();
@@ -445,10 +446,10 @@ function HomePage() {
       await loadTopics();
 
       const message = `Upload complete!\nTotal in CSV: ${parsedTopics.length}\nDuplicates in CSV: ${duplicatesSkipped}\nUpdated: ${updateCount}\nInserted: ${insertCount}\nFailed: ${insertErrors}`;
-      alert(message);
+      setUploadMessage(message);
     } catch (error) {
       console.error('Error saving topics:', error);
-      alert(`Upload failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      setUploadMessage(`Upload failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 
@@ -625,6 +626,27 @@ function HomePage() {
             </div>
           </div>
         )}
+
+        {uploadMessage && (
+          <div className="fixed top-4 right-4 z-50 max-w-md">
+            <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border rounded-lg shadow-xl p-4`}>
+              <div className="flex justify-between items-start gap-3">
+                <div className="flex-1">
+                  <div className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'} whitespace-pre-line`}>
+                    {uploadMessage}
+                  </div>
+                </div>
+                <button
+                  onClick={() => setUploadMessage(null)}
+                  className={`${theme === 'dark' ? 'text-gray-400 hover:text-white' : 'text-gray-500 hover:text-gray-900'} text-xl leading-none flex-shrink-0`}
+                >
+                  ×
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         <FileUpload onUpload={handleFileUpload} theme={theme} />
         {loading && (
           <div className={`text-center py-8 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>Loading...</div>
