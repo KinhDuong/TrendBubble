@@ -173,19 +173,6 @@ export default function PublicView() {
       }));
 
       setTopics(formattedTopics);
-
-      if (data && data.length > 0) {
-        const oldestTopic = data[data.length - 1];
-        if (oldestTopic.created_at) {
-          const createdTime = new Date(oldestTopic.created_at).getTime();
-          const lifetime = 60 * 60 * 1000;
-          const expiryTime = createdTime + lifetime;
-
-          setOldestBubbleCreated(createdTime);
-          setOldestBubbleTime(expiryTime);
-          setOldestBubbleLifetime(lifetime);
-        }
-      }
     } catch (error) {
       console.error('Error loading topics:', error);
     } finally {
@@ -347,7 +334,16 @@ export default function PublicView() {
               </div>
             </div>
             {viewMode === 'bubble' ? (
-              <BubbleChart topics={filteredTopics} maxDisplay={maxBubbles} theme={theme} />
+              <BubbleChart
+                topics={filteredTopics}
+                maxDisplay={maxBubbles}
+                theme={theme}
+                onBubbleTimingUpdate={(nextPopTime, createdTime, lifetime) => {
+                  setOldestBubbleTime(nextPopTime);
+                  setOldestBubbleCreated(createdTime || null);
+                  setOldestBubbleLifetime(lifetime || null);
+                }}
+              />
             ) : (
               <div className="max-w-7xl mx-auto">
                 <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-lg border shadow-sm overflow-hidden`}>
