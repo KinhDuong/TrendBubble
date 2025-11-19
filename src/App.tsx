@@ -442,14 +442,6 @@ function App() {
               <LogOut size={16} />
               Logout
             </button>
-            <select
-              value={theme}
-              onChange={(e) => handleThemeChange(e.target.value as 'dark' | 'light')}
-              className={`px-3 md:px-4 py-1.5 md:py-2 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} border rounded-lg transition-colors text-xs md:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500`}
-            >
-              <option value="dark">Dark Style</option>
-              <option value="light">Light Style</option>
-            </select>
             <button
               onClick={manualUpdate}
               disabled={loading}
@@ -574,6 +566,19 @@ function App() {
                   <option value="week">Week</option>
                   <option value="month">Month</option>
                   <option value="year">Year</option>
+                </select>
+                <div className={`w-px h-4 md:h-6 ${theme === 'dark' ? 'bg-gray-600' : 'bg-gray-300'}`}></div>
+                <label htmlFor="themeFilter" className="text-xs md:text-sm font-medium">
+                  Style:
+                </label>
+                <select
+                  id="themeFilter"
+                  value={theme}
+                  onChange={(e) => handleThemeChange(e.target.value as 'dark' | 'light')}
+                  className={`${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} border rounded px-2 md:px-3 py-1 md:py-1.5 text-xs md:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                >
+                  <option value="dark">Dark</option>
+                  <option value="light">Light</option>
                 </select>
                 <div className={`w-px h-4 md:h-6 ${theme === 'dark' ? 'bg-gray-600' : 'bg-gray-300'}`}></div>
                 <div className="flex items-center gap-2">
