@@ -189,7 +189,7 @@ export default function PublicView() {
     <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'}`}>
       <header className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-b py-4 md:py-6 px-3 md:px-6 shadow-sm`}>
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-2xl md:text-3xl font-bold text-center">Google Trending Topics</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-center">Trending Bubbles</h1>
           <p className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'} text-xs md:text-sm text-center mt-1 md:mt-2`}>
             Bubble size represents search volume · Auto-updates hourly
           </p>
