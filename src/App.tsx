@@ -18,7 +18,10 @@ function App() {
   const [backups, setBackups] = useState<any[]>([]);
   const [nextUpdateIn, setNextUpdateIn] = useState<string>('');
   const [nextBubbleIn, setNextBubbleIn] = useState<string>('');
+  const [bubbleProgress, setBubbleProgress] = useState<number>(0);
   const [oldestBubbleTime, setOldestBubbleTime] = useState<number | null>(null);
+  const [oldestBubbleCreated, setOldestBubbleCreated] = useState<number | null>(null);
+  const [oldestBubbleLifetime, setOldestBubbleLifetime] = useState<number | null>(null);
 
   useEffect(() => {
     loadTopics();
@@ -31,9 +34,14 @@ function App() {
 
   useEffect(() => {
     const bubbleInterval = setInterval(() => {
-      if (oldestBubbleTime) {
+      if (oldestBubbleTime && oldestBubbleCreated && oldestBubbleLifetime) {
         const now = Date.now();
         const remaining = oldestBubbleTime - now;
+        const elapsed = now - oldestBubbleCreated;
+        const progress = Math.min(100, Math.max(0, (elapsed / oldestBubbleLifetime) * 100));
+
+        setBubbleProgress(progress);
+
         if (remaining > 0) {
           const seconds = Math.ceil(remaining / 1000);
           setNextBubbleIn(`${seconds}s`);
@@ -42,10 +50,11 @@ function App() {
         }
       } else {
         setNextBubbleIn('--');
+        setBubbleProgress(0);
       }
     }, 100);
     return () => clearInterval(bubbleInterval);
-  }, [oldestBubbleTime]);
+  }, [oldestBubbleTime, oldestBubbleCreated, oldestBubbleLifetime]);
 
   useEffect(() => {
     loadTopics();
@@ -93,8 +102,10 @@ function App() {
     setNextUpdateIn(`${minutes}:${seconds.toString().padStart(2, '0')}`);
   };
 
-  const handleBubbleTimingUpdate = (nextPopTime: number | null) => {
+  const handleBubbleTimingUpdate = (nextPopTime: number | null, createdTime?: number, lifetime?: number) => {
     setOldestBubbleTime(nextPopTime);
+    setOldestBubbleCreated(createdTime || null);
+    setOldestBubbleLifetime(lifetime || null);
   };
 
   const loadTopics = async () => {
@@ -548,10 +559,30 @@ function App() {
                     <span className="text-xs font-mono">{nextUpdateIn}</span>
                   </div>
                   <div className={`flex items-center gap-1.5 px-2 py-1 rounded ${theme === 'dark' ? 'bg-indigo-900/50 text-indigo-300' : 'bg-indigo-100 text-indigo-700'}`}>
-                    <svg className="h-3 w-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <circle cx="12" cy="12" r="10" strokeWidth="2"></circle>
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6l4 2"></path>
-                    </svg>
+                    <div className="relative h-3 w-3">
+                      <svg className="h-3 w-3 -rotate-90" viewBox="0 0 24 24">
+                        <circle
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          opacity="0.2"
+                        />
+                        <circle
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeDasharray={`${2 * Math.PI * 10}`}
+                          strokeDashoffset={`${2 * Math.PI * 10 * (1 - bubbleProgress / 100)}`}
+                          strokeLinecap="round"
+                        />
+                      </svg>
+                    </div>
                     <span className="text-xs font-mono">{nextBubbleIn}</span>
                   </div>
                 </div>

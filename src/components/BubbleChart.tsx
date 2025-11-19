@@ -5,7 +5,7 @@ interface BubbleChartProps {
   topics: TrendingTopic[];
   maxDisplay: number;
   theme: 'dark' | 'light';
-  onBubbleTimingUpdate?: (nextPopTime: number | null) => void;
+  onBubbleTimingUpdate?: (nextPopTime: number | null, createdTime?: number, lifetime?: number) => void;
 }
 
 interface Bubble {
@@ -295,7 +295,7 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
           return bubbleExpiry < oldestExpiry ? bubble : oldest;
         });
         const nextPopTime = oldestBubble.createdAt + oldestBubble.lifetime;
-        onBubbleTimingUpdate(nextPopTime);
+        onBubbleTimingUpdate(nextPopTime, oldestBubble.createdAt, oldestBubble.lifetime);
       }
 
       bubblesRef.current = bubblesRef.current.filter((bubble) => {
