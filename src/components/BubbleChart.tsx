@@ -157,7 +157,7 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
         if (!hasOverlap || attempts >= maxAttempts) break;
       } while (true);
 
-      return {
+      const bubble = {
         topic,
         x,
         y,
@@ -170,6 +170,11 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
         isSpawning: true,
         spawnProgress: 0,
       };
+      console.log(`Created bubble "${topic.name}":`, {
+        lifetime: randomLifetime / 1000,
+        createdAt: new Date(bubble.createdAt).toISOString()
+      });
+      return bubble;
     };
 
     displayedIndicesRef.current.clear();
@@ -230,7 +235,13 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
 
       if (topics.length > maxDisplay) {
         bubblesRef.current.forEach((bubble) => {
-          if (!bubble.isPopping && !bubble.isSpawning && (now - bubble.createdAt) >= bubble.lifetime) {
+          const age = now - bubble.createdAt;
+          if (!bubble.isPopping && !bubble.isSpawning && age >= bubble.lifetime) {
+            console.log(`Bubble "${bubble.topic.name}" expired:`, {
+              age: age / 1000,
+              lifetime: bubble.lifetime / 1000,
+              createdAt: new Date(bubble.createdAt).toISOString()
+            });
             bubble.isPopping = true;
             bubble.popProgress = 0;
           }
@@ -252,7 +263,13 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
           bubble.spawnProgress = Math.min((bubble.spawnProgress || 0) + 0.05, 1);
           if (bubble.spawnProgress >= 1) {
             bubble.isSpawning = false;
-            bubble.createdAt = Date.now();
+            const newCreatedAt = Date.now();
+            console.log(`Bubble "${bubble.topic.name}" finished spawning, resetting createdAt:`, {
+              oldCreatedAt: new Date(bubble.createdAt).toISOString(),
+              newCreatedAt: new Date(newCreatedAt).toISOString(),
+              lifetime: bubble.lifetime / 1000
+            });
+            bubble.createdAt = newCreatedAt;
           }
         }
 
