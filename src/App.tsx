@@ -17,6 +17,8 @@ function App() {
   const [showBackups, setShowBackups] = useState(false);
   const [backups, setBackups] = useState<any[]>([]);
   const [nextUpdateIn, setNextUpdateIn] = useState<string>('');
+  const [nextBubbleIn, setNextBubbleIn] = useState<string>('');
+  const [oldestBubbleTime, setOldestBubbleTime] = useState<number | null>(null);
 
   useEffect(() => {
     loadTopics();
@@ -24,7 +26,11 @@ function App() {
     loadCategories();
     updateCountdown();
     const interval = setInterval(updateCountdown, 1000);
-    return () => clearInterval(interval);
+    const bubbleInterval = setInterval(updateBubbleCountdown, 100);
+    return () => {
+      clearInterval(interval);
+      clearInterval(bubbleInterval);
+    };
   }, []);
 
   useEffect(() => {
@@ -71,6 +77,25 @@ function App() {
     const minutes = Math.floor(diff / 60000);
     const seconds = Math.floor((diff % 60000) / 1000);
     setNextUpdateIn(`${minutes}:${seconds.toString().padStart(2, '0')}`);
+  };
+
+  const updateBubbleCountdown = () => {
+    if (oldestBubbleTime) {
+      const now = Date.now();
+      const remaining = oldestBubbleTime - now;
+      if (remaining > 0) {
+        const seconds = Math.ceil(remaining / 1000);
+        setNextBubbleIn(`${seconds}s`);
+      } else {
+        setNextBubbleIn('0s');
+      }
+    } else {
+      setNextBubbleIn('--');
+    }
+  };
+
+  const handleBubbleTimingUpdate = (nextPopTime: number | null) => {
+    setOldestBubbleTime(nextPopTime);
   };
 
   const loadTopics = async () => {
@@ -523,11 +548,18 @@ function App() {
                     </svg>
                     <span className="text-xs font-mono">{nextUpdateIn}</span>
                   </div>
+                  <div className={`flex items-center gap-1.5 px-2 py-1 rounded ${theme === 'dark' ? 'bg-indigo-900/50 text-indigo-300' : 'bg-indigo-100 text-indigo-700'}`}>
+                    <svg className="h-3 w-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <circle cx="12" cy="12" r="10" strokeWidth="2"></circle>
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6l4 2"></path>
+                    </svg>
+                    <span className="text-xs font-mono">{nextBubbleIn}</span>
+                  </div>
                 </div>
               </div>
             </div>
             {viewMode === 'bubble' ? (
-              <BubbleChart topics={topics} maxDisplay={maxBubbles} theme={theme} />
+              <BubbleChart topics={topics} maxDisplay={maxBubbles} theme={theme} onBubbleTimingUpdate={handleBubbleTimingUpdate} />
             ) : (
               <div className="max-w-6xl mx-auto">
                 <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-lg border overflow-hidden shadow-sm`}>

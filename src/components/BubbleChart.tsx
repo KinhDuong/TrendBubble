@@ -5,6 +5,7 @@ interface BubbleChartProps {
   topics: TrendingTopic[];
   maxDisplay: number;
   theme: 'dark' | 'light';
+  onBubbleTimingUpdate?: (nextPopTime: number | null) => void;
 }
 
 interface Bubble {
@@ -23,7 +24,7 @@ interface Bubble {
   spawnProgress?: number;
 }
 
-export default function BubbleChart({ topics, maxDisplay, theme }: BubbleChartProps) {
+export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingUpdate }: BubbleChartProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const bubblesRef = useRef<Bubble[]>([]);
   const animationFrameRef = useRef<number>();
@@ -286,6 +287,17 @@ export default function BubbleChart({ topics, maxDisplay, theme }: BubbleChartPr
       }
 
       const bubblesToAdd: Bubble[] = [];
+      // Update parent component with next bubble pop time
+      if (onBubbleTimingUpdate && bubblesRef.current.length > 0) {
+        const oldestBubble = bubblesRef.current.reduce((oldest, bubble) => {
+          const bubbleExpiry = bubble.createdAt + bubble.lifetime;
+          const oldestExpiry = oldest.createdAt + oldest.lifetime;
+          return bubbleExpiry < oldestExpiry ? bubble : oldest;
+        });
+        const nextPopTime = oldestBubble.createdAt + oldestBubble.lifetime;
+        onBubbleTimingUpdate(nextPopTime);
+      }
+
       bubblesRef.current = bubblesRef.current.filter((bubble) => {
         if (bubble.isPopping && (bubble.popProgress || 0) >= 1) {
           const topicIndex = topics.findIndex(t => t.name === bubble.topic.name);
