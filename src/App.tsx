@@ -321,16 +321,26 @@ function HomePage() {
         .select('*');
 
       const existingMap = new Map(
-        (existingTopics || []).map(t => [t.name.toLowerCase(), t])
+        (existingTopics || []).map(t => [t.name.trim().toLowerCase(), t])
       );
 
       const topicsToInsert = [];
       const topicsToUpdate = [];
       const historySnapshots = [];
+      const seenInCSV = new Map();
+      let duplicatesSkipped = 0;
 
       for (let index = 0; index < parsedTopics.length; index++) {
         const topic = parsedTopics[index];
-        const existing = existingMap.get(topic.name.toLowerCase());
+        const normalizedName = topic.name.trim().toLowerCase();
+
+        if (seenInCSV.has(normalizedName)) {
+          duplicatesSkipped++;
+          continue;
+        }
+        seenInCSV.set(normalizedName, true);
+
+        const existing = existingMap.get(normalizedName);
 
         if (existing) {
           const earliestPubDate = !topic.pubDate ? existing.pub_date :
@@ -371,6 +381,7 @@ function HomePage() {
         }
       }
 
+      let updateCount = 0;
       if (topicsToUpdate.length > 0) {
         for (const topic of topicsToUpdate) {
           const { error } = await supabase
@@ -378,45 +389,66 @@ function HomePage() {
             .update(topic)
             .eq('id', topic.id);
 
-          if (error) throw error;
+          if (error) {
+            console.error(`Error updating topic ${topic.name}:`, error);
+          } else {
+            updateCount++;
+          }
         }
       }
 
-      const insertedTopicIds: string[] = [];
+      let insertCount = 0;
+      let insertErrors = 0;
       if (topicsToInsert.length > 0) {
-        const { data, error } = await supabase
-          .from('trending_topics')
-          .insert(topicsToInsert)
-          .select('id, name, search_volume, search_volume_raw, rank, url');
+        const batchSize = 100;
+        for (let i = 0; i < topicsToInsert.length; i += batchSize) {
+          const batch = topicsToInsert.slice(i, i + batchSize);
+          const { data, error } = await supabase
+            .from('trending_topics')
+            .insert(batch)
+            .select('id, name, search_volume, search_volume_raw, rank, url');
 
-        if (error) throw error;
-
-        if (data) {
-          for (const newTopic of data) {
-            historySnapshots.push({
-              topic_id: newTopic.id,
-              name: newTopic.name,
-              search_volume: newTopic.search_volume,
-              search_volume_raw: newTopic.search_volume_raw,
-              rank: newTopic.rank,
-              url: newTopic.url,
-              snapshot_at: now
-            });
+          if (error) {
+            console.error(`Error inserting batch ${i / batchSize + 1}:`, error);
+            insertErrors += batch.length;
+          } else if (data) {
+            insertCount += data.length;
+            for (const newTopic of data) {
+              historySnapshots.push({
+                topic_id: newTopic.id,
+                name: newTopic.name,
+                search_volume: newTopic.search_volume,
+                search_volume_raw: newTopic.search_volume_raw,
+                rank: newTopic.rank,
+                url: newTopic.url,
+                snapshot_at: now
+              });
+            }
           }
         }
       }
 
       if (historySnapshots.length > 0) {
-        const { error } = await supabase
-          .from('trending_topics_history')
-          .insert(historySnapshots);
+        const batchSize = 100;
+        for (let i = 0; i < historySnapshots.length; i += batchSize) {
+          const batch = historySnapshots.slice(i, i + batchSize);
+          const { error } = await supabase
+            .from('trending_topics_history')
+            .insert(batch);
 
-        if (error) throw error;
+          if (error) {
+            console.error(`Error inserting history batch ${i / batchSize + 1}:`, error);
+          }
+        }
       }
 
       await loadTopics();
+
+      const message = `Upload complete!\nTotal in CSV: ${parsedTopics.length}\nDuplicates in CSV: ${duplicatesSkipped}\nUpdated: ${updateCount}\nInserted: ${insertCount}\nFailed: ${insertErrors}`;
+      alert(message);
     } catch (error) {
       console.error('Error saving topics:', error);
+      alert(`Upload failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 
