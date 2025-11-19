@@ -398,30 +398,27 @@ function TrendingBubble() {
       let insertCount = 0;
       let insertErrors = 0;
       if (topicsToInsert.length > 0) {
-        const batchSize = 100;
-        for (let i = 0; i < topicsToInsert.length; i += batchSize) {
-          const batch = topicsToInsert.slice(i, i + batchSize);
+        for (const topic of topicsToInsert) {
           const { data, error } = await supabase
             .from('trending_topics')
-            .insert(batch)
-            .select('id, name, search_volume, search_volume_raw, rank, url');
+            .insert(topic)
+            .select('id, name, search_volume, search_volume_raw, rank, url')
+            .maybeSingle();
 
           if (error) {
-            console.error(`Error inserting batch ${i / batchSize + 1}:`, error);
-            insertErrors += batch.length;
+            console.error(`Error inserting topic ${topic.name}:`, error);
+            insertErrors++;
           } else if (data) {
-            insertCount += data.length;
-            for (const newTopic of data) {
-              historySnapshots.push({
-                topic_id: newTopic.id,
-                name: newTopic.name,
-                search_volume: newTopic.search_volume,
-                search_volume_raw: newTopic.search_volume_raw,
-                rank: newTopic.rank,
-                url: newTopic.url,
-                snapshot_at: now
-              });
-            }
+            insertCount++;
+            historySnapshots.push({
+              topic_id: data.id,
+              name: data.name,
+              search_volume: data.search_volume,
+              search_volume_raw: data.search_volume_raw,
+              rank: data.rank,
+              url: data.url,
+              snapshot_at: now
+            });
           }
         }
       }
