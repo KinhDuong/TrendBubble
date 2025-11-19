@@ -3,7 +3,7 @@ import { Upload, Loader2 } from 'lucide-react';
 import { TrendingTopic } from '../types';
 
 interface FileUploadProps {
-  onUpload: (topics: TrendingTopic[]) => void;
+  onUpload: (topics: TrendingTopic[]) => Promise<void>;
   theme: 'dark' | 'light';
 }
 
@@ -34,14 +34,14 @@ export default function FileUpload({ onUpload, theme }: FileUploadProps) {
       setFileName(file.name);
       setIsUploading(true);
       const reader = new FileReader();
-      reader.onload = (e) => {
+      reader.onload = async (e) => {
         const text = e.target?.result as string;
         const parsedTopics = parseCSV(text);
         const topicsWithCategory = parsedTopics.map(topic => ({
           ...topic,
           category: selectedCategory || undefined
         }));
-        onUpload(topicsWithCategory);
+        await onUpload(topicsWithCategory);
         setIsUploading(false);
         setFileName('');
       };

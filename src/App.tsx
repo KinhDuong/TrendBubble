@@ -243,7 +243,7 @@ function App() {
     }
   };
 
-  const handleFileUpload = async (parsedTopics: TrendingTopic[]) => {
+  const handleFileUpload = async (parsedTopics: TrendingTopic[]): Promise<void> => {
     try {
       const now = new Date().toISOString();
       const { data: existingTopics } = await supabase
