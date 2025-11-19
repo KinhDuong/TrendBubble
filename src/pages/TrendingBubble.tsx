@@ -401,16 +401,47 @@ function TrendingBubble() {
         for (const topic of topicsToInsert) {
           const { data, error } = await supabase
             .from('trending_topics')
-            .upsert(topic, {
-              onConflict: 'name',
-              ignoreDuplicates: false
-            })
+            .insert(topic)
             .select('id, name, search_volume, search_volume_raw, rank, url')
             .maybeSingle();
 
           if (error) {
-            console.error(`Error upserting topic ${topic.name}:`, error);
-            insertErrors++;
+            if (error.code === '23505') {
+              const { data: updateData, error: updateError } = await supabase
+                .from('trending_topics')
+                .update({
+                  search_volume: topic.search_volume,
+                  search_volume_raw: topic.search_volume_raw,
+                  rank: topic.rank,
+                  url: topic.url,
+                  category: topic.category,
+                  pub_date: topic.pub_date
+                })
+                .eq('id', (await supabase
+                  .from('trending_topics')
+                  .select('id')
+                  .ilike('name', topic.name)
+                  .maybeSingle())?.data?.id)
+                .select('id, name, search_volume, search_volume_raw, rank, url')
+                .maybeSingle();
+
+              if (!updateError && updateData) {
+                insertCount++;
+                historySnapshots.push({
+                  topic_id: updateData.id,
+                  name: updateData.name,
+                  search_volume: updateData.search_volume,
+                  search_volume_raw: updateData.search_volume_raw,
+                  rank: updateData.rank,
+                  url: updateData.url,
+                  snapshot_at: now
+                });
+              } else {
+                insertErrors++;
+              }
+            } else {
+              insertErrors++;
+            }
           } else if (data) {
             insertCount++;
             historySnapshots.push({
