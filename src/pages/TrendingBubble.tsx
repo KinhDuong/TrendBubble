@@ -1,17 +1,14 @@
 import { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
-import BubbleChart from './components/BubbleChart';
-import FileUpload from './components/FileUpload';
-import Login from './components/Login';
-import TrendingBubble from './pages/TrendingBubble';
-import { TrendingTopic } from './types';
-import { supabase } from './lib/supabase';
-import { useAuth } from './hooks/useAuth';
-import { LogOut, Home, TrendingUp } from 'lucide-react';
+import BubbleChart from '../components/BubbleChart';
+import FileUpload from '../components/FileUpload';
+import Login from '../components/Login';
+import { TrendingTopic } from '../types';
+import { supabase } from '../lib/supabase';
+import { useAuth } from '../hooks/useAuth';
+import { LogOut } from 'lucide-react';
 
-function HomePage() {
-  const { isAdmin, logout } = useAuth();
-  const location = useLocation();
+function TrendingBubble() {
+  const { isAdmin, isLoading: authLoading, logout } = useAuth();
   const [topics, setTopics] = useState<TrendingTopic[]>([]);
   const isMobile = window.innerWidth < 768;
   const [maxBubbles, setMaxBubbles] = useState<number>(isMobile ? 40 : 60);
@@ -415,6 +412,18 @@ function HomePage() {
     }
   };
 
+  if (authLoading) {
+    return (
+      <div className={`min-h-screen flex items-center justify-center ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'}`}>
+        <div className="text-xl">Loading...</div>
+      </div>
+    );
+  }
+
+  if (!isAdmin) {
+    return <Login onLogin={loadTopics} theme={theme} />;
+  }
+
   return (
     <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'}`}>
       <header className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-b py-4 md:py-6 px-3 md:px-6 shadow-sm`}>
@@ -424,38 +433,6 @@ function HomePage() {
             <p className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'} text-xs md:text-sm text-center mt-1 md:mt-2`}>
               Bubble size represents search volume · Auto-updates hourly
             </p>
-            <nav className="flex justify-center gap-4 mt-3">
-              <Link
-                to="/"
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                  location.pathname === '/'
-                    ? theme === 'dark'
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-blue-500 text-white'
-                    : theme === 'dark'
-                    ? 'text-gray-400 hover:text-white hover:bg-gray-700'
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-                }`}
-              >
-                <Home size={16} />
-                Home
-              </Link>
-              <Link
-                to="/trending-bubble"
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                  location.pathname === '/trending-bubble'
-                    ? theme === 'dark'
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-blue-500 text-white'
-                    : theme === 'dark'
-                    ? 'text-gray-400 hover:text-white hover:bg-gray-700'
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-                }`}
-              >
-                <TrendingUp size={16} />
-                Trending Bubble
-              </Link>
-            </nav>
           </div>
           <div className="flex gap-2 md:gap-3">
             <button
@@ -721,53 +698,4 @@ function HomePage() {
   );
 }
 
-function App() {
-  const { isAdmin, isLoading: authLoading } = useAuth();
-  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
-
-  useEffect(() => {
-    loadThemePreference();
-  }, []);
-
-  const loadThemePreference = async () => {
-    try {
-      const { data } = await supabase
-        .from('user_preferences')
-        .select('theme')
-        .maybeSingle();
-
-      if (data?.theme) {
-        setTheme(data.theme as 'dark' | 'light');
-      }
-    } catch (error) {
-      console.error('Error loading theme preference:', error);
-    }
-  };
-
-  const loadTopics = async () => {
-    return;
-  };
-
-  if (authLoading) {
-    return (
-      <div className={`min-h-screen flex items-center justify-center ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'}`}>
-        <div className="text-xl">Loading...</div>
-      </div>
-    );
-  }
-
-  if (!isAdmin) {
-    return <Login onLogin={loadTopics} theme={theme} />;
-  }
-
-  return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/trending-bubble" element={<TrendingBubble />} />
-      </Routes>
-    </BrowserRouter>
-  );
-}
-
-export default App;
+export default TrendingBubble;
