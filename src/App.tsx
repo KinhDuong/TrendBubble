@@ -1,10 +1,14 @@
 import { useState, useEffect } from 'react';
 import BubbleChart from './components/BubbleChart';
 import FileUpload from './components/FileUpload';
+import Login from './components/Login';
 import { TrendingTopic } from './types';
 import { supabase } from './lib/supabase';
+import { useAuth } from './hooks/useAuth';
+import { LogOut } from 'lucide-react';
 
 function App() {
+  const { isAdmin, isLoading: authLoading, logout } = useAuth();
   const [topics, setTopics] = useState<TrendingTopic[]>([]);
   const isMobile = window.innerWidth < 768;
   const [maxBubbles, setMaxBubbles] = useState<number>(isMobile ? 40 : 60);
@@ -408,6 +412,18 @@ function App() {
     }
   };
 
+  if (authLoading) {
+    return (
+      <div className={`min-h-screen flex items-center justify-center ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'}`}>
+        <div className="text-xl">Loading...</div>
+      </div>
+    );
+  }
+
+  if (!isAdmin) {
+    return <Login onLogin={loadTopics} theme={theme} />;
+  }
+
   return (
     <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'}`}>
       <header className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-b py-4 md:py-6 px-3 md:px-6 shadow-sm`}>
@@ -419,6 +435,13 @@ function App() {
             </p>
           </div>
           <div className="flex gap-2 md:gap-3">
+            <button
+              onClick={logout}
+              className={`px-3 md:px-4 py-1.5 md:py-2 ${theme === 'dark' ? 'bg-red-600 hover:bg-red-700' : 'bg-red-500 hover:bg-red-600'} rounded-lg transition-colors text-xs md:text-sm font-medium text-white flex items-center gap-2`}
+            >
+              <LogOut size={16} />
+              Logout
+            </button>
             <select
               value={theme}
               onChange={(e) => handleThemeChange(e.target.value as 'dark' | 'light')}
