@@ -31,7 +31,7 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
   const displayedIndicesRef = useRef<Set<number>>(new Set());
   const nextIndexRef = useRef<number>(0);
 
-  const bubbleLifetimes = [40000, 60000, 80000, 100000, 120000];
+  const bubbleLifetimes = [15000, 20000, 25000, 30000, 35000];
 
   const handleCanvasClick = (event: MouseEvent) => {
     const canvas = canvasRef.current;
@@ -252,7 +252,6 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
           bubble.spawnProgress = Math.min((bubble.spawnProgress || 0) + 0.05, 1);
           if (bubble.spawnProgress >= 1) {
             bubble.isSpawning = false;
-            bubble.createdAt = Date.now();
           }
         }
 
