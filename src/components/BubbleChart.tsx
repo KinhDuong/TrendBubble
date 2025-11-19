@@ -109,14 +109,24 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
       const displayCount = Math.min(maxDisplay, topics.length);
       const densityFactor = Math.min(1, Math.sqrt(50 / displayCount));
 
-      // Use a more conservative normalization to prevent extreme sizes
-      const normalizedScale = Math.min(1, Math.max(0, (searchVolume - minVolume) / (maxSearchVolume - minVolume || 1)));
-
-      // Apply stronger exponential curve to compress size differences
-      const exponentialScale = Math.pow(normalizedScale, 0.7);
-
       const baseMin = (isMobile ? 20 : 45) * densityFactor;
-      const baseMax = (isMobile ? 50 : 100) * densityFactor;
+      const baseMax = (isMobile ? 55 : 110) * densityFactor;
+
+      // If all values are the same or very close, use logarithmic ranking
+      if (maxSearchVolume === minVolume || volumeRange < maxSearchVolume * 0.1) {
+        // Use index-based sizing when volumes are too similar
+        const topicIndex = topics.findIndex(t => t.searchVolume === searchVolume);
+        const rankFactor = 1 - (topicIndex / Math.max(1, topics.length - 1)) * 0.5;
+        return baseMin + (baseMax - baseMin) * rankFactor;
+      }
+
+      // Use logarithmic scale for better differentiation
+      const logMin = Math.log(minVolume + 1);
+      const logMax = Math.log(maxSearchVolume + 1);
+      const logValue = Math.log(searchVolume + 1);
+
+      const normalizedScale = (logValue - logMin) / (logMax - logMin || 1);
+      const exponentialScale = Math.pow(normalizedScale, 0.6);
 
       const scaledSize = baseMin + exponentialScale * (baseMax - baseMin);
 
