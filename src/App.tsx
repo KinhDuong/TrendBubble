@@ -7,7 +7,10 @@ import TrendingBubble from './pages/TrendingBubble';
 import { TrendingTopic } from './types';
 import { supabase } from './lib/supabase';
 import { useAuth } from './hooks/useAuth';
-import { LogOut, Home, TrendingUp } from 'lucide-react';
+import { LogOut, Home, TrendingUp, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+
+type SortField = 'name' | 'category' | 'searchVolume' | 'rank' | 'pubDate' | 'createdAt';
+type SortDirection = 'asc' | 'desc';
 
 function HomePage() {
   const { isAdmin, logout } = useAuth();
@@ -30,6 +33,8 @@ function HomePage() {
   const [oldestBubbleTime, setOldestBubbleTime] = useState<number | null>(null);
   const [oldestBubbleCreated, setOldestBubbleCreated] = useState<number | null>(null);
   const [oldestBubbleLifetime, setOldestBubbleLifetime] = useState<number | null>(null);
+  const [sortField, setSortField] = useState<SortField>('rank');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
 
   useEffect(() => {
     loadTopics();
@@ -415,6 +420,64 @@ function HomePage() {
     }
   };
 
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
+  const getSortedTopics = () => {
+    const sorted = [...topics].sort((a, b) => {
+      let aValue: any;
+      let bValue: any;
+
+      switch (sortField) {
+        case 'name':
+          aValue = a.name.toLowerCase();
+          bValue = b.name.toLowerCase();
+          break;
+        case 'category':
+          aValue = (a.category || '').toLowerCase();
+          bValue = (b.category || '').toLowerCase();
+          break;
+        case 'searchVolume':
+          aValue = a.searchVolume;
+          bValue = b.searchVolume;
+          break;
+        case 'rank':
+          aValue = topics.indexOf(a);
+          bValue = topics.indexOf(b);
+          break;
+        case 'pubDate':
+          aValue = a.pubDate ? new Date(a.pubDate).getTime() : (a.createdAt ? new Date(a.createdAt).getTime() : 0);
+          bValue = b.pubDate ? new Date(b.pubDate).getTime() : (b.createdAt ? new Date(b.createdAt).getTime() : 0);
+          break;
+        case 'createdAt':
+          aValue = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          bValue = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+          break;
+        default:
+          return 0;
+      }
+
+      if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
+      if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
+      return 0;
+    });
+
+    return sorted;
+  };
+
+  const SortIcon = ({ field }: { field: SortField }) => {
+    if (sortField !== field) {
+      return <ArrowUpDown size={14} className="opacity-50" />;
+    }
+    return sortDirection === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />;
+  };
+
   return (
     <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'}`}>
       <header className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-b py-4 md:py-6 px-3 md:px-6 shadow-sm`}>
@@ -674,15 +737,45 @@ function HomePage() {
               <div className="max-w-6xl mx-auto">
                 <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-lg border overflow-hidden shadow-sm`}>
                   <div className={`grid grid-cols-6 gap-4 px-6 py-4 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'} font-semibold text-sm`}>
-                    <div>Topic</div>
-                    <div className="text-center">Category</div>
-                    <div className="text-center">Search Volume</div>
-                    <div className="text-center">Rank</div>
-                    <div className="text-center">Started (ET)</div>
-                    <div className="text-center">Added (ET)</div>
+                    <button
+                      onClick={() => handleSort('name')}
+                      className={`flex items-center gap-1 hover:${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'} transition-colors`}
+                    >
+                      Topic <SortIcon field="name" />
+                    </button>
+                    <button
+                      onClick={() => handleSort('category')}
+                      className={`flex items-center justify-center gap-1 hover:${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'} transition-colors`}
+                    >
+                      Category <SortIcon field="category" />
+                    </button>
+                    <button
+                      onClick={() => handleSort('searchVolume')}
+                      className={`flex items-center justify-center gap-1 hover:${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'} transition-colors`}
+                    >
+                      Search Volume <SortIcon field="searchVolume" />
+                    </button>
+                    <button
+                      onClick={() => handleSort('rank')}
+                      className={`flex items-center justify-center gap-1 hover:${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'} transition-colors`}
+                    >
+                      Rank <SortIcon field="rank" />
+                    </button>
+                    <button
+                      onClick={() => handleSort('pubDate')}
+                      className={`flex items-center justify-center gap-1 hover:${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'} transition-colors`}
+                    >
+                      Started (ET) <SortIcon field="pubDate" />
+                    </button>
+                    <button
+                      onClick={() => handleSort('createdAt')}
+                      className={`flex items-center justify-center gap-1 hover:${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'} transition-colors`}
+                    >
+                      Added (ET) <SortIcon field="createdAt" />
+                    </button>
                   </div>
                   <div className={`divide-y ${theme === 'dark' ? 'divide-gray-700' : 'divide-gray-200'}`}>
-                    {topics.map((topic, index) => (
+                    {getSortedTopics().map((topic, index) => (
                       <div key={index} className={`grid grid-cols-6 gap-4 px-6 py-4 ${theme === 'dark' ? 'hover:bg-gray-750' : 'hover:bg-gray-50'} transition-colors`}>
                         <div className="font-medium">{topic.name.replace(/"/g, '')}</div>
                         <div className={`text-center ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>{topic.category || '-'}</div>
