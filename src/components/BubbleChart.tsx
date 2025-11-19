@@ -109,16 +109,18 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
       const displayCount = Math.min(maxDisplay, topics.length);
       const densityFactor = Math.min(1, Math.sqrt(50 / displayCount));
 
-      const normalizedScale = (searchVolume - minVolume) / (maxSearchVolume - minVolume || 1);
+      // Use a more conservative normalization to prevent extreme sizes
+      const normalizedScale = Math.min(1, Math.max(0, (searchVolume - minVolume) / (maxSearchVolume - minVolume || 1)));
 
-      const exponentialScale = Math.pow(normalizedScale, 0.5);
+      // Apply stronger exponential curve to compress size differences
+      const exponentialScale = Math.pow(normalizedScale, 0.7);
 
-      const baseMin = (isMobile ? 18 : 40) * densityFactor;
-      const baseMax = (isMobile ? 60 : 120) * densityFactor;
+      const baseMin = (isMobile ? 20 : 45) * densityFactor;
+      const baseMax = (isMobile ? 50 : 100) * densityFactor;
 
       const scaledSize = baseMin + exponentialScale * (baseMax - baseMin);
 
-      return Math.max(baseMin, scaledSize);
+      return Math.max(baseMin, Math.min(baseMax, scaledSize));
     };
 
     const getRandomColor = (index: number) => {
@@ -172,14 +174,32 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
       };
     };
 
-    displayedIndicesRef.current.clear();
-    const initialCount = Math.min(maxDisplay, topics.length);
-    bubblesRef.current = [];
-    for (let i = 0; i < initialCount; i++) {
-      displayedIndicesRef.current.add(i);
-      bubblesRef.current.push(createBubble(i, bubblesRef.current));
+    // Only recreate bubbles if the topic list has changed significantly
+    const existingTopicNames = new Set(bubblesRef.current.map(b => b.topic.name));
+    const newTopicNames = new Set(topics.map(t => t.name));
+    const topicsChanged = bubblesRef.current.length === 0 ||
+      existingTopicNames.size !== newTopicNames.size ||
+      ![...existingTopicNames].every(name => newTopicNames.has(name));
+
+    if (topicsChanged) {
+      displayedIndicesRef.current.clear();
+      const initialCount = Math.min(maxDisplay, topics.length);
+      bubblesRef.current = [];
+      for (let i = 0; i < initialCount; i++) {
+        displayedIndicesRef.current.add(i);
+        bubblesRef.current.push(createBubble(i, bubblesRef.current));
+      }
+      nextIndexRef.current = initialCount;
+    } else {
+      // Just update the bubble sizes for existing topics
+      bubblesRef.current.forEach(bubble => {
+        const topicIndex = topics.findIndex(t => t.name === bubble.topic.name);
+        if (topicIndex !== -1) {
+          const newRadius = calculateBubbleSize(topics[topicIndex].searchVolume);
+          bubble.radius = newRadius;
+        }
+      });
     }
-    nextIndexRef.current = initialCount;
 
     const checkCollision = (b1: Bubble, b2: Bubble) => {
       const dx = b2.x - b1.x;
