@@ -17,6 +17,7 @@ function App() {
   const [showBackups, setShowBackups] = useState(false);
   const [backups, setBackups] = useState<any[]>([]);
   const [nextUpdateIn, setNextUpdateIn] = useState<string>('');
+  const [updateProgress, setUpdateProgress] = useState<number>(0);
   const [nextBubbleIn, setNextBubbleIn] = useState<string>('');
   const [bubbleProgress, setBubbleProgress] = useState<number>(0);
   const [oldestBubbleTime, setOldestBubbleTime] = useState<number | null>(null);
@@ -94,12 +95,20 @@ function App() {
 
   const updateCountdown = () => {
     const now = new Date();
+    const currentHour = new Date(now);
+    currentHour.setMinutes(0, 0, 0);
     const nextHour = new Date(now);
     nextHour.setHours(now.getHours() + 1, 0, 0, 0);
+
     const diff = nextHour.getTime() - now.getTime();
     const minutes = Math.floor(diff / 60000);
     const seconds = Math.floor((diff % 60000) / 1000);
     setNextUpdateIn(`${minutes}:${seconds.toString().padStart(2, '0')}`);
+
+    const hourDuration = 60 * 60 * 1000;
+    const elapsed = now.getTime() - currentHour.getTime();
+    const progress = Math.min(100, Math.max(0, (elapsed / hourDuration) * 100));
+    setUpdateProgress(progress);
   };
 
   const handleBubbleTimingUpdate = (nextPopTime: number | null, createdTime?: number, lifetime?: number) => {
@@ -552,10 +561,30 @@ function App() {
                     {viewMode === 'bubble' ? 'List' : 'Bubble'}
                   </button>
                   <div className={`flex items-center gap-1.5 px-2 py-1 rounded ${theme === 'dark' ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-600'}`}>
-                    <svg className="animate-spin h-3 w-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
+                    <div className="relative h-3 w-3">
+                      <svg className="h-3 w-3 -rotate-90" viewBox="0 0 24 24">
+                        <circle
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          opacity="0.2"
+                        />
+                        <circle
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeDasharray={`${2 * Math.PI * 10}`}
+                          strokeDashoffset={`${2 * Math.PI * 10 * (1 - updateProgress / 100)}`}
+                          strokeLinecap="round"
+                        />
+                      </svg>
+                    </div>
                     <span className="text-xs font-mono">{nextUpdateIn}</span>
                   </div>
                   <div className={`flex items-center gap-1.5 px-2 py-1 rounded ${theme === 'dark' ? 'bg-indigo-900/50 text-indigo-300' : 'bg-indigo-100 text-indigo-700'}`}>
