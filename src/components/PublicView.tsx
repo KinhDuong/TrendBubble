@@ -127,7 +127,7 @@ export default function PublicView() {
       let query = supabase
         .from('trending_topics')
         .select('*')
-        .order('volume', { ascending: false });
+        .order('search_volume', { ascending: false });
 
       if (categoryFilter !== 'all') {
         query = query.eq('category', categoryFilter);
@@ -162,7 +162,17 @@ export default function PublicView() {
 
       if (error) throw error;
 
-      setTopics(data || []);
+      const formattedTopics: TrendingTopic[] = (data || []).map(topic => ({
+        name: topic.name,
+        searchVolume: topic.search_volume,
+        searchVolumeRaw: topic.search_volume_raw,
+        url: topic.url,
+        createdAt: topic.created_at,
+        pubDate: topic.pub_date,
+        category: topic.category
+      }));
+
+      setTopics(formattedTopics);
 
       if (data && data.length > 0) {
         const oldestTopic = data[data.length - 1];
@@ -350,7 +360,7 @@ export default function PublicView() {
                   </div>
                   <div className={`divide-y ${theme === 'dark' ? 'divide-gray-700' : 'divide-gray-200'}`}>
                     {filteredTopics.map((topic, index) => (
-                      <div key={topic.id} className={`px-6 py-4 grid grid-cols-12 gap-4 items-center text-xs md:text-sm ${theme === 'dark' ? 'hover:bg-gray-750' : 'hover:bg-gray-50'}`}>
+                      <div key={index} className={`px-6 py-4 grid grid-cols-12 gap-4 items-center text-xs md:text-sm ${theme === 'dark' ? 'hover:bg-gray-750' : 'hover:bg-gray-50'}`}>
                         <div className="col-span-1 font-semibold">{index + 1}</div>
                         <div className="col-span-5">
                           {topic.url ? (
@@ -366,7 +376,7 @@ export default function PublicView() {
                             <span>{topic.name}</span>
                           )}
                         </div>
-                        <div className="col-span-2 font-medium">{topic.volume.toLocaleString()}</div>
+                        <div className="col-span-2 font-medium">{topic.searchVolume.toLocaleString()}</div>
                         <div className="col-span-2">
                           {topic.category && (
                             <span className={`px-2 py-1 rounded text-xs ${theme === 'dark' ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-700'}`}>
@@ -375,7 +385,7 @@ export default function PublicView() {
                           )}
                         </div>
                         <div className={`col-span-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                          {new Date(topic.created_at).toLocaleDateString()}
+                          {topic.createdAt && new Date(topic.createdAt).toLocaleDateString()}
                         </div>
                       </div>
                     ))}

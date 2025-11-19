@@ -26,10 +26,21 @@ export default function AdminDashboard({ onViewPublic, logout, theme }: AdminDas
       const { data, error } = await supabase
         .from('trending_topics')
         .select('*')
-        .order('volume', { ascending: false });
+        .order('search_volume', { ascending: false });
 
       if (error) throw error;
-      setTopics(data || []);
+
+      const formattedTopics: TrendingTopic[] = (data || []).map(topic => ({
+        name: topic.name,
+        searchVolume: topic.search_volume,
+        searchVolumeRaw: topic.search_volume_raw,
+        url: topic.url,
+        createdAt: topic.created_at,
+        pubDate: topic.pub_date,
+        category: topic.category
+      }));
+
+      setTopics(formattedTopics);
     } catch (error) {
       console.error('Error loading topics:', error);
     } finally {
@@ -321,7 +332,7 @@ export default function AdminDashboard({ onViewPublic, logout, theme }: AdminDas
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                   {topics.slice(0, 50).map((topic, index) => (
                     <div
-                      key={topic.id}
+                      key={index}
                       className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} p-3 rounded border ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}
                     >
                       <div className="flex items-start justify-between gap-2">
@@ -329,7 +340,7 @@ export default function AdminDashboard({ onViewPublic, logout, theme }: AdminDas
                           #{index + 1}
                         </span>
                         <span className={`${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'} text-xs font-medium`}>
-                          {topic.volume.toLocaleString()}
+                          {topic.searchVolume.toLocaleString()}
                         </span>
                       </div>
                       <div className="mt-1 text-sm font-medium">{topic.name}</div>
