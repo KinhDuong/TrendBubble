@@ -193,21 +193,6 @@ Deno.serve(async (req: Request) => {
       console.log(`Captured ${historySnapshots.length} historical snapshots`);
     }
 
-    // Keep only top 100 most recently seen topics
-    const { data: allTopics } = await supabase
-      .from("trending_topics")
-      .select("id")
-      .order("last_seen", { ascending: false })
-      .range(100, 1000);
-
-    if (allTopics && allTopics.length > 0) {
-      const idsToDelete = allTopics.map((t) => t.id);
-      await supabase
-        .from("trending_topics")
-        .delete()
-        .in("id", idsToDelete);
-    }
-
     console.log(`Successfully updated trends: ${newTopicsCount} new, ${updatedTopicsCount} updated`);
 
     return new Response(
