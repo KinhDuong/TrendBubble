@@ -374,7 +374,8 @@ function TrendingBubble() {
             rank: index + 1,
             url: topic.url,
             pub_date: topic.pubDate,
-            category: topic.category
+            category: topic.category,
+            created_at: topic.pubDate || now
           });
         }
       }
