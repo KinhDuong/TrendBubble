@@ -580,11 +580,7 @@ function HomePage() {
       <header className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-b py-4 md:py-6 px-3 md:px-6 shadow-sm`}>
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3">
           <div className="flex-1 w-full">
-            <h1 className="text-2xl md:text-3xl font-bold text-center">Google Trending Topics</h1>
-            <p className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'} text-xs md:text-sm text-center mt-1 md:mt-2`}>
-              Bubble size represents search volume · Auto-updates hourly
-            </p>
-            <nav className="flex justify-center gap-4 mt-3">
+            <nav className="flex justify-center gap-4">
               <Link
                 to="/"
                 className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
@@ -712,6 +708,14 @@ function HomePage() {
         )}
 
         <FileUpload onUpload={handleFileUpload} theme={theme} />
+
+        <div className="text-center mb-3 md:mb-4">
+          <h1 className="text-2xl md:text-3xl font-bold">Google Trending Topics</h1>
+          <p className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'} text-xs md:text-sm mt-1 md:mt-2`}>
+            Bubble size represents search volume · Auto-updates hourly
+          </p>
+        </div>
+
         {loading && (
           <div className={`text-center py-8 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>Loading...</div>
         )}
