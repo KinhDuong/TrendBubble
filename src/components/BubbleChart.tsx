@@ -31,6 +31,8 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
   const animationFrameRef = useRef<number>();
   const displayedIndicesRef = useRef<Set<number>>(new Set());
   const nextIndexRef = useRef<number>(0);
+  const pausedTimeRef = useRef<number>(0);
+  const pauseStartRef = useRef<number | null>(null);
 
   const bubbleLifetimes = [40000, 60000, 80000, 100000, 120000];
 
@@ -230,11 +232,26 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
       const now = Date.now();
 
       if (isPaused) {
+        if (pauseStartRef.current === null) {
+          pauseStartRef.current = now;
+        }
+        pausedTimeRef.current = now - pauseStartRef.current;
+      } else {
+        if (pauseStartRef.current !== null) {
+          bubblesRef.current.forEach(bubble => {
+            bubble.createdAt += pausedTimeRef.current;
+          });
+          pauseStartRef.current = null;
+          pausedTimeRef.current = 0;
+        }
+      }
+
+      if (isPaused) {
         bubblesRef.current.forEach((bubble) => {
           const colorRgb = bubble.color.match(/\w\w/g)?.map(x => parseInt(x, 16)) || [60, 130, 246];
           let displayRadius = bubble.radius;
           let opacity = 1;
-          const age = Date.now() - bubble.createdAt;
+          const age = Date.now() - bubble.createdAt - pausedTimeRef.current;
           const ageRatio = Math.min(age / bubble.lifetime, 1);
           const colorIntensity = theme === 'dark' ? (1 - ageRatio * 0.6) : 1;
 
