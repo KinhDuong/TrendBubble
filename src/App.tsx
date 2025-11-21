@@ -883,7 +883,12 @@ function HomePage() {
                   >
                     {viewMode === 'bubble' ? 'List' : 'Bubble'}
                   </button>
-                  <div className={`hidden md:flex items-center gap-1.5 px-2 py-1 rounded ${theme === 'dark' ? 'bg-indigo-900/50 text-indigo-300' : 'bg-indigo-100 text-indigo-700'}`}>
+                  <button
+                    onClick={loadTopics}
+                    className={`hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded transition-colors ${theme === 'dark' ? 'bg-indigo-900/50 text-indigo-300 hover:bg-indigo-800/50' : 'bg-indigo-100 text-indigo-700 hover:bg-indigo-200'}`}
+                    aria-label="Refresh trending topics"
+                    title="Refresh trending topics"
+                  >
                     <div className="relative h-3 w-3">
                       <svg className="h-3 w-3 -rotate-90" viewBox="0 0 24 24">
                         <circle
@@ -909,7 +914,7 @@ function HomePage() {
                       </svg>
                     </div>
                     <span className="text-xs font-mono">{nextBubbleIn}</span>
-                  </div>
+                  </button>
                 </div>
               </div>
             </nav>
