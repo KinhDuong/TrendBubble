@@ -332,7 +332,7 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
 
       // Smoothly transition bubble sizes
       bubblesRef.current.forEach((bubble) => {
-        const hoverScale = bubble.isHovered ? 1.15 : 1.0;
+        const hoverScale = bubble.isHovered ? 1.25 : 1.0;
         const targetRadius = bubble.baseRadius * shrinkFactor * hoverScale;
         // Smooth transition: move 10% towards target each frame
         bubble.radius += (targetRadius - bubble.radius) * 0.1;
