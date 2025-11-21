@@ -811,7 +811,6 @@ function HomePage() {
                       <div className={`hidden md:block w-px h-6 ${theme === 'dark' ? 'bg-gray-600' : 'bg-gray-300'}`}></div>
                     </>
                   )}
-                  <div className={`hidden md:block w-px h-6 ${theme === 'dark' ? 'bg-gray-600' : 'bg-gray-300'}`}></div>
                   <div className="flex items-center gap-2">
                     <label htmlFor="themeFilter" className="text-xs font-medium whitespace-nowrap">
                       Style:
