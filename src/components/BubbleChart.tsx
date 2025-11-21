@@ -197,14 +197,9 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
     const resolveCollision = (b1: Bubble, b2: Bubble) => {
       const dx = b2.x - b1.x;
       const dy = b2.y - b1.y;
-      let distance = Math.sqrt(dx * dx + dy * dy);
+      const distance = Math.sqrt(dx * dx + dy * dy);
 
-      // Handle perfect overlap by adding small random offset
-      if (distance < 0.01) {
-        distance = 0.01;
-        b2.x += (Math.random() - 0.5) * 0.1;
-        b2.y += (Math.random() - 0.5) * 0.1;
-      }
+      if (distance === 0) return;
 
       const minDist = b1.radius + b2.radius;
       const overlap = minDist - distance;
@@ -214,8 +209,7 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
       const nx = dx / distance;
       const ny = dy / distance;
 
-      // Stronger separation force for better stability
-      const separationForce = overlap * 0.6;
+      const separationForce = overlap * 0.5;
       b1.x -= nx * separationForce;
       b1.y -= ny * separationForce;
       b2.x += nx * separationForce;
@@ -225,10 +219,9 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
       const relativeVelocityY = b1.vy - b2.vy;
       const speed = relativeVelocityX * nx + relativeVelocityY * ny;
 
-      // Add minimum separation velocity to prevent sticking
-      const minSeparationSpeed = 0.1;
-      const impulse = Math.max(speed, minSeparationSpeed) * 0.5;
+      if (speed < 0) return;
 
+      const impulse = speed * 0.3;
       b1.vx -= impulse * nx;
       b1.vy -= impulse * ny;
       b2.vx += impulse * nx;
