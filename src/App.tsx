@@ -603,13 +603,13 @@ function HomePage() {
                       : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
                   }`}
                 >
-                  <TrendingUp size={16} />
-                  Trending Bubble
+                  <Home size={16} />
+                  Table View
                 </Link>
                 <Link
-                  to="/home"
+                  to="/trending-bubble"
                   className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                    location.pathname === '/home'
+                    location.pathname === '/trending-bubble'
                       ? theme === 'dark'
                         ? 'bg-blue-600 text-white'
                         : 'bg-blue-500 text-white'
@@ -618,8 +618,8 @@ function HomePage() {
                       : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
                   }`}
                 >
-                  <Home size={16} />
-                  Table View
+                  <TrendingUp size={16} />
+                  Trending Bubble
                 </Link>
               </nav>
             </div>
@@ -972,8 +972,8 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<TrendingBubble />} />
-        <Route path="/home" element={<HomePage />} />
+        <Route path="/" element={<HomePage />} />
+        <Route path="/trending-bubble" element={<TrendingBubble />} />
       </Routes>
     </BrowserRouter>
   );
