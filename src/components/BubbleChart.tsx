@@ -114,6 +114,11 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
       const displayCount = Math.min(maxDisplay, topics.length);
       const densityFactor = Math.min(1, Math.sqrt(50 / displayCount));
 
+      // If all volumes are the same, use smaller uniform bubbles
+      if (maxSearchVolume === minVolume) {
+        return (isMobile ? 25 : 45) * densityFactor;
+      }
+
       const normalizedScale = (searchVolume - minVolume) / (maxSearchVolume - minVolume || 1);
 
       const exponentialScale = Math.pow(normalizedScale, 0.5);
