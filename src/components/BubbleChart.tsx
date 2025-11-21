@@ -23,6 +23,7 @@ interface Bubble {
   popProgress?: number;
   isSpawning?: boolean;
   spawnProgress?: number;
+  isHovered?: boolean;
 }
 
 export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingUpdate }: BubbleChartProps) {
@@ -33,6 +34,7 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
   const nextIndexRef = useRef<number>(0);
   const initialLoadQueueRef = useRef<number[]>([]);
   const lastSpawnTimeRef = useRef<number>(0);
+  const hoveredBubbleRef = useRef<Bubble | null>(null);
 
   const bubbleLifetimes = [40000, 60000, 80000, 100000, 120000];
 
@@ -83,13 +85,19 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
       const y = event.clientY - rect.top;
 
       let isOverBubble = false;
+      hoveredBubbleRef.current = null;
+
       for (const bubble of bubblesRef.current) {
         const dx = x - bubble.x;
         const dy = y - bubble.y;
         const distance = Math.sqrt(dx * dx + dy * dy);
 
+        bubble.isHovered = false;
+
         if (distance <= bubble.radius && bubble.topic.url) {
           isOverBubble = true;
+          bubble.isHovered = true;
+          hoveredBubbleRef.current = bubble;
           break;
         }
       }
@@ -324,7 +332,8 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
 
       // Smoothly transition bubble sizes
       bubblesRef.current.forEach((bubble) => {
-        const targetRadius = bubble.baseRadius * shrinkFactor;
+        const hoverScale = bubble.isHovered ? 1.15 : 1.0;
+        const targetRadius = bubble.baseRadius * shrinkFactor * hoverScale;
         // Smooth transition: move 10% towards target each frame
         bubble.radius += (targetRadius - bubble.radius) * 0.1;
       });
@@ -375,7 +384,8 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
 
         const age = Date.now() - bubble.createdAt;
         const ageRatio = Math.min(age / bubble.lifetime, 1);
-        const colorIntensity = theme === 'dark' ? (1 - ageRatio * 0.6) : 1;
+        const brightnessBoost = bubble.isHovered ? 0.3 : 0;
+        const colorIntensity = theme === 'dark' ? (1 - ageRatio * 0.6 + brightnessBoost) : (1 + brightnessBoost);
 
         if (bubble.isSpawning) {
           const progress = bubble.spawnProgress || 0;
