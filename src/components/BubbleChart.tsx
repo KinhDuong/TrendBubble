@@ -102,9 +102,9 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
     canvas.addEventListener('mousemove', handleMouseMove);
 
     const volumes = topics.map(t => t.searchVolume).sort((a, b) => b - a);
-    const maxSearchVolume = volumes[0];
-    const medianVolume = volumes[Math.floor(volumes.length / 2)];
-    const minVolume = volumes[volumes.length - 1];
+    const maxSearchVolume = Math.max(volumes[0] || 1000000, 1000000);
+    const medianVolume = volumes[Math.floor(volumes.length / 2)] || 10000;
+    const minVolume = Math.max(volumes[volumes.length - 1] || 1000, 1000);
 
     const volumeRange = maxSearchVolume - minVolume;
     const hasHighVariance = volumeRange > medianVolume * 2;
