@@ -154,11 +154,8 @@ export default function FileUpload({ onUpload, theme }: FileUploadProps) {
   };
 
   return (
-    <div className="mb-8 w-full max-w-md mx-auto space-y-4">
-      <div className="relative">
-        <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-          Category (Optional)
-        </label>
+    <div className="w-full flex flex-col md:flex-row items-center gap-3">
+      <div className="relative flex-shrink-0 w-full md:w-48">
         <input
           type="text"
           value={categorySearch}
@@ -167,8 +164,8 @@ export default function FileUpload({ onUpload, theme }: FileUploadProps) {
             setShowCategoryDropdown(true);
           }}
           onFocus={() => setShowCategoryDropdown(true)}
-          placeholder="Search or select category..."
-          className={`w-full px-4 py-2 rounded-lg border ${
+          placeholder="Category (optional)"
+          className={`w-full px-3 py-2 rounded-lg border text-sm ${
             theme === 'dark'
               ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
               : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
@@ -184,7 +181,7 @@ export default function FileUpload({ onUpload, theme }: FileUploadProps) {
               <button
                 key={category}
                 onClick={() => handleCategorySelect(category)}
-                className={`w-full px-4 py-2 text-left transition-colors ${
+                className={`w-full px-3 py-2 text-left text-sm transition-colors ${
                   theme === 'dark'
                     ? 'hover:bg-gray-600 text-white'
                     : 'hover:bg-gray-100 text-gray-900'
@@ -199,19 +196,19 @@ export default function FileUpload({ onUpload, theme }: FileUploadProps) {
 
       <label
         htmlFor="file-upload"
-        className={`flex items-center justify-center text-white px-6 py-3 rounded-lg transition-colors duration-200 w-full ${
+        className={`flex items-center justify-center text-white px-4 py-2 rounded-lg transition-colors duration-200 text-sm font-medium ${
           isUploading ? 'bg-blue-500 cursor-wait' : 'bg-blue-600 hover:bg-blue-700 cursor-pointer'
         }`}
       >
         {isUploading ? (
           <>
-            <Loader2 className="mr-2 animate-spin" size={20} />
+            <Loader2 className="mr-2 animate-spin" size={18} />
             Uploading...
           </>
         ) : (
           <>
-            <Upload className="mr-2" size={20} />
-            Upload CSV File
+            <Upload className="mr-2" size={18} />
+            Upload CSV
           </>
         )}
         <input
@@ -223,9 +220,6 @@ export default function FileUpload({ onUpload, theme }: FileUploadProps) {
           disabled={isUploading}
         />
       </label>
-      <p className={`text-sm text-center ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-        CSV format: Topic Name, Search Volume, Explore Link (optional), Started (optional)
-      </p>
     </div>
   );
 }

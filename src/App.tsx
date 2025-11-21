@@ -578,69 +578,72 @@ function HomePage() {
   return (
     <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'}`}>
       <header className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-b py-4 md:py-6 px-3 md:px-6 shadow-sm`}>
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3">
-          <div className="flex-1 w-full">
-            <nav className="flex justify-center gap-4">
-              <Link
-                to="/"
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                  location.pathname === '/'
-                    ? theme === 'dark'
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-blue-500 text-white'
-                    : theme === 'dark'
-                    ? 'text-gray-400 hover:text-white hover:bg-gray-700'
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-                }`}
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-3 mb-4">
+            <div className="flex-1 w-full">
+              <nav className="flex justify-center gap-4">
+                <Link
+                  to="/"
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                    location.pathname === '/'
+                      ? theme === 'dark'
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-blue-500 text-white'
+                      : theme === 'dark'
+                      ? 'text-gray-400 hover:text-white hover:bg-gray-700'
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                  }`}
+                >
+                  <Home size={16} />
+                  Home
+                </Link>
+                <Link
+                  to="/trending-bubble"
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                    location.pathname === '/trending-bubble'
+                      ? theme === 'dark'
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-blue-500 text-white'
+                      : theme === 'dark'
+                      ? 'text-gray-400 hover:text-white hover:bg-gray-700'
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                  }`}
+                >
+                  <TrendingUp size={16} />
+                  Trending Bubble
+                </Link>
+              </nav>
+            </div>
+            <div className="flex gap-2 md:gap-3">
+              <button
+                onClick={logout}
+                className={`px-3 md:px-4 py-1.5 md:py-2 ${theme === 'dark' ? 'bg-red-600 hover:bg-red-700' : 'bg-red-500 hover:bg-red-600'} rounded-lg transition-colors text-xs md:text-sm font-medium text-white flex items-center gap-2`}
               >
-                <Home size={16} />
-                Home
-              </Link>
-              <Link
-                to="/trending-bubble"
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                  location.pathname === '/trending-bubble'
-                    ? theme === 'dark'
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-blue-500 text-white'
-                    : theme === 'dark'
-                    ? 'text-gray-400 hover:text-white hover:bg-gray-700'
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-                }`}
+                <LogOut size={16} />
+                Logout
+              </button>
+              <button
+                onClick={manualUpdate}
+                disabled={loading}
+                className={`px-3 md:px-4 py-1.5 md:py-2 ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600' : 'bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300'} disabled:cursor-not-allowed rounded-lg transition-colors text-xs md:text-sm font-medium text-white`}
               >
-                <TrendingUp size={16} />
-                Trending Bubble
-              </Link>
-            </nav>
+                {loading ? 'Updating...' : 'Update Now'}
+              </button>
+              <button
+                onClick={saveBackup}
+                className={`px-3 md:px-4 py-1.5 md:py-2 ${theme === 'dark' ? 'bg-green-600 hover:bg-green-700' : 'bg-green-500 hover:bg-green-600'} rounded-lg transition-colors text-xs md:text-sm font-medium text-white`}
+              >
+                Save
+              </button>
+              <button
+                onClick={loadBackups}
+                className={`px-3 md:px-4 py-1.5 md:py-2 ${theme === 'dark' ? 'bg-purple-600 hover:bg-purple-700' : 'bg-purple-500 hover:bg-purple-600'} rounded-lg transition-colors text-xs md:text-sm font-medium text-white`}
+              >
+                Restore
+              </button>
+            </div>
           </div>
-          <div className="flex gap-2 md:gap-3">
-            <button
-              onClick={logout}
-              className={`px-3 md:px-4 py-1.5 md:py-2 ${theme === 'dark' ? 'bg-red-600 hover:bg-red-700' : 'bg-red-500 hover:bg-red-600'} rounded-lg transition-colors text-xs md:text-sm font-medium text-white flex items-center gap-2`}
-            >
-              <LogOut size={16} />
-              Logout
-            </button>
-            <button
-              onClick={manualUpdate}
-              disabled={loading}
-              className={`px-3 md:px-4 py-1.5 md:py-2 ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600' : 'bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300'} disabled:cursor-not-allowed rounded-lg transition-colors text-xs md:text-sm font-medium text-white`}
-            >
-              {loading ? 'Updating...' : 'Update Now'}
-            </button>
-            <button
-              onClick={saveBackup}
-              className={`px-3 md:px-4 py-1.5 md:py-2 ${theme === 'dark' ? 'bg-green-600 hover:bg-green-700' : 'bg-green-500 hover:bg-green-600'} rounded-lg transition-colors text-xs md:text-sm font-medium text-white`}
-            >
-              Save
-            </button>
-            <button
-              onClick={loadBackups}
-              className={`px-3 md:px-4 py-1.5 md:py-2 ${theme === 'dark' ? 'bg-purple-600 hover:bg-purple-700' : 'bg-purple-500 hover:bg-purple-600'} rounded-lg transition-colors text-xs md:text-sm font-medium text-white`}
-            >
-              Restore
-            </button>
-          </div>
+          <FileUpload onUpload={handleFileUpload} theme={theme} />
         </div>
       </header>
 
@@ -706,8 +709,6 @@ function HomePage() {
             </div>
           </div>
         )}
-
-        <FileUpload onUpload={handleFileUpload} theme={theme} />
 
         <div className="text-center mb-3 md:mb-4">
           <h1 className="text-2xl md:text-3xl font-bold">Google Trending Topics</h1>
