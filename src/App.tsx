@@ -685,7 +685,25 @@ function HomePage() {
               </div>
             </div>
           </div>
-          <FileUpload onUpload={handleFileUpload} theme={theme} />
+          <div className="flex flex-col md:flex-row items-start md:items-center gap-3 w-full">
+            <div className="flex items-center gap-2">
+              <label htmlFor="adminSourceFilter" className="text-xs font-medium whitespace-nowrap">
+                Source:
+              </label>
+              <select
+                id="adminSourceFilter"
+                value={sourceFilter}
+                onChange={(e) => setSourceFilter(e.target.value as 'all' | 'google_trends' | 'user_upload')}
+                className={`${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} border rounded px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                aria-label="Filter trending topics by data source"
+              >
+                <option value="all">All</option>
+                <option value="google_trends">Google Trends</option>
+                <option value="user_upload">My Uploads</option>
+              </select>
+            </div>
+            <FileUpload onUpload={handleFileUpload} theme={theme} />
+          </div>
         </div>
       </header>
       )}
@@ -799,23 +817,6 @@ function HomePage() {
                       <option value="week">Week</option>
                       <option value="month">Month</option>
                       <option value="year">Year</option>
-                    </select>
-                  </div>
-                  <div className={`hidden md:block w-px h-6 ${theme === 'dark' ? 'bg-gray-600' : 'bg-gray-300'}`}></div>
-                  <div className="flex items-center gap-2">
-                    <label htmlFor="sourceFilter" className="text-xs font-medium whitespace-nowrap">
-                      Source:
-                    </label>
-                    <select
-                      id="sourceFilter"
-                      value={sourceFilter}
-                      onChange={(e) => setSourceFilter(e.target.value as 'all' | 'google_trends' | 'user_upload')}
-                      className={`flex-1 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} border rounded px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500`}
-                      aria-label="Filter trending topics by data source"
-                    >
-                      <option value="all">All</option>
-                      <option value="google_trends">Google Trends</option>
-                      <option value="user_upload">My Uploads</option>
                     </select>
                   </div>
                   <div className={`hidden md:block w-px h-6 ${theme === 'dark' ? 'bg-gray-600' : 'bg-gray-300'}`}></div>
