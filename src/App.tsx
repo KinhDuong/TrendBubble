@@ -743,8 +743,8 @@ function HomePage() {
         {!loading && (
           <>
             <div className="flex justify-center mb-3 md:mb-4 px-3">
-              <div className={`w-full max-w-4xl ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} px-3 md:px-6 py-3 rounded-lg border shadow-sm`}>
-                <div className="grid grid-cols-2 md:flex md:items-center gap-3 md:gap-4">
+              <div className={`w-full max-w-4xl ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} px-3 md:px-6 py-3 rounded-lg border shadow-sm overflow-x-auto`}>
+                <div className="flex md:flex-wrap items-center gap-3 md:gap-4 min-w-max md:min-w-0">
                   {viewMode === 'bubble' && (
                     <>
                       <div className="flex items-center gap-2">
@@ -820,13 +820,12 @@ function HomePage() {
                     </select>
                   </div>
                   <div className={`hidden md:block w-px h-6 ${theme === 'dark' ? 'bg-gray-600' : 'bg-gray-300'}`}></div>
-                  <div className="col-span-2 flex items-center justify-center gap-2">
-                    <button
-                      onClick={() => setViewMode(viewMode === 'bubble' ? 'list' : 'bubble')}
-                      className={`flex-1 md:flex-none px-4 py-1.5 text-xs font-medium ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'} rounded transition-colors text-white`}
-                    >
-                      {viewMode === 'bubble' ? 'List' : 'Bubble'}
-                    </button>
+                  <button
+                    onClick={() => setViewMode(viewMode === 'bubble' ? 'list' : 'bubble')}
+                    className={`px-4 py-1.5 text-xs font-medium ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'} rounded transition-colors text-white whitespace-nowrap`}
+                  >
+                    {viewMode === 'bubble' ? 'List' : 'Bubble'}
+                  </button>
                     <div className={`hidden md:flex items-center gap-1.5 px-2 py-1 rounded ${theme === 'dark' ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-600'}`}>
                     <div className="relative h-3 w-3">
                       <svg className="h-3 w-3 -rotate-90" viewBox="0 0 24 24">
@@ -880,7 +879,6 @@ function HomePage() {
                       </svg>
                     </div>
                     <span className="text-xs font-mono">{nextBubbleIn}</span>
-                  </div>
                   </div>
                 </div>
               </div>
