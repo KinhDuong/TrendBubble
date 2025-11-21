@@ -666,7 +666,7 @@ function TrendingBubble() {
         {loading && (
           <div className={`text-center py-8 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>Loading...</div>
         )}
-        {topics.length > 0 && (
+        {!loading && (
           <>
             <div className="flex justify-center mb-3 md:mb-4">
               <div className={`flex items-center gap-2 md:gap-4 ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} px-3 md:px-6 py-2 md:py-3 rounded-lg border shadow-sm`}>
@@ -808,9 +808,10 @@ function TrendingBubble() {
                 </div>
               </div>
             </div>
-            {viewMode === 'bubble' ? (
-              <BubbleChart topics={topics} maxDisplay={maxBubbles} theme={theme} onBubbleTimingUpdate={handleBubbleTimingUpdate} isPaused={isPaused} />
-            ) : (
+            {topics.length > 0 && (
+              viewMode === 'bubble' ? (
+                <BubbleChart topics={topics} maxDisplay={maxBubbles} theme={theme} onBubbleTimingUpdate={handleBubbleTimingUpdate} isPaused={isPaused} />
+              ) : (
               <div className="max-w-6xl mx-auto">
                 <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-lg border overflow-hidden shadow-sm`}>
                   <div className={`grid grid-cols-6 gap-4 px-6 py-4 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'} font-semibold text-sm`}>
@@ -883,6 +884,7 @@ function TrendingBubble() {
                   </div>
                 </div>
               </div>
+              )
             )}
           </>
         )}
