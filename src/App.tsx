@@ -656,7 +656,7 @@ function HomePage() {
       </header>
       )}
 
-      <main className="p-2 md:p-6">
+      <div className="p-2 md:p-6">
         {showBackups && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] overflow-hidden`}>
@@ -719,11 +719,11 @@ function HomePage() {
           </div>
         )}
 
-        <div className="relative mb-3 md:mb-4">
+        <header className="relative mb-3 md:mb-4">
           <div className="text-center">
-            <h1 className="text-2xl md:text-3xl font-bold">Google Trending Topics</h1>
+            <h1 className="text-2xl md:text-3xl font-bold">Google Trending Topics - Real-Time Search Trends</h1>
             <p className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'} text-xs md:text-sm mt-1 md:mt-2`}>
-              Bubble size represents search volume · Auto-updates hourly
+              Track real-time trending topics on Google with interactive visualization · Bubble size represents search volume · Auto-updates hourly
             </p>
           </div>
           {!isAdmin && (
@@ -731,18 +731,21 @@ function HomePage() {
               onClick={() => setShowLogin(true)}
               className={`absolute right-0 top-1/2 -translate-y-1/2 ${theme === 'dark' ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'} transition-colors`}
               title="Admin Login"
+              aria-label="Admin Login"
             >
               <LogIn size={24} />
             </button>
           )}
-        </div>
+        </header>
+      </div>
 
+      <main role="main" aria-label="Trending topics visualization">
         {loading && (
           <div className={`text-center py-8 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>Loading...</div>
         )}
         {!loading && (
           <>
-            <div className="flex justify-center mb-3 md:mb-4 px-3">
+            <nav className="flex justify-center mb-3 md:mb-4 px-3" aria-label="Trending topics filters">
               <div className={`w-full max-w-4xl ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} px-3 md:px-6 py-3 rounded-lg border shadow-sm overflow-x-auto`}>
                 <div className="flex md:flex-wrap items-center gap-3 md:gap-4 min-w-max md:min-w-0">
                   {viewMode === 'bubble' && (
@@ -756,6 +759,7 @@ function HomePage() {
                           value={maxBubbles}
                           onChange={(e) => setMaxBubbles(Number(e.target.value))}
                           className={`flex-1 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} border rounded px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                          aria-label="Maximum number of bubbles to display"
                         >
                           <option value={20}>20</option>
                           <option value={40}>40</option>
@@ -778,6 +782,7 @@ function HomePage() {
                       value={categoryFilter}
                       onChange={(e) => setCategoryFilter(e.target.value)}
                       className={`flex-1 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} border rounded px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                      aria-label="Filter trending topics by category"
                     >
                       <option value="all">All</option>
                       {categories.map(category => (
@@ -795,6 +800,7 @@ function HomePage() {
                       value={dateFilter}
                       onChange={(e) => setDateFilter(e.target.value as 'now' | 'all' | '24h' | 'week' | 'month' | 'year')}
                       className={`flex-1 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} border rounded px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                      aria-label="Filter trending topics by date range"
                     >
                       <option value="now">Now</option>
                       <option value="all">All Time</option>
@@ -814,6 +820,7 @@ function HomePage() {
                       value={theme}
                       onChange={(e) => handleThemeChange(e.target.value as 'dark' | 'light')}
                       className={`flex-1 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} border rounded px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                      aria-label="Select theme style"
                     >
                       <option value="dark">Dark</option>
                       <option value="light">Light</option>
@@ -823,6 +830,7 @@ function HomePage() {
                   <button
                     onClick={() => setViewMode(viewMode === 'bubble' ? 'list' : 'bubble')}
                     className={`px-4 py-1.5 text-xs font-medium ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'} rounded transition-colors text-white whitespace-nowrap`}
+                    aria-label={`Switch to ${viewMode === 'bubble' ? 'list' : 'bubble'} view`}
                   >
                     {viewMode === 'bubble' ? 'List' : 'Bubble'}
                   </button>
@@ -882,7 +890,7 @@ function HomePage() {
                   </div>
                 </div>
               </div>
-            </div>
+            </nav>
             {topics.length > 0 && (
               viewMode === 'bubble' ? (
                 <BubbleChart topics={topics} maxDisplay={maxBubbles} theme={theme} onBubbleTimingUpdate={handleBubbleTimingUpdate} />
