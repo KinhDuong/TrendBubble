@@ -7,6 +7,7 @@ interface BubbleChartProps {
   theme: 'dark' | 'light';
   onBubbleTimingUpdate?: (nextPopTime: number | null, createdTime?: number, lifetime?: number) => void;
   isPaused?: boolean;
+  onSimilarSizesDetected?: (hasSimilarSizes: boolean) => void;
 }
 
 interface Bubble {
@@ -25,7 +26,7 @@ interface Bubble {
   spawnProgress?: number;
 }
 
-export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingUpdate, isPaused = false }: BubbleChartProps) {
+export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingUpdate, isPaused = false, onSimilarSizesDetected }: BubbleChartProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const bubblesRef = useRef<Bubble[]>([]);
   const animationFrameRef = useRef<number>();
@@ -124,6 +125,11 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
     };
 
     const hasSimilarSizes = calculateSizeVariance();
+
+    // Notify parent component about similar sizes detection
+    if (onSimilarSizesDetected) {
+      onSimilarSizesDetected(hasSimilarSizes);
+    }
 
     const calculateBubbleSize = (searchVolume: number) => {
       const isMobile = window.innerWidth < 768;

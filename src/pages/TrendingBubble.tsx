@@ -34,6 +34,7 @@ function TrendingBubble() {
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
   const [uploadMessage, setUploadMessage] = useState<string | null>(null);
   const [isPaused, setIsPaused] = useState(false);
+  const [showSimilarSizesAlert, setShowSimilarSizesAlert] = useState(false);
 
   useEffect(() => {
     loadTopics();
@@ -126,6 +127,14 @@ function TrendingBubble() {
     setOldestBubbleTime(nextPopTime);
     setOldestBubbleCreated(createdTime || null);
     setOldestBubbleLifetime(lifetime || null);
+  };
+
+  const handleSimilarSizesDetected = (hasSimilarSizes: boolean) => {
+    if (hasSimilarSizes && !showSimilarSizesAlert) {
+      setShowSimilarSizesAlert(true);
+    } else if (!hasSimilarSizes && showSimilarSizesAlert) {
+      setShowSimilarSizesAlert(false);
+    }
   };
 
   const loadTopics = async () => {
@@ -662,6 +671,29 @@ function TrendingBubble() {
           </div>
         )}
 
+        {showSimilarSizesAlert && (
+          <div className="fixed top-20 right-4 z-50 max-w-md">
+            <div className={`${theme === 'dark' ? 'bg-yellow-900 border-yellow-700' : 'bg-yellow-50 border-yellow-300'} border rounded-lg shadow-xl p-4`}>
+              <div className="flex justify-between items-start gap-3">
+                <div className="flex-1">
+                  <div className={`text-sm font-semibold mb-1 ${theme === 'dark' ? 'text-yellow-200' : 'text-yellow-800'}`}>
+                    Similar Bubble Sizes Detected
+                  </div>
+                  <div className={`text-sm ${theme === 'dark' ? 'text-yellow-300' : 'text-yellow-700'}`}>
+                    80% of bubbles have similar search volumes. Bubble sizes have been reduced to prevent constant collisions.
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowSimilarSizesAlert(false)}
+                  className={`${theme === 'dark' ? 'text-yellow-400 hover:text-yellow-200' : 'text-yellow-600 hover:text-yellow-900'} text-xl leading-none flex-shrink-0`}
+                >
+                  ×
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         <FileUpload onUpload={handleFileUpload} theme={theme} />
         {loading && (
           <div className={`text-center py-8 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>Loading...</div>
@@ -809,7 +841,14 @@ function TrendingBubble() {
               </div>
             </div>
             {viewMode === 'bubble' ? (
-              <BubbleChart topics={topics} maxDisplay={maxBubbles} theme={theme} onBubbleTimingUpdate={handleBubbleTimingUpdate} isPaused={isPaused} />
+              <BubbleChart
+                topics={topics}
+                maxDisplay={maxBubbles}
+                theme={theme}
+                onBubbleTimingUpdate={handleBubbleTimingUpdate}
+                isPaused={isPaused}
+                onSimilarSizesDetected={handleSimilarSizesDetected}
+              />
             ) : (
               <div className="max-w-6xl mx-auto">
                 <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-lg border overflow-hidden shadow-sm`}>
