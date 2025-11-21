@@ -34,8 +34,8 @@ function HomePage() {
   const [oldestBubbleTime, setOldestBubbleTime] = useState<number | null>(null);
   const [oldestBubbleCreated, setOldestBubbleCreated] = useState<number | null>(null);
   const [oldestBubbleLifetime, setOldestBubbleLifetime] = useState<number | null>(null);
-  const [sortField, setSortField] = useState<SortField>('rank');
-  const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
+  const [sortField, setSortField] = useState<SortField>('searchVolume');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const [uploadMessage, setUploadMessage] = useState<string | null>(null);
   const [showLogin, setShowLogin] = useState(false);
 
