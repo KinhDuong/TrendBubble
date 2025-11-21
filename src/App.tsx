@@ -603,13 +603,13 @@ function HomePage() {
                       : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
                   }`}
                 >
-                  <Home size={16} />
-                  Home
+                  <TrendingUp size={16} />
+                  Trending Bubble
                 </Link>
                 <Link
-                  to="/trending-bubble"
+                  to="/home"
                   className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                    location.pathname === '/trending-bubble'
+                    location.pathname === '/home'
                       ? theme === 'dark'
                         ? 'bg-blue-600 text-white'
                         : 'bg-blue-500 text-white'
@@ -618,8 +618,8 @@ function HomePage() {
                       : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
                   }`}
                 >
-                  <TrendingUp size={16} />
-                  Trending Bubble
+                  <Home size={16} />
+                  Table View
                 </Link>
               </nav>
             </div>
@@ -969,49 +969,11 @@ function HomePage() {
 }
 
 function App() {
-  const { isAdmin, isLoading: authLoading } = useAuth();
-  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
-
-  useEffect(() => {
-    loadThemePreference();
-  }, []);
-
-  const loadThemePreference = async () => {
-    try {
-      const { data } = await supabase
-        .from('user_preferences')
-        .select('theme')
-        .maybeSingle();
-
-      if (data?.theme) {
-        setTheme(data.theme as 'dark' | 'light');
-      }
-    } catch (error) {
-      console.error('Error loading theme preference:', error);
-    }
-  };
-
-  const loadTopics = async () => {
-    return;
-  };
-
-  if (authLoading) {
-    return (
-      <div className={`min-h-screen flex items-center justify-center ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'}`}>
-        <div className="text-xl">Loading...</div>
-      </div>
-    );
-  }
-
-  if (!isAdmin) {
-    return <Login onLogin={loadTopics} theme={theme} />;
-  }
-
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/trending-bubble" element={<TrendingBubble />} />
+        <Route path="/" element={<TrendingBubble />} />
+        <Route path="/home" element={<HomePage />} />
       </Routes>
     </BrowserRouter>
   );

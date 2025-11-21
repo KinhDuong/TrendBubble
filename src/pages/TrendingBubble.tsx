@@ -1,17 +1,19 @@
 import { useState, useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import BubbleChart from '../components/BubbleChart';
 import FileUpload from '../components/FileUpload';
 import Login from '../components/Login';
 import { TrendingTopic } from '../types';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
-import { LogOut, ArrowUpDown, ArrowUp, ArrowDown, Pause, Play, LogIn } from 'lucide-react';
+import { LogOut, ArrowUpDown, ArrowUp, ArrowDown, Pause, Play, LogIn, Home, TrendingUp } from 'lucide-react';
 
 type SortField = 'name' | 'category' | 'searchVolume' | 'rank' | 'pubDate' | 'createdAt';
 type SortDirection = 'asc' | 'desc';
 
 function TrendingBubble() {
   const { isAdmin, isLoading: authLoading, logout } = useAuth();
+  const location = useLocation();
   const [topics, setTopics] = useState<TrendingTopic[]>([]);
   const isMobile = window.innerWidth < 768;
   const [maxBubbles, setMaxBubbles] = useState<number>(isMobile ? 40 : 60);
@@ -568,7 +570,41 @@ function TrendingBubble() {
               Admin Menu
             </div>
             <div className="flex flex-col md:flex-row items-center justify-between gap-3 mb-4">
-            <div className="flex gap-2 md:gap-3">
+              <div className="flex-1 w-full">
+                <nav className="flex justify-center gap-4">
+                  <Link
+                    to="/"
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                      location.pathname === '/'
+                        ? theme === 'dark'
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-blue-500 text-white'
+                        : theme === 'dark'
+                        ? 'text-gray-400 hover:text-white hover:bg-gray-700'
+                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                    }`}
+                  >
+                    <TrendingUp size={16} />
+                    Trending Bubble
+                  </Link>
+                  <Link
+                    to="/home"
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                      location.pathname === '/home'
+                        ? theme === 'dark'
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-blue-500 text-white'
+                        : theme === 'dark'
+                        ? 'text-gray-400 hover:text-white hover:bg-gray-700'
+                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                    }`}
+                  >
+                    <Home size={16} />
+                    Table View
+                  </Link>
+                </nav>
+              </div>
+              <div className="flex gap-2 md:gap-3">
               <button
                 onClick={logout}
                 className={`px-3 md:px-4 py-1.5 md:py-2 ${theme === 'dark' ? 'bg-red-600 hover:bg-red-700' : 'bg-red-500 hover:bg-red-600'} rounded-lg transition-colors text-xs md:text-sm font-medium text-white flex items-center gap-2`}
