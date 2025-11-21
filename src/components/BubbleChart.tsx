@@ -102,9 +102,9 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
     canvas.addEventListener('mousemove', handleMouseMove);
 
     const volumes = topics.map(t => t.searchVolume).sort((a, b) => b - a);
-    const maxSearchVolume = Math.max(volumes[0], 1000000);
+    const maxSearchVolume = volumes[0];
     const medianVolume = volumes[Math.floor(volumes.length / 2)];
-    const minVolume = Math.min(volumes[volumes.length - 1], 1000);
+    const minVolume = volumes[volumes.length - 1];
 
     const volumeRange = maxSearchVolume - minVolume;
     const hasHighVariance = volumeRange > medianVolume * 2;
@@ -135,7 +135,7 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
       return colors[index % colors.length];
     };
 
-    const createBubble = (topicIndex: number, existingBubbles: Bubble[] = [], isInvisible: boolean = false): Bubble => {
+    const createBubble = (topicIndex: number, existingBubbles: Bubble[] = []): Bubble => {
       const topic = topics[topicIndex];
       const randomLifetime = bubbleLifetimes[Math.floor(Math.random() * bubbleLifetimes.length)];
       const radius = calculateBubbleSize(topic.searchVolume);
@@ -164,35 +164,22 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
 
       return {
         topic,
-        x: isInvisible ? -10000 : x,
-        y: isInvisible ? -10000 : y,
+        x,
+        y,
         vx: (Math.random() - 0.5) * 0.25,
         vy: (Math.random() - 0.5) * 0.25,
-        radius: isInvisible ? 0 : radius,
+        radius,
         color: getRandomColor(topicIndex),
         createdAt: Date.now(),
         lifetime: randomLifetime,
-        isSpawning: !isInvisible,
+        isSpawning: true,
         spawnProgress: 0,
       };
-    };
-
-    const createInvisibleReferenceBubbles = (existingBubbles: Bubble[]) => {
-      const largeBubble = createBubble(0, existingBubbles, true);
-      largeBubble.topic = { ...largeBubble.topic, searchVolume: 1000000, searchVolumeRaw: '1M+' };
-
-      const smallBubble = createBubble(0, existingBubbles, true);
-      smallBubble.topic = { ...smallBubble.topic, searchVolume: 1000, searchVolumeRaw: '1K+' };
-
-      return [largeBubble, smallBubble];
     };
 
     displayedIndicesRef.current.clear();
     const initialCount = Math.min(maxDisplay, topics.length);
     bubblesRef.current = [];
-
-    bubblesRef.current.push(...createInvisibleReferenceBubbles(bubblesRef.current));
-
     initialLoadQueueRef.current = [];
     for (let i = 0; i < initialCount; i++) {
       initialLoadQueueRef.current.push(i);
@@ -393,7 +380,6 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
           if (nextTopicIndex !== undefined) {
             displayedIndicesRef.current.add(nextTopicIndex);
             bubblesRef.current.push(createBubble(nextTopicIndex, bubblesRef.current));
-            bubblesRef.current.push(...createInvisibleReferenceBubbles(bubblesRef.current));
             lastSpawnTimeRef.current = now;
           }
         }
