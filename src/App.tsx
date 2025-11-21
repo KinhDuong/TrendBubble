@@ -7,7 +7,7 @@ import TrendingBubble from './pages/TrendingBubble';
 import { TrendingTopic } from './types';
 import { supabase } from './lib/supabase';
 import { useAuth } from './hooks/useAuth';
-import { LogOut, Home, TrendingUp, ArrowUpDown, ArrowUp, ArrowDown, Pause, Play } from 'lucide-react';
+import { LogOut, Home, TrendingUp, ArrowUpDown, ArrowUp, ArrowDown, Pause, Play, LogIn } from 'lucide-react';
 
 type SortField = 'name' | 'category' | 'searchVolume' | 'rank' | 'pubDate' | 'createdAt';
 type SortDirection = 'asc' | 'desc';
@@ -37,6 +37,7 @@ function HomePage() {
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
   const [uploadMessage, setUploadMessage] = useState<string | null>(null);
   const [isPaused, setIsPaused] = useState(false);
+  const [showLogin, setShowLogin] = useState(false);
 
   useEffect(() => {
     loadTopics();
@@ -575,6 +576,10 @@ function HomePage() {
     return sortDirection === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />;
   };
 
+  if (!isAdmin && showLogin) {
+    return <Login onLogin={loadTopics} theme={theme} />;
+  }
+
   return (
     <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'}`}>
       {isAdmin && (
@@ -715,11 +720,22 @@ function HomePage() {
           </div>
         )}
 
-        <div className="text-center mb-3 md:mb-4">
-          <h1 className="text-2xl md:text-3xl font-bold">Google Trending Topics</h1>
-          <p className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'} text-xs md:text-sm mt-1 md:mt-2`}>
-            Bubble size represents search volume · Auto-updates hourly
-          </p>
+        <div className="relative mb-3 md:mb-4">
+          <div className="text-center">
+            <h1 className="text-2xl md:text-3xl font-bold">Google Trending Topics</h1>
+            <p className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'} text-xs md:text-sm mt-1 md:mt-2`}>
+              Bubble size represents search volume · Auto-updates hourly
+            </p>
+          </div>
+          {!isAdmin && (
+            <button
+              onClick={() => setShowLogin(true)}
+              className={`absolute right-0 top-1/2 -translate-y-1/2 ${theme === 'dark' ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'} transition-colors`}
+              title="Admin Login"
+            >
+              <LogIn size={24} />
+            </button>
+          )}
         </div>
 
         {loading && (
