@@ -743,90 +743,99 @@ function HomePage() {
         )}
         {!loading && (
           <>
-            <div className="flex justify-center mb-3 md:mb-4">
-              <div className={`flex items-center gap-2 md:gap-4 ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} px-3 md:px-6 py-2 md:py-3 rounded-lg border shadow-sm`}>
-                {viewMode === 'bubble' && (
-                  <>
-                    <label htmlFor="maxBubbles" className="text-xs md:text-sm font-medium">
-                      Max:
+            <div className="flex justify-center mb-3 md:mb-4 px-3">
+              <div className={`w-full max-w-4xl ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} px-3 md:px-6 py-3 rounded-lg border shadow-sm`}>
+                <div className="grid grid-cols-2 md:flex md:items-center gap-3 md:gap-4">
+                  {viewMode === 'bubble' && (
+                    <>
+                      <div className="flex items-center gap-2">
+                        <label htmlFor="maxBubbles" className="text-xs font-medium whitespace-nowrap">
+                          Max:
+                        </label>
+                        <select
+                          id="maxBubbles"
+                          value={maxBubbles}
+                          onChange={(e) => setMaxBubbles(Number(e.target.value))}
+                          className={`flex-1 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} border rounded px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                        >
+                          <option value={20}>20</option>
+                          <option value={40}>40</option>
+                          <option value={50}>50</option>
+                          <option value={80}>80</option>
+                          <option value={100}>100</option>
+                          <option value={150}>150</option>
+                          <option value={200}>200</option>
+                        </select>
+                      </div>
+                      <div className={`hidden md:block w-px h-6 ${theme === 'dark' ? 'bg-gray-600' : 'bg-gray-300'}`}></div>
+                    </>
+                  )}
+                  <div className="flex items-center gap-2">
+                    <label htmlFor="categoryFilter" className="text-xs font-medium whitespace-nowrap">
+                      Category:
                     </label>
                     <select
-                      id="maxBubbles"
-                      value={maxBubbles}
-                      onChange={(e) => setMaxBubbles(Number(e.target.value))}
-                      className={`${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} border rounded px-2 md:px-3 py-1 md:py-1.5 text-xs md:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                      id="categoryFilter"
+                      value={categoryFilter}
+                      onChange={(e) => setCategoryFilter(e.target.value)}
+                      className={`flex-1 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} border rounded px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500`}
                     >
-                      <option value={20}>20</option>
-                      <option value={40}>40</option>
-                      <option value={50}>50</option>
-                      <option value={80}>80</option>
-                      <option value={100}>100</option>
-                      <option value={150}>150</option>
-                      <option value={200}>200</option>
+                      <option value="all">All</option>
+                      {categories.map(category => (
+                        <option key={category} value={category}>{category}</option>
+                      ))}
                     </select>
-                    <div className={`w-px h-4 md:h-6 ${theme === 'dark' ? 'bg-gray-600' : 'bg-gray-300'}`}></div>
-                  </>
-                )}
-                <label htmlFor="categoryFilter" className="text-xs md:text-sm font-medium">
-                  Category:
-                </label>
-                <select
-                  id="categoryFilter"
-                  value={categoryFilter}
-                  onChange={(e) => setCategoryFilter(e.target.value)}
-                  className={`${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} border rounded px-2 md:px-3 py-1 md:py-1.5 text-xs md:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500`}
-                >
-                  <option value="all">All</option>
-                  {categories.map(category => (
-                    <option key={category} value={category}>{category}</option>
-                  ))}
-                </select>
-                <div className={`w-px h-4 md:h-6 ${theme === 'dark' ? 'bg-gray-600' : 'bg-gray-300'}`}></div>
-                <label htmlFor="dateFilter" className="text-xs md:text-sm font-medium">
-                  Date:
-                </label>
-                <select
-                  id="dateFilter"
-                  value={dateFilter}
-                  onChange={(e) => setDateFilter(e.target.value as 'now' | 'all' | '24h' | 'week' | 'month' | 'year')}
-                  className={`${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} border rounded px-2 md:px-3 py-1 md:py-1.5 text-xs md:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500`}
-                >
-                  <option value="now">Now</option>
-                  <option value="all">All Time</option>
-                  <option value="24h">24 Hours</option>
-                  <option value="week">Week</option>
-                  <option value="month">Month</option>
-                  <option value="year">Year</option>
-                </select>
-                <div className={`w-px h-4 md:h-6 ${theme === 'dark' ? 'bg-gray-600' : 'bg-gray-300'}`}></div>
-                <label htmlFor="themeFilter" className="text-xs md:text-sm font-medium">
-                  Style:
-                </label>
-                <select
-                  id="themeFilter"
-                  value={theme}
-                  onChange={(e) => handleThemeChange(e.target.value as 'dark' | 'light')}
-                  className={`${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} border rounded px-2 md:px-3 py-1 md:py-1.5 text-xs md:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500`}
-                >
-                  <option value="dark">Dark</option>
-                  <option value="light">Light</option>
-                </select>
-                <div className={`w-px h-4 md:h-6 ${theme === 'dark' ? 'bg-gray-600' : 'bg-gray-300'}`}></div>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => setViewMode(viewMode === 'bubble' ? 'list' : 'bubble')}
-                    className={`px-3 md:px-4 py-1 md:py-1.5 text-xs md:text-sm font-medium ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'} rounded transition-colors text-white`}
-                  >
-                    {viewMode === 'bubble' ? 'List' : 'Bubble'}
-                  </button>
-                  <button
-                    onClick={() => setIsPaused(!isPaused)}
-                    className={`px-3 md:px-4 py-1 md:py-1.5 text-xs md:text-sm font-medium ${theme === 'dark' ? 'bg-orange-600 hover:bg-orange-700' : 'bg-orange-500 hover:bg-orange-600'} rounded transition-colors text-white flex items-center gap-1`}
-                  >
-                    {isPaused ? <Play size={14} /> : <Pause size={14} />}
-                    {isPaused ? 'Resume' : 'Pause'}
-                  </button>
-                  <div className={`flex items-center gap-1.5 px-2 py-1 rounded ${theme === 'dark' ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-600'}`}>
+                  </div>
+                  <div className={`hidden md:block w-px h-6 ${theme === 'dark' ? 'bg-gray-600' : 'bg-gray-300'}`}></div>
+                  <div className="flex items-center gap-2">
+                    <label htmlFor="dateFilter" className="text-xs font-medium whitespace-nowrap">
+                      Date:
+                    </label>
+                    <select
+                      id="dateFilter"
+                      value={dateFilter}
+                      onChange={(e) => setDateFilter(e.target.value as 'now' | 'all' | '24h' | 'week' | 'month' | 'year')}
+                      className={`flex-1 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} border rounded px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                    >
+                      <option value="now">Now</option>
+                      <option value="all">All Time</option>
+                      <option value="24h">24 Hours</option>
+                      <option value="week">Week</option>
+                      <option value="month">Month</option>
+                      <option value="year">Year</option>
+                    </select>
+                  </div>
+                  <div className={`hidden md:block w-px h-6 ${theme === 'dark' ? 'bg-gray-600' : 'bg-gray-300'}`}></div>
+                  <div className="flex items-center gap-2">
+                    <label htmlFor="themeFilter" className="text-xs font-medium whitespace-nowrap">
+                      Style:
+                    </label>
+                    <select
+                      id="themeFilter"
+                      value={theme}
+                      onChange={(e) => handleThemeChange(e.target.value as 'dark' | 'light')}
+                      className={`flex-1 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} border rounded px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                    >
+                      <option value="dark">Dark</option>
+                      <option value="light">Light</option>
+                    </select>
+                  </div>
+                  <div className={`hidden md:block w-px h-6 ${theme === 'dark' ? 'bg-gray-600' : 'bg-gray-300'}`}></div>
+                  <div className="col-span-2 flex items-center justify-center gap-2">
+                    <button
+                      onClick={() => setViewMode(viewMode === 'bubble' ? 'list' : 'bubble')}
+                      className={`flex-1 md:flex-none px-4 py-1.5 text-xs font-medium ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'} rounded transition-colors text-white`}
+                    >
+                      {viewMode === 'bubble' ? 'List' : 'Bubble'}
+                    </button>
+                    <button
+                      onClick={() => setIsPaused(!isPaused)}
+                      className={`flex-1 md:flex-none px-4 py-1.5 text-xs font-medium ${theme === 'dark' ? 'bg-orange-600 hover:bg-orange-700' : 'bg-orange-500 hover:bg-orange-600'} rounded transition-colors text-white flex items-center justify-center gap-1`}
+                    >
+                      {isPaused ? <Play size={14} /> : <Pause size={14} />}
+                      {isPaused ? 'Resume' : 'Pause'}
+                    </button>
+                    <div className={`hidden md:flex items-center gap-1.5 px-2 py-1 rounded ${theme === 'dark' ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-600'}`}>
                     <div className="relative h-3 w-3">
                       <svg className="h-3 w-3 -rotate-90" viewBox="0 0 24 24">
                         <circle
@@ -853,7 +862,7 @@ function HomePage() {
                     </div>
                     <span className="text-xs font-mono">{nextUpdateIn}</span>
                   </div>
-                  <div className={`flex items-center gap-1.5 px-2 py-1 rounded ${theme === 'dark' ? 'bg-indigo-900/50 text-indigo-300' : 'bg-indigo-100 text-indigo-700'}`}>
+                  <div className={`hidden md:flex items-center gap-1.5 px-2 py-1 rounded ${theme === 'dark' ? 'bg-indigo-900/50 text-indigo-300' : 'bg-indigo-100 text-indigo-700'}`}>
                     <div className="relative h-3 w-3">
                       <svg className="h-3 w-3 -rotate-90" viewBox="0 0 24 24">
                         <circle
@@ -879,6 +888,7 @@ function HomePage() {
                       </svg>
                     </div>
                     <span className="text-xs font-mono">{nextBubbleIn}</span>
+                  </div>
                   </div>
                 </div>
               </div>
