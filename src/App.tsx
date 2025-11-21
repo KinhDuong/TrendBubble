@@ -676,33 +676,6 @@ function HomePage() {
                 </div>
                 <span className="text-xs font-mono">{nextUpdateIn}</span>
               </div>
-              <div className={`flex items-center gap-1.5 px-2 py-1 rounded ${theme === 'dark' ? 'bg-indigo-900/50 text-indigo-300' : 'bg-indigo-100 text-indigo-700'}`}>
-                <div className="relative h-3 w-3">
-                  <svg className="h-3 w-3 -rotate-90" viewBox="0 0 24 24">
-                    <circle
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      opacity="0.2"
-                    />
-                    <circle
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeDasharray={`${2 * Math.PI * 10}`}
-                      strokeDashoffset={`${2 * Math.PI * 10 * (1 - bubbleProgress / 100)}`}
-                      strokeLinecap="round"
-                    />
-                  </svg>
-                </div>
-                <span className="text-xs font-mono">{nextBubbleIn}</span>
-              </div>
             </div>
           </div>
           <FileUpload onUpload={handleFileUpload} theme={theme} />
@@ -885,6 +858,33 @@ function HomePage() {
                   >
                     {viewMode === 'bubble' ? 'List' : 'Bubble'}
                   </button>
+                  <div className={`hidden md:flex items-center gap-1.5 px-2 py-1 rounded ${theme === 'dark' ? 'bg-indigo-900/50 text-indigo-300' : 'bg-indigo-100 text-indigo-700'}`}>
+                    <div className="relative h-3 w-3">
+                      <svg className="h-3 w-3 -rotate-90" viewBox="0 0 24 24">
+                        <circle
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          opacity="0.2"
+                        />
+                        <circle
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeDasharray={`${2 * Math.PI * 10}`}
+                          strokeDashoffset={`${2 * Math.PI * 10 * (1 - bubbleProgress / 100)}`}
+                          strokeLinecap="round"
+                        />
+                      </svg>
+                    </div>
+                    <span className="text-xs font-mono">{nextBubbleIn}</span>
+                  </div>
                 </div>
               </div>
             </nav>
