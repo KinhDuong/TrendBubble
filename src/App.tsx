@@ -750,7 +750,7 @@ function HomePage() {
                 <div className="flex md:flex-wrap items-center gap-3 md:gap-4 min-w-max md:min-w-0">
                   <div className="flex items-center gap-2">
                     <label htmlFor="dateFilter" className="text-xs font-medium whitespace-nowrap">
-                      Date:
+                      Trending:
                     </label>
                     <select
                       id="dateFilter"
