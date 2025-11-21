@@ -729,6 +729,7 @@ function HomePage() {
                       onChange={(e) => setMaxBubbles(Number(e.target.value))}
                       className={`${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} border rounded px-2 md:px-3 py-1 md:py-1.5 text-xs md:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500`}
                     >
+                      <option value={20}>20</option>
                       <option value={40}>40</option>
                       <option value={50}>50</option>
                       <option value={80}>80</option>
