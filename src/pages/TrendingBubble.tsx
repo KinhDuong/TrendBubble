@@ -5,7 +5,7 @@ import Login from '../components/Login';
 import { TrendingTopic } from '../types';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
-import { LogOut, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { LogOut, ArrowUpDown, ArrowUp, ArrowDown, Pause, Play } from 'lucide-react';
 
 type SortField = 'name' | 'category' | 'searchVolume' | 'rank' | 'pubDate' | 'createdAt';
 type SortDirection = 'asc' | 'desc';
@@ -33,6 +33,7 @@ function TrendingBubble() {
   const [sortField, setSortField] = useState<SortField>('rank');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
   const [uploadMessage, setUploadMessage] = useState<string | null>(null);
+  const [isPaused, setIsPaused] = useState(false);
 
   useEffect(() => {
     loadTopics();
@@ -743,6 +744,13 @@ function TrendingBubble() {
                   >
                     {viewMode === 'bubble' ? 'List' : 'Bubble'}
                   </button>
+                  <button
+                    onClick={() => setIsPaused(!isPaused)}
+                    className={`px-3 md:px-4 py-1 md:py-1.5 text-xs md:text-sm font-medium ${theme === 'dark' ? 'bg-orange-600 hover:bg-orange-700' : 'bg-orange-500 hover:bg-orange-600'} rounded transition-colors text-white flex items-center gap-1`}
+                  >
+                    {isPaused ? <Play size={14} /> : <Pause size={14} />}
+                    {isPaused ? 'Resume' : 'Pause'}
+                  </button>
                   <div className={`flex items-center gap-1.5 px-2 py-1 rounded ${theme === 'dark' ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-600'}`}>
                     <div className="relative h-3 w-3">
                       <svg className="h-3 w-3 -rotate-90" viewBox="0 0 24 24">
@@ -801,7 +809,7 @@ function TrendingBubble() {
               </div>
             </div>
             {viewMode === 'bubble' ? (
-              <BubbleChart topics={topics} maxDisplay={maxBubbles} theme={theme} onBubbleTimingUpdate={handleBubbleTimingUpdate} />
+              <BubbleChart topics={topics} maxDisplay={maxBubbles} theme={theme} onBubbleTimingUpdate={handleBubbleTimingUpdate} isPaused={isPaused} />
             ) : (
               <div className="max-w-6xl mx-auto">
                 <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-lg border overflow-hidden shadow-sm`}>

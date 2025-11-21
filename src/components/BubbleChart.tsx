@@ -6,6 +6,7 @@ interface BubbleChartProps {
   maxDisplay: number;
   theme: 'dark' | 'light';
   onBubbleTimingUpdate?: (nextPopTime: number | null, createdTime?: number, lifetime?: number) => void;
+  isPaused?: boolean;
 }
 
 interface Bubble {
@@ -24,7 +25,7 @@ interface Bubble {
   spawnProgress?: number;
 }
 
-export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingUpdate }: BubbleChartProps) {
+export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingUpdate, isPaused = false }: BubbleChartProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const bubblesRef = useRef<Bubble[]>([]);
   const animationFrameRef = useRef<number>();
@@ -227,6 +228,130 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
       ctx.clearRect(0, 0, canvas.width / dpr, canvas.height / dpr);
 
       const now = Date.now();
+
+      if (isPaused) {
+        bubblesRef.current.forEach((bubble) => {
+          const colorRgb = bubble.color.match(/\w\w/g)?.map(x => parseInt(x, 16)) || [60, 130, 246];
+          let displayRadius = bubble.radius;
+          let opacity = 1;
+          const age = Date.now() - bubble.createdAt;
+          const ageRatio = Math.min(age / bubble.lifetime, 1);
+          const colorIntensity = theme === 'dark' ? (1 - ageRatio * 0.6) : 1;
+
+          const innerGlow = ctx.createRadialGradient(
+            bubble.x,
+            bubble.y,
+            displayRadius,
+            bubble.x,
+            bubble.y,
+            Math.max(0, displayRadius - 10)
+          );
+          if (theme === 'dark') {
+            innerGlow.addColorStop(0, `rgba(${colorRgb[0]}, ${colorRgb[1]}, ${colorRgb[2]}, ${0.8 * opacity * colorIntensity})`);
+            innerGlow.addColorStop(1, 'rgba(20, 20, 20, 0)');
+          } else {
+            innerGlow.addColorStop(0, `rgba(${colorRgb[0]}, ${colorRgb[1]}, ${colorRgb[2]}, ${0.4 * opacity})`);
+            innerGlow.addColorStop(1, 'rgba(255, 255, 255, 0)');
+          }
+
+          const gradient = ctx.createRadialGradient(
+            bubble.x - displayRadius * 0.3,
+            bubble.y - displayRadius * 0.3,
+            0,
+            bubble.x,
+            bubble.y,
+            displayRadius
+          );
+
+          if (theme === 'dark') {
+            gradient.addColorStop(0, `rgba(50, 50, 50, ${0.9 * opacity})`);
+            gradient.addColorStop(0.5, `rgba(30, 30, 30, ${0.85 * opacity})`);
+            gradient.addColorStop(1, `rgba(20, 20, 20, ${0.9 * opacity})`);
+          } else {
+            gradient.addColorStop(0, `rgba(250, 250, 255, ${0.95 * opacity})`);
+            gradient.addColorStop(0.5, `rgba(240, 242, 250, ${0.9 * opacity})`);
+            gradient.addColorStop(1, `rgba(230, 235, 245, ${0.95 * opacity})`);
+          }
+
+          ctx.beginPath();
+          ctx.arc(bubble.x, bubble.y, displayRadius, 0, Math.PI * 2);
+          ctx.fillStyle = gradient;
+          ctx.fill();
+
+          ctx.beginPath();
+          ctx.arc(bubble.x, bubble.y, displayRadius, 0, Math.PI * 2);
+          ctx.fillStyle = innerGlow;
+          ctx.fill();
+
+          ctx.shadowColor = bubble.color;
+          ctx.shadowBlur = theme === 'dark' ? Math.max(8, displayRadius / 8) * colorIntensity : Math.max(8, displayRadius / 8);
+          ctx.shadowOffsetX = 0;
+          ctx.shadowOffsetY = 0;
+          ctx.beginPath();
+          ctx.arc(bubble.x, bubble.y, displayRadius, 0, Math.PI * 2);
+          ctx.strokeStyle = bubble.color;
+          ctx.globalAlpha = theme === 'dark' ? opacity * colorIntensity : opacity;
+          ctx.lineWidth = 1;
+          ctx.stroke();
+          ctx.shadowBlur = 0;
+          ctx.globalAlpha = 1;
+
+          if (opacity > 0.1) {
+            ctx.globalAlpha = opacity;
+            const textBrightness = theme === 'dark' ? (1 - ageRatio * 0.3) : 1;
+            const textAlpha = theme === 'dark' ? textBrightness : 1;
+            ctx.fillStyle = theme === 'dark' ? `rgba(255, 255, 255, ${textAlpha})` : 'rgb(30, 30, 30)';
+            const isMobile = window.innerWidth < 768;
+            const fontSize = Math.max(isMobile ? 9 : 10, displayRadius / (isMobile ? 3.2 : 3.5));
+            ctx.font = `bold ${fontSize}px sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            const cleanName = bubble.topic.name.replace(/"/g, '');
+            const maxWidth = displayRadius * 1.6;
+            const words = cleanName.split(' ');
+            const lines: string[] = [];
+            let currentLine = '';
+
+            words.forEach(word => {
+              const testLine = currentLine ? `${currentLine} ${word}` : word;
+              const metrics = ctx.measureText(testLine);
+              if (metrics.width > maxWidth && currentLine) {
+                lines.push(currentLine);
+                currentLine = word;
+              } else {
+                currentLine = testLine;
+              }
+            });
+            if (currentLine) lines.push(currentLine);
+
+            const maxLines = 3;
+            const displayLines = lines.slice(0, maxLines);
+            if (lines.length > maxLines) {
+              const lastLine = displayLines[maxLines - 1];
+              displayLines[maxLines - 1] = lastLine.length > 10 ? lastLine.slice(0, 10) + '...' : lastLine + '...';
+            }
+
+            const lineHeight = fontSize * 1.2;
+            const totalTextHeight = displayLines.length * lineHeight;
+            const startY = bubble.y - totalTextHeight / 2 + fontSize / 2;
+
+            displayLines.forEach((line, i) => {
+              ctx.fillText(line, bubble.x, startY + i * lineHeight);
+            });
+
+            ctx.font = `${Math.max(8, displayRadius / 5)}px sans-serif`;
+            const volumeAlpha = theme === 'dark' ? 0.9 * textBrightness : 0.9;
+            ctx.fillStyle = theme === 'dark' ? `rgba(200, 200, 200, ${volumeAlpha * opacity})` : `rgba(60, 60, 60, ${0.9 * opacity})`;
+            const volumeY = startY + displayLines.length * lineHeight + Math.max(4, displayRadius / 10);
+            const cleanVolume = bubble.topic.searchVolumeRaw.replace(/"/g, '');
+            ctx.fillText(cleanVolume, bubble.x, volumeY);
+            ctx.globalAlpha = 1;
+          }
+        });
+        animationFrameRef.current = requestAnimationFrame(animate);
+        return;
+      }
 
       if (topics.length > maxDisplay) {
         bubblesRef.current.forEach((bubble) => {
@@ -475,7 +600,7 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, [topics, maxDisplay, theme]);
+  }, [topics, maxDisplay, theme, isPaused]);
 
   return (
     <div className="w-full h-full">
