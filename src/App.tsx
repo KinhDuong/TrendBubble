@@ -577,11 +577,15 @@ function HomePage() {
 
   return (
     <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'}`}>
-      <header className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-b py-4 md:py-6 px-3 md:px-6 shadow-sm`}>
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-3 mb-4">
-            <div className="flex-1 w-full">
-              <nav className="flex justify-center gap-4">
+      {isAdmin && (
+        <header className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-b py-4 md:py-6 px-3 md:px-6 shadow-sm`}>
+          <div className="max-w-7xl mx-auto">
+            <div className={`text-center mb-3 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} text-xs font-semibold uppercase tracking-wide`}>
+              Admin Menu
+            </div>
+            <div className="flex flex-col md:flex-row items-center justify-between gap-3 mb-4">
+              <div className="flex-1 w-full">
+                <nav className="flex justify-center gap-4">
                 <Link
                   to="/"
                   className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
@@ -646,6 +650,7 @@ function HomePage() {
           <FileUpload onUpload={handleFileUpload} theme={theme} />
         </div>
       </header>
+      )}
 
       <main className="p-2 md:p-6">
         {showBackups && (
