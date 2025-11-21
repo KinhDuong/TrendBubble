@@ -33,6 +33,8 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
   const nextIndexRef = useRef<number>(0);
   const pausedTimeRef = useRef<number>(0);
   const pauseStartRef = useRef<number | null>(null);
+  const initialLoadQueueRef = useRef<number[]>([]);
+  const lastSpawnTimeRef = useRef<number>(0);
 
   const bubbleLifetimes = [40000, 60000, 80000, 100000, 120000];
 
@@ -178,11 +180,12 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
     displayedIndicesRef.current.clear();
     const initialCount = Math.min(maxDisplay, topics.length);
     bubblesRef.current = [];
+    initialLoadQueueRef.current = [];
     for (let i = 0; i < initialCount; i++) {
-      displayedIndicesRef.current.add(i);
-      bubblesRef.current.push(createBubble(i, bubblesRef.current));
+      initialLoadQueueRef.current.push(i);
     }
     nextIndexRef.current = initialCount;
+    lastSpawnTimeRef.current = Date.now();
 
     const checkCollision = (b1: Bubble, b2: Bubble) => {
       const dx = b2.x - b1.x;
@@ -370,7 +373,17 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
         return;
       }
 
-      if (topics.length > maxDisplay) {
+      if (initialLoadQueueRef.current.length > 0) {
+        const spawnDelay = 100;
+        if (now - lastSpawnTimeRef.current >= spawnDelay) {
+          const nextTopicIndex = initialLoadQueueRef.current.shift();
+          if (nextTopicIndex !== undefined) {
+            displayedIndicesRef.current.add(nextTopicIndex);
+            bubblesRef.current.push(createBubble(nextTopicIndex, bubblesRef.current));
+            lastSpawnTimeRef.current = now;
+          }
+        }
+      } else if (topics.length > maxDisplay) {
         bubblesRef.current.forEach((bubble) => {
           if (!bubble.isPopping && !bubble.isSpawning && (now - bubble.createdAt) >= bubble.lifetime) {
             bubble.isPopping = true;
