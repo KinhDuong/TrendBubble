@@ -149,6 +149,7 @@ Deno.serve(async (req: Request) => {
             last_seen: now,
             url: trendsUrl || existing.url,
             pub_date: earliestPubDate,
+            source: 'google_trends',
           })
           .eq("id", existing.id);
         updatedTopicsCount++;
@@ -164,6 +165,7 @@ Deno.serve(async (req: Request) => {
           last_seen: now,
           url: trendsUrl,
           pub_date: pubDate,
+          source: 'google_trends',
         };
 
         if (pubDate) {

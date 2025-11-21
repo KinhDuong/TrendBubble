@@ -20,6 +20,7 @@ function HomePage() {
   const [maxBubbles, setMaxBubbles] = useState<number>(50);
   const [dateFilter, setDateFilter] = useState<'now' | 'all' | '24h' | 'week' | 'month' | 'year'>('now');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
+  const [sourceFilter, setSourceFilter] = useState<'all' | 'google_trends' | 'user_upload'>('all');
   const [categories, setCategories] = useState<string[]>([]);
   const [viewMode, setViewMode] = useState<'bubble' | 'list'>('bubble');
   const [loading, setLoading] = useState(true);
@@ -73,7 +74,7 @@ function HomePage() {
 
   useEffect(() => {
     loadTopics();
-  }, [dateFilter, categoryFilter]);
+  }, [dateFilter, categoryFilter, sourceFilter]);
 
   const loadThemePreference = async () => {
     try {
@@ -166,6 +167,10 @@ function HomePage() {
 
       if (categoryFilter !== 'all') {
         query = query.eq('category', categoryFilter);
+      }
+
+      if (sourceFilter !== 'all') {
+        query = query.eq('source', sourceFilter);
       }
 
       const { data, error } = await query.order('rank', { ascending: true });
@@ -359,7 +364,8 @@ function HomePage() {
             url: topic.url || existing.url,
             pub_date: earliestPubDate,
             category: topic.category || existing.category,
-            created_at: existing.created_at
+            created_at: existing.created_at,
+            source: 'user_upload'
           });
 
           historySnapshots.push({
@@ -379,7 +385,8 @@ function HomePage() {
             rank: index + 1,
             url: topic.url,
             pub_date: topic.pubDate,
-            category: topic.category
+            category: topic.category,
+            source: 'user_upload'
           });
         }
       }
@@ -792,6 +799,23 @@ function HomePage() {
                       <option value="week">Week</option>
                       <option value="month">Month</option>
                       <option value="year">Year</option>
+                    </select>
+                  </div>
+                  <div className={`hidden md:block w-px h-6 ${theme === 'dark' ? 'bg-gray-600' : 'bg-gray-300'}`}></div>
+                  <div className="flex items-center gap-2">
+                    <label htmlFor="sourceFilter" className="text-xs font-medium whitespace-nowrap">
+                      Source:
+                    </label>
+                    <select
+                      id="sourceFilter"
+                      value={sourceFilter}
+                      onChange={(e) => setSourceFilter(e.target.value as 'all' | 'google_trends' | 'user_upload')}
+                      className={`flex-1 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} border rounded px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                      aria-label="Filter trending topics by data source"
+                    >
+                      <option value="all">All</option>
+                      <option value="google_trends">Google Trends</option>
+                      <option value="user_upload">My Uploads</option>
                     </select>
                   </div>
                   <div className={`hidden md:block w-px h-6 ${theme === 'dark' ? 'bg-gray-600' : 'bg-gray-300'}`}></div>
