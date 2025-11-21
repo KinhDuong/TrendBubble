@@ -457,11 +457,11 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
       const densityRatio = totalBubbleArea / canvasArea;
 
       // Start shrinking when density exceeds 0.3 (30% coverage)
-      // Fully shrink to 80% at 0.5 (50% coverage)
+      // Fully shrink to 60% at 0.5 (50% coverage)
       let shrinkFactor = 1.0;
       if (densityRatio > 0.3) {
         const excessDensity = Math.min(densityRatio - 0.3, 0.2) / 0.2;
-        shrinkFactor = 1.0 - (excessDensity * 0.2); // Shrink up to 20%
+        shrinkFactor = 1.0 - (excessDensity * 0.4); // Shrink up to 40%
       }
 
       // Smoothly transition bubble sizes
