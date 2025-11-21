@@ -7,7 +7,6 @@ interface BubbleChartProps {
   theme: 'dark' | 'light';
   onBubbleTimingUpdate?: (nextPopTime: number | null, createdTime?: number, lifetime?: number) => void;
   isPaused?: boolean;
-  onSimilarSizesDetected?: (hasSimilarSizes: boolean) => void;
 }
 
 interface Bubble {
@@ -26,7 +25,7 @@ interface Bubble {
   spawnProgress?: number;
 }
 
-export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingUpdate, isPaused = false, onSimilarSizesDetected }: BubbleChartProps) {
+export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingUpdate, isPaused = false }: BubbleChartProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const bubblesRef = useRef<Bubble[]>([]);
   const animationFrameRef = useRef<number>();
@@ -110,27 +109,6 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
     const volumeRange = maxSearchVolume - minVolume;
     const hasHighVariance = volumeRange > medianVolume * 2;
 
-    // Check if 80% of bubbles are within a narrow size range
-    const calculateSizeVariance = () => {
-      const sortedVolumes = [...volumes];
-      const count80Percent = Math.floor(sortedVolumes.length * 0.8);
-      const topVolumes = sortedVolumes.slice(0, count80Percent);
-      const bottomOfTop80 = topVolumes[topVolumes.length - 1];
-      const topOfTop80 = topVolumes[0];
-      const range80 = topOfTop80 - bottomOfTop80;
-      const percentRange = range80 / (topOfTop80 || 1);
-
-      // If 80% of bubbles are within 20% of each other, consider them similar
-      return percentRange < 0.2;
-    };
-
-    const hasSimilarSizes = calculateSizeVariance();
-
-    // Notify parent component about similar sizes detection
-    if (onSimilarSizesDetected) {
-      onSimilarSizesDetected(hasSimilarSizes);
-    }
-
     const calculateBubbleSize = (searchVolume: number) => {
       const isMobile = window.innerWidth < 768;
       const displayCount = Math.min(maxDisplay, topics.length);
@@ -140,15 +118,8 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
 
       const exponentialScale = Math.pow(normalizedScale, 0.5);
 
-      let baseMin = (isMobile ? 18 : 40) * densityFactor;
-      let baseMax = (isMobile ? 60 : 120) * densityFactor;
-
-      // If 80% of bubbles are similar in size, reduce overall scale to prevent collisions
-      if (hasSimilarSizes) {
-        const reductionFactor = 0.65; // Reduce to 65% of original size
-        baseMin *= reductionFactor;
-        baseMax *= reductionFactor;
-      }
+      const baseMin = (isMobile ? 18 : 40) * densityFactor;
+      const baseMax = (isMobile ? 60 : 120) * densityFactor;
 
       const scaledSize = baseMin + exponentialScale * (baseMax - baseMin);
 
