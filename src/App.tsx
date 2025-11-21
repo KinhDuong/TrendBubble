@@ -17,7 +17,7 @@ function HomePage() {
   const location = useLocation();
   const [topics, setTopics] = useState<TrendingTopic[]>([]);
   const isMobile = window.innerWidth < 768;
-  const [maxBubbles, setMaxBubbles] = useState<number>(isMobile ? 40 : 60);
+  const [maxBubbles, setMaxBubbles] = useState<number>(50);
   const [dateFilter, setDateFilter] = useState<'now' | 'all' | '24h' | 'week' | 'month' | 'year'>('now');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [categories, setCategories] = useState<string[]>([]);
@@ -741,7 +741,7 @@ function HomePage() {
 
       <main role="main" aria-label="Trending topics visualization">
         {loading && (
-          <div className={`text-center py-8 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>Loading...</div>
+          <div className={`text-center py-8 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>Loading 50 bubbles...</div>
         )}
         {!loading && (
           <>
