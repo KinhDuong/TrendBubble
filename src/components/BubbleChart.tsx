@@ -114,15 +114,6 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
       const displayCount = Math.min(maxDisplay, topics.length);
       const densityFactor = Math.min(1, Math.sqrt(50 / displayCount));
 
-      // If volumes are too similar (within 20% range), use smaller uniform bubbles
-      const volumeRange = maxSearchVolume - minVolume;
-      const averageVolume = (maxSearchVolume + minVolume) / 2;
-      const isLowVariance = volumeRange < averageVolume * 0.2;
-
-      if (isLowVariance) {
-        return (isMobile ? 25 : 45) * densityFactor;
-      }
-
       const normalizedScale = (searchVolume - minVolume) / (maxSearchVolume - minVolume || 1);
 
       const exponentialScale = Math.pow(normalizedScale, 0.5);
