@@ -16,6 +16,7 @@ interface Bubble {
   vx: number;
   vy: number;
   radius: number;
+  baseRadius: number;
   color: string;
   createdAt: number;
   lifetime: number;
@@ -169,6 +170,7 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
         vx: (Math.random() - 0.5) * 0.25,
         vy: (Math.random() - 0.5) * 0.25,
         radius,
+        baseRadius: radius,
         color: getRandomColor(topicIndex),
         createdAt: Date.now(),
         lifetime: randomLifetime,
@@ -440,6 +442,34 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
           }
         }
       }
+
+      // Calculate density and adjust bubble sizes
+      const canvasDisplayWidth = canvas.width / dpr;
+      const canvasDisplayHeight = canvas.height / dpr;
+      const canvasArea = canvasDisplayWidth * canvasDisplayHeight;
+
+      // Calculate total bubble area
+      const totalBubbleArea = bubblesRef.current.reduce((sum, bubble) => {
+        return sum + Math.PI * bubble.baseRadius * bubble.baseRadius;
+      }, 0);
+
+      // Density ratio: how much of the canvas is covered by bubbles
+      const densityRatio = totalBubbleArea / canvasArea;
+
+      // Start shrinking when density exceeds 0.3 (30% coverage)
+      // Fully shrink to 80% at 0.5 (50% coverage)
+      let shrinkFactor = 1.0;
+      if (densityRatio > 0.3) {
+        const excessDensity = Math.min(densityRatio - 0.3, 0.2) / 0.2;
+        shrinkFactor = 1.0 - (excessDensity * 0.2); // Shrink up to 20%
+      }
+
+      // Smoothly transition bubble sizes
+      bubblesRef.current.forEach((bubble) => {
+        const targetRadius = bubble.baseRadius * shrinkFactor;
+        // Smooth transition: move 10% towards target each frame
+        bubble.radius += (targetRadius - bubble.radius) * 0.1;
+      });
 
       const bubblesToAdd: Bubble[] = [];
       // Update parent component with next bubble pop time
