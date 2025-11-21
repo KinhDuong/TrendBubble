@@ -790,7 +790,7 @@ function HomePage() {
                     <>
                       <div className="flex items-center gap-2">
                         <label htmlFor="maxBubbles" className="text-xs font-medium whitespace-nowrap">
-                          Max:
+                          Bubbles:
                         </label>
                         <select
                           id="maxBubbles"
