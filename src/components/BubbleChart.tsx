@@ -104,6 +104,23 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
     const volumeRange = maxSearchVolume - minVolume;
     const hasHighVariance = volumeRange > medianVolume * 2;
 
+    const checkSimilarSizes = () => {
+      if (volumes.length === 0) return false;
+      const sizeThreshold = volumeRange * 0.1;
+      let similarCount = 0;
+
+      for (let i = 0; i < volumes.length; i++) {
+        const diff = Math.abs(volumes[i] - medianVolume);
+        if (diff <= sizeThreshold) {
+          similarCount++;
+        }
+      }
+
+      return (similarCount / volumes.length) >= 0.8;
+    };
+
+    const needsStabilization = checkSimilarSizes();
+
     const calculateBubbleSize = (searchVolume: number) => {
       const isMobile = window.innerWidth < 768;
       const displayCount = Math.min(maxDisplay, topics.length);
@@ -111,11 +128,8 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
 
       const normalizedScale = (searchVolume - minVolume) / (maxSearchVolume - minVolume || 1);
 
-      const variance = volumeRange / (medianVolume || 1);
-      const lowVariance = variance < 0.5;
-
       let scaledValue;
-      if (lowVariance) {
+      if (needsStabilization) {
         const spreadFactor = 0.4;
         scaledValue = 0.5 + (normalizedScale - 0.5) * spreadFactor + (Math.random() * 0.15 - 0.075);
         scaledValue = Math.max(0.2, Math.min(0.8, scaledValue));
