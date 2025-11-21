@@ -104,23 +104,6 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
     const volumeRange = maxSearchVolume - minVolume;
     const hasHighVariance = volumeRange > medianVolume * 2;
 
-    const checkSimilarSizes = () => {
-      if (volumes.length === 0) return false;
-      const sizeThreshold = volumeRange * 0.1;
-      let similarCount = 0;
-
-      for (let i = 0; i < volumes.length; i++) {
-        const diff = Math.abs(volumes[i] - medianVolume);
-        if (diff <= sizeThreshold) {
-          similarCount++;
-        }
-      }
-
-      return (similarCount / volumes.length) >= 0.8;
-    };
-
-    const needsStabilization = checkSimilarSizes();
-
     const calculateBubbleSize = (searchVolume: number) => {
       const isMobile = window.innerWidth < 768;
       const displayCount = Math.min(maxDisplay, topics.length);
@@ -128,19 +111,12 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
 
       const normalizedScale = (searchVolume - minVolume) / (maxSearchVolume - minVolume || 1);
 
-      let scaledValue;
-      if (needsStabilization) {
-        const spreadFactor = 0.4;
-        scaledValue = 0.5 + (normalizedScale - 0.5) * spreadFactor + (Math.random() * 0.15 - 0.075);
-        scaledValue = Math.max(0.2, Math.min(0.8, scaledValue));
-      } else {
-        scaledValue = Math.pow(normalizedScale, 0.5);
-      }
+      const exponentialScale = Math.pow(normalizedScale, 0.5);
 
       const baseMin = (isMobile ? 18 : 40) * densityFactor;
       const baseMax = (isMobile ? 60 : 120) * densityFactor;
 
-      const scaledSize = baseMin + scaledValue * (baseMax - baseMin);
+      const scaledSize = baseMin + exponentialScale * (baseMax - baseMin);
 
       return Math.max(baseMin, scaledSize);
     };
@@ -185,8 +161,8 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
         topic,
         x,
         y,
-        vx: (Math.random() - 0.5) * 0.15,
-        vy: (Math.random() - 0.5) * 0.15,
+        vx: (Math.random() - 0.5) * 0.25,
+        vy: (Math.random() - 0.5) * 0.25,
         radius,
         color: getRandomColor(topicIndex),
         createdAt: Date.now(),
@@ -217,15 +193,7 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
       const dy = b2.y - b1.y;
       const distance = Math.sqrt(dx * dx + dy * dy);
 
-      if (distance === 0) {
-        const angle = Math.random() * Math.PI * 2;
-        const separationDist = (b1.radius + b2.radius) * 0.51;
-        b1.x -= Math.cos(angle) * separationDist * 0.5;
-        b1.y -= Math.sin(angle) * separationDist * 0.5;
-        b2.x += Math.cos(angle) * separationDist * 0.5;
-        b2.y += Math.sin(angle) * separationDist * 0.5;
-        return;
-      }
+      if (distance === 0) return;
 
       const minDist = b1.radius + b2.radius;
       const overlap = minDist - distance;
@@ -235,14 +203,11 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
       const nx = dx / distance;
       const ny = dy / distance;
 
-      const separationForce = overlap * 0.6;
-      const massRatio1 = b2.radius / (b1.radius + b2.radius);
-      const massRatio2 = b1.radius / (b1.radius + b2.radius);
-
-      b1.x -= nx * separationForce * massRatio1;
-      b1.y -= ny * separationForce * massRatio1;
-      b2.x += nx * separationForce * massRatio2;
-      b2.y += ny * separationForce * massRatio2;
+      const separationForce = overlap * 0.5;
+      b1.x -= nx * separationForce;
+      b1.y -= ny * separationForce;
+      b2.x += nx * separationForce;
+      b2.y += ny * separationForce;
 
       const relativeVelocityX = b1.vx - b2.vx;
       const relativeVelocityY = b1.vy - b2.vy;
@@ -250,12 +215,11 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
 
       if (speed < 0) return;
 
-      const restitution = 0.2;
-      const impulse = speed * restitution;
-      b1.vx -= impulse * nx * massRatio1;
-      b1.vy -= impulse * ny * massRatio1;
-      b2.vx += impulse * nx * massRatio2;
-      b2.vy += impulse * ny * massRatio2;
+      const impulse = speed * 0.3;
+      b1.vx -= impulse * nx;
+      b1.vy -= impulse * ny;
+      b2.vx += impulse * nx;
+      b2.vy += impulse * ny;
     };
 
     const animate = () => {
@@ -274,19 +238,15 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
       }
 
       bubblesRef.current.forEach((bubble) => {
-        const speedLimit = 0.8;
+        const speedLimit = 1.5;
         const currentSpeed = Math.sqrt(bubble.vx * bubble.vx + bubble.vy * bubble.vy);
         if (currentSpeed > speedLimit) {
           bubble.vx = (bubble.vx / currentSpeed) * speedLimit;
           bubble.vy = (bubble.vy / currentSpeed) * speedLimit;
         }
 
-        const damping = 0.96;
-        bubble.vx *= damping;
-        bubble.vy *= damping;
-
-        if (Math.abs(bubble.vx) < 0.01) bubble.vx = 0;
-        if (Math.abs(bubble.vy) < 0.01) bubble.vy = 0;
+        bubble.vx *= 0.998;
+        bubble.vy *= 0.998;
 
         if (bubble.isSpawning) {
           bubble.spawnProgress = Math.min((bubble.spawnProgress || 0) + 0.05, 1);
