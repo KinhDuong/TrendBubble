@@ -812,9 +812,6 @@ function HomePage() {
                     </>
                   )}
                   <div className="flex items-center gap-2">
-                    <label htmlFor="themeFilter" className="text-xs font-medium whitespace-nowrap">
-                      Style:
-                    </label>
                     <select
                       id="themeFilter"
                       value={theme}
