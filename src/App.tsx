@@ -748,6 +748,44 @@ function HomePage() {
             <nav className="flex justify-center mb-3 md:mb-4 px-3" aria-label="Trending topics filters">
               <div className={`w-full max-w-4xl ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} px-3 md:px-6 py-3 rounded-lg border shadow-sm overflow-x-auto`}>
                 <div className="flex md:flex-wrap items-center gap-3 md:gap-4 min-w-max md:min-w-0">
+                  <div className="flex items-center gap-2">
+                    <label htmlFor="dateFilter" className="text-xs font-medium whitespace-nowrap">
+                      Date:
+                    </label>
+                    <select
+                      id="dateFilter"
+                      value={dateFilter}
+                      onChange={(e) => setDateFilter(e.target.value as 'now' | 'all' | '24h' | 'week' | 'month' | 'year')}
+                      className={`flex-1 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} border rounded px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                      aria-label="Filter trending topics by date range"
+                    >
+                      <option value="now">Now</option>
+                      <option value="all">All Time</option>
+                      <option value="24h">24 Hours</option>
+                      <option value="week">Week</option>
+                      <option value="month">Month</option>
+                      <option value="year">Year</option>
+                    </select>
+                  </div>
+                  <div className={`hidden md:block w-px h-6 ${theme === 'dark' ? 'bg-gray-600' : 'bg-gray-300'}`}></div>
+                  <div className="flex items-center gap-2">
+                    <label htmlFor="categoryFilter" className="text-xs font-medium whitespace-nowrap">
+                      Category:
+                    </label>
+                    <select
+                      id="categoryFilter"
+                      value={categoryFilter}
+                      onChange={(e) => setCategoryFilter(e.target.value)}
+                      className={`flex-1 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} border rounded px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                      aria-label="Filter trending topics by category"
+                    >
+                      <option value="all">All</option>
+                      {categories.map(category => (
+                        <option key={category} value={category}>{category}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className={`hidden md:block w-px h-6 ${theme === 'dark' ? 'bg-gray-600' : 'bg-gray-300'}`}></div>
                   {viewMode === 'bubble' && (
                     <>
                       <div className="flex items-center gap-2">
@@ -773,43 +811,6 @@ function HomePage() {
                       <div className={`hidden md:block w-px h-6 ${theme === 'dark' ? 'bg-gray-600' : 'bg-gray-300'}`}></div>
                     </>
                   )}
-                  <div className="flex items-center gap-2">
-                    <label htmlFor="categoryFilter" className="text-xs font-medium whitespace-nowrap">
-                      Category:
-                    </label>
-                    <select
-                      id="categoryFilter"
-                      value={categoryFilter}
-                      onChange={(e) => setCategoryFilter(e.target.value)}
-                      className={`flex-1 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} border rounded px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500`}
-                      aria-label="Filter trending topics by category"
-                    >
-                      <option value="all">All</option>
-                      {categories.map(category => (
-                        <option key={category} value={category}>{category}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className={`hidden md:block w-px h-6 ${theme === 'dark' ? 'bg-gray-600' : 'bg-gray-300'}`}></div>
-                  <div className="flex items-center gap-2">
-                    <label htmlFor="dateFilter" className="text-xs font-medium whitespace-nowrap">
-                      Date:
-                    </label>
-                    <select
-                      id="dateFilter"
-                      value={dateFilter}
-                      onChange={(e) => setDateFilter(e.target.value as 'now' | 'all' | '24h' | 'week' | 'month' | 'year')}
-                      className={`flex-1 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} border rounded px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500`}
-                      aria-label="Filter trending topics by date range"
-                    >
-                      <option value="now">Now</option>
-                      <option value="all">All Time</option>
-                      <option value="24h">24 Hours</option>
-                      <option value="week">Week</option>
-                      <option value="month">Month</option>
-                      <option value="year">Year</option>
-                    </select>
-                  </div>
                   <div className={`hidden md:block w-px h-6 ${theme === 'dark' ? 'bg-gray-600' : 'bg-gray-300'}`}></div>
                   <div className="flex items-center gap-2">
                     <label htmlFor="themeFilter" className="text-xs font-medium whitespace-nowrap">
