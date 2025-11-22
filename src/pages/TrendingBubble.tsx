@@ -702,19 +702,24 @@ function TrendingBubble() {
           </div>
         )}
 
-        <div className="relative mb-3 md:mb-4">
-          <div className="text-center">
-            <h1 className="text-2xl md:text-3xl font-bold">Google Trending Topics</h1>
+        <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-b mb-3 md:mb-4`}>
+          <div className="max-w-7xl mx-auto px-4 md:px-6 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <TrendingUp size={32} className={`${theme === 'dark' ? 'text-blue-400' : 'text-blue-500'}`} />
+                <h1 className="text-xl md:text-2xl font-bold">Google Trending Topics</h1>
+              </div>
+              {!isAdmin && (
+                <button
+                  onClick={() => setShowLogin(true)}
+                  className={`${theme === 'dark' ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'} transition-colors`}
+                  title="Admin Login"
+                >
+                  <LogIn size={24} />
+                </button>
+              )}
+            </div>
           </div>
-          {!isAdmin && (
-            <button
-              onClick={() => setShowLogin(true)}
-              className={`absolute right-0 top-1/2 -translate-y-1/2 ${theme === 'dark' ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'} transition-colors`}
-              title="Admin Login"
-            >
-              <LogIn size={24} />
-            </button>
-          )}
         </div>
 
         {loading && (
