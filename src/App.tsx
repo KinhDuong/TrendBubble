@@ -814,7 +814,7 @@ function HomePage() {
         {!loading && (
           <>
             <nav className="flex justify-center mb-3 md:mb-4 px-3" aria-label="Trending topics filters">
-              <div className={`w-full max-w-4xl ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} px-3 md:px-6 py-3 rounded-lg border shadow-sm overflow-x-auto`}>
+              <div className={`w-full max-w-7xl ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} px-3 md:px-6 py-3 rounded-lg border shadow-sm overflow-x-auto`}>
                 <div className="flex md:flex-wrap items-center gap-3 md:gap-4 min-w-max md:min-w-0">
                   <div className="flex items-center gap-2">
                     <label htmlFor="dateFilter" className="text-xs font-medium whitespace-nowrap">
