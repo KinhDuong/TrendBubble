@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-do
 import BubbleChart from './components/BubbleChart';
 import FileUpload from './components/FileUpload';
 import Login from './components/Login';
+import Footer from './components/Footer';
 import TrendingBubble from './pages/TrendingBubble';
 import { TrendingTopic } from './types';
 import { supabase } from './lib/supabase';
@@ -1044,6 +1045,7 @@ function HomePage() {
           </>
         )}
       </main>
+      <Footer theme={theme} />
     </div>
   );
 }

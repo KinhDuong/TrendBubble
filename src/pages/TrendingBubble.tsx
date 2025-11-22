@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import BubbleChart from '../components/BubbleChart';
 import FileUpload from '../components/FileUpload';
 import Login from '../components/Login';
+import Footer from '../components/Footer';
 import { TrendingTopic } from '../types';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
@@ -945,6 +946,7 @@ function TrendingBubble() {
           </>
         )}
       </main>
+      <Footer theme={theme} />
     </div>
   );
 }
