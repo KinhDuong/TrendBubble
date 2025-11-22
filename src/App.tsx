@@ -785,10 +785,12 @@ function HomePage() {
         )}
 
         <header className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-b mb-3 md:mb-4`}>
-          <div className="max-w-7xl mx-auto px-4 md:px-6 py-4">
+          <div className="px-4 md:px-6 py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <TrendingUp size={32} className={`${theme === 'dark' ? 'text-blue-400' : 'text-blue-500'}`} />
+                <div className={`relative w-12 h-12 rounded-full ${theme === 'dark' ? 'bg-blue-500/20' : 'bg-blue-100'} flex items-center justify-center`}>
+                  <TrendingUp size={24} className={`${theme === 'dark' ? 'text-blue-400' : 'text-blue-500'}`} />
+                </div>
                 <h1 className="text-xl md:text-2xl font-bold">Google Trending Topics - Real-Time Search Trends</h1>
               </div>
               {!isAdmin && (
