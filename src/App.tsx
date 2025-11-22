@@ -831,10 +831,7 @@ function HomePage() {
                     </select>
                   </div>
                   <div className={`hidden md:block w-px h-6 ${theme === 'dark' ? 'bg-gray-600' : 'bg-gray-300'}`}></div>
-                  <div className="flex items-center gap-2">
-                    <label htmlFor="searchQuery" className="text-xs font-medium whitespace-nowrap">
-                      Search:
-                    </label>
+                  <div className="flex items-center">
                     <input
                       id="searchQuery"
                       type="text"
