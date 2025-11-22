@@ -4,7 +4,6 @@ import { supabase } from '../lib/supabase';
 export function useAuth() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
     checkAuth();
@@ -16,7 +15,6 @@ export function useAuth() {
         })();
       } else if (event === 'SIGNED_OUT') {
         setIsAdmin(false);
-        setUser(null);
         setIsLoading(false);
       }
     });
@@ -28,21 +26,18 @@ export function useAuth() {
 
   const checkAuth = async () => {
     try {
-      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      const { data: { user } } = await supabase.auth.getUser();
 
-      if (!currentUser) {
+      if (!user) {
         setIsAdmin(false);
-        setUser(null);
         setIsLoading(false);
         return;
       }
 
-      setUser(currentUser);
-
       const { data: adminData, error } = await supabase
         .from('admin_users')
         .select('id')
-        .eq('id', currentUser.id)
+        .eq('id', user.id)
         .maybeSingle();
 
       if (error) throw error;
@@ -59,8 +54,7 @@ export function useAuth() {
   const logout = async () => {
     await supabase.auth.signOut();
     setIsAdmin(false);
-    setUser(null);
   };
 
-  return { user, isAdmin, isLoading, logout };
+  return { isAdmin, isLoading, logout };
 }

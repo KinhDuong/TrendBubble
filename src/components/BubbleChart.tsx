@@ -3,7 +3,7 @@ import { TrendingTopic } from '../types';
 
 interface BubbleChartProps {
   topics: TrendingTopic[];
-  maxDisplay?: number;
+  maxDisplay: number;
   theme: 'dark' | 'light';
   onBubbleTimingUpdate?: (nextPopTime: number | null, createdTime?: number, lifetime?: number) => void;
 }
@@ -26,7 +26,7 @@ interface Bubble {
   isHovered?: boolean;
 }
 
-export default function BubbleChart({ topics, maxDisplay = 50, theme, onBubbleTimingUpdate }: BubbleChartProps) {
+export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingUpdate }: BubbleChartProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const bubblesRef = useRef<Bubble[]>([]);
   const animationFrameRef = useRef<number>();

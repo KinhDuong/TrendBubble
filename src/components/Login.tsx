@@ -3,12 +3,11 @@ import { LogIn, Loader2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 interface LoginProps {
-  onLogin?: () => void;
-  onClose?: () => void;
-  theme?: 'dark' | 'light';
+  onLogin: () => void;
+  theme: 'dark' | 'light';
 }
 
-export default function Login({ onLogin, onClose, theme = 'dark' }: LoginProps) {
+export default function Login({ onLogin, theme }: LoginProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -41,8 +40,7 @@ export default function Login({ onLogin, onClose, theme = 'dark' }: LoginProps) 
           throw new Error('Access denied. You are not authorized as an admin.');
         }
 
-        onLogin?.();
-        onClose?.();
+        onLogin();
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to login');
