@@ -3,8 +3,9 @@ import { Upload, Loader2 } from 'lucide-react';
 import { TrendingTopic } from '../types';
 
 interface FileUploadProps {
-  onUpload: (topics: TrendingTopic[]) => Promise<void>;
-  theme: 'dark' | 'light';
+  onUpload?: (topics: TrendingTopic[]) => Promise<void>;
+  onUploadSuccess?: () => void;
+  theme?: 'dark' | 'light';
 }
 
 const COMMON_CATEGORIES = [
@@ -21,7 +22,7 @@ const COMMON_CATEGORIES = [
   'Other'
 ];
 
-export default function FileUpload({ onUpload, theme }: FileUploadProps) {
+export default function FileUpload({ onUpload, onUploadSuccess, theme = 'dark' }: FileUploadProps) {
   const [fileName, setFileName] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [categorySearch, setCategorySearch] = useState('');
@@ -41,9 +42,14 @@ export default function FileUpload({ onUpload, theme }: FileUploadProps) {
           ...topic,
           category: selectedCategory || undefined
         }));
-        await onUpload(topicsWithCategory);
+        if (onUpload) {
+          await onUpload(topicsWithCategory);
+        }
+        onUploadSuccess?.();
         setIsUploading(false);
         setFileName('');
+        setSelectedCategory('');
+        setCategorySearch('');
       };
       reader.readAsText(file);
     }
