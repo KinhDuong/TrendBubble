@@ -23,6 +23,7 @@ function HomePage() {
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [sourceFilter, setSourceFilter] = useState<'all' | 'google_trends' | 'user_upload'>('all');
   const [categories, setCategories] = useState<string[]>([]);
+  const [sources, setSources] = useState<string[]>([]);
   const [viewMode, setViewMode] = useState<'bubble' | 'list'>('bubble');
   const [loading, setLoading] = useState(true);
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
@@ -204,7 +205,7 @@ function HomePage() {
     try {
       const { data, error } = await supabase
         .from('trending_topics')
-        .select('category')
+        .select('category, source')
         .not('category', 'is', null)
         .order('category');
 
@@ -213,6 +214,9 @@ function HomePage() {
       if (data) {
         const uniqueCategories = [...new Set(data.map(item => item.category).filter(Boolean))] as string[];
         setCategories(uniqueCategories);
+
+        const uniqueSources = [...new Set(data.map(item => item.source).filter(Boolean))] as string[];
+        setSources(uniqueSources);
       }
     } catch (error) {
       console.error('Error loading categories:', error);
