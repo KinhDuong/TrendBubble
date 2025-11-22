@@ -14,7 +14,7 @@ export default function Footer({ theme }: FooterProps) {
               Google Trending Topics
             </h3>
             <p className="text-sm">
-              Real-time tracking of trending search topics on Google with interactive visualizations and hourly updates.
+              Track real-time trending topics on Google with interactive visualization. Bubble size represents search volume. Auto-updates hourly.
             </p>
           </div>
 

@@ -705,9 +705,6 @@ function TrendingBubble() {
         <div className="relative mb-3 md:mb-4">
           <div className="text-center">
             <h1 className="text-2xl md:text-3xl font-bold">Google Trending Topics</h1>
-            <p className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'} text-xs md:text-sm mt-1 md:mt-2`}>
-              Bubble size represents search volume · Auto-updates hourly
-            </p>
           </div>
           {!isAdmin && (
             <button

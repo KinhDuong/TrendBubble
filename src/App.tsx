@@ -787,9 +787,6 @@ function HomePage() {
         <header className="relative mb-3 md:mb-4">
           <div className="text-center">
             <h1 className="text-2xl md:text-3xl font-bold">Google Trending Topics - Real-Time Search Trends</h1>
-            <p className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'} text-xs md:text-sm mt-1 md:mt-2`}>
-              Track real-time trending topics on Google with interactive visualization · Bubble size represents search volume · Auto-updates hourly
-            </p>
           </div>
           {!isAdmin && (
             <button
