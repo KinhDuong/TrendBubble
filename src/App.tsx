@@ -728,7 +728,7 @@ function HomePage() {
               <div className="relative w-12 h-12 flex-shrink-0 rounded-full bg-blue-500 flex items-center justify-center">
                 <TrendingUp size={24} className="text-white" />
               </div>
-              <h1 className="text-xl md:text-2xl font-bold">Google Trending Topics - Real-Time Search Trends</h1>
+              <h1 className="text-xl md:text-2xl font-bold text-white">Google Trending Topics - Real-Time Search Trends</h1>
             </div>
             {!isAdmin && (
               <button
