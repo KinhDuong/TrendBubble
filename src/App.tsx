@@ -7,7 +7,7 @@ import TrendingBubble from './pages/TrendingBubble';
 import { TrendingTopic } from './types';
 import { supabase } from './lib/supabase';
 import { useAuth } from './hooks/useAuth';
-import { LogOut, Home, TrendingUp, ArrowUpDown, ArrowUp, ArrowDown, LogIn } from 'lucide-react';
+import { LogOut, Home, TrendingUp, ArrowUpDown, ArrowUp, ArrowDown, LogIn, X } from 'lucide-react';
 
 type SortField = 'name' | 'category' | 'searchVolume' | 'rank' | 'pubDate' | 'createdAt';
 type SortDirection = 'asc' | 'desc';
@@ -888,7 +888,7 @@ function HomePage() {
                     </select>
                   </div>
                   <div className={`hidden md:block w-px h-6 ${theme === 'dark' ? 'bg-gray-600' : 'bg-gray-300'}`}></div>
-                  <div className="flex items-center">
+                  <div className="flex items-center gap-1">
                     <input
                       id="searchQuery"
                       type="text"
@@ -903,6 +903,18 @@ function HomePage() {
                       className={`flex-1 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'} border rounded px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[140px]`}
                       aria-label="Search trending topics"
                     />
+                    {searchQuery && (
+                      <button
+                        onClick={() => {
+                          setSearchQuery('');
+                          setViewMode('bubble');
+                        }}
+                        className={`p-1 ${theme === 'dark' ? 'hover:bg-gray-600' : 'hover:bg-gray-200'} rounded transition-colors`}
+                        aria-label="Clear search and return to bubble view"
+                      >
+                        <X size={14} />
+                      </button>
+                    )}
                   </div>
                   <div className={`hidden md:block w-px h-6 ${theme === 'dark' ? 'bg-gray-600' : 'bg-gray-300'}`}></div>
                   <button
