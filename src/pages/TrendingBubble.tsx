@@ -662,13 +662,13 @@ function TrendingBubble() {
       </div>
 
       {!loading && (
-        <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-b`}>
-          <div className="px-4 md:px-6 py-4">
+        <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}>
+          <div className="px-4 md:px-6 py-3">
             <div className="flex items-center justify-center">
-              <div className={`flex items-center gap-2 md:gap-4 ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} px-3 md:px-6 py-2 md:py-3 rounded-lg border shadow-sm`}>
+              <div className="flex items-center gap-2 md:gap-4">
                 {viewMode === 'bubble' && (
                   <>
-                    <label htmlFor="maxBubbles" className="text-xs md:text-sm font-medium">
+                    <label htmlFor="maxBubbles" className="text-xs md:text-sm font-medium text-white">
                       Max:
                     </label>
                     <select
@@ -688,7 +688,7 @@ function TrendingBubble() {
                     <div className={`w-px h-4 md:h-6 ${theme === 'dark' ? 'bg-gray-600' : 'bg-gray-300'}`}></div>
                   </>
                 )}
-                <label htmlFor="categoryFilter" className="text-xs md:text-sm font-medium">
+                <label htmlFor="categoryFilter" className="text-xs md:text-sm font-medium text-white">
                   Category:
                 </label>
                 <select
@@ -703,7 +703,7 @@ function TrendingBubble() {
                   ))}
                 </select>
                 <div className={`w-px h-4 md:h-6 ${theme === 'dark' ? 'bg-gray-600' : 'bg-gray-300'}`}></div>
-                <label htmlFor="dateFilter" className="text-xs md:text-sm font-medium">
+                <label htmlFor="dateFilter" className="text-xs md:text-sm font-medium text-white">
                   Date:
                 </label>
                 <select
@@ -720,7 +720,7 @@ function TrendingBubble() {
                   <option value="year">Year</option>
                 </select>
                 <div className={`w-px h-4 md:h-6 ${theme === 'dark' ? 'bg-gray-600' : 'bg-gray-300'}`}></div>
-                <label htmlFor="themeFilter" className="text-xs md:text-sm font-medium">
+                <label htmlFor="themeFilter" className="text-xs md:text-sm font-medium text-white">
                   Style:
                 </label>
                 <select

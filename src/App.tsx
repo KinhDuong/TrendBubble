@@ -745,13 +745,13 @@ function HomePage() {
       </header>
 
       {!loading && (
-        <nav className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-b`} aria-label="Trending topics filters">
-          <div className="px-4 md:px-6 py-4">
+        <nav className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`} aria-label="Trending topics filters">
+          <div className="px-4 md:px-6 py-3">
             <div className="flex items-center justify-center">
-              <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} px-3 md:px-6 py-3 rounded-lg border shadow-sm overflow-x-auto`}>
+              <div className="overflow-x-auto">
                 <div className="flex items-center gap-3 md:gap-4">
                   <div className="flex items-center gap-2">
-                    <label htmlFor="dateFilter" className="text-xs font-medium whitespace-nowrap">
+                    <label htmlFor="dateFilter" className="text-xs font-medium whitespace-nowrap text-white">
                       Trending:
                     </label>
                     <select
@@ -771,7 +771,7 @@ function HomePage() {
                   </div>
                   <div className={`hidden md:block w-px h-6 ${theme === 'dark' ? 'bg-gray-600' : 'bg-gray-300'}`}></div>
                   <div className="flex items-center gap-2">
-                    <label htmlFor="categoryFilter" className="text-xs font-medium whitespace-nowrap">
+                    <label htmlFor="categoryFilter" className="text-xs font-medium whitespace-nowrap text-white">
                       Category:
                     </label>
                     <select
@@ -791,7 +791,7 @@ function HomePage() {
                   {viewMode === 'bubble' && (
                     <>
                       <div className="flex items-center gap-2">
-                        <label htmlFor="maxBubbles" className="text-xs font-medium whitespace-nowrap">
+                        <label htmlFor="maxBubbles" className="text-xs font-medium whitespace-nowrap text-white">
                           Bubbles:
                         </label>
                         <select
