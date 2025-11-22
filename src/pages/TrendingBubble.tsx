@@ -643,7 +643,7 @@ function TrendingBubble() {
         <div className="px-4 md:px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="relative w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center">
+              <div className="relative w-12 h-12 flex-shrink-0 rounded-full bg-blue-500 flex items-center justify-center">
                 <TrendingUp size={24} className="text-white" />
               </div>
               <h1 className="text-xl md:text-2xl font-bold">Google Trending Topics</h1>
