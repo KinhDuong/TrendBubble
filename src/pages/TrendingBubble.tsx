@@ -563,7 +563,7 @@ function TrendingBubble() {
   }
 
   return (
-    <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'}`}>
+    <>
       {isAdmin && (
         <header className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-b py-4 md:py-6 px-3 md:px-6 shadow-sm`}>
           <div className="max-w-7xl mx-auto">
@@ -639,7 +639,29 @@ function TrendingBubble() {
       </header>
       )}
 
-      <main className="p-2 md:p-6">
+      <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-b mb-3 md:mb-4`}>
+        <div className="px-4 md:px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="relative w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center">
+                <TrendingUp size={24} className="text-white" />
+              </div>
+              <h1 className="text-xl md:text-2xl font-bold">Google Trending Topics</h1>
+            </div>
+            {!isAdmin && (
+              <button
+                onClick={() => setShowLogin(true)}
+                className={`${theme === 'dark' ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'} transition-colors`}
+                title="Admin Login"
+              >
+                <LogIn size={24} />
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'} p-2 md:p-6`}>
         {showBackups && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] overflow-hidden`}>
@@ -701,28 +723,6 @@ function TrendingBubble() {
             </div>
           </div>
         )}
-
-        <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-b mb-3 md:mb-4`}>
-          <div className="px-4 md:px-6 py-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="relative w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center">
-                  <TrendingUp size={24} className="text-white" />
-                </div>
-                <h1 className="text-xl md:text-2xl font-bold">Google Trending Topics</h1>
-              </div>
-              {!isAdmin && (
-                <button
-                  onClick={() => setShowLogin(true)}
-                  className={`${theme === 'dark' ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'} transition-colors`}
-                  title="Admin Login"
-                >
-                  <LogIn size={24} />
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
 
         {loading && (
           <div className={`text-center py-8 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>Loading...</div>
@@ -949,9 +949,9 @@ function TrendingBubble() {
             )}
           </>
         )}
-      </main>
+      </div>
       <Footer theme={theme} />
-    </div>
+    </>
   );
 }
 
