@@ -538,9 +538,14 @@ function HomePage() {
     if (!searchQuery.trim()) return topics;
 
     const query = searchQuery.toLowerCase().trim();
-    return topics.filter(topic =>
+    const filtered = topics.filter(topic =>
       topic.name.toLowerCase().includes(query)
     );
+    console.log('Search query:', query);
+    console.log('Total topics:', topics.length);
+    console.log('Filtered topics:', filtered.length);
+    console.log('Sample topics:', topics.slice(0, 3).map(t => t.name));
+    return filtered;
   };
 
   const getSortedTopics = () => {
