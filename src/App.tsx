@@ -541,10 +541,6 @@ function HomePage() {
     const filtered = topics.filter(topic =>
       topic.name.toLowerCase().includes(query)
     );
-    console.log('Search query:', query);
-    console.log('Total topics:', topics.length);
-    console.log('Filtered topics:', filtered.length);
-    console.log('Sample topics:', topics.slice(0, 3).map(t => t.name));
     return filtered;
   };
 
@@ -897,7 +893,12 @@ function HomePage() {
                       id="searchQuery"
                       type="text"
                       value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onChange={(e) => {
+                        setSearchQuery(e.target.value);
+                        if (e.target.value.trim()) {
+                          setViewMode('list');
+                        }
+                      }}
                       placeholder="Search bubbles..."
                       className={`flex-1 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'} border rounded px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[140px]`}
                       aria-label="Search trending topics"
@@ -948,7 +949,7 @@ function HomePage() {
             </nav>
             {topics.length > 0 && (
               viewMode === 'bubble' ? (
-                <BubbleChart topics={getFilteredTopics()} maxDisplay={maxBubbles} theme={theme} onBubbleTimingUpdate={handleBubbleTimingUpdate} />
+                <BubbleChart topics={topics} maxDisplay={maxBubbles} theme={theme} onBubbleTimingUpdate={handleBubbleTimingUpdate} />
               ) : (
               <div className="max-w-6xl mx-auto">
                 <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-lg border overflow-hidden shadow-sm`}>
