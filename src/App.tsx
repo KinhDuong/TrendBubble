@@ -38,6 +38,7 @@ function HomePage() {
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const [uploadMessage, setUploadMessage] = useState<string | null>(null);
   const [showLogin, setShowLogin] = useState(false);
+  const [searchQuery, setSearchQuery] = useState<string>('');
 
   useEffect(() => {
     loadTopics();
@@ -533,8 +534,18 @@ function HomePage() {
     }
   };
 
+  const getFilteredTopics = () => {
+    if (!searchQuery.trim()) return topics;
+
+    const query = searchQuery.toLowerCase().trim();
+    return topics.filter(topic =>
+      topic.name.toLowerCase().includes(query)
+    );
+  };
+
   const getSortedTopics = () => {
-    const sorted = [...topics].sort((a, b) => {
+    const filtered = getFilteredTopics();
+    const sorted = [...filtered].sort((a, b) => {
       let aValue: any;
       let bValue: any;
 
@@ -818,6 +829,21 @@ function HomePage() {
                       <option value="month">Month</option>
                       <option value="year">Year</option>
                     </select>
+                  </div>
+                  <div className={`hidden md:block w-px h-6 ${theme === 'dark' ? 'bg-gray-600' : 'bg-gray-300'}`}></div>
+                  <div className="flex items-center gap-2">
+                    <label htmlFor="searchQuery" className="text-xs font-medium whitespace-nowrap">
+                      Search:
+                    </label>
+                    <input
+                      id="searchQuery"
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Search bubbles..."
+                      className={`flex-1 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'} border rounded px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[140px]`}
+                      aria-label="Search trending topics"
+                    />
                   </div>
                   <div className={`hidden md:block w-px h-6 ${theme === 'dark' ? 'bg-gray-600' : 'bg-gray-300'}`}></div>
                   <div className="flex items-center gap-2">
