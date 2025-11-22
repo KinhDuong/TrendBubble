@@ -661,75 +661,10 @@ function TrendingBubble() {
         </div>
       </div>
 
-      <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'} p-2 md:p-6`}>
-        {showBackups && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] overflow-hidden`}>
-              <div className={`${theme === 'dark' ? 'bg-gray-700 border-gray-600' : 'bg-gray-100 border-gray-200'} border-b px-6 py-4 flex justify-between items-center`}>
-                <h2 className="text-xl font-bold">Restore Backup</h2>
-                <button
-                  onClick={() => setShowBackups(false)}
-                  className={`${theme === 'dark' ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'} text-2xl leading-none`}
-                >
-                  ×
-                </button>
-              </div>
-              <div className="overflow-y-auto max-h-[calc(80vh-80px)]">
-                {backups.length === 0 ? (
-                  <div className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} text-center py-8`}>
-                    No backups found
-                  </div>
-                ) : (
-                  <div className={`divide-y ${theme === 'dark' ? 'divide-gray-700' : 'divide-gray-200'}`}>
-                    {backups.map((backup) => (
-                      <div key={backup.id} className={`px-6 py-4 flex justify-between items-center ${theme === 'dark' ? 'hover:bg-gray-750' : 'hover:bg-gray-50'}`}>
-                        <div>
-                          <div className="font-medium">{backup.name}</div>
-                          <div className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                            {new Date(backup.created_at).toLocaleString()}
-                          </div>
-                        </div>
-                        <button
-                          onClick={() => restoreBackup(backup)}
-                          className={`px-4 py-2 ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'} rounded-lg transition-colors text-sm font-medium text-white`}
-                        >
-                          Restore
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {uploadMessage && (
-          <div className="fixed top-4 right-4 z-50 max-w-md">
-            <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border rounded-lg shadow-xl p-4`}>
-              <div className="flex justify-between items-start gap-3">
-                <div className="flex-1">
-                  <div className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'} whitespace-pre-line`}>
-                    {uploadMessage}
-                  </div>
-                </div>
-                <button
-                  onClick={() => setUploadMessage(null)}
-                  className={`${theme === 'dark' ? 'text-gray-400 hover:text-white' : 'text-gray-500 hover:text-gray-900'} text-xl leading-none flex-shrink-0`}
-                >
-                  ×
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {loading && (
-          <div className={`text-center py-8 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>Loading...</div>
-        )}
-        {!loading && (
-          <>
-            <div className="flex justify-center mb-3 md:mb-4">
+      {!loading && (
+        <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-b`}>
+          <div className="px-4 md:px-6 py-4">
+            <div className="flex items-center justify-center">
               <div className={`flex items-center gap-2 md:gap-4 ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} px-3 md:px-6 py-2 md:py-3 rounded-lg border shadow-sm`}>
                 {viewMode === 'bubble' && (
                   <>
@@ -869,6 +804,78 @@ function TrendingBubble() {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'} p-2 md:p-6`}>
+        {showBackups && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] overflow-hidden`}>
+              <div className={`${theme === 'dark' ? 'bg-gray-700 border-gray-600' : 'bg-gray-100 border-gray-200'} border-b px-6 py-4 flex justify-between items-center`}>
+                <h2 className="text-xl font-bold">Restore Backup</h2>
+                <button
+                  onClick={() => setShowBackups(false)}
+                  className={`${theme === 'dark' ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'} text-2xl leading-none`}
+                >
+                  ×
+                </button>
+              </div>
+              <div className="overflow-y-auto max-h-[calc(80vh-80px)]">
+                {backups.length === 0 ? (
+                  <div className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} text-center py-8`}>
+                    No backups found
+                  </div>
+                ) : (
+                  <div className={`divide-y ${theme === 'dark' ? 'divide-gray-700' : 'divide-gray-200'}`}>
+                    {backups.map((backup) => (
+                      <div key={backup.id} className={`px-6 py-4 flex justify-between items-center ${theme === 'dark' ? 'hover:bg-gray-750' : 'hover:bg-gray-50'}`}>
+                        <div>
+                          <div className="font-medium">{backup.name}</div>
+                          <div className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                            {new Date(backup.created_at).toLocaleString()}
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => restoreBackup(backup)}
+                          className={`px-4 py-2 ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'} rounded-lg transition-colors text-sm font-medium text-white`}
+                        >
+                          Restore
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {uploadMessage && (
+          <div className="fixed top-4 right-4 z-50 max-w-md">
+            <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border rounded-lg shadow-xl p-4`}>
+              <div className="flex justify-between items-start gap-3">
+                <div className="flex-1">
+                  <div className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'} whitespace-pre-line`}>
+                    {uploadMessage}
+                  </div>
+                </div>
+                <button
+                  onClick={() => setUploadMessage(null)}
+                  className={`${theme === 'dark' ? 'text-gray-400 hover:text-white' : 'text-gray-500 hover:text-gray-900'} text-xl leading-none flex-shrink-0`}
+                >
+                  ×
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {loading && (
+          <div className={`text-center py-8 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>Loading...</div>
+        )}
+        {!loading && (
+          <>
             {topics.length > 0 && (
               viewMode === 'bubble' ? (
                 <BubbleChart topics={topics} maxDisplay={maxBubbles} theme={theme} onBubbleTimingUpdate={handleBubbleTimingUpdate} isPaused={isPaused} />
