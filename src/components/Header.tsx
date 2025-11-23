@@ -1,4 +1,4 @@
-import { LogIn } from 'lucide-react';
+import { TrendingUp, LogIn } from 'lucide-react';
 
 interface HeaderProps {
   theme: 'dark' | 'light';
@@ -13,12 +13,10 @@ export default function Header({ theme, isAdmin, onLoginClick, title = 'Google T
       <div className="px-4 md:px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="relative w-12 h-12 flex-shrink-0 rounded-full shadow-lg border-4 border-gray-900 overflow-hidden">
+            <div className="relative w-12 h-12 flex-shrink-0 rounded-full shadow-lg border-4 border-gray-900 overflow-hidden flex items-center justify-center">
               <div className="absolute inset-0 bg-gradient-to-br from-blue-300 via-blue-400 to-blue-500"></div>
               <div className="absolute inset-0 bg-gradient-to-tl from-blue-400 via-blue-500 to-blue-600 opacity-60"></div>
-              <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-white opacity-70"></div>
-              <div className="absolute top-4 left-3 w-2 h-2 rounded-full bg-white/30"></div>
-              <div className="absolute bottom-4 left-3 w-2 h-3 bg-white/40 rounded-sm transform rotate-12"></div>
+              <TrendingUp size={24} className="text-white relative z-10" />
             </div>
             <h1 className="text-xl md:text-2xl font-bold text-white">{title}</h1>
           </div>
