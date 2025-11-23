@@ -1066,10 +1066,53 @@ function HomePage() {
         )}
         {!loading && (
           <>
-            {topics.length > 0 && (
-              viewMode === 'bubble' ? (
+            {topics.length > 0 && viewMode === 'bubble' && (
+              <>
                 <BubbleChart topics={topics} maxDisplay={maxBubbles} theme={theme} onBubbleTimingUpdate={handleBubbleTimingUpdate} />
-              ) : (
+
+                <div className="max-w-7xl mx-auto mt-8 mb-8">
+                  <h2 className={`text-2xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                    Top 10 Trending
+                  </h2>
+                  <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-lg border overflow-hidden shadow-sm`}>
+                    <div className={`divide-y ${theme === 'dark' ? 'divide-gray-700' : 'divide-gray-200'}`}>
+                      {[...topics]
+                        .sort((a, b) => b.searchVolume - a.searchVolume)
+                        .slice(0, 10)
+                        .map((topic, index) => (
+                          <div key={index} className={`px-6 py-4 flex items-center gap-4 ${theme === 'dark' ? 'hover:bg-gray-750' : 'hover:bg-gray-50'} transition-colors`}>
+                            <div className={`text-3xl font-bold ${theme === 'dark' ? 'text-gray-600' : 'text-gray-300'} w-12 text-center`}>
+                              {index + 1}
+                            </div>
+                            <div className="flex-1">
+                              <div className="font-semibold text-lg mb-1">{topic.name.replace(/"/g, '')}</div>
+                              <div className="flex flex-wrap items-center gap-3 text-sm">
+                                <span className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                                  {topic.searchVolumeRaw.replace(/"/g, '')} searches
+                                </span>
+                                <span className={`px-2 py-0.5 rounded text-xs ${topic.source === 'user_upload' ? (theme === 'dark' ? 'bg-green-900/30 text-green-400' : 'bg-green-100 text-green-700') : (theme === 'dark' ? 'bg-blue-900/30 text-blue-400' : 'bg-blue-100 text-blue-700')}`}>
+                                  {(() => {
+                                    const found = sources.find(s => s.value === topic.source);
+                                    if (found) return found.label;
+                                    if (topic.source) return topic.source.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+                                    return '-';
+                                  })()}
+                                </span>
+                                {topic.category && (
+                                  <span className={`px-2 py-0.5 rounded text-xs ${theme === 'dark' ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-700'}`}>
+                                    {topic.category}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
+            {topics.length > 0 && viewMode === 'list' && (
               <div className="max-w-7xl mx-auto">
                 <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-lg border overflow-hidden shadow-sm`}>
                   <div className={`hidden md:grid grid-cols-5 gap-4 px-6 py-4 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'} font-semibold text-sm`}>
@@ -1165,7 +1208,6 @@ function HomePage() {
                   </div>
                 </div>
               </div>
-              )
             )}
           </>
         )}
