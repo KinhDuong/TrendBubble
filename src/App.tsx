@@ -745,7 +745,7 @@ function HomePage() {
               Add Source
             </button>
             <div className="flex items-center gap-2">
-              <label htmlFor="adminSourceFilter" className="text-xs font-medium whitespace-nowrap">
+              <label htmlFor="adminSourceFilter" className={`text-xs font-medium whitespace-nowrap ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                 Source:
               </label>
               <select
@@ -766,7 +766,7 @@ function HomePage() {
             >
               Add Category
             </button>
-            <FileUpload onUpload={handleFileUpload} theme={theme} />
+            <FileUpload onUpload={handleFileUpload} theme={theme} sourceFilter={sourceFilter} />
           </div>
         </div>
       </header>

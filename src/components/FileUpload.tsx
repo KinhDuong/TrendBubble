@@ -5,6 +5,7 @@ import { TrendingTopic } from '../types';
 interface FileUploadProps {
   onUpload: (topics: TrendingTopic[]) => Promise<void>;
   theme: 'dark' | 'light';
+  sourceFilter: string;
 }
 
 const COMMON_CATEGORIES = [
@@ -21,7 +22,7 @@ const COMMON_CATEGORIES = [
   'Other'
 ];
 
-export default function FileUpload({ onUpload, theme }: FileUploadProps) {
+export default function FileUpload({ onUpload, theme, sourceFilter }: FileUploadProps) {
   const [fileName, setFileName] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [categorySearch, setCategorySearch] = useState('');
@@ -31,6 +32,11 @@ export default function FileUpload({ onUpload, theme }: FileUploadProps) {
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      if (sourceFilter === 'all') {
+        alert('Please select a specific source before uploading a CSV file.');
+        event.target.value = '';
+        return;
+      }
       setFileName(file.name);
       setIsUploading(true);
       const reader = new FileReader();
