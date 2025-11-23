@@ -672,12 +672,13 @@ function HomePage() {
         return;
       }
 
-      alert(`Page created successfully! Visit ${pageUrl}`);
       setNewPageUrl('');
       setNewPageSource('all');
       setNewPageMetaTitle('');
       setNewPageMetaDescription('');
       setShowCreatePage(false);
+      await loadLatestPages();
+      alert(`Page created successfully! Visit ${pageUrl}`);
     } catch (error) {
       console.error('Error creating page:', error);
       alert('Failed to create page');
