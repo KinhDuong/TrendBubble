@@ -738,6 +738,12 @@ function HomePage() {
             </div>
           </div>
           <div className="flex flex-col md:flex-row items-start md:items-center gap-3 w-full">
+            <button
+              onClick={() => setShowAddSource(true)}
+              className={`px-3 py-1 ${theme === 'dark' ? 'bg-teal-600 hover:bg-teal-700' : 'bg-teal-500 hover:bg-teal-600'} rounded transition-colors text-xs font-medium text-white`}
+            >
+              Add Source
+            </button>
             <div className="flex items-center gap-2">
               <label htmlFor="adminSourceFilter" className="text-xs font-medium whitespace-nowrap">
                 Source:
@@ -753,22 +759,13 @@ function HomePage() {
                   <option key={source.value} value={source.value}>{source.label}</option>
                 ))}
               </select>
-              <button
-                onClick={() => setShowAddSource(true)}
-                className={`px-2 py-1 ${theme === 'dark' ? 'bg-teal-600 hover:bg-teal-700' : 'bg-teal-500 hover:bg-teal-600'} rounded transition-colors text-xs font-medium text-white`}
-                title="Add new source"
-              >
-                +
-              </button>
             </div>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setShowAddCategory(true)}
-                className={`px-3 py-1 ${theme === 'dark' ? 'bg-teal-600 hover:bg-teal-700' : 'bg-teal-500 hover:bg-teal-600'} rounded transition-colors text-xs font-medium text-white`}
-              >
-                Add Category
-              </button>
-            </div>
+            <button
+              onClick={() => setShowAddCategory(true)}
+              className={`px-3 py-1 ${theme === 'dark' ? 'bg-teal-600 hover:bg-teal-700' : 'bg-teal-500 hover:bg-teal-600'} rounded transition-colors text-xs font-medium text-white`}
+            >
+              Add Category
+            </button>
             <FileUpload onUpload={handleFileUpload} theme={theme} />
           </div>
         </div>
