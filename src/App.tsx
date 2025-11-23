@@ -42,6 +42,16 @@ function HomePage() {
   const [uploadMessage, setUploadMessage] = useState<string | null>(null);
   const [showLogin, setShowLogin] = useState(false);
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [showAddCategory, setShowAddCategory] = useState(false);
+  const [newCategory, setNewCategory] = useState<string>('');
+  const [showAddSource, setShowAddSource] = useState(false);
+  const [newSourceValue, setNewSourceValue] = useState<string>('');
+  const [newSourceLabel, setNewSourceLabel] = useState<string>('');
+  const [sources, setSources] = useState<Array<{value: string, label: string}>>([
+    { value: 'all', label: 'All' },
+    { value: 'google_trends', label: 'Google Trends' },
+    { value: 'user_upload', label: 'My Uploads' }
+  ]);
 
   useEffect(() => {
     loadTopics();
@@ -537,6 +547,33 @@ function HomePage() {
     }
   };
 
+  const handleAddCategory = async () => {
+    if (!newCategory.trim()) return;
+
+    const trimmedCategory = newCategory.trim();
+    if (!categories.includes(trimmedCategory)) {
+      setCategories([...categories, trimmedCategory].sort());
+    }
+
+    setNewCategory('');
+    setShowAddCategory(false);
+  };
+
+  const handleAddSource = async () => {
+    if (!newSourceValue.trim() || !newSourceLabel.trim()) return;
+
+    const trimmedValue = newSourceValue.trim().toLowerCase().replace(/\s+/g, '_');
+    const trimmedLabel = newSourceLabel.trim();
+
+    if (!sources.find(s => s.value === trimmedValue)) {
+      setSources([...sources, { value: trimmedValue, label: trimmedLabel }]);
+    }
+
+    setNewSourceValue('');
+    setNewSourceLabel('');
+    setShowAddSource(false);
+  };
+
   const getFilteredTopics = () => {
     if (!searchQuery.trim()) return topics;
 
@@ -708,14 +745,29 @@ function HomePage() {
               <select
                 id="adminSourceFilter"
                 value={sourceFilter}
-                onChange={(e) => setSourceFilter(e.target.value as 'all' | 'google_trends' | 'user_upload')}
+                onChange={(e) => setSourceFilter(e.target.value as any)}
                 className={`${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} border rounded px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500`}
                 aria-label="Filter trending topics by data source"
               >
-                <option value="all">All</option>
-                <option value="google_trends">Google Trends</option>
-                <option value="user_upload">My Uploads</option>
+                {sources.map(source => (
+                  <option key={source.value} value={source.value}>{source.label}</option>
+                ))}
               </select>
+              <button
+                onClick={() => setShowAddSource(true)}
+                className={`px-2 py-1 ${theme === 'dark' ? 'bg-teal-600 hover:bg-teal-700' : 'bg-teal-500 hover:bg-teal-600'} rounded transition-colors text-xs font-medium text-white`}
+                title="Add new source"
+              >
+                +
+              </button>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setShowAddCategory(true)}
+                className={`px-3 py-1 ${theme === 'dark' ? 'bg-teal-600 hover:bg-teal-700' : 'bg-teal-500 hover:bg-teal-600'} rounded transition-colors text-xs font-medium text-white`}
+              >
+                Add Category
+              </button>
             </div>
             <FileUpload onUpload={handleFileUpload} theme={theme} />
           </div>
@@ -812,6 +864,133 @@ function HomePage() {
                 >
                   ×
                 </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {showAddCategory && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-xl max-w-md w-full`}>
+              <div className={`${theme === 'dark' ? 'bg-gray-700 border-gray-600' : 'bg-gray-100 border-gray-200'} border-b px-6 py-4 flex justify-between items-center`}>
+                <h2 className="text-xl font-bold">Add New Category</h2>
+                <button
+                  onClick={() => {
+                    setShowAddCategory(false);
+                    setNewCategory('');
+                  }}
+                  className={`${theme === 'dark' ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'} text-2xl leading-none`}
+                >
+                  ×
+                </button>
+              </div>
+              <div className="p-6">
+                <div className="space-y-4">
+                  <div>
+                    <label htmlFor="newCategory" className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                      Category Name
+                    </label>
+                    <input
+                      id="newCategory"
+                      type="text"
+                      value={newCategory}
+                      onChange={(e) => setNewCategory(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleAddCategory()}
+                      placeholder="e.g., Technology, Sports, Entertainment"
+                      className={`w-full ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'} border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                      autoFocus
+                    />
+                  </div>
+                  <div className="flex justify-end gap-3">
+                    <button
+                      onClick={() => {
+                        setShowAddCategory(false);
+                        setNewCategory('');
+                      }}
+                      className={`px-4 py-2 ${theme === 'dark' ? 'bg-gray-600 hover:bg-gray-700' : 'bg-gray-300 hover:bg-gray-400'} rounded-lg transition-colors text-sm font-medium`}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleAddCategory}
+                      disabled={!newCategory.trim()}
+                      className={`px-4 py-2 ${theme === 'dark' ? 'bg-teal-600 hover:bg-teal-700 disabled:bg-gray-600' : 'bg-teal-500 hover:bg-teal-600 disabled:bg-gray-300'} disabled:cursor-not-allowed rounded-lg transition-colors text-sm font-medium text-white`}
+                    >
+                      Add Category
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {showAddSource && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-xl max-w-md w-full`}>
+              <div className={`${theme === 'dark' ? 'bg-gray-700 border-gray-600' : 'bg-gray-100 border-gray-200'} border-b px-6 py-4 flex justify-between items-center`}>
+                <h2 className="text-xl font-bold">Add New Source</h2>
+                <button
+                  onClick={() => {
+                    setShowAddSource(false);
+                    setNewSourceValue('');
+                    setNewSourceLabel('');
+                  }}
+                  className={`${theme === 'dark' ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'} text-2xl leading-none`}
+                >
+                  ×
+                </button>
+              </div>
+              <div className="p-6">
+                <div className="space-y-4">
+                  <div>
+                    <label htmlFor="newSourceLabel" className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                      Display Name
+                    </label>
+                    <input
+                      id="newSourceLabel"
+                      type="text"
+                      value={newSourceLabel}
+                      onChange={(e) => setNewSourceLabel(e.target.value)}
+                      placeholder="e.g., Twitter Trends"
+                      className={`w-full ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'} border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                      autoFocus
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="newSourceValue" className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                      Internal Value (lowercase, no spaces)
+                    </label>
+                    <input
+                      id="newSourceValue"
+                      type="text"
+                      value={newSourceValue}
+                      onChange={(e) => setNewSourceValue(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleAddSource()}
+                      placeholder="e.g., twitter_trends"
+                      className={`w-full ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'} border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                    />
+                  </div>
+                  <div className="flex justify-end gap-3">
+                    <button
+                      onClick={() => {
+                        setShowAddSource(false);
+                        setNewSourceValue('');
+                        setNewSourceLabel('');
+                      }}
+                      className={`px-4 py-2 ${theme === 'dark' ? 'bg-gray-600 hover:bg-gray-700' : 'bg-gray-300 hover:bg-gray-400'} rounded-lg transition-colors text-sm font-medium`}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleAddSource}
+                      disabled={!newSourceValue.trim() || !newSourceLabel.trim()}
+                      className={`px-4 py-2 ${theme === 'dark' ? 'bg-teal-600 hover:bg-teal-700 disabled:bg-gray-600' : 'bg-teal-500 hover:bg-teal-600 disabled:bg-gray-300'} disabled:cursor-not-allowed rounded-lg transition-colors text-sm font-medium text-white`}
+                    >
+                      Add Source
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
