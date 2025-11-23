@@ -114,9 +114,12 @@ export default function FileUpload({ onUpload, theme, sourceFilter }: FileUpload
     const startedIndex = headers.findIndex(h => h.includes('started'));
 
     const parseSearchVolumeForSize = (volumeStr: string): number => {
-      const cleanStr = volumeStr.replace(/[^0-9.MKmk+]/g, '').replace(/\+/g, '');
+      const cleanStr = volumeStr.replace(/[^0-9.MKBmkb+]/g, '').replace(/\+/g, '');
 
-      if (cleanStr.includes('M') || cleanStr.includes('m')) {
+      if (cleanStr.includes('B') || cleanStr.includes('b')) {
+        const num = parseFloat(cleanStr.replace(/[Bb]/g, ''));
+        return Math.floor(num * 1000000000);
+      } else if (cleanStr.includes('M') || cleanStr.includes('m')) {
         const num = parseFloat(cleanStr.replace(/[Mm]/g, ''));
         return Math.floor(num * 1000000);
       } else if (cleanStr.includes('K') || cleanStr.includes('k')) {
