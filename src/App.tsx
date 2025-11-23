@@ -56,6 +56,7 @@ function HomePage() {
   const [newPageMetaDescription, setNewPageMetaDescription] = useState<string>('');
   const [showAllPages, setShowAllPages] = useState(false);
   const [allPages, setAllPages] = useState<any[]>([]);
+  const [latestPages, setLatestPages] = useState<any[]>([]);
   const [sources, setSources] = useState<Array<{value: string, label: string}>>([
     { value: 'all', label: 'All' },
     { value: 'google_trends', label: 'Google Trends' },
@@ -67,6 +68,7 @@ function HomePage() {
     loadThemePreference();
     loadCategories();
     loadSources();
+    loadLatestPages();
     updateCountdown();
     const interval = setInterval(updateCountdown, 1000);
     return () => clearInterval(interval);
@@ -713,9 +715,26 @@ function HomePage() {
       if (error) throw error;
 
       await loadAllPages();
+      await loadLatestPages();
     } catch (error) {
       console.error('Error deleting page:', error);
       alert('Failed to delete page');
+    }
+  };
+
+  const loadLatestPages = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('pages')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      if (error) throw error;
+
+      setLatestPages(data || []);
+    } catch (error) {
+      console.error('Error loading latest pages:', error);
     }
   };
 
@@ -1446,6 +1465,54 @@ function HomePage() {
                       ))}
                   </ol>
                 </section>
+
+                {latestPages.length > 0 && (
+                  <section className="max-w-7xl mx-auto mt-8 mb-0 md:mb-8" aria-labelledby="latest-pages-heading">
+                    <h2 id="latest-pages-heading" className={`text-2xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                      Latest
+                    </h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {latestPages.map((page) => {
+                        const sourceInfo = sources.find(s => s.value === page.source);
+                        return (
+                          <a
+                            key={page.id}
+                            href={page.page_url}
+                            className={`group block ${theme === 'dark' ? 'bg-gray-800 hover:bg-gray-750' : 'bg-white hover:bg-gray-50'} rounded-lg overflow-hidden shadow-sm transition-all hover:shadow-md`}
+                          >
+                            <div className="flex flex-row">
+                              <div className={`w-2/5 ${theme === 'dark' ? 'bg-gradient-to-br from-blue-900 to-blue-800' : 'bg-gradient-to-br from-blue-100 to-blue-50'} flex items-center justify-center p-4`}>
+                                <div className="text-center">
+                                  <div className={`text-4xl font-bold ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'} mb-2`}>
+                                    {sourceInfo ? sourceInfo.label.substring(0, 2).toUpperCase() : page.source.substring(0, 2).toUpperCase()}
+                                  </div>
+                                  {sourceInfo && (
+                                    <div className={`text-xs font-medium ${theme === 'dark' ? 'text-blue-300' : 'text-blue-700'}`}>
+                                      {sourceInfo.label}
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="w-3/5 p-4 flex flex-col justify-between">
+                                <div>
+                                  <div className={`text-xs font-semibold uppercase tracking-wide mb-1 ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
+                                    {sourceInfo ? sourceInfo.label : page.source} <span className="mx-1">|</span> {new Date(page.created_at).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}
+                                  </div>
+                                  <h3 className={`font-bold text-base mb-2 ${theme === 'dark' ? 'text-white group-hover:text-blue-400' : 'text-gray-900 group-hover:text-blue-600'} transition-colors line-clamp-2`}>
+                                    {page.meta_title}
+                                  </h3>
+                                </div>
+                                <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} line-clamp-2`}>
+                                  {page.meta_description}
+                                </p>
+                              </div>
+                            </div>
+                          </a>
+                        );
+                      })}
+                    </div>
+                  </section>
+                )}
               </>
             )}
             {topics.length > 0 && viewMode === 'list' && (
