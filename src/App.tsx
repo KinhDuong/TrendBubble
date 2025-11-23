@@ -760,7 +760,7 @@ function HomePage() {
                   </button>
                   <button
                     onClick={loadTopics}
-                    className={`hidden md:flex items-center gap-1.5 px-4 py-1.5 text-xs font-medium ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'} rounded transition-colors text-white whitespace-nowrap`}
+                    className={`flex items-center gap-1.5 px-4 py-1.5 text-xs font-medium ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'} rounded transition-colors text-white whitespace-nowrap`}
                     aria-label="Refresh trending topics"
                     title="Refresh trending topics"
                   >
