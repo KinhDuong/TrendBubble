@@ -1107,7 +1107,7 @@ function HomePage() {
                           <div className={`text-center ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>#{index + 1}</div>
                           <div className={`text-center text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
                             <span className={`px-2 py-1 rounded text-xs ${topic.source === 'user_upload' ? (theme === 'dark' ? 'bg-green-900/30 text-green-400' : 'bg-green-100 text-green-700') : (theme === 'dark' ? 'bg-blue-900/30 text-blue-400' : 'bg-blue-100 text-blue-700')}`}>
-                              {sources.find(s => s.value === topic.source)?.label || topic.source}
+                              {sources.find(s => s.value === topic.source)?.label || topic.source?.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ') || '-'}
                             </span>
                           </div>
                           <div className={`text-center text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
@@ -1131,7 +1131,7 @@ function HomePage() {
                               {topic.searchVolumeRaw.replace(/"/g, '')}
                             </span>
                             <span className={`px-2 py-1 rounded ${topic.source === 'user_upload' ? (theme === 'dark' ? 'bg-green-900/30 text-green-400' : 'bg-green-100 text-green-700') : (theme === 'dark' ? 'bg-blue-900/30 text-blue-400' : 'bg-blue-100 text-blue-700')}`}>
-                              {sources.find(s => s.value === topic.source)?.label || topic.source}
+                              {sources.find(s => s.value === topic.source)?.label || topic.source?.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ') || '-'}
                             </span>
                           </div>
                           <div className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
