@@ -248,9 +248,7 @@ function HomePage() {
 
       if (data) {
         const customSources = data.map(item => ({ value: item.value, label: item.label }));
-        const allSources = [...defaultSources, ...customSources];
-        console.log('Loaded sources:', allSources);
-        setSources(allSources);
+        setSources([...defaultSources, ...customSources]);
       } else {
         setSources(defaultSources);
       }
@@ -1111,7 +1109,6 @@ function HomePage() {
                             <span className={`px-2 py-1 rounded text-xs ${topic.source === 'user_upload' ? (theme === 'dark' ? 'bg-green-900/30 text-green-400' : 'bg-green-100 text-green-700') : (theme === 'dark' ? 'bg-blue-900/30 text-blue-400' : 'bg-blue-100 text-blue-700')}`}>
                               {(() => {
                                 const found = sources.find(s => s.value === topic.source);
-                                console.log('Looking for source:', topic.source, 'Found:', found, 'All sources:', sources);
                                 if (found) return found.label;
                                 if (topic.source) return topic.source.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
                                 return '-';
@@ -1141,7 +1138,6 @@ function HomePage() {
                             <span className={`px-2 py-1 rounded ${topic.source === 'user_upload' ? (theme === 'dark' ? 'bg-green-900/30 text-green-400' : 'bg-green-100 text-green-700') : (theme === 'dark' ? 'bg-blue-900/30 text-blue-400' : 'bg-blue-100 text-blue-700')}`}>
                               {(() => {
                                 const found = sources.find(s => s.value === topic.source);
-                                console.log('Looking for source:', topic.source, 'Found:', found, 'All sources:', sources);
                                 if (found) return found.label;
                                 if (topic.source) return topic.source.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
                                 return '-';
