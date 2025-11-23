@@ -1070,6 +1070,23 @@ function HomePage() {
               <>
                 <BubbleChart topics={topics} maxDisplay={maxBubbles} theme={theme} onBubbleTimingUpdate={handleBubbleTimingUpdate} />
 
+                {/* Branded Attribution Section */}
+                <div className={`w-full border-t border-b ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-200'} py-6 px-4 mt-8`}>
+                  <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                      <div className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                        TrendingBubble
+                      </div>
+                      <span className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                        Real-time Trending Topics Visualization
+                      </span>
+                    </div>
+                    <div className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                      <span className="font-medium">Source:</span> Google Trends & User Data
+                    </div>
+                  </div>
+                </div>
+
                 <section className="max-w-7xl mx-auto mt-8 mb-8" aria-labelledby="top-trending-heading">
                   <h2 id="top-trending-heading" className={`text-2xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                     Top 10 Trending Topics Today
