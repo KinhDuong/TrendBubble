@@ -854,60 +854,64 @@ function HomePage() {
               </div>
             </div>
           </div>
-          <div className="flex flex-col md:flex-row items-start md:items-center gap-3 w-full">
-            <button
-              onClick={() => setShowAddSource(true)}
-              className={`px-3 py-1 ${theme === 'dark' ? 'bg-teal-600 hover:bg-teal-700' : 'bg-teal-500 hover:bg-teal-600'} rounded transition-colors text-xs font-medium text-white`}
-            >
-              Add Source
-            </button>
-            <div className="flex items-center gap-2">
-              <label htmlFor="adminSourceFilter" className={`text-xs font-medium whitespace-nowrap ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                Source:
-              </label>
-              <select
-                id="adminSourceFilter"
-                value={sourceFilter}
-                onChange={(e) => {
-                  if (e.target.value === 'add_new') {
+          <div className="flex flex-col gap-3 w-full">
+            <div className="flex flex-col md:flex-row items-start md:items-center gap-3">
+              <button
+                onClick={() => setShowAddSource(true)}
+                className={`px-3 py-1 ${theme === 'dark' ? 'bg-teal-600 hover:bg-teal-700' : 'bg-teal-500 hover:bg-teal-600'} rounded transition-colors text-xs font-medium text-white`}
+              >
+                Add Source
+              </button>
+              <div className="flex items-center gap-2">
+                <label htmlFor="adminSourceFilter" className={`text-xs font-medium whitespace-nowrap ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                  Source:
+                </label>
+                <select
+                  id="adminSourceFilter"
+                  value={sourceFilter}
+                  onChange={(e) => {
+                    if (e.target.value === 'add_new') {
+                      setShowAddSource(true);
+                    } else {
+                      setSourceFilter(e.target.value);
+                    }
+                  }}
+                  className={`${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} border rounded px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                  aria-label="Filter trending topics by data source"
+                >
+                  {sources.map(source => (
+                    <option key={source.value} value={source.value}>{source.label}</option>
+                  ))}
+                </select>
+              </div>
+              <button
+                onClick={() => setShowAddCategory(true)}
+                className={`px-3 py-1 ${theme === 'dark' ? 'bg-teal-600 hover:bg-teal-700' : 'bg-teal-500 hover:bg-teal-600'} rounded transition-colors text-xs font-medium text-white`}
+              >
+                Add Category
+              </button>
+              <FileUpload
+                onUpload={handleFileUpload}
+                theme={theme}
+                sourceFilter={sourceFilter}
+                sources={sources.map(s => s.value)}
+                onSourceFilterChange={(source) => {
+                  if (source === 'add_new') {
                     setShowAddSource(true);
                   } else {
-                    setSourceFilter(e.target.value);
+                    setSourceFilter(source);
                   }
                 }}
-                className={`${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} border rounded px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500`}
-                aria-label="Filter trending topics by data source"
-              >
-                {sources.map(source => (
-                  <option key={source.value} value={source.value}>{source.label}</option>
-                ))}
-              </select>
+              />
             </div>
-            <button
-              onClick={() => setShowAddCategory(true)}
-              className={`px-3 py-1 ${theme === 'dark' ? 'bg-teal-600 hover:bg-teal-700' : 'bg-teal-500 hover:bg-teal-600'} rounded transition-colors text-xs font-medium text-white`}
-            >
-              Add Category
-            </button>
-            <button
-              onClick={() => setShowCreatePage(true)}
-              className={`px-3 py-1 ${theme === 'dark' ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-indigo-500 hover:bg-indigo-600'} rounded transition-colors text-xs font-medium text-white`}
-            >
-              Create New Page
-            </button>
-            <FileUpload
-              onUpload={handleFileUpload}
-              theme={theme}
-              sourceFilter={sourceFilter}
-              sources={sources.map(s => s.value)}
-              onSourceFilterChange={(source) => {
-                if (source === 'add_new') {
-                  setShowAddSource(true);
-                } else {
-                  setSourceFilter(source);
-                }
-              }}
-            />
+            <div className={`${theme === 'dark' ? 'border-gray-700' : 'border-gray-300'} border-t pt-3`}>
+              <button
+                onClick={() => setShowCreatePage(true)}
+                className={`px-3 py-1 ${theme === 'dark' ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-indigo-500 hover:bg-indigo-600'} rounded transition-colors text-xs font-medium text-white`}
+              >
+                Create New Page
+              </button>
+            </div>
           </div>
         </div>
       </header>
