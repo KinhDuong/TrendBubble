@@ -13,10 +13,11 @@ export default function Header({ theme, isAdmin, onLoginClick, title = 'Google T
       <div className="px-4 md:px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="relative w-12 h-12 flex-shrink-0 rounded-full bg-gradient-to-br from-cyan-300 via-cyan-400 to-cyan-500 flex items-center justify-center shadow-lg border-4 border-gray-900">
-              <div className="absolute top-2 right-3 w-5 h-5 rounded-full bg-white opacity-80"></div>
-              <div className="absolute top-4 left-3 w-3 h-4 rounded-full bg-white/40"></div>
+            <div className="relative w-12 h-12 flex-shrink-0 rounded-full bg-gradient-to-br from-blue-400 via-blue-500 to-blue-600 flex items-center justify-center shadow-lg border-4 border-gray-900">
+              <div className="absolute top-2 right-3 w-3 h-3 rounded-full bg-white opacity-80"></div>
+              <div className="absolute top-4 left-3 w-2 h-2 rounded-full bg-white/40"></div>
               <div className="absolute bottom-4 left-4 w-2 h-3 bg-white/50 rounded-sm transform rotate-12"></div>
+              <TrendingUp size={24} className="text-white relative z-10" />
             </div>
             <h1 className="text-xl md:text-2xl font-bold text-white">{title}</h1>
           </div>
