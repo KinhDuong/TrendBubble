@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import BubbleChart from '../components/BubbleChart';
 import FileUpload from '../components/FileUpload';
 import Login from '../components/Login';
@@ -596,8 +597,19 @@ function TrendingBubble() {
     return <Login onLogin={loadTopics} theme={theme} />;
   }
 
+  const topTopics = [...topics].sort((a, b) => b.searchVolume - a.searchVolume).slice(0, 10);
+  const topTopicNames = topTopics.map(t => t.name).join(', ');
+  const totalTopics = topics.length;
+
   return (
     <>
+      <Helmet>
+        <title>Trending Bubble Chart - Interactive Google Trends Visualization</title>
+        <meta name="description" content={`Watch ${totalTopics} trending topics in an interactive animated bubble chart. See search volumes visualize in real-time: ${topTopicNames || 'live Google trends visualization'}. Updated continuously.`} />
+        <meta property="og:title" content="Trending Bubble - Interactive Real-Time Trends Visualization" />
+        <meta property="og:description" content={`Interactive bubble chart showing ${totalTopics} trending topics with animated visualization. Watch trends grow and shrink in real-time.`} />
+        <link rel="canonical" href="https://googletrendingtopics.com/trending-bubble" />
+      </Helmet>
       {isAdmin && (
         <header className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-b py-4 md:py-6 px-3 md:px-6 shadow-sm`}>
           <div className="max-w-7xl mx-auto">

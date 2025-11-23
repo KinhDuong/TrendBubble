@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import BubbleChart from './components/BubbleChart';
 import FileUpload from './components/FileUpload';
 import Login from './components/Login';
@@ -687,8 +688,19 @@ function HomePage() {
     return <Login onLogin={loadTopics} theme={theme} />;
   }
 
+  const topTopics = [...topics].sort((a, b) => b.searchVolume - a.searchVolume).slice(0, 10);
+  const topTopicNames = topTopics.map(t => t.name).join(', ');
+  const currentDate = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+
   return (
     <>
+      <Helmet>
+        <title>Google Trending Topics Today - Real-Time Search Trends & Analytics</title>
+        <meta name="description" content={`Discover today's trending topics on Google: ${topTopicNames || 'live search trends, viral topics, and popular searches'}. Updated in real-time with interactive visualizations. ${currentDate}`} />
+        <meta property="og:title" content="Google Trending Topics Today - Real-Time Search Trends" />
+        <meta property="og:description" content={`Live trending topics: ${topTopicNames || 'Track what\'s popular on Google right now'}. Interactive bubble chart visualization updated hourly.`} />
+        <link rel="canonical" href="https://googletrendingtopics.com/" />
+      </Helmet>
       {isAdmin && (
         <header className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-b py-4 md:py-6 px-3 md:px-6 shadow-sm border-t-0`}>
           <div className="max-w-7xl mx-auto">
