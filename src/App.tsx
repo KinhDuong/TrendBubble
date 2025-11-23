@@ -1071,14 +1071,14 @@ function HomePage() {
                 <BubbleChart topics={topics} maxDisplay={maxBubbles} theme={theme} onBubbleTimingUpdate={handleBubbleTimingUpdate} />
 
                 {/* Branded Attribution Section - Full Width */}
-                <div className={`w-screen relative left-[50%] right-[50%] -mx-[50vw] ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'} py-6 mt-8`}>
+                <div className={`w-screen relative left-[50%] right-[50%] -mx-[50vw] ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'} py-6 mt-8 overflow-hidden`}>
                   <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-4 min-w-0 flex-shrink-0">
                       <div className="relative w-12 h-12 flex-shrink-0 rounded-full shadow-lg border-4 border-gray-900 overflow-hidden flex items-center justify-center">
                         <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-blue-600"></div>
                         <TrendingUp size={24} strokeWidth={4} className="text-white relative z-10" />
                       </div>
-                      <div className="flex flex-col">
+                      <div className="flex flex-col min-w-0">
                         <div className={`text-xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                           TrendingBubble
                         </div>
@@ -1087,15 +1087,15 @@ function HomePage() {
                         </span>
                       </div>
                     </div>
-                    <div className="flex flex-col md:flex-row items-center gap-4">
-                      <div className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                    <div className="flex flex-col md:flex-row items-center gap-4 min-w-0">
+                      <div className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} whitespace-nowrap`}>
                         <span className="font-medium">Source:</span> Google Trends & User Data
                       </div>
                       <a
                         href={typeof window !== 'undefined' ? window.location.href : '/'}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className={`text-sm font-medium ${theme === 'dark' ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'} transition-colors`}
+                        className={`text-sm font-medium ${theme === 'dark' ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'} transition-colors truncate max-w-xs`}
                       >
                         {typeof window !== 'undefined' ? window.location.host : 'trendingbubble.com'}
                       </a>
