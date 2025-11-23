@@ -1123,8 +1123,10 @@ function HomePage() {
                           itemType="https://schema.org/ListItem"
                         >
                           <meta itemProp="position" content={String(index + 1)} />
-                          <div className={`text-3xl font-bold ${theme === 'dark' ? 'text-gray-600' : 'text-gray-300'} w-12 text-center`} aria-label={`Rank ${index + 1}`}>
-                            {index + 1}
+                          <div className={`w-12 flex items-center justify-center`} aria-label={`Rank ${index + 1}`}>
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold ${theme === 'dark' ? 'bg-blue-600 text-white' : 'bg-blue-500 text-white'} shadow-md`}>
+                              {index + 1}
+                            </div>
                           </div>
                           <article className="flex-1" itemProp="item" itemScope itemType="https://schema.org/Thing">
                             <h3 className="font-semibold text-lg mb-1" itemProp="name">{topic.name.replace(/"/g, '')}</h3>
