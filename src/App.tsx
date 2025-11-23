@@ -379,7 +379,7 @@ function HomePage() {
             pub_date: earliestPubDate,
             category: topic.category || existing.category,
             created_at: existing.created_at,
-            source: 'user_upload'
+            source: sourceFilter === 'all' ? 'user_upload' : sourceFilter
           });
 
           historySnapshots.push({
@@ -400,7 +400,7 @@ function HomePage() {
             url: topic.url,
             pub_date: topic.pubDate,
             category: topic.category,
-            source: 'user_upload'
+            source: sourceFilter === 'all' ? 'user_upload' : sourceFilter
           });
         }
       }
