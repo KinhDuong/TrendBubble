@@ -752,9 +752,6 @@ function HomePage() {
               <div className="overflow-x-auto">
                 <div className="flex items-center gap-3 md:gap-4">
                   <div className="flex items-center gap-2">
-                    <label htmlFor="dateFilter" className="text-xs font-medium whitespace-nowrap text-white">
-                      Trending:
-                    </label>
                     <select
                       id="dateFilter"
                       value={dateFilter}
@@ -762,7 +759,7 @@ function HomePage() {
                       className={`flex-1 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} border rounded px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500`}
                       aria-label="Filter trending topics by date range"
                     >
-                      <option value="now">Now</option>
+                      <option value="now">Trending Now</option>
                       <option value="all">All Time</option>
                       <option value="24h">24 Hours</option>
                       <option value="week">Week</option>
