@@ -766,7 +766,13 @@ function HomePage() {
             >
               Add Category
             </button>
-            <FileUpload onUpload={handleFileUpload} theme={theme} sourceFilter={sourceFilter} />
+            <FileUpload
+              onUpload={handleFileUpload}
+              theme={theme}
+              sourceFilter={sourceFilter}
+              sources={sources.map(s => s.value)}
+              onSourceFilterChange={(source) => setSourceFilter(source as any)}
+            />
           </div>
         </div>
       </header>
