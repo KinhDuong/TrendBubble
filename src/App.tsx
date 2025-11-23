@@ -57,6 +57,7 @@ function HomePage() {
     loadTopics();
     loadThemePreference();
     loadCategories();
+    loadSources();
     updateCountdown();
     const interval = setInterval(updateCountdown, 1000);
     return () => clearInterval(interval);
@@ -215,19 +216,44 @@ function HomePage() {
   const loadCategories = async () => {
     try {
       const { data, error } = await supabase
-        .from('trending_topics')
-        .select('category')
-        .not('category', 'is', null)
-        .order('category');
+        .from('custom_categories')
+        .select('name')
+        .order('name');
 
       if (error) throw error;
 
       if (data) {
-        const uniqueCategories = [...new Set(data.map(item => item.category).filter(Boolean))] as string[];
-        setCategories(uniqueCategories);
+        const categoryNames = data.map(item => item.name);
+        setCategories(categoryNames);
       }
     } catch (error) {
       console.error('Error loading categories:', error);
+    }
+  };
+
+  const loadSources = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('custom_sources')
+        .select('value, label')
+        .order('label');
+
+      if (error) throw error;
+
+      const defaultSources = [
+        { value: 'all', label: 'All' },
+        { value: 'google_trends', label: 'Google Trends' },
+        { value: 'user_upload', label: 'My Uploads' }
+      ];
+
+      if (data) {
+        const customSources = data.map(item => ({ value: item.value, label: item.label }));
+        setSources([...defaultSources, ...customSources]);
+      } else {
+        setSources(defaultSources);
+      }
+    } catch (error) {
+      console.error('Error loading sources:', error);
     }
   };
 
@@ -551,8 +577,19 @@ function HomePage() {
     if (!newCategory.trim()) return;
 
     const trimmedCategory = newCategory.trim();
-    if (!categories.includes(trimmedCategory)) {
-      setCategories([...categories, trimmedCategory].sort());
+
+    try {
+      const { error } = await supabase
+        .from('custom_categories')
+        .insert({ name: trimmedCategory });
+
+      if (error && error.code !== '23505') {
+        throw error;
+      }
+
+      await loadCategories();
+    } catch (error) {
+      console.error('Error adding category:', error);
     }
 
     setNewCategory('');
@@ -565,9 +602,19 @@ function HomePage() {
     const trimmedValue = newSourceValue.trim().toLowerCase().replace(/\s+/g, '_');
     const trimmedLabel = newSourceLabel.trim();
 
-    if (!sources.find(s => s.value === trimmedValue)) {
-      setSources([...sources, { value: trimmedValue, label: trimmedLabel }]);
+    try {
+      const { error } = await supabase
+        .from('custom_sources')
+        .insert({ value: trimmedValue, label: trimmedLabel });
+
+      if (error && error.code !== '23505') {
+        throw error;
+      }
+
+      await loadSources();
       setSourceFilter(trimmedValue);
+    } catch (error) {
+      console.error('Error adding source:', error);
     }
 
     setNewSourceValue('');
