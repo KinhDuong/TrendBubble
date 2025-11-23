@@ -41,7 +41,9 @@ function TrendingBubble() {
   const [uploadMessage, setUploadMessage] = useState<string | null>(null);
   const [isPaused, setIsPaused] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
-  const [sourceFilter, setSourceFilter] = useState<string>('google_trends');
+  const [sourceFilter, setSourceFilter] = useState<string>('all');
+  const [customSourceInput, setCustomSourceInput] = useState<string>('');
+  const [showAddSource, setShowAddSource] = useState(false);
 
   useEffect(() => {
     loadTopics();
@@ -666,7 +668,76 @@ function TrendingBubble() {
               </button>
             </div>
           </div>
-          <FileUpload onUpload={handleFileUpload} theme={theme} sourceFilter={sourceFilter} />
+          <div className="flex flex-col gap-3">
+            <FileUpload
+              onUpload={handleFileUpload}
+              theme={theme}
+              sourceFilter={sourceFilter}
+              sources={['google_trends', ...sources]}
+              onSourceFilterChange={(source) => {
+                if (source === 'add_new') {
+                  setShowAddSource(true);
+                } else {
+                  setSourceFilter(source);
+                }
+              }}
+            />
+            {showAddSource && (
+              <div className="flex gap-2 items-center">
+                <input
+                  type="text"
+                  value={customSourceInput}
+                  onChange={(e) => setCustomSourceInput(e.target.value)}
+                  placeholder="Enter new source name..."
+                  className={`flex-1 px-3 py-2 rounded-lg border text-sm ${
+                    theme === 'dark'
+                      ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
+                      : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
+                  } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter' && customSourceInput.trim()) {
+                      const newSource = customSourceInput.trim().toLowerCase().replace(/\s+/g, '_');
+                      if (!sources.includes(newSource) && newSource !== 'google_trends') {
+                        setSources([...sources, newSource]);
+                        setSourceFilter(newSource);
+                      }
+                      setCustomSourceInput('');
+                      setShowAddSource(false);
+                    }
+                  }}
+                />
+                <button
+                  onClick={() => {
+                    if (customSourceInput.trim()) {
+                      const newSource = customSourceInput.trim().toLowerCase().replace(/\s+/g, '_');
+                      if (!sources.includes(newSource) && newSource !== 'google_trends') {
+                        setSources([...sources, newSource]);
+                        setSourceFilter(newSource);
+                      }
+                      setCustomSourceInput('');
+                    }
+                    setShowAddSource(false);
+                  }}
+                  className={`px-4 py-2 ${
+                    theme === 'dark' ? 'bg-green-600 hover:bg-green-700' : 'bg-green-500 hover:bg-green-600'
+                  } rounded-lg transition-colors text-sm font-medium text-white`}
+                >
+                  Add
+                </button>
+                <button
+                  onClick={() => {
+                    setShowAddSource(false);
+                    setCustomSourceInput('');
+                  }}
+                  className={`px-4 py-2 ${
+                    theme === 'dark' ? 'bg-gray-600 hover:bg-gray-700' : 'bg-gray-400 hover:bg-gray-500'
+                  } rounded-lg transition-colors text-sm font-medium text-white`}
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </header>
       )}

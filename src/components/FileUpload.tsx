@@ -6,6 +6,8 @@ interface FileUploadProps {
   onUpload: (topics: TrendingTopic[]) => Promise<void>;
   theme: 'dark' | 'light';
   sourceFilter: string;
+  sources: string[];
+  onSourceFilterChange: (source: string) => void;
 }
 
 const COMMON_CATEGORIES = [
@@ -22,7 +24,7 @@ const COMMON_CATEGORIES = [
   'Other'
 ];
 
-export default function FileUpload({ onUpload, theme, sourceFilter }: FileUploadProps) {
+export default function FileUpload({ onUpload, theme, sourceFilter, sources, onSourceFilterChange }: FileUploadProps) {
   const [fileName, setFileName] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [categorySearch, setCategorySearch] = useState('');
@@ -164,6 +166,25 @@ export default function FileUpload({ onUpload, theme, sourceFilter }: FileUpload
 
   return (
     <div className="w-full flex flex-col md:flex-row items-center gap-3">
+      <div className="flex-shrink-0 w-full md:w-48">
+        <select
+          value={sourceFilter}
+          onChange={(e) => onSourceFilterChange(e.target.value)}
+          className={`w-full px-3 py-2 rounded-lg border text-sm ${
+            theme === 'dark'
+              ? 'bg-gray-700 border-gray-600 text-white'
+              : 'bg-white border-gray-300 text-gray-900'
+          } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+        >
+          <option value="all">Select Source...</option>
+          {sources.map(source => (
+            <option key={source} value={source}>
+              {source === 'google_trends' ? 'Google Trends' : source.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+            </option>
+          ))}
+          <option value="add_new">+ Add New Source...</option>
+        </select>
+      </div>
       <div className="relative flex-shrink-0 w-full md:w-48">
         <input
           type="text"
