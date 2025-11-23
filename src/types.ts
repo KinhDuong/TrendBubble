@@ -6,4 +6,5 @@ export interface TrendingTopic {
   createdAt?: string;
   pubDate?: string;
   category?: string;
+  source?: string;
 }
