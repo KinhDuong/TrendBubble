@@ -65,7 +65,7 @@ export default function FilterMenu({
 
   if (variant === 'bubble') {
     return (
-      <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}>
+      <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} shadow-md`}>
         <div className="px-4 md:px-6 py-3">
           <div className="flex items-center justify-center">
             <div className="overflow-x-auto">
@@ -216,7 +216,7 @@ export default function FilterMenu({
   }
 
   return (
-    <nav className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`} aria-label="Trending topics filters">
+    <nav className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} shadow-md`} aria-label="Trending topics filters">
       <div className="px-4 md:px-6 py-3">
         <div className="flex items-center justify-center">
           <div className="overflow-x-auto">
