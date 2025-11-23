@@ -751,6 +751,46 @@ function HomePage() {
             <div className="flex items-center justify-center">
               <div className="overflow-x-auto">
                 <div className="flex items-center gap-3 md:gap-4">
+                  <button
+                    onClick={() => setViewMode(viewMode === 'bubble' ? 'list' : 'bubble')}
+                    className={`px-4 py-1.5 text-xs font-medium ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'} rounded transition-colors text-white whitespace-nowrap`}
+                    aria-label={`Switch to ${viewMode === 'bubble' ? 'list' : 'bubble'} view`}
+                  >
+                    {viewMode === 'bubble' ? 'List' : 'Bubble'}
+                  </button>
+                  <button
+                    onClick={loadTopics}
+                    className={`hidden md:flex items-center gap-1.5 px-4 py-1.5 text-xs font-medium ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'} rounded transition-colors text-white whitespace-nowrap`}
+                    aria-label="Refresh trending topics"
+                    title="Refresh trending topics"
+                  >
+                    <div className="relative h-3 w-3">
+                      <svg className="h-3 w-3 -rotate-90" viewBox="0 0 24 24">
+                        <circle
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          opacity="0.2"
+                        />
+                        <circle
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeDasharray={`${2 * Math.PI * 10}`}
+                          strokeDashoffset={`${2 * Math.PI * 10 * (1 - bubbleProgress / 100)}`}
+                          strokeLinecap="round"
+                        />
+                      </svg>
+                    </div>
+                    <span className="text-xs font-mono">{nextBubbleIn}</span>
+                  </button>
+                  <div className={`hidden md:block w-px h-6 ${theme === 'dark' ? 'bg-gray-600' : 'bg-gray-300'}`}></div>
                   <div className="flex items-center gap-2">
                     <select
                       id="dateFilter"
@@ -849,46 +889,6 @@ function HomePage() {
                       </button>
                     )}
                   </div>
-                  <div className={`hidden md:block w-px h-6 ${theme === 'dark' ? 'bg-gray-600' : 'bg-gray-300'}`}></div>
-                  <button
-                    onClick={() => setViewMode(viewMode === 'bubble' ? 'list' : 'bubble')}
-                    className={`px-4 py-1.5 text-xs font-medium ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'} rounded transition-colors text-white whitespace-nowrap`}
-                    aria-label={`Switch to ${viewMode === 'bubble' ? 'list' : 'bubble'} view`}
-                  >
-                    {viewMode === 'bubble' ? 'List' : 'Bubble'}
-                  </button>
-                  <button
-                    onClick={loadTopics}
-                    className={`hidden md:flex items-center gap-1.5 px-4 py-1.5 text-xs font-medium ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'} rounded transition-colors text-white whitespace-nowrap`}
-                    aria-label="Refresh trending topics"
-                    title="Refresh trending topics"
-                  >
-                    <div className="relative h-3 w-3">
-                      <svg className="h-3 w-3 -rotate-90" viewBox="0 0 24 24">
-                        <circle
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          opacity="0.2"
-                        />
-                        <circle
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeDasharray={`${2 * Math.PI * 10}`}
-                          strokeDashoffset={`${2 * Math.PI * 10 * (1 - bubbleProgress / 100)}`}
-                          strokeLinecap="round"
-                        />
-                      </svg>
-                    </div>
-                    <span className="text-xs font-mono">{nextBubbleIn}</span>
-                  </button>
                 </div>
               </div>
             </div>
