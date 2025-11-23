@@ -769,9 +769,6 @@ function HomePage() {
                   </div>
                   <div className={`hidden md:block w-px h-6 ${theme === 'dark' ? 'bg-gray-600' : 'bg-gray-300'}`}></div>
                   <div className="flex items-center gap-2">
-                    <label htmlFor="categoryFilter" className="text-xs font-medium whitespace-nowrap text-white">
-                      Category:
-                    </label>
                     <select
                       id="categoryFilter"
                       value={categoryFilter}
@@ -779,7 +776,7 @@ function HomePage() {
                       className={`flex-1 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} border rounded px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500`}
                       aria-label="Filter trending topics by category"
                     >
-                      <option value="all">All</option>
+                      <option value="all">All Categories</option>
                       {categories.map(category => (
                         <option key={category} value={category}>{category}</option>
                       ))}
