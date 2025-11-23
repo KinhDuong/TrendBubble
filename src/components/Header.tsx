@@ -16,7 +16,7 @@ export default function Header({ theme, isAdmin, onLoginClick, title = 'Google T
             <div className="relative w-12 h-12 flex-shrink-0 rounded-full shadow-lg border-4 border-gray-900 overflow-hidden flex items-center justify-center">
               <div className="absolute inset-0 bg-gradient-to-br from-blue-300 via-blue-400 to-blue-500"></div>
               <div className="absolute inset-0 bg-gradient-to-tl from-blue-400 via-blue-500 to-blue-600 opacity-60"></div>
-              <TrendingUp size={24} className="text-white relative z-10" />
+              <TrendingUp size={24} strokeWidth={4} className="text-white relative z-10" />
             </div>
             <h1 className="text-xl md:text-2xl font-bold text-white">{title}</h1>
           </div>
