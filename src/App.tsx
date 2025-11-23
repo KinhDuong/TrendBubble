@@ -1071,7 +1071,7 @@ function HomePage() {
                 <BubbleChart topics={topics} maxDisplay={maxBubbles} theme={theme} onBubbleTimingUpdate={handleBubbleTimingUpdate} />
 
                 {/* Branded Attribution Section - Full Width */}
-                <div className={`w-screen relative left-[50%] right-[50%] -mx-[50vw] border-t border-b ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-200'} py-6 mt-8`}>
+                <div className={`w-screen relative left-[50%] right-[50%] -mx-[50vw] ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'} py-6 mt-8`}>
                   <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
                     <div className="flex items-center gap-4">
                       <div className="relative w-12 h-12 flex-shrink-0 rounded-full shadow-lg border-4 border-gray-900 overflow-hidden flex items-center justify-center">
