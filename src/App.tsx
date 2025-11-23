@@ -10,7 +10,7 @@ import TrendingBubble from './pages/TrendingBubble';
 import { TrendingTopic } from './types';
 import { supabase } from './lib/supabase';
 import { useAuth } from './hooks/useAuth';
-import { LogOut, Home, TrendingUp, ArrowUpDown, ArrowUp, ArrowDown, LogIn, X } from 'lucide-react';
+import { LogOut, Home, TrendingUp, ArrowUpDown, ArrowUp, ArrowDown, LogIn, X, BarChart3 } from 'lucide-react';
 
 type SortField = 'name' | 'category' | 'searchVolume' | 'rank' | 'pubDate' | 'createdAt';
 type SortDirection = 'asc' | 'desc';
@@ -1070,19 +1070,32 @@ function HomePage() {
               <>
                 <BubbleChart topics={topics} maxDisplay={maxBubbles} theme={theme} onBubbleTimingUpdate={handleBubbleTimingUpdate} />
 
-                {/* Branded Attribution Section */}
-                <div className={`w-full border-t border-b ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-200'} py-6 px-4 mt-8`}>
-                  <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-                    <div className="flex items-center gap-3">
-                      <div className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                        TrendingBubble
+                {/* Branded Attribution Section - Full Width */}
+                <div className={`w-screen relative left-[50%] right-[50%] -mx-[50vw] border-t border-b ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-200'} py-6 mt-8`}>
+                  <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                      <div className={`flex items-center justify-center w-12 h-12 rounded-lg ${theme === 'dark' ? 'bg-blue-600' : 'bg-blue-500'}`}>
+                        <BarChart3 className="w-7 h-7 text-white" />
                       </div>
-                      <span className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                        Real-time Trending Topics Visualization
-                      </span>
+                      <div className="flex flex-col">
+                        <div className={`text-xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                          TrendingBubble
+                        </div>
+                        <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                          Real-time Trending Topics Visualization
+                        </span>
+                      </div>
                     </div>
-                    <div className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                      <span className="font-medium">Source:</span> Google Trends & User Data
+                    <div className="flex flex-col md:flex-row items-center gap-4">
+                      <div className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                        <span className="font-medium">Source:</span> Google Trends & User Data
+                      </div>
+                      <a
+                        href={window.location.origin}
+                        className={`text-sm font-medium ${theme === 'dark' ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'} transition-colors`}
+                      >
+                        {window.location.host}
+                      </a>
                     </div>
                   </div>
                 </div>
