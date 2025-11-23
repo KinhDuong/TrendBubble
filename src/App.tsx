@@ -690,7 +690,7 @@ function HomePage() {
   return (
     <>
       {isAdmin && (
-        <header className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-b py-4 md:py-6 px-3 md:px-6 shadow-sm`}>
+        <header className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-b py-4 md:py-6 px-3 md:px-6 shadow-sm border-t-0`}>
           <div className="max-w-7xl mx-auto">
             <div className={`text-center mb-3 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} text-xs font-semibold uppercase tracking-wide`}>
               Admin Menu
