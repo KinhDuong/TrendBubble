@@ -1071,7 +1071,7 @@ function HomePage() {
               ) : (
               <div className="max-w-7xl mx-auto">
                 <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-lg border overflow-hidden shadow-sm`}>
-                  <div className={`hidden md:grid grid-cols-5 gap-4 px-6 py-4 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'} font-semibold text-sm`}>
+                  <div className={`hidden md:grid grid-cols-4 gap-4 px-6 py-4 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'} font-semibold text-sm`}>
                     <button
                       onClick={() => handleSort('name')}
                       className={`flex items-center gap-1 hover:${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'} transition-colors`}
@@ -1090,7 +1090,6 @@ function HomePage() {
                     >
                       Rank <SortIcon field="rank" />
                     </button>
-                    <div className="text-center">Source</div>
                     <button
                       onClick={() => handleSort('pubDate')}
                       className={`flex items-center justify-center gap-1 hover:${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'} transition-colors`}
@@ -1101,20 +1100,10 @@ function HomePage() {
                   <div className={`divide-y ${theme === 'dark' ? 'divide-gray-700' : 'divide-gray-200'}`}>
                     {getSortedTopics().map((topic, index) => (
                       <div key={index} className={`${theme === 'dark' ? 'hover:bg-gray-750' : 'hover:bg-gray-50'} transition-colors`}>
-                        <div className="hidden md:grid grid-cols-5 gap-4 px-6 py-4">
+                        <div className="hidden md:grid grid-cols-4 gap-4 px-6 py-4">
                           <div className="font-medium">{topic.name.replace(/"/g, '')}</div>
                           <div className={`text-center ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>{topic.searchVolumeRaw.replace(/"/g, '')}</div>
                           <div className={`text-center ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>#{index + 1}</div>
-                          <div className={`text-center text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-                            <span className={`px-2 py-1 rounded text-xs ${topic.source === 'user_upload' ? (theme === 'dark' ? 'bg-green-900/30 text-green-400' : 'bg-green-100 text-green-700') : (theme === 'dark' ? 'bg-blue-900/30 text-blue-400' : 'bg-blue-100 text-blue-700')}`}>
-                              {(() => {
-                                const found = sources.find(s => s.value === topic.source);
-                                if (found) return found.label;
-                                if (topic.source) return topic.source.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-                                return '-';
-                              })()}
-                            </span>
-                          </div>
                           <div className={`text-center text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
                             {(topic.pubDate || topic.createdAt) ? new Date(topic.pubDate || topic.createdAt).toLocaleString('en-US', {
                               timeZone: 'America/New_York',
@@ -1134,14 +1123,6 @@ function HomePage() {
                           <div className="flex flex-wrap gap-2 text-xs">
                             <span className={`px-2 py-1 rounded ${theme === 'dark' ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-700'}`}>
                               {topic.searchVolumeRaw.replace(/"/g, '')}
-                            </span>
-                            <span className={`px-2 py-1 rounded ${topic.source === 'user_upload' ? (theme === 'dark' ? 'bg-green-900/30 text-green-400' : 'bg-green-100 text-green-700') : (theme === 'dark' ? 'bg-blue-900/30 text-blue-400' : 'bg-blue-100 text-blue-700')}`}>
-                              {(() => {
-                                const found = sources.find(s => s.value === topic.source);
-                                if (found) return found.label;
-                                if (topic.source) return topic.source.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-                                return '-';
-                              })()}
                             </span>
                           </div>
                           <div className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
