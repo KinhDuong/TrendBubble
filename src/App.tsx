@@ -23,7 +23,7 @@ function HomePage() {
   const [maxBubbles, setMaxBubbles] = useState<number>(50);
   const [dateFilter, setDateFilter] = useState<'now' | 'all' | '24h' | 'week' | 'month' | 'year'>('now');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
-  const [sourceFilter, setSourceFilter] = useState<'all' | 'google_trends' | 'user_upload'>('all');
+  const [sourceFilter, setSourceFilter] = useState<string>('all');
   const [categories, setCategories] = useState<string[]>([]);
   const [viewMode, setViewMode] = useState<'bubble' | 'list'>('bubble');
   const [loading, setLoading] = useState(true);
@@ -567,6 +567,7 @@ function HomePage() {
 
     if (!sources.find(s => s.value === trimmedValue)) {
       setSources([...sources, { value: trimmedValue, label: trimmedLabel }]);
+      setSourceFilter(trimmedValue);
     }
 
     setNewSourceValue('');
@@ -751,7 +752,13 @@ function HomePage() {
               <select
                 id="adminSourceFilter"
                 value={sourceFilter}
-                onChange={(e) => setSourceFilter(e.target.value as any)}
+                onChange={(e) => {
+                  if (e.target.value === 'add_new') {
+                    setShowAddSource(true);
+                  } else {
+                    setSourceFilter(e.target.value);
+                  }
+                }}
                 className={`${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} border rounded px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500`}
                 aria-label="Filter trending topics by data source"
               >
@@ -771,7 +778,13 @@ function HomePage() {
               theme={theme}
               sourceFilter={sourceFilter}
               sources={sources.map(s => s.value)}
-              onSourceFilterChange={(source) => setSourceFilter(source as any)}
+              onSourceFilterChange={(source) => {
+                if (source === 'add_new') {
+                  setShowAddSource(true);
+                } else {
+                  setSourceFilter(source);
+                }
+              }}
             />
           </div>
         </div>
