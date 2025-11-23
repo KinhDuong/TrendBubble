@@ -1070,46 +1070,59 @@ function HomePage() {
               <>
                 <BubbleChart topics={topics} maxDisplay={maxBubbles} theme={theme} onBubbleTimingUpdate={handleBubbleTimingUpdate} />
 
-                <div className="max-w-7xl mx-auto mt-8 mb-8">
-                  <h2 className={`text-2xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                    Top 10 Trending
+                <section className="max-w-7xl mx-auto mt-8 mb-8" aria-labelledby="top-trending-heading">
+                  <h2 id="top-trending-heading" className={`text-2xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                    Top 10 Trending Topics Today
                   </h2>
-                  <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-lg border overflow-hidden shadow-sm`}>
-                    <div className={`divide-y ${theme === 'dark' ? 'divide-gray-700' : 'divide-gray-200'}`}>
-                      {[...topics]
-                        .sort((a, b) => b.searchVolume - a.searchVolume)
-                        .slice(0, 10)
-                        .map((topic, index) => (
-                          <div key={index} className={`px-6 py-4 flex items-center gap-4 ${theme === 'dark' ? 'hover:bg-gray-750' : 'hover:bg-gray-50'} transition-colors`}>
-                            <div className={`text-3xl font-bold ${theme === 'dark' ? 'text-gray-600' : 'text-gray-300'} w-12 text-center`}>
-                              {index + 1}
-                            </div>
-                            <div className="flex-1">
-                              <div className="font-semibold text-lg mb-1">{topic.name.replace(/"/g, '')}</div>
-                              <div className="flex flex-wrap items-center gap-3 text-sm">
-                                <span className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                                  {topic.searchVolumeRaw.replace(/"/g, '')} searches
-                                </span>
-                                <span className={`px-2 py-0.5 rounded text-xs ${topic.source === 'user_upload' ? (theme === 'dark' ? 'bg-green-900/30 text-green-400' : 'bg-green-100 text-green-700') : (theme === 'dark' ? 'bg-blue-900/30 text-blue-400' : 'bg-blue-100 text-blue-700')}`}>
-                                  {(() => {
-                                    const found = sources.find(s => s.value === topic.source);
-                                    if (found) return found.label;
-                                    if (topic.source) return topic.source.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-                                    return '-';
-                                  })()}
-                                </span>
-                                {topic.category && (
-                                  <span className={`px-2 py-0.5 rounded text-xs ${theme === 'dark' ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-700'}`}>
-                                    {topic.category}
-                                  </span>
-                                )}
-                              </div>
-                            </div>
+                  <p className={`mb-4 text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                    Discover the most popular trending topics ranked by search volume
+                  </p>
+                  <ol className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-lg border overflow-hidden shadow-sm list-none`} itemScope itemType="https://schema.org/ItemList">
+                    {[...topics]
+                      .sort((a, b) => b.searchVolume - a.searchVolume)
+                      .slice(0, 10)
+                      .map((topic, index) => (
+                        <li
+                          key={index}
+                          className={`px-6 py-4 flex items-center gap-4 ${theme === 'dark' ? 'hover:bg-gray-750' : 'hover:bg-gray-50'} transition-colors ${index < 9 ? (theme === 'dark' ? 'border-b border-gray-700' : 'border-b border-gray-200') : ''}`}
+                          itemProp="itemListElement"
+                          itemScope
+                          itemType="https://schema.org/ListItem"
+                        >
+                          <meta itemProp="position" content={String(index + 1)} />
+                          <div className={`text-3xl font-bold ${theme === 'dark' ? 'text-gray-600' : 'text-gray-300'} w-12 text-center`} aria-label={`Rank ${index + 1}`}>
+                            {index + 1}
                           </div>
-                        ))}
-                    </div>
-                  </div>
-                </div>
+                          <article className="flex-1" itemProp="item" itemScope itemType="https://schema.org/Thing">
+                            <h3 className="font-semibold text-lg mb-1" itemProp="name">{topic.name.replace(/"/g, '')}</h3>
+                            <div className="flex flex-wrap items-center gap-3 text-sm">
+                              <span className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`} itemProp="description">
+                                {topic.searchVolumeRaw.replace(/"/g, '')} searches
+                              </span>
+                              <span className={`px-2 py-0.5 rounded text-xs ${topic.source === 'user_upload' ? (theme === 'dark' ? 'bg-green-900/30 text-green-400' : 'bg-green-100 text-green-700') : (theme === 'dark' ? 'bg-blue-900/30 text-blue-400' : 'bg-blue-100 text-blue-700')}`}>
+                                {(() => {
+                                  const found = sources.find(s => s.value === topic.source);
+                                  if (found) return found.label;
+                                  if (topic.source) return topic.source.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+                                  return 'Trending';
+                                })()}
+                              </span>
+                              {topic.category && (
+                                <span className={`px-2 py-0.5 rounded text-xs ${theme === 'dark' ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-700'}`}>
+                                  {topic.category}
+                                </span>
+                              )}
+                              {topic.pubDate && (
+                                <time className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`} dateTime={new Date(topic.pubDate).toISOString()}>
+                                  {new Date(topic.pubDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                </time>
+                              )}
+                            </div>
+                          </article>
+                        </li>
+                      ))}
+                  </ol>
+                </section>
               </>
             )}
             {topics.length > 0 && viewMode === 'list' && (
