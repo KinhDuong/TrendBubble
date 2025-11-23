@@ -1122,7 +1122,7 @@ function HomePage() {
                   <p className={`mb-4 text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
                     Discover the most popular trending topics ranked by search volume
                   </p>
-                  <ol className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-lg border overflow-hidden shadow-sm list-none`} itemScope itemType="https://schema.org/ItemList">
+                  <ol className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-lg overflow-hidden shadow-sm list-none`} itemScope itemType="https://schema.org/ItemList">
                     {[...topics]
                       .sort((a, b) => b.searchVolume - a.searchVolume)
                       .slice(0, 10)
