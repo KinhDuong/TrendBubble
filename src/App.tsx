@@ -4,6 +4,8 @@ import BubbleChart from './components/BubbleChart';
 import FileUpload from './components/FileUpload';
 import Login from './components/Login';
 import Footer from './components/Footer';
+import Header from './components/Header';
+import FilterMenu from './components/FilterMenu';
 import TrendingBubble from './pages/TrendingBubble';
 import { TrendingTopic } from './types';
 import { supabase } from './lib/supabase';
@@ -721,180 +723,36 @@ function HomePage() {
       </header>
       )}
 
-      <header className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-b`}>
-        <div className="px-4 md:px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="relative w-12 h-12 flex-shrink-0 rounded-full bg-gradient-to-br from-blue-400 via-blue-500 to-blue-600 flex items-center justify-center shadow-lg">
-                <div className="absolute inset-0 rounded-full bg-gradient-to-br from-white/30 to-transparent"></div>
-                <TrendingUp size={24} className="text-white relative z-10" />
-              </div>
-              <h1 className="text-xl md:text-2xl font-bold text-white">Google Trending Topics - Real-Time Search Trends</h1>
-            </div>
-            {!isAdmin && (
-              <button
-                onClick={() => setShowLogin(true)}
-                className={`${theme === 'dark' ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'} transition-colors`}
-                title="Admin Login"
-                aria-label="Admin Login"
-              >
-                <LogIn size={24} />
-              </button>
-            )}
-          </div>
-        </div>
-      </header>
+      <Header
+        theme={theme}
+        isAdmin={isAdmin}
+        onLoginClick={() => setShowLogin(true)}
+      />
 
-      {!loading && (
-        <nav className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`} aria-label="Trending topics filters">
-          <div className="px-4 md:px-6 py-3">
-            <div className="flex items-center justify-center">
-              <div className="overflow-x-auto">
-                <div className="flex items-center gap-3 md:gap-4">
-                  <button
-                    onClick={() => setViewMode(viewMode === 'bubble' ? 'list' : 'bubble')}
-                    className={`px-4 py-1.5 text-xs font-medium ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'} rounded transition-colors text-white whitespace-nowrap`}
-                    aria-label={`Switch to ${viewMode === 'bubble' ? 'list' : 'bubble'} view`}
-                  >
-                    {viewMode === 'bubble' ? 'List' : 'Bubble'}
-                  </button>
-                  <button
-                    onClick={loadTopics}
-                    className={`flex items-center gap-1 px-2 md:px-4 py-1.5 text-xs font-medium ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'} rounded transition-colors text-white whitespace-nowrap`}
-                    aria-label="Refresh trending topics"
-                    title="Refresh trending topics"
-                  >
-                    <div className="relative h-3 w-3">
-                      <svg className="h-3 w-3 -rotate-90" viewBox="0 0 24 24">
-                        <circle
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          opacity="0.2"
-                        />
-                        <circle
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeDasharray={`${2 * Math.PI * 10}`}
-                          strokeDashoffset={`${2 * Math.PI * 10 * (1 - bubbleProgress / 100)}`}
-                          strokeLinecap="round"
-                        />
-                      </svg>
-                    </div>
-                    <span className="text-xs font-mono">{nextBubbleIn}</span>
-                  </button>
-                  <div className={`hidden md:block w-px h-6 ${theme === 'dark' ? 'bg-gray-600' : 'bg-gray-300'}`}></div>
-                  <div className="flex items-center gap-2">
-                    <select
-                      id="dateFilter"
-                      value={dateFilter}
-                      onChange={(e) => setDateFilter(e.target.value as 'now' | 'all' | '24h' | 'week' | 'month' | 'year')}
-                      className={`flex-1 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} border rounded px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500`}
-                      aria-label="Filter trending topics by date range"
-                    >
-                      <option value="now">Trending Now</option>
-                      <option value="all">All Time</option>
-                      <option value="24h">24 Hours</option>
-                      <option value="week">Week</option>
-                      <option value="month">Month</option>
-                      <option value="year">Year</option>
-                    </select>
-                  </div>
-                  <div className={`hidden md:block w-px h-6 ${theme === 'dark' ? 'bg-gray-600' : 'bg-gray-300'}`}></div>
-                  <div className="flex items-center gap-2">
-                    <select
-                      id="categoryFilter"
-                      value={categoryFilter}
-                      onChange={(e) => setCategoryFilter(e.target.value)}
-                      className={`flex-1 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} border rounded px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500`}
-                      aria-label="Filter trending topics by category"
-                    >
-                      <option value="all">All Categories</option>
-                      {categories.map(category => (
-                        <option key={category} value={category}>{category}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className={`hidden md:block w-px h-6 ${theme === 'dark' ? 'bg-gray-600' : 'bg-gray-300'}`}></div>
-                  {viewMode === 'bubble' && (
-                    <>
-                      <div className="flex items-center gap-2">
-                        <label htmlFor="maxBubbles" className="text-xs font-medium whitespace-nowrap text-white">
-                          Bubbles:
-                        </label>
-                        <select
-                          id="maxBubbles"
-                          value={maxBubbles}
-                          onChange={(e) => setMaxBubbles(Number(e.target.value))}
-                          className={`flex-1 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} border rounded px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500`}
-                          aria-label="Maximum number of bubbles to display"
-                        >
-                          <option value={20}>20</option>
-                          <option value={40}>40</option>
-                          <option value={50}>50</option>
-                          <option value={80}>80</option>
-                          <option value={100}>100</option>
-                          <option value={150}>150</option>
-                          <option value={200}>200</option>
-                        </select>
-                      </div>
-                      <div className={`hidden md:block w-px h-6 ${theme === 'dark' ? 'bg-gray-600' : 'bg-gray-300'}`}></div>
-                    </>
-                  )}
-                  <div className="flex items-center gap-2">
-                    <select
-                      id="themeFilter"
-                      value={theme}
-                      onChange={(e) => handleThemeChange(e.target.value as 'dark' | 'light')}
-                      className={`flex-1 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} border rounded px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500`}
-                      aria-label="Select theme style"
-                    >
-                      <option value="dark">Dark</option>
-                      <option value="light">Light</option>
-                    </select>
-                  </div>
-                  <div className={`hidden md:block w-px h-6 ${theme === 'dark' ? 'bg-gray-600' : 'bg-gray-300'}`}></div>
-                  <div className="flex items-center gap-1">
-                    <input
-                      id="searchQuery"
-                      type="text"
-                      value={searchQuery}
-                      onChange={(e) => {
-                        setSearchQuery(e.target.value);
-                        if (e.target.value.trim()) {
-                          setViewMode('list');
-                        }
-                      }}
-                      placeholder="Search bubbles..."
-                      className={`flex-1 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'} border rounded px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[140px]`}
-                      aria-label="Search trending topics"
-                    />
-                    {searchQuery && (
-                      <button
-                        onClick={() => {
-                          setSearchQuery('');
-                          setViewMode('bubble');
-                        }}
-                        className={`p-1 ${theme === 'dark' ? 'hover:bg-gray-600 text-white' : 'hover:bg-gray-200 text-gray-900'} rounded transition-colors`}
-                        aria-label="Clear search and return to bubble view"
-                      >
-                        <X size={14} />
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </nav>
-      )}
+      <FilterMenu
+        theme={theme}
+        loading={loading}
+        viewMode={viewMode}
+        dateFilter={dateFilter}
+        categoryFilter={categoryFilter}
+        categories={categories}
+        maxBubbles={maxBubbles}
+        searchQuery={searchQuery}
+        nextBubbleIn={nextBubbleIn}
+        bubbleProgress={bubbleProgress}
+        onViewModeChange={setViewMode}
+        onDateFilterChange={setDateFilter}
+        onCategoryFilterChange={setCategoryFilter}
+        onMaxBubblesChange={setMaxBubbles}
+        onThemeChange={handleThemeChange}
+        onSearchQueryChange={setSearchQuery}
+        onSearchClear={() => {
+          setSearchQuery('');
+          setViewMode('bubble');
+        }}
+        onRefresh={loadTopics}
+        variant="homepage"
+      />
 
       <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'} px-2 md:px-6 py-2 md:py-6 pb-0`}>
         {showBackups && (
