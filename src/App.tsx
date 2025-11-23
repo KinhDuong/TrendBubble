@@ -1115,7 +1115,7 @@ function HomePage() {
                   </div>
                 </div>
 
-                <section className="max-w-7xl mx-auto mt-8 mb-8 md:mb-8 mb-0" aria-labelledby="top-trending-heading">
+                <section className="max-w-7xl mx-auto mt-8 mb-0 md:mb-8" aria-labelledby="top-trending-heading">
                   <h2 id="top-trending-heading" className={`text-2xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                     Top 10 Trending Topics Today
                   </h2>
