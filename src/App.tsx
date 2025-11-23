@@ -54,6 +54,8 @@ function HomePage() {
   const [newPageSource, setNewPageSource] = useState<string>('all');
   const [newPageMetaTitle, setNewPageMetaTitle] = useState<string>('');
   const [newPageMetaDescription, setNewPageMetaDescription] = useState<string>('');
+  const [showAllPages, setShowAllPages] = useState(false);
+  const [allPages, setAllPages] = useState<any[]>([]);
   const [sources, setSources] = useState<Array<{value: string, label: string}>>([
     { value: 'all', label: 'All' },
     { value: 'google_trends', label: 'Google Trends' },
@@ -680,6 +682,43 @@ function HomePage() {
     }
   };
 
+  const loadAllPages = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('pages')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      setAllPages(data || []);
+      setShowAllPages(true);
+    } catch (error) {
+      console.error('Error loading pages:', error);
+      alert('Failed to load pages');
+    }
+  };
+
+  const handleDeletePage = async (pageId: string) => {
+    if (!confirm('Are you sure you want to delete this page?')) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('pages')
+        .delete()
+        .eq('id', pageId);
+
+      if (error) throw error;
+
+      await loadAllPages();
+    } catch (error) {
+      console.error('Error deleting page:', error);
+      alert('Failed to delete page');
+    }
+  };
+
   const getFilteredTopics = () => {
     if (!searchQuery.trim()) return topics;
 
@@ -904,12 +943,18 @@ function HomePage() {
                 }}
               />
             </div>
-            <div className={`${theme === 'dark' ? 'border-gray-700' : 'border-gray-300'} border-t pt-3`}>
+            <div className={`${theme === 'dark' ? 'border-gray-700' : 'border-gray-300'} border-t pt-3 flex gap-2`}>
               <button
                 onClick={() => setShowCreatePage(true)}
                 className={`px-3 py-1 ${theme === 'dark' ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-indigo-500 hover:bg-indigo-600'} rounded transition-colors text-xs font-medium text-white`}
               >
                 Create New Page
+              </button>
+              <button
+                onClick={loadAllPages}
+                className={`px-3 py-1 ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'} rounded transition-colors text-xs font-medium text-white`}
+              >
+                View All Pages
               </button>
             </div>
           </div>
@@ -1133,6 +1178,69 @@ function HomePage() {
                     </button>
                   </div>
                 </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {showAllPages && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col`}>
+              <div className={`${theme === 'dark' ? 'bg-gray-700 border-gray-600' : 'bg-gray-100 border-gray-200'} border-b px-6 py-4 flex justify-between items-center`}>
+                <h2 className="text-xl font-bold">All Pages</h2>
+                <button
+                  onClick={() => setShowAllPages(false)}
+                  className={`${theme === 'dark' ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'} text-2xl leading-none`}
+                >
+                  ×
+                </button>
+              </div>
+              <div className="p-6 overflow-y-auto">
+                {allPages.length === 0 ? (
+                  <div className={`text-center py-8 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                    No pages created yet.
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {allPages.map((page) => (
+                      <div
+                        key={page.id}
+                        className={`${theme === 'dark' ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'} border rounded-lg p-4`}
+                      >
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-semibold text-lg mb-1">{page.meta_title}</h3>
+                            <p className={`text-sm mb-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                              {page.meta_description}
+                            </p>
+                            <div className="flex flex-wrap items-center gap-3 text-xs">
+                              <a
+                                href={page.page_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className={`font-mono ${theme === 'dark' ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'} hover:underline`}
+                              >
+                                {page.page_url}
+                              </a>
+                              <span className={`px-2 py-0.5 rounded ${theme === 'dark' ? 'bg-gray-600 text-gray-300' : 'bg-gray-200 text-gray-700'}`}>
+                                Source: {sources.find(s => s.value === page.source)?.label || page.source}
+                              </span>
+                              <span className={`${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
+                                Created: {new Date(page.created_at).toLocaleDateString()}
+                              </span>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => handleDeletePage(page.id)}
+                            className={`px-3 py-1.5 ${theme === 'dark' ? 'bg-red-600 hover:bg-red-700' : 'bg-red-500 hover:bg-red-600'} rounded transition-colors text-xs font-medium text-white flex-shrink-0`}
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>
