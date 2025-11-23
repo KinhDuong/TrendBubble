@@ -23,6 +23,7 @@ function TrendingBubble() {
   const [dateFilter, setDateFilter] = useState<'now' | 'all' | '24h' | 'week' | 'month' | 'year'>('now');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [categories, setCategories] = useState<string[]>([]);
+  const [sources, setSources] = useState<string[]>([]);
   const [viewMode, setViewMode] = useState<'bubble' | 'list'>('bubble');
   const [loading, setLoading] = useState(true);
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
@@ -40,11 +41,13 @@ function TrendingBubble() {
   const [uploadMessage, setUploadMessage] = useState<string | null>(null);
   const [isPaused, setIsPaused] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
+  const [sourceFilter, setSourceFilter] = useState<string>('google_trends');
 
   useEffect(() => {
     loadTopics();
     loadThemePreference();
     loadCategories();
+    loadSources();
     updateCountdown();
     const interval = setInterval(updateCountdown, 1000);
     return () => clearInterval(interval);
@@ -76,7 +79,7 @@ function TrendingBubble() {
 
   useEffect(() => {
     loadTopics();
-  }, [dateFilter, categoryFilter]);
+  }, [dateFilter, categoryFilter, sourceFilter]);
 
   const loadThemePreference = async () => {
     try {
@@ -171,6 +174,10 @@ function TrendingBubble() {
         query = query.eq('category', categoryFilter);
       }
 
+      if (sourceFilter !== 'all') {
+        query = query.eq('source', sourceFilter);
+      }
+
       const { data, error } = await query.order('rank', { ascending: true });
 
       if (error) throw error;
@@ -183,7 +190,8 @@ function TrendingBubble() {
           url: topic.url,
           createdAt: topic.created_at,
           pubDate: topic.pub_date,
-          category: topic.category
+          category: topic.category,
+          source: topic.source
         }));
         setTopics(formattedTopics);
       } else {
@@ -212,6 +220,25 @@ function TrendingBubble() {
       }
     } catch (error) {
       console.error('Error loading categories:', error);
+    }
+  };
+
+  const loadSources = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('trending_topics')
+        .select('source')
+        .not('source', 'is', null)
+        .order('source');
+
+      if (error) throw error;
+
+      if (data) {
+        const uniqueSources = [...new Set(data.map(item => item.source).filter(Boolean))] as string[];
+        setSources(uniqueSources);
+      }
+    } catch (error) {
+      console.error('Error loading sources:', error);
     }
   };
 
@@ -361,6 +388,7 @@ function TrendingBubble() {
             url: topic.url || existing.url,
             pub_date: earliestPubDate,
             category: topic.category || existing.category,
+            source: sourceFilter === 'all' ? existing.source : sourceFilter,
             created_at: existing.created_at
           });
 
@@ -381,7 +409,8 @@ function TrendingBubble() {
             rank: index + 1,
             url: topic.url,
             pub_date: topic.pubDate,
-            category: topic.category
+            category: topic.category,
+            source: sourceFilter === 'all' ? 'google_trends' : sourceFilter
           };
 
           if (topic.pubDate) {
@@ -428,7 +457,8 @@ function TrendingBubble() {
                   rank: topic.rank,
                   url: topic.url,
                   category: topic.category,
-                  pub_date: topic.pub_date
+                  pub_date: topic.pub_date,
+                  source: topic.source
                 })
                 .eq('id', (await supabase
                   .from('trending_topics')
@@ -636,7 +666,7 @@ function TrendingBubble() {
               </button>
             </div>
           </div>
-          <FileUpload onUpload={handleFileUpload} theme={theme} />
+          <FileUpload onUpload={handleFileUpload} theme={theme} sourceFilter={sourceFilter} />
         </div>
       </header>
       )}
@@ -655,6 +685,8 @@ function TrendingBubble() {
         dateFilter={dateFilter}
         categoryFilter={categoryFilter}
         categories={categories}
+        sourceFilter={sourceFilter}
+        sources={sources}
         maxBubbles={maxBubbles}
         isPaused={isPaused}
         nextBubbleIn={nextBubbleIn}
@@ -664,6 +696,7 @@ function TrendingBubble() {
         onViewModeChange={setViewMode}
         onDateFilterChange={setDateFilter}
         onCategoryFilterChange={setCategoryFilter}
+        onSourceFilterChange={setSourceFilter}
         onMaxBubblesChange={setMaxBubbles}
         onThemeChange={handleThemeChange}
         onPauseToggle={() => setIsPaused(!isPaused)}

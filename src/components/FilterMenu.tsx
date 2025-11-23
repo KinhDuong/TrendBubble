@@ -7,6 +7,8 @@ interface FilterMenuProps {
   dateFilter: 'now' | 'all' | '24h' | 'week' | 'month' | 'year';
   categoryFilter: string;
   categories: string[];
+  sourceFilter?: string;
+  sources?: string[];
   maxBubbles?: number;
   searchQuery?: string;
   isPaused?: boolean;
@@ -17,6 +19,7 @@ interface FilterMenuProps {
   onViewModeChange: (mode: 'bubble' | 'list') => void;
   onDateFilterChange: (filter: 'now' | 'all' | '24h' | 'week' | 'month' | 'year') => void;
   onCategoryFilterChange: (category: string) => void;
+  onSourceFilterChange?: (source: string) => void;
   onMaxBubblesChange?: (max: number) => void;
   onThemeChange: (theme: 'dark' | 'light') => void;
   onSearchQueryChange?: (query: string) => void;
@@ -33,6 +36,8 @@ export default function FilterMenu({
   dateFilter,
   categoryFilter,
   categories,
+  sourceFilter,
+  sources,
   maxBubbles,
   searchQuery,
   isPaused,
@@ -43,6 +48,7 @@ export default function FilterMenu({
   onViewModeChange,
   onDateFilterChange,
   onCategoryFilterChange,
+  onSourceFilterChange,
   onMaxBubblesChange,
   onThemeChange,
   onSearchQueryChange,
@@ -101,6 +107,27 @@ export default function FilterMenu({
                   ))}
                 </select>
                 <Divider />
+                {sourceFilter !== undefined && sources && onSourceFilterChange && (
+                  <>
+                    <label htmlFor="sourceFilter" className="text-xs md:text-sm font-medium text-white">
+                      Source:
+                    </label>
+                    <select
+                      id="sourceFilter"
+                      value={sourceFilter}
+                      onChange={(e) => onSourceFilterChange(e.target.value)}
+                      className={`${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} border rounded px-2 md:px-3 py-1 md:py-1.5 text-xs md:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                    >
+                      <option value="all">All</option>
+                      {sources.map(source => (
+                        <option key={source} value={source}>
+                          {source === 'google_trends' ? 'Google Trends' : source.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+                        </option>
+                      ))}
+                    </select>
+                    <Divider />
+                  </>
+                )}
                 <label htmlFor="dateFilter" className="text-xs md:text-sm font-medium text-white">
                   Date:
                 </label>
