@@ -882,7 +882,7 @@ function HomePage() {
                           setSearchQuery('');
                           setViewMode('bubble');
                         }}
-                        className={`p-1 ${theme === 'dark' ? 'hover:bg-gray-600' : 'hover:bg-gray-200'} rounded transition-colors`}
+                        className={`p-1 ${theme === 'dark' ? 'hover:bg-gray-600 text-white' : 'hover:bg-gray-200 text-gray-900'} rounded transition-colors`}
                         aria-label="Clear search and return to bubble view"
                       >
                         <X size={14} />
