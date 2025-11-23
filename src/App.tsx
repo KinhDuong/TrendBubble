@@ -8,6 +8,7 @@ import Footer from './components/Footer';
 import Header from './components/Header';
 import FilterMenu from './components/FilterMenu';
 import TrendingBubble from './pages/TrendingBubble';
+import DynamicPage from './pages/DynamicPage';
 import { TrendingTopic } from './types';
 import { supabase } from './lib/supabase';
 import { useAuth } from './hooks/useAuth';
@@ -48,6 +49,11 @@ function HomePage() {
   const [showAddSource, setShowAddSource] = useState(false);
   const [newSourceValue, setNewSourceValue] = useState<string>('');
   const [newSourceLabel, setNewSourceLabel] = useState<string>('');
+  const [showCreatePage, setShowCreatePage] = useState(false);
+  const [newPageUrl, setNewPageUrl] = useState<string>('');
+  const [newPageSource, setNewPageSource] = useState<string>('all');
+  const [newPageMetaTitle, setNewPageMetaTitle] = useState<string>('');
+  const [newPageMetaDescription, setNewPageMetaDescription] = useState<string>('');
   const [sources, setSources] = useState<Array<{value: string, label: string}>>([
     { value: 'all', label: 'All' },
     { value: 'google_trends', label: 'Google Trends' },
@@ -624,6 +630,56 @@ function HomePage() {
     setShowAddSource(false);
   };
 
+  const handleCreatePage = async () => {
+    if (!newPageUrl.trim() || !newPageMetaTitle.trim() || !newPageMetaDescription.trim()) {
+      alert('Please fill in all fields');
+      return;
+    }
+
+    let pageUrl = newPageUrl.trim();
+    if (!pageUrl.startsWith('/')) {
+      pageUrl = '/' + pageUrl;
+    }
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (!user) {
+        alert('You must be logged in to create a page');
+        return;
+      }
+
+      const { error } = await supabase
+        .from('pages')
+        .insert({
+          page_url: pageUrl,
+          source: newPageSource,
+          meta_title: newPageMetaTitle,
+          meta_description: newPageMetaDescription,
+          user_id: user.id
+        });
+
+      if (error) {
+        if (error.code === '23505') {
+          alert('A page with this URL already exists');
+        } else {
+          throw error;
+        }
+        return;
+      }
+
+      alert(`Page created successfully! Visit ${pageUrl}`);
+      setNewPageUrl('');
+      setNewPageSource('all');
+      setNewPageMetaTitle('');
+      setNewPageMetaDescription('');
+      setShowCreatePage(false);
+    } catch (error) {
+      console.error('Error creating page:', error);
+      alert('Failed to create page');
+    }
+  };
+
   const getFilteredTopics = () => {
     if (!searchQuery.trim()) return topics;
 
@@ -832,6 +888,12 @@ function HomePage() {
               className={`px-3 py-1 ${theme === 'dark' ? 'bg-teal-600 hover:bg-teal-700' : 'bg-teal-500 hover:bg-teal-600'} rounded transition-colors text-xs font-medium text-white`}
             >
               Add Category
+            </button>
+            <button
+              onClick={() => setShowCreatePage(true)}
+              className={`px-3 py-1 ${theme === 'dark' ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-indigo-500 hover:bg-indigo-600'} rounded transition-colors text-xs font-medium text-white`}
+            >
+              Create New Page
             </button>
             <FileUpload
               onUpload={handleFileUpload}
@@ -1072,6 +1134,108 @@ function HomePage() {
           </div>
         )}
 
+        {showCreatePage && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto`}>
+              <div className={`${theme === 'dark' ? 'bg-gray-700 border-gray-600' : 'bg-gray-100 border-gray-200'} border-b px-6 py-4 flex justify-between items-center sticky top-0 z-10`}>
+                <h2 className="text-xl font-bold">Create New Page</h2>
+                <button
+                  onClick={() => {
+                    setShowCreatePage(false);
+                    setNewPageUrl('');
+                    setNewPageSource('all');
+                    setNewPageMetaTitle('');
+                    setNewPageMetaDescription('');
+                  }}
+                  className={`${theme === 'dark' ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'} text-2xl leading-none`}
+                >
+                  ×
+                </button>
+              </div>
+              <div className="p-6">
+                <div className="space-y-4">
+                  <div>
+                    <label htmlFor="newPageUrl" className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                      Page URL *
+                    </label>
+                    <input
+                      id="newPageUrl"
+                      type="text"
+                      value={newPageUrl}
+                      onChange={(e) => setNewPageUrl(e.target.value)}
+                      placeholder="e.g., /sports-trends or sports-trends"
+                      className={`w-full ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'} border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                      autoFocus
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="newPageSource" className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                      Source Filter *
+                    </label>
+                    <select
+                      id="newPageSource"
+                      value={newPageSource}
+                      onChange={(e) => setNewPageSource(e.target.value)}
+                      className={`w-full ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                    >
+                      {sources.map(source => (
+                        <option key={source.value} value={source.value}>{source.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label htmlFor="newPageMetaTitle" className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                      Meta Title *
+                    </label>
+                    <input
+                      id="newPageMetaTitle"
+                      type="text"
+                      value={newPageMetaTitle}
+                      onChange={(e) => setNewPageMetaTitle(e.target.value)}
+                      placeholder="e.g., Sports Trending Topics Today"
+                      className={`w-full ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'} border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="newPageMetaDescription" className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                      Meta Description *
+                    </label>
+                    <textarea
+                      id="newPageMetaDescription"
+                      value={newPageMetaDescription}
+                      onChange={(e) => setNewPageMetaDescription(e.target.value)}
+                      placeholder="e.g., Discover the latest sports trending topics..."
+                      rows={4}
+                      className={`w-full ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'} border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none`}
+                    />
+                  </div>
+                  <div className="flex justify-end gap-3">
+                    <button
+                      onClick={() => {
+                        setShowCreatePage(false);
+                        setNewPageUrl('');
+                        setNewPageSource('all');
+                        setNewPageMetaTitle('');
+                        setNewPageMetaDescription('');
+                      }}
+                      className={`px-4 py-2 ${theme === 'dark' ? 'bg-gray-600 hover:bg-gray-700' : 'bg-gray-300 hover:bg-gray-400'} rounded-lg transition-colors text-sm font-medium`}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleCreatePage}
+                      disabled={!newPageUrl.trim() || !newPageMetaTitle.trim() || !newPageMetaDescription.trim()}
+                      className={`px-4 py-2 ${theme === 'dark' ? 'bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-600' : 'bg-indigo-500 hover:bg-indigo-600 disabled:bg-gray-300'} disabled:cursor-not-allowed rounded-lg transition-colors text-sm font-medium text-white`}
+                    >
+                      Create Page
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         <main role="main" aria-label="Trending topics visualization">
         {loading && (
           <div className={`text-center py-8 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>Loading 50 bubbles...</div>
@@ -1284,6 +1448,7 @@ function App() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/trending-bubble" element={<TrendingBubble />} />
+        <Route path="*" element={<DynamicPage />} />
       </Routes>
     </BrowserRouter>
   );
