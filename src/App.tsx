@@ -1019,7 +1019,7 @@ function HomePage() {
       />
 
       {!loading && topics.length > 0 && viewMode === 'bubble' && (
-        <div className="w-screen bg-white">
+        <div className="w-screen bg-white py-4">
           <div className="max-w-7xl mx-auto">
             <BubbleChart topics={topics} maxDisplay={maxBubbles} theme={theme} layout={bubbleLayout} onBubbleTimingUpdate={handleBubbleTimingUpdate} />
           </div>
