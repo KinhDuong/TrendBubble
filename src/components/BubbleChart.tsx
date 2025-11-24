@@ -316,15 +316,20 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
           const maxRadius = Math.min(canvasDisplayWidth, canvasDisplayHeight) / 2 - padding - radius * 2;
 
           const displayCount = Math.min(maxDisplay, topics.length);
-          const itemsPerRing = Math.ceil(Math.sqrt(displayCount / 2));
+          // Increase items per ring to reduce overlap
+          const itemsPerRing = Math.max(8, Math.ceil(Math.sqrt(displayCount * 1.5)));
           const volumeRatio = topic.searchVolume / (Math.max(...topics.map(t => t.searchVolume)) || 1);
 
           const ringCount = Math.ceil(displayCount / itemsPerRing);
           const ringIndex = Math.floor(topicIndex / itemsPerRing);
           const posInRing = topicIndex % itemsPerRing;
+          const itemsInThisRing = Math.min(itemsPerRing, displayCount - ringIndex * itemsPerRing);
 
-          const distance = maxRadius * (0.3 + (ringIndex / Math.max(1, ringCount - 1)) * 0.6);
-          const angleStep = (Math.PI * 2) / itemsPerRing;
+          // Spread rings more evenly across the space
+          const distance = ringCount === 1
+            ? maxRadius * 0.5
+            : maxRadius * (0.2 + (ringIndex / (ringCount - 1)) * 0.75);
+          const angleStep = (Math.PI * 2) / itemsInThisRing;
           const angle = posInRing * angleStep;
 
           initialX = centerX + Math.cos(angle) * distance;
@@ -342,13 +347,19 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
           const sortedIndex = sortedTopics.findIndex(t => t.name === topic.name);
           const displayCount = Math.min(maxDisplay, topics.length);
 
-          const availableWidth = canvasDisplayWidth - padding * 2 - radius * 4;
-          const spacing = availableWidth / Math.max(1, displayCount - 1);
-          initialX = padding + radius * 2 + sortedIndex * spacing;
+          // Use more horizontal space and ensure minimum spacing
+          const availableWidth = canvasDisplayWidth - padding * 2;
+          const minSpacing = radius * 2.5;
+          const calculatedSpacing = availableWidth / Math.max(1, displayCount);
+          const spacing = Math.max(minSpacing, calculatedSpacing);
+          initialX = padding + sortedIndex * spacing + spacing / 2;
 
+          // Spread bubbles more vertically to reduce overlap
           const normalizedVolume = topic.searchVolume / (Math.max(...topics.map(t => t.searchVolume)) || 1);
-          const availableHeight = canvasDisplayHeight - padding * 2 - radius * 4;
-          initialY = canvasDisplayHeight - padding - radius * 2 - normalizedVolume * availableHeight * 0.7;
+          const availableHeight = canvasDisplayHeight - padding * 2;
+          const minY = padding + radius * 2;
+          const maxY = canvasDisplayHeight - padding - radius * 2;
+          initialY = maxY - normalizedVolume * (maxY - minY) * 0.8;
 
           return { x: initialX, y: initialY };
         }
@@ -363,16 +374,20 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
             return { x: centerX, y: centerY };
           }
 
-          const itemsPerRing = 8;
-          const ring = Math.floor(volumeIndex / itemsPerRing);
-          const posInRing = volumeIndex % itemsPerRing;
+          // Increase items per ring based on ring number to reduce overlap
+          const baseItemsPerRing = 6;
+          const ring = volumeIndex === 0 ? 0 : Math.floor((volumeIndex - 1) / baseItemsPerRing) + 1;
+          const itemsInPreviousRings = ring === 0 ? 0 : 1 + (ring - 1) * baseItemsPerRing;
+          const posInRing = volumeIndex - itemsInPreviousRings - 1;
+          const itemsPerRing = ring === 0 ? 1 : baseItemsPerRing + (ring - 1) * 2;
 
           const averageRadius = bubblesRef.current.length > 0
             ? bubblesRef.current.reduce((sum, b) => sum + b.baseRadius, 0) / bubblesRef.current.length
             : radius;
 
-          const ringSpacing = Math.max(averageRadius * 4, 120);
-          const ringRadius = (ring + 1) * ringSpacing;
+          // Increase ring spacing to prevent overlap
+          const ringSpacing = Math.max(averageRadius * 5, 140);
+          const ringRadius = ring * ringSpacing;
           const angle = (posInRing / itemsPerRing) * Math.PI * 2;
 
           initialX = centerX + Math.cos(angle) * ringRadius;
