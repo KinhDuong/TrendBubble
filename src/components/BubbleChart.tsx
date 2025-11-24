@@ -219,15 +219,23 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
       existingBubbles: Bubble[]
     ): { x: number; y: number } => {
       const topic = topics[topicIndex];
-      const padding = 50;
+      const padding = 80;
 
       switch (layout) {
         case 'grid': {
-          const cols = Math.ceil(Math.sqrt(maxDisplay));
-          const cellWidth = (canvasDisplayWidth - padding * 2) / cols;
-          const cellHeight = (canvasDisplayHeight - padding * 2) / cols;
+          const displayCount = Math.min(maxDisplay, topics.length);
+          const cols = Math.ceil(Math.sqrt(displayCount));
+          const rows = Math.ceil(displayCount / cols);
+
+          const availableWidth = canvasDisplayWidth - padding * 2;
+          const availableHeight = canvasDisplayHeight - padding * 2;
+
+          const cellWidth = availableWidth / cols;
+          const cellHeight = availableHeight / rows;
+
           const row = Math.floor(topicIndex / cols);
           const col = topicIndex % cols;
+
           return {
             x: padding + col * cellWidth + cellWidth / 2,
             y: padding + row * cellHeight + cellHeight / 2
@@ -237,9 +245,16 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
         case 'circular': {
           const centerX = canvasDisplayWidth / 2;
           const centerY = canvasDisplayHeight / 2;
-          const maxRadius = Math.min(canvasDisplayWidth, canvasDisplayHeight) / 2 - padding - radius;
-          const angle = (topicIndex / maxDisplay) * Math.PI * 2;
-          const distance = (topic.searchVolume / topics[0]?.searchVolume || 0.5) * maxRadius * 0.7;
+          const maxRadius = Math.min(canvasDisplayWidth, canvasDisplayHeight) / 2 - padding - radius * 2;
+
+          const displayCount = Math.min(maxDisplay, topics.length);
+          const angle = (topicIndex / displayCount) * Math.PI * 2;
+
+          const volumeRatio = topic.searchVolume / (Math.max(...topics.map(t => t.searchVolume)) || 1);
+          const minDistance = maxRadius * 0.3;
+          const maxDistance = maxRadius * 0.85;
+          const distance = minDistance + volumeRatio * (maxDistance - minDistance);
+
           return {
             x: centerX + Math.cos(angle) * distance,
             y: centerY + Math.sin(angle) * distance
@@ -252,10 +267,18 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
             const dateB = new Date(b.createdAt || b.pubDate || '').getTime();
             return dateA - dateB;
           });
+
           const sortedIndex = sortedTopics.findIndex(t => t.name === topic.name);
-          const x = padding + (sortedIndex / Math.max(1, topics.length - 1)) * (canvasDisplayWidth - padding * 2);
-          const normalizedVolume = topic.searchVolume / (topics[0]?.searchVolume || 1);
-          const y = canvasDisplayHeight - padding - normalizedVolume * (canvasDisplayHeight - padding * 2) * 0.8;
+          const displayCount = Math.min(maxDisplay, topics.length);
+
+          const availableWidth = canvasDisplayWidth - padding * 2;
+          const spacing = availableWidth / Math.max(1, displayCount - 1);
+          const x = padding + sortedIndex * spacing;
+
+          const normalizedVolume = topic.searchVolume / (Math.max(...topics.map(t => t.searchVolume)) || 1);
+          const availableHeight = canvasDisplayHeight - padding * 2 - radius * 2;
+          const y = canvasDisplayHeight - padding - radius - normalizedVolume * availableHeight * 0.7;
+
           return { x, y };
         }
 
@@ -264,10 +287,23 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
           const centerY = canvasDisplayHeight / 2;
           const sortedByVolume = [...topics].sort((a, b) => b.searchVolume - a.searchVolume);
           const volumeIndex = sortedByVolume.findIndex(t => t.name === topic.name);
-          const ring = Math.floor(volumeIndex / 8);
-          const posInRing = volumeIndex % 8;
-          const ringRadius = ring * 120 + 100;
-          const angle = (posInRing / 8) * Math.PI * 2;
+
+          if (volumeIndex === 0) {
+            return { x: centerX, y: centerY };
+          }
+
+          const itemsPerRing = 8;
+          const ring = Math.floor(volumeIndex / itemsPerRing);
+          const posInRing = volumeIndex % itemsPerRing;
+
+          const averageRadius = bubblesRef.current.length > 0
+            ? bubblesRef.current.reduce((sum, b) => sum + b.baseRadius, 0) / bubblesRef.current.length
+            : radius;
+
+          const ringSpacing = Math.max(averageRadius * 3, 100);
+          const ringRadius = (ring + 1) * ringSpacing;
+          const angle = (posInRing / itemsPerRing) * Math.PI * 2;
+
           return {
             x: centerX + Math.cos(angle) * ringRadius,
             y: centerY + Math.sin(angle) * ringRadius
@@ -289,10 +325,14 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
           const indexInCategory = topicsInCategory.findIndex(t => t.name === topic.name);
 
           const cols = Math.ceil(Math.sqrt(categories.length));
+          const rows = Math.ceil(categories.length / cols);
           const categoryCol = categoryIndex % cols;
           const categoryRow = Math.floor(categoryIndex / cols);
-          const clusterWidth = (canvasDisplayWidth - padding * 2) / cols;
-          const clusterHeight = (canvasDisplayHeight - padding * 2) / cols;
+
+          const availableWidth = canvasDisplayWidth - padding * 2;
+          const availableHeight = canvasDisplayHeight - padding * 2;
+          const clusterWidth = availableWidth / cols;
+          const clusterHeight = availableHeight / rows;
 
           const clusterCenterX = padding + categoryCol * clusterWidth + clusterWidth / 2;
           const clusterCenterY = padding + categoryRow * clusterHeight + clusterHeight / 2;
@@ -300,26 +340,33 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
           const itemsPerRow = Math.ceil(Math.sqrt(topicsInCategory.length));
           const itemCol = indexInCategory % itemsPerRow;
           const itemRow = Math.floor(indexInCategory / itemsPerRow);
-          const itemSpacing = Math.min(clusterWidth, clusterHeight) / (itemsPerRow + 1);
+
+          const clusterPadding = Math.min(clusterWidth, clusterHeight) * 0.15;
+          const itemSpacing = (Math.min(clusterWidth, clusterHeight) - clusterPadding * 2) / (itemsPerRow + 0.5);
 
           return {
-            x: clusterCenterX - (itemsPerRow * itemSpacing) / 2 + itemCol * itemSpacing + itemSpacing,
-            y: clusterCenterY - (itemsPerRow * itemSpacing) / 2 + itemRow * itemSpacing + itemSpacing
+            x: clusterCenterX - (itemsPerRow * itemSpacing) / 2 + itemCol * itemSpacing + itemSpacing / 2,
+            y: clusterCenterY - (itemsPerRow * itemSpacing) / 2 + itemRow * itemSpacing + itemSpacing / 2
           };
         }
 
         case 'scatter': {
           const ageInDays = topic.createdAt || topic.pubDate
             ? (Date.now() - new Date(topic.createdAt || topic.pubDate || '').getTime()) / (1000 * 60 * 60 * 24)
-            : 0;
+            : Math.random() * 30;
+
           const maxAge = Math.max(...topics.map(t => {
             const date = t.createdAt || t.pubDate;
             return date ? (Date.now() - new Date(date).getTime()) / (1000 * 60 * 60 * 24) : 0;
           }), 1);
 
-          const x = padding + (ageInDays / maxAge) * (canvasDisplayWidth - padding * 2);
+          const availableWidth = canvasDisplayWidth - padding * 2 - radius * 2;
+          const availableHeight = canvasDisplayHeight - padding * 2 - radius * 2;
+
+          const x = padding + radius + (ageInDays / maxAge) * availableWidth;
           const normalizedVolume = topic.searchVolume / (Math.max(...topics.map(t => t.searchVolume)) || 1);
-          const y = canvasDisplayHeight - padding - normalizedVolume * (canvasDisplayHeight - padding * 2);
+          const y = canvasDisplayHeight - padding - radius - normalizedVolume * availableHeight;
+
           return { x, y };
         }
 
@@ -336,18 +383,28 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
           let placed = false;
           let attempts = 0;
           let x = centerX, y = centerY;
+          const spiralIncrement = 0.5;
+          let spiralRadius = radius * 2;
+          let spiralAngle = volumeIndex * 0.5;
 
-          while (!placed && attempts < 100) {
-            const angle = Math.random() * Math.PI * 2;
-            const distance = Math.sqrt(volumeIndex) * radius * 2;
-            x = centerX + Math.cos(angle) * distance;
-            y = centerY + Math.sin(angle) * distance;
+          while (!placed && attempts < 200) {
+            spiralAngle += spiralIncrement;
+            spiralRadius += spiralIncrement * 2;
+
+            x = centerX + Math.cos(spiralAngle) * spiralRadius;
+            y = centerY + Math.sin(spiralAngle) * spiralRadius;
+
+            if (x < padding + radius || x > canvasDisplayWidth - padding - radius ||
+                y < padding + radius || y > canvasDisplayHeight - padding - radius) {
+              attempts++;
+              continue;
+            }
 
             const hasOverlap = existingBubbles.some(other => {
               const dx = x - other.x;
               const dy = y - other.y;
               const dist = Math.sqrt(dx * dx + dy * dy);
-              return dist < radius + other.radius;
+              return dist < radius + other.radius + 5;
             });
 
             if (!hasOverlap) placed = true;
