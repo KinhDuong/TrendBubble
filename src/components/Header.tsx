@@ -1,15 +1,31 @@
-import { TrendingUp, LogIn } from 'lucide-react';
+import { TrendingUp, Menu, X, Home, Compass, Mail, Info, LogIn, LogOut } from 'lucide-react';
+import { useState } from 'react';
 
 interface HeaderProps {
   theme: 'dark' | 'light';
   isAdmin: boolean;
   onLoginClick: () => void;
+  onLogout?: () => void;
   title?: string;
 }
 
-export default function Header({ theme, isAdmin, onLoginClick, title = 'Google Trending Topics - Real-Time Search Trends' }: HeaderProps) {
+export default function Header({ theme, isAdmin, onLoginClick, onLogout, title = 'Google Trending Topics - Real-Time Search Trends' }: HeaderProps) {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const handleLogout = () => {
+    setIsMenuOpen(false);
+    if (onLogout) {
+      onLogout();
+    }
+  };
+
+  const handleLogin = () => {
+    setIsMenuOpen(false);
+    onLoginClick();
+  };
+
   return (
-    <header className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200 shadow-sm'} border-b`}>
+    <header className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200 shadow-sm'} border-b relative`}>
       <div className="px-4 md:px-6 py-4">
         <div className="flex items-center justify-between">
           <a href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
@@ -19,18 +35,74 @@ export default function Header({ theme, isAdmin, onLoginClick, title = 'Google T
             </div>
             <h1 className={`text-xl md:text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{title}</h1>
           </a>
-          {!isAdmin && (
-            <button
-              onClick={onLoginClick}
-              className={`${theme === 'dark' ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'} transition-colors`}
-              title="Admin Login"
-              aria-label="Admin Login"
-            >
-              <LogIn size={24} />
-            </button>
-          )}
+
+          <button
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className={`${theme === 'dark' ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'} transition-colors`}
+            aria-label="Menu"
+            aria-expanded={isMenuOpen}
+          >
+            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
         </div>
       </div>
+
+      {isMenuOpen && (
+        <div className={`absolute top-full right-0 w-64 ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-l border-b shadow-lg z-50`}>
+          <nav className="py-2">
+            <a
+              href="/"
+              className={`flex items-center gap-3 px-6 py-3 ${theme === 'dark' ? 'text-gray-300 hover:bg-gray-700 hover:text-white' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'} transition-colors`}
+              onClick={() => setIsMenuOpen(false)}
+            >
+              <Home size={20} />
+              <span>Home</span>
+            </a>
+            <a
+              href="/"
+              className={`flex items-center gap-3 px-6 py-3 ${theme === 'dark' ? 'text-gray-300 hover:bg-gray-700 hover:text-white' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'} transition-colors`}
+              onClick={() => setIsMenuOpen(false)}
+            >
+              <Compass size={20} />
+              <span>Explore Topics</span>
+            </a>
+            <a
+              href="mailto:contact@example.com"
+              className={`flex items-center gap-3 px-6 py-3 ${theme === 'dark' ? 'text-gray-300 hover:bg-gray-700 hover:text-white' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'} transition-colors`}
+              onClick={() => setIsMenuOpen(false)}
+            >
+              <Mail size={20} />
+              <span>Contact</span>
+            </a>
+            <a
+              href="#about"
+              className={`flex items-center gap-3 px-6 py-3 ${theme === 'dark' ? 'text-gray-300 hover:bg-gray-700 hover:text-white' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'} transition-colors`}
+              onClick={() => setIsMenuOpen(false)}
+            >
+              <Info size={20} />
+              <span>About</span>
+            </a>
+            <div className={`border-t ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'} my-2`}></div>
+            {isAdmin ? (
+              <button
+                onClick={handleLogout}
+                className={`flex items-center gap-3 px-6 py-3 w-full text-left ${theme === 'dark' ? 'text-gray-300 hover:bg-gray-700 hover:text-white' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'} transition-colors`}
+              >
+                <LogOut size={20} />
+                <span>Logout</span>
+              </button>
+            ) : (
+              <button
+                onClick={handleLogin}
+                className={`flex items-center gap-3 px-6 py-3 w-full text-left ${theme === 'dark' ? 'text-gray-300 hover:bg-gray-700 hover:text-white' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'} transition-colors`}
+              >
+                <LogIn size={20} />
+                <span>Login</span>
+              </button>
+            )}
+          </nav>
+        </div>
+      )}
     </header>
   );
 }

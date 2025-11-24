@@ -761,6 +761,7 @@ function TrendingBubble() {
         theme={theme}
         isAdmin={isAdmin}
         onLoginClick={() => setShowLogin(true)}
+        onLogout={logout}
         title="Google Trending Topics"
       />
 

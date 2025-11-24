@@ -988,6 +988,7 @@ function HomePage() {
         theme={theme}
         isAdmin={isAdmin}
         onLoginClick={() => setShowLogin(true)}
+        onLogout={logout}
       />
 
       <FilterMenu

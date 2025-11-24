@@ -26,7 +26,7 @@ interface PageData {
 function DynamicPage() {
   const { '*': urlPath } = useParams();
   const navigate = useNavigate();
-  const { isAdmin } = useAuth();
+  const { isAdmin, logout } = useAuth();
   const [pageData, setPageData] = useState<PageData | null>(null);
   const [topics, setTopics] = useState<TrendingTopic[]>([]);
   const [maxBubbles, setMaxBubbles] = useState<number>(50);
@@ -509,6 +509,7 @@ function DynamicPage() {
         theme={theme}
         isAdmin={isAdmin}
         onLoginClick={() => {}}
+        onLogout={logout}
         title={pageData.meta_title}
       />
 
