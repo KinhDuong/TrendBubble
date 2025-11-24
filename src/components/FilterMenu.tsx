@@ -174,14 +174,30 @@ export default function FilterMenu({
                   <option value="year">Year</option>
                 </select>
                 <Divider />
-                <button
-                  onClick={() => onThemeChange(theme === 'dark' ? 'light' : 'dark')}
-                  className={`flex items-center gap-1.5 px-3 md:px-4 py-1 md:py-1.5 text-xs md:text-sm font-medium ${theme === 'dark' ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'} rounded transition-colors ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}
-                  title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-                >
-                  {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
-                  {theme === 'dark' ? 'Light' : 'Dark'}
-                </button>
+                <div className={`flex items-center gap-1 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'} rounded p-1`}>
+                  <button
+                    onClick={() => onThemeChange('dark')}
+                    className={`flex items-center gap-1.5 px-2 md:px-3 py-1 md:py-1.5 text-xs md:text-sm font-medium rounded transition-colors ${
+                      theme === 'dark'
+                        ? 'bg-blue-600 text-white'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    <Moon size={16} />
+                    Dark
+                  </button>
+                  <button
+                    onClick={() => onThemeChange('light')}
+                    className={`flex items-center gap-1.5 px-2 md:px-3 py-1 md:py-1.5 text-xs md:text-sm font-medium rounded transition-colors ${
+                      theme === 'light'
+                        ? 'bg-blue-600 text-white'
+                        : 'text-gray-300 hover:text-gray-100'
+                    }`}
+                  >
+                    <Sun size={16} />
+                    Light
+                  </button>
+                </div>
                 <Divider />
                 <div className="flex items-center gap-2">
                   <button
@@ -359,14 +375,30 @@ export default function FilterMenu({
                 </>
               )}
               <div className="flex items-center gap-2">
-                <button
-                  onClick={() => onThemeChange(theme === 'dark' ? 'light' : 'dark')}
-                  className={`flex-1 flex items-center justify-center gap-1.5 px-2 py-1 text-xs font-medium ${theme === 'dark' ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'} rounded transition-colors ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}
-                  title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-                >
-                  {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
-                  {theme === 'dark' ? 'Light' : 'Dark'}
-                </button>
+                <div className={`flex-1 flex items-center gap-1 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'} rounded p-1`}>
+                  <button
+                    onClick={() => onThemeChange('dark')}
+                    className={`flex-1 flex items-center justify-center gap-1.5 px-2 py-1 text-xs font-medium rounded transition-colors ${
+                      theme === 'dark'
+                        ? 'bg-blue-600 text-white'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    <Moon size={14} />
+                    Dark
+                  </button>
+                  <button
+                    onClick={() => onThemeChange('light')}
+                    className={`flex-1 flex items-center justify-center gap-1.5 px-2 py-1 text-xs font-medium rounded transition-colors ${
+                      theme === 'light'
+                        ? 'bg-blue-600 text-white'
+                        : 'text-gray-300 hover:text-gray-100'
+                    }`}
+                  >
+                    <Sun size={14} />
+                    Light
+                  </button>
+                </div>
               </div>
               <Divider />
               {onSearchQueryChange && onSearchClear && (
