@@ -370,6 +370,19 @@ function DynamicPage() {
   const pageUrl = typeof window !== 'undefined' ? window.location.href : `https://googletrendingtopics.com/${pageData.page_url}`;
   const sourceName = sources.find(s => s.value === pageData.source)?.label || 'Custom';
 
+  const extractTopicType = (title: string) => {
+    const lowerTitle = title.toLowerCase();
+    if (lowerTitle.includes('trending topics')) {
+      return title.replace(/trending topics/i, '').trim();
+    }
+    return title;
+  };
+
+  const topicType = extractTopicType(pageData.meta_title);
+  const top10Title = showFullList
+    ? `All ${topicType || 'Trending Topics'}`
+    : `Top 10 ${topicType || 'Trending Topics'}`;
+
   const enhancedTitle = `${pageData.meta_title} - ${currentDate}`;
   const enhancedDescription = topTopicNames
     ? `${pageData.meta_description} Top trending: ${topTopicNames}. Updated ${lastUpdated.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}.`
@@ -618,10 +631,10 @@ function DynamicPage() {
 
                   <section className="max-w-7xl mx-auto mt-8 mb-0 md:mb-8" aria-labelledby="top-trending-heading">
                     <h2 id="top-trending-heading" className={`text-2xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                      {showFullList ? 'All Trending Topics' : 'Top 10 Trending Topics'}
+                      {top10Title}
                     </h2>
                     <p className={`mb-4 text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                      {showFullList ? 'Complete list of all trending topics ranked by search volume' : 'Discover the most popular trending topics ranked by search volume'}
+                      {showFullList ? 'Complete list ranked by search volume' : 'Discover the most popular topics ranked by search volume'}
                     </p>
                     <ol className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-lg overflow-hidden shadow-sm list-none`} itemScope itemType="https://schema.org/ItemList">
                       {displayTopics.map((topic, index) => (
