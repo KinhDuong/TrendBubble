@@ -201,7 +201,9 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
 
       const scaledSize = baseMin + exponentialScale * (baseMax - baseMin);
 
-      return Math.max(baseMin, scaledSize);
+      const layoutScaleFactor = layout === 'force' ? 1.0 : 0.4;
+
+      return Math.max(baseMin * layoutScaleFactor, scaledSize * layoutScaleFactor);
     };
 
     const getRandomColor = (index: number) => {
