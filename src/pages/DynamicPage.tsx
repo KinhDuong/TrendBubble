@@ -558,7 +558,7 @@ function DynamicPage() {
                     </div>
                   </header>
                   <div className={`prose ${theme === 'dark' ? 'prose-invert' : ''} max-w-none`}>
-                    <p className={`text-lg leading-relaxed mb-4 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                    <p className={`text-base leading-relaxed mb-4 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
                       {pageData.meta_description}
                     </p>
                     {topTopicNames && (
