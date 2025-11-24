@@ -9,7 +9,7 @@ interface HeaderProps {
   title?: string;
 }
 
-export default function Header({ theme, isAdmin, onLoginClick, onLogout, title = 'Google Trending Topics - Real-Time Search Trends' }: HeaderProps) {
+export default function Header({ theme, isAdmin, onLoginClick, onLogout, title = 'Trending Bubbles' }: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const handleLogout = () => {
