@@ -519,6 +519,8 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
 
       const usePhysics = layout === 'force';
 
+      const isStaticLayout = !usePhysics;
+
       return {
         topic,
         x,
@@ -527,13 +529,13 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
         layoutY: y,
         vx: usePhysics ? (Math.random() - 0.5) * 0.25 : 0,
         vy: usePhysics ? (Math.random() - 0.5) * 0.25 : 0,
-        radius,
+        radius: isStaticLayout ? radius : 0,
         baseRadius: radius,
         color: getRandomColor(topicIndex),
         createdAt: Date.now(),
         lifetime: randomLifetime,
-        isSpawning: true,
-        spawnProgress: 0,
+        isSpawning: !isStaticLayout,
+        spawnProgress: isStaticLayout ? 1 : 0,
         isPinned: pinnedTopics.has(topic.name),
         isComparing: comparingTopics.has(topic.name),
       };
@@ -543,9 +545,18 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
     const initialCount = Math.min(maxDisplay, topics.length);
     bubblesRef.current = [];
     initialLoadQueueRef.current = [];
-    for (let i = 0; i < initialCount; i++) {
-      initialLoadQueueRef.current.push(i);
+
+    if (layout === 'force') {
+      for (let i = 0; i < initialCount; i++) {
+        initialLoadQueueRef.current.push(i);
+      }
+    } else {
+      for (let i = 0; i < initialCount; i++) {
+        displayedIndicesRef.current.add(i);
+        bubblesRef.current.push(createBubble(i, bubblesRef.current));
+      }
     }
+
     nextIndexRef.current = initialCount;
     lastSpawnTimeRef.current = Date.now();
 
@@ -768,17 +779,19 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
             displayedIndicesRef.current.delete(topicIndex);
           }
 
-          let nextIndex = nextIndexRef.current;
-          if (nextIndex >= topics.length) {
-            nextIndex = 0;
-            nextIndexRef.current = 0;
-          }
+          if (layout === 'force') {
+            let nextIndex = nextIndexRef.current;
+            if (nextIndex >= topics.length) {
+              nextIndex = 0;
+              nextIndexRef.current = 0;
+            }
 
-          if (topics.length > 0) {
-            const newBubble = createBubble(nextIndex, bubblesRef.current);
-            displayedIndicesRef.current.add(nextIndex);
-            nextIndexRef.current = nextIndex + 1;
-            bubblesToAdd.push(newBubble);
+            if (topics.length > 0) {
+              const newBubble = createBubble(nextIndex, bubblesRef.current);
+              displayedIndicesRef.current.add(nextIndex);
+              nextIndexRef.current = nextIndex + 1;
+              bubblesToAdd.push(newBubble);
+            }
           }
           return false;
         }
@@ -786,6 +799,28 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
       });
 
       bubblesRef.current.push(...bubblesToAdd);
+
+      if (layout !== 'force' && bubblesRef.current.length < maxDisplay && topics.length > 0) {
+        const missingCount = maxDisplay - bubblesRef.current.length;
+        const currentBubbles = [...bubblesRef.current];
+
+        for (let i = 0; i < missingCount; i++) {
+          let nextIndex = nextIndexRef.current;
+          if (nextIndex >= topics.length) {
+            nextIndex = 0;
+            nextIndexRef.current = 0;
+          }
+
+          if (!displayedIndicesRef.current.has(nextIndex)) {
+            const newBubble = createBubble(nextIndex, currentBubbles);
+            displayedIndicesRef.current.add(nextIndex);
+            currentBubbles.push(newBubble);
+            bubblesRef.current.push(newBubble);
+          }
+
+          nextIndexRef.current = nextIndex + 1;
+        }
+      }
 
       bubblesRef.current.forEach((bubble) => {
         const colorRgb = bubble.color.match(/\w\w/g)?.map(x => parseInt(x, 16)) || [60, 130, 246];
