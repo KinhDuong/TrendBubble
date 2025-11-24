@@ -8,7 +8,10 @@ import FilterMenu from '../components/FilterMenu';
 import { TrendingTopic } from '../types';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
-import { TrendingUp } from 'lucide-react';
+import { TrendingUp, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+
+type SortField = 'name' | 'category' | 'searchVolume' | 'rank' | 'pubDate' | 'createdAt';
+type SortDirection = 'asc' | 'desc';
 
 interface PageData {
   id: string;
@@ -44,6 +47,9 @@ function DynamicPage() {
     { value: 'user_upload', label: 'My Uploads' }
   ]);
   const [latestPages, setLatestPages] = useState<PageData[]>([]);
+  const [sortField, setSortField] = useState<SortField>('searchVolume');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+  const [sourceFilter, setSourceFilter] = useState<string>('all');
 
   useEffect(() => {
     loadPageData();
@@ -275,6 +281,74 @@ function DynamicPage() {
     }
   };
 
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
+  const getFilteredTopics = () => {
+    return topics.filter(topic => {
+      const matchesSearch = !searchQuery || topic.name.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesCategory = categoryFilter === 'all' || topic.category === categoryFilter;
+      const matchesSource = sourceFilter === 'all' || topic.source === sourceFilter;
+      return matchesSearch && matchesCategory && matchesSource;
+    });
+  };
+
+  const getSortedTopics = () => {
+    const filtered = getFilteredTopics();
+    const sorted = [...filtered].sort((a, b) => {
+      let aValue: any;
+      let bValue: any;
+
+      switch (sortField) {
+        case 'name':
+          aValue = a.name.toLowerCase();
+          bValue = b.name.toLowerCase();
+          break;
+        case 'category':
+          aValue = (a.category || '').toLowerCase();
+          bValue = (b.category || '').toLowerCase();
+          break;
+        case 'searchVolume':
+          aValue = a.searchVolume;
+          bValue = b.searchVolume;
+          break;
+        case 'rank':
+          aValue = topics.indexOf(a);
+          bValue = topics.indexOf(b);
+          break;
+        case 'pubDate':
+          aValue = a.pubDate ? new Date(a.pubDate).getTime() : (a.createdAt ? new Date(a.createdAt).getTime() : 0);
+          bValue = b.pubDate ? new Date(b.pubDate).getTime() : (b.createdAt ? new Date(b.createdAt).getTime() : 0);
+          break;
+        case 'createdAt':
+          aValue = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          bValue = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+          break;
+        default:
+          return 0;
+      }
+
+      if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
+      if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
+      return 0;
+    });
+
+    return sorted;
+  };
+
+  const SortIcon = ({ field }: { field: SortField }) => {
+    if (sortField !== field) {
+      return <ArrowUpDown size={14} className="opacity-50" />;
+    }
+    return sortDirection === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />;
+  };
+
   if (!pageData) {
     return (
       <div className={`min-h-screen flex items-center justify-center ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'}`}>
@@ -308,6 +382,8 @@ function DynamicPage() {
         dateFilter={dateFilter}
         categoryFilter={categoryFilter}
         categories={categories}
+        sourceFilter={sourceFilter}
+        sources={sources.map(s => s.value)}
         maxBubbles={maxBubbles}
         searchQuery={searchQuery}
         nextBubbleIn={nextBubbleIn}
@@ -315,6 +391,7 @@ function DynamicPage() {
         onViewModeChange={setViewMode}
         onDateFilterChange={setDateFilter}
         onCategoryFilterChange={setCategoryFilter}
+        onSourceFilterChange={setSourceFilter}
         onMaxBubblesChange={setMaxBubbles}
         onThemeChange={handleThemeChange}
         onSearchQueryChange={setSearchQuery}
@@ -423,6 +500,103 @@ function DynamicPage() {
                   </section>
                 </>
               )}
+              {topics.length > 0 && viewMode === 'list' && (
+              <div className="max-w-7xl mx-auto">
+                <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-lg border overflow-hidden shadow-sm`}>
+                  <div className={`hidden md:grid grid-cols-5 gap-4 px-6 py-4 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'} font-semibold text-sm`}>
+                    <button
+                      onClick={() => handleSort('name')}
+                      className={`flex items-center gap-1 hover:${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'} transition-colors`}
+                    >
+                      Topic <SortIcon field="name" />
+                    </button>
+                    <button
+                      onClick={() => handleSort('searchVolume')}
+                      className={`flex items-center justify-center gap-1 hover:${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'} transition-colors`}
+                    >
+                      Search Volume <SortIcon field="searchVolume" />
+                    </button>
+                    <button
+                      onClick={() => handleSort('rank')}
+                      className={`flex items-center justify-center gap-1 hover:${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'} transition-colors`}
+                    >
+                      Rank <SortIcon field="rank" />
+                    </button>
+                    <div className="text-center">Source</div>
+                    <button
+                      onClick={() => handleSort('pubDate')}
+                      className={`flex items-center justify-center gap-1 hover:${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'} transition-colors`}
+                    >
+                      Started (ET) <SortIcon field="pubDate" />
+                    </button>
+                  </div>
+                  <div className={`divide-y ${theme === 'dark' ? 'divide-gray-700' : 'divide-gray-200'}`}>
+                    {getSortedTopics().map((topic, index) => (
+                      <div key={index} className={`${theme === 'dark' ? 'hover:bg-gray-750' : 'hover:bg-gray-50'} transition-colors`}>
+                        <div className="hidden md:grid grid-cols-5 gap-4 px-6 py-4">
+                          <div className="font-medium">{topic.name.replace(/"/g, '')}</div>
+                          <div className={`text-center ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>{topic.searchVolumeRaw.replace(/"/g, '')}</div>
+                          <div className={`text-center ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>#{index + 1}</div>
+                          <div className={`text-center text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                            <span className={`px-2 py-1 rounded text-xs ${topic.source === 'user_upload' ? (theme === 'dark' ? 'bg-green-900/30 text-green-400' : 'bg-green-100 text-green-700') : (theme === 'dark' ? 'bg-blue-900/30 text-blue-400' : 'bg-blue-100 text-blue-700')}`}>
+                              {(() => {
+                                const found = sources.find(s => s.value === topic.source);
+                                if (found) return found.label;
+                                if (topic.source) return topic.source.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+                                return '-';
+                              })()}
+                            </span>
+                          </div>
+                          <div className={`text-center text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                            {(topic.pubDate || topic.createdAt) ? new Date(topic.pubDate || topic.createdAt).toLocaleString('en-US', {
+                              timeZone: 'America/New_York',
+                              month: 'short',
+                              day: 'numeric',
+                              hour: 'numeric',
+                              minute: '2-digit',
+                              hour12: true
+                            }) : '-'}
+                          </div>
+                        </div>
+                        <div className="md:hidden px-4 py-3 space-y-2">
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="font-medium text-base flex-1">{topic.name.replace(/"/g, '')}</div>
+                            <div className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'} font-mono`}>#{index + 1}</div>
+                          </div>
+                          <div className="flex flex-wrap gap-2 text-xs">
+                            <span className={`px-2 py-1 rounded ${theme === 'dark' ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-700'}`}>
+                              {topic.searchVolumeRaw.replace(/"/g, '')}
+                            </span>
+                            <span className={`px-2 py-1 rounded ${topic.source === 'user_upload' ? (theme === 'dark' ? 'bg-green-900/30 text-green-400' : 'bg-green-100 text-green-700') : (theme === 'dark' ? 'bg-blue-900/30 text-blue-400' : 'bg-blue-100 text-blue-700')}`}>
+                              {(() => {
+                                const found = sources.find(s => s.value === topic.source);
+                                if (found) return found.label;
+                                if (topic.source) return topic.source.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+                                return '-';
+                              })()}
+                            </span>
+                          </div>
+                          <div className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                            {(topic.pubDate || topic.createdAt) && (
+                              <div>
+                                <span className="font-medium">Started:</span> {new Date(topic.pubDate || topic.createdAt).toLocaleString('en-US', {
+                                  timeZone: 'America/New_York',
+                                  month: 'short',
+                                  day: 'numeric',
+                                  hour: 'numeric',
+                                  minute: '2-digit',
+                                  hour12: true
+                                })}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
               {topics.length === 0 && !loading && (
                 <div className={`text-center py-12 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
                   No trending topics found for this source.
