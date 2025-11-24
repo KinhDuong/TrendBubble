@@ -1,5 +1,5 @@
 import { TrendingTopic } from '../types';
-import { TrendingUp, Clock, Tag, Star } from 'lucide-react';
+import { TrendingUp, Clock, Tag, Star, X } from 'lucide-react';
 
 interface BubbleTooltipProps {
   topic: TrendingTopic;
@@ -10,8 +10,7 @@ interface BubbleTooltipProps {
   onToggleFavorite: () => void;
   onCompare: () => void;
   isComparing: boolean;
-  onMouseEnter?: () => void;
-  onMouseLeave?: () => void;
+  onClose: () => void;
 }
 
 export default function BubbleTooltip({
@@ -23,8 +22,7 @@ export default function BubbleTooltip({
   onToggleFavorite,
   onCompare,
   isComparing,
-  onMouseEnter,
-  onMouseLeave
+  onClose
 }: BubbleTooltipProps) {
   const tooltipWidth = 280;
   const tooltipHeight = 200;
@@ -54,32 +52,27 @@ export default function BubbleTooltip({
     return sourceMap[source] || source.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
   };
 
-  const isLeftSide = left < x;
-  const bridgeLeft = isLeftSide ? left + tooltipWidth : x;
-  const bridgeWidth = isLeftSide ? x - (left + tooltipWidth) + 50 : left - x + 50;
-
   return (
     <>
       <div
-        className="fixed z-50 pointer-events-auto"
-        style={{
-          left: `${bridgeLeft}px`,
-          top: `${top}px`,
-          width: `${bridgeWidth}px`,
-          height: `${Math.min(tooltipHeight, 150)}px`,
-          background: 'transparent'
-        }}
-        onMouseEnter={onMouseEnter}
-        onMouseLeave={onMouseLeave}
+        className="fixed inset-0 z-40"
+        onClick={onClose}
+        style={{ background: 'transparent' }}
       />
       <div
-        className={`fixed z-50 pointer-events-auto ${
+        className={`fixed z-50 ${
           theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
         } border rounded-lg shadow-2xl p-4`}
         style={{ left: `${left}px`, top: `${top}px`, width: `${tooltipWidth}px` }}
-        onMouseEnter={onMouseEnter}
-        onMouseLeave={onMouseLeave}
       >
+        <button
+          onClick={onClose}
+          className={`absolute top-2 right-2 p-1 rounded-full hover:${
+            theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'
+          } transition-colors`}
+        >
+          <X size={16} className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} />
+        </button>
       <div className="space-y-3">
         <div>
           <h3 className={`font-bold text-lg mb-1 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>

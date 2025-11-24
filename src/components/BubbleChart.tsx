@@ -40,9 +40,7 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
   const initialLoadQueueRef = useRef<number[]>([]);
   const lastSpawnTimeRef = useRef<number>(0);
   const hoveredBubbleRef = useRef<Bubble | null>(null);
-  const tooltipHideTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [tooltipData, setTooltipData] = useState<{ topic: TrendingTopic; x: number; y: number } | null>(null);
-  const [isTooltipHovered, setIsTooltipHovered] = useState(false);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [internalComparingTopics, setInternalComparingTopics] = useState<Set<string>>(new Set());
   const [userId, setUserId] = useState<string | null>(null);
@@ -134,8 +132,12 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
       const dy = y - bubble.y;
       const distance = Math.sqrt(dx * dx + dy * dy);
 
-      if (distance <= bubble.radius && bubble.topic.url) {
-        window.open(bubble.topic.url, '_blank');
+      if (distance <= bubble.radius) {
+        setTooltipData({
+          topic: bubble.topic,
+          x: event.clientX,
+          y: event.clientY
+        });
         break;
       }
     }
@@ -170,11 +172,6 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
       let isOverBubble = false;
       hoveredBubbleRef.current = null;
 
-      if (tooltipHideTimeoutRef.current) {
-        clearTimeout(tooltipHideTimeoutRef.current);
-        tooltipHideTimeoutRef.current = null;
-      }
-
       for (const bubble of bubblesRef.current) {
         const dx = x - bubble.x;
         const dy = y - bubble.y;
@@ -186,34 +183,14 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
           isOverBubble = true;
           bubble.isHovered = true;
           hoveredBubbleRef.current = bubble;
-          setTooltipData({
-            topic: bubble.topic,
-            x: event.clientX,
-            y: event.clientY
-          });
           break;
         }
-      }
-
-      if (!isOverBubble && !isTooltipHovered) {
-        tooltipHideTimeoutRef.current = setTimeout(() => {
-          setTooltipData(null);
-        }, 300);
       }
 
       canvas.style.cursor = isOverBubble ? 'pointer' : 'default';
     };
 
-    const handleMouseLeave = () => {
-      if (!isTooltipHovered) {
-        tooltipHideTimeoutRef.current = setTimeout(() => {
-          setTooltipData(null);
-        }, 300);
-      }
-    };
-
     canvas.addEventListener('mousemove', handleMouseMove);
-    canvas.addEventListener('mouseleave', handleMouseLeave);
 
     const volumes = topics.map(t => t.searchVolume).sort((a, b) => b - a);
     const maxSearchVolume = volumes[0];
@@ -643,12 +620,8 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
       window.removeEventListener('resize', updateCanvasSize);
       canvas.removeEventListener('click', handleCanvasClick);
       canvas.removeEventListener('mousemove', handleMouseMove);
-      canvas.removeEventListener('mouseleave', handleMouseLeave);
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
-      }
-      if (tooltipHideTimeoutRef.current) {
-        clearTimeout(tooltipHideTimeoutRef.current);
       }
     };
   }, [topics, maxDisplay, theme]);
@@ -670,19 +643,7 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
           onToggleFavorite={() => handleToggleFavorite(tooltipData.topic.name)}
           onCompare={() => handleToggleCompare(tooltipData.topic.name)}
           isComparing={comparingTopics.has(tooltipData.topic.name)}
-          onMouseEnter={() => {
-            if (tooltipHideTimeoutRef.current) {
-              clearTimeout(tooltipHideTimeoutRef.current);
-              tooltipHideTimeoutRef.current = null;
-            }
-            setIsTooltipHovered(true);
-          }}
-          onMouseLeave={() => {
-            setIsTooltipHovered(false);
-            tooltipHideTimeoutRef.current = setTimeout(() => {
-              setTooltipData(null);
-            }, 300);
-          }}
+          onClose={() => setTooltipData(null)}
         />
       )}
     </div>
