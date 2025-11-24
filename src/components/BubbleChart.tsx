@@ -220,8 +220,8 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
       existingBubbles: Bubble[],
       allowWideSearch: boolean = true
     ): { x: number; y: number } => {
-      const minSpacing = 15;
-      const padding = 50;
+      const minSpacing = 20;
+      const padding = 60;
 
       const checkPosition = (testX: number, testY: number): boolean => {
         if (testX - radius < padding || testX + radius > canvasDisplayWidth - padding) return false;
@@ -231,7 +231,8 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
           const dx = testX - other.x;
           const dy = testY - other.y;
           const dist = Math.sqrt(dx * dx + dy * dy);
-          return dist < radius + other.radius + minSpacing;
+          const requiredDistance = radius + other.radius + minSpacing;
+          return dist < requiredDistance;
         });
       };
 
@@ -243,13 +244,13 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
         return { x: initialX, y: initialY };
       }
 
-      const spiralAttempts = 200;
+      const spiralAttempts = 300;
       let spiralAngle = 0;
-      let spiralDistance = 5;
+      let spiralDistance = minSpacing;
 
       for (let i = 0; i < spiralAttempts; i++) {
-        spiralAngle += 0.5;
-        spiralDistance += 2;
+        spiralAngle += 0.4;
+        spiralDistance += 1.5;
 
         const x = initialX + Math.cos(spiralAngle) * spiralDistance;
         const y = initialY + Math.sin(spiralAngle) * spiralDistance;
@@ -259,8 +260,8 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
         }
       }
 
-      const gridSearchRadius = 200;
-      const gridStep = radius * 2 + minSpacing;
+      const gridSearchRadius = 300;
+      const gridStep = Math.max(radius * 2 + minSpacing, 30);
       for (let offsetX = -gridSearchRadius; offsetX <= gridSearchRadius; offsetX += gridStep) {
         for (let offsetY = -gridSearchRadius; offsetY <= gridSearchRadius; offsetY += gridStep) {
           const x = initialX + offsetX;
@@ -653,11 +654,39 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
         }
       });
 
-      if (layout === 'force') {
-        for (let i = 0; i < bubblesRef.current.length; i++) {
-          for (let j = i + 1; j < bubblesRef.current.length; j++) {
-            if (checkCollision(bubblesRef.current[i], bubblesRef.current[j])) {
-              resolveCollision(bubblesRef.current[i], bubblesRef.current[j]);
+      for (let i = 0; i < bubblesRef.current.length; i++) {
+        for (let j = i + 1; j < bubblesRef.current.length; j++) {
+          const b1 = bubblesRef.current[i];
+          const b2 = bubblesRef.current[j];
+
+          if (checkCollision(b1, b2)) {
+            if (layout === 'force') {
+              resolveCollision(b1, b2);
+            } else {
+              const dx = b2.x - b1.x;
+              const dy = b2.y - b1.y;
+              const distance = Math.sqrt(dx * dx + dy * dy);
+
+              if (distance === 0) continue;
+
+              const minDist = b1.radius + b2.radius + 5;
+              const overlap = minDist - distance;
+
+              if (overlap > 0) {
+                const nx = dx / distance;
+                const ny = dy / distance;
+
+                const separationForce = overlap * 0.5;
+
+                if (!b1.isPinned && !b1.isSpawning) {
+                  b1.x -= nx * separationForce;
+                  b1.y -= ny * separationForce;
+                }
+                if (!b2.isPinned && !b2.isSpawning) {
+                  b2.x += nx * separationForce;
+                  b2.y += ny * separationForce;
+                }
+              }
             }
           }
         }
