@@ -6,7 +6,7 @@ import FileUpload from '../components/FileUpload';
 import Login from '../components/Login';
 import Footer from '../components/Footer';
 import Header from '../components/Header';
-import FilterMenu from '../components/FilterMenu';
+import FilterMenu, { BubbleLayout } from '../components/FilterMenu';
 import ComparisonPanel from '../components/ComparisonPanel';
 import { TrendingTopic } from '../types';
 import { supabase } from '../lib/supabase';
@@ -47,6 +47,7 @@ function TrendingBubble() {
   const [sourceFilter, setSourceFilter] = useState<string>('all');
   const [customSourceInput, setCustomSourceInput] = useState<string>('');
   const [showAddSource, setShowAddSource] = useState(false);
+  const [bubbleLayout, setBubbleLayout] = useState<BubbleLayout>('force');
 
   useEffect(() => {
     loadTopics();
@@ -778,6 +779,7 @@ function TrendingBubble() {
         bubbleProgress={bubbleProgress}
         nextUpdateIn={nextUpdateIn}
         updateProgress={updateProgress}
+        bubbleLayout={bubbleLayout}
         onViewModeChange={setViewMode}
         onDateFilterChange={setDateFilter}
         onCategoryFilterChange={setCategoryFilter}
@@ -785,6 +787,7 @@ function TrendingBubble() {
         onMaxBubblesChange={setMaxBubbles}
         onThemeChange={handleThemeChange}
         onPauseToggle={() => setIsPaused(!isPaused)}
+        onBubbleLayoutChange={setBubbleLayout}
         variant="bubble"
       />
 

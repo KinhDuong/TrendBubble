@@ -1,5 +1,7 @@
 import { X, Play, Pause } from 'lucide-react';
 
+export type BubbleLayout = 'force' | 'hierarchical' | 'grid' | 'circular' | 'timeline' | 'packed' | 'scatter' | 'importance';
+
 interface FilterMenuProps {
   theme: 'dark' | 'light';
   loading: boolean;
@@ -16,6 +18,7 @@ interface FilterMenuProps {
   bubbleProgress?: number;
   nextUpdateIn?: string;
   updateProgress?: number;
+  bubbleLayout?: BubbleLayout;
   onViewModeChange: (mode: 'bubble' | 'list') => void;
   onDateFilterChange: (filter: 'now' | 'all' | '24h' | 'week' | 'month' | 'year') => void;
   onCategoryFilterChange: (category: string) => void;
@@ -26,6 +29,7 @@ interface FilterMenuProps {
   onSearchClear?: () => void;
   onRefresh?: () => void;
   onPauseToggle?: () => void;
+  onBubbleLayoutChange?: (layout: BubbleLayout) => void;
   variant?: 'homepage' | 'bubble';
 }
 
@@ -45,6 +49,7 @@ export default function FilterMenu({
   bubbleProgress,
   nextUpdateIn,
   updateProgress,
+  bubbleLayout = 'force',
   onViewModeChange,
   onDateFilterChange,
   onCategoryFilterChange,
@@ -55,6 +60,7 @@ export default function FilterMenu({
   onSearchClear,
   onRefresh,
   onPauseToggle,
+  onBubbleLayoutChange,
   variant = 'homepage'
 }: FilterMenuProps) {
   if (loading) return null;
@@ -88,6 +94,29 @@ export default function FilterMenu({
                       <option value={100}>100</option>
                       <option value={150}>150</option>
                       <option value={200}>200</option>
+                    </select>
+                    <Divider />
+                  </>
+                )}
+                {viewMode === 'bubble' && onBubbleLayoutChange && (
+                  <>
+                    <label htmlFor="bubbleLayout" className="text-xs md:text-sm font-medium text-white">
+                      Layout:
+                    </label>
+                    <select
+                      id="bubbleLayout"
+                      value={bubbleLayout}
+                      onChange={(e) => onBubbleLayoutChange(e.target.value as BubbleLayout)}
+                      className={`${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} border rounded px-2 md:px-3 py-1 md:py-1.5 text-xs md:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                    >
+                      <option value="force">Force-Directed</option>
+                      <option value="hierarchical">Hierarchical</option>
+                      <option value="grid">Grid</option>
+                      <option value="circular">Circular</option>
+                      <option value="timeline">Timeline</option>
+                      <option value="packed">Packed</option>
+                      <option value="scatter">Scatter</option>
+                      <option value="importance">Importance</option>
                     </select>
                     <Divider />
                   </>
@@ -302,6 +331,32 @@ export default function FilterMenu({
                       <option value={100}>100</option>
                       <option value={150}>150</option>
                       <option value={200}>200</option>
+                    </select>
+                  </div>
+                  <Divider />
+                </>
+              )}
+              {viewMode === 'bubble' && onBubbleLayoutChange && (
+                <>
+                  <div className="flex items-center gap-2">
+                    <label htmlFor="bubbleLayout" className="text-xs font-medium whitespace-nowrap text-white">
+                      Layout:
+                    </label>
+                    <select
+                      id="bubbleLayout"
+                      value={bubbleLayout}
+                      onChange={(e) => onBubbleLayoutChange(e.target.value as BubbleLayout)}
+                      className={`flex-1 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} border rounded px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                      aria-label="Select bubble chart layout"
+                    >
+                      <option value="force">Force-Directed</option>
+                      <option value="hierarchical">Hierarchical</option>
+                      <option value="grid">Grid</option>
+                      <option value="circular">Circular</option>
+                      <option value="timeline">Timeline</option>
+                      <option value="packed">Packed</option>
+                      <option value="scatter">Scatter</option>
+                      <option value="importance">Importance</option>
                     </select>
                   </div>
                   <Divider />

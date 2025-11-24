@@ -4,7 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import BubbleChart from '../components/BubbleChart';
 import Footer from '../components/Footer';
 import Header from '../components/Header';
-import FilterMenu from '../components/FilterMenu';
+import FilterMenu, { BubbleLayout } from '../components/FilterMenu';
 import ComparisonPanel from '../components/ComparisonPanel';
 import { TrendingTopic } from '../types';
 import { supabase } from '../lib/supabase';
@@ -52,6 +52,7 @@ function DynamicPage() {
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const [sourceFilter, setSourceFilter] = useState<string>('all');
   const [comparingTopics, setComparingTopics] = useState<Set<string>>(new Set());
+  const [bubbleLayout, setBubbleLayout] = useState<BubbleLayout>('force');
 
   useEffect(() => {
     loadPageData();
@@ -509,6 +510,7 @@ function DynamicPage() {
         searchQuery={searchQuery}
         nextBubbleIn={nextBubbleIn}
         bubbleProgress={bubbleProgress}
+        bubbleLayout={bubbleLayout}
         onViewModeChange={setViewMode}
         onDateFilterChange={setDateFilter}
         onCategoryFilterChange={setCategoryFilter}
@@ -521,6 +523,7 @@ function DynamicPage() {
           setViewMode('bubble');
         }}
         onRefresh={loadTopics}
+        onBubbleLayoutChange={setBubbleLayout}
         variant="homepage"
       />
 
