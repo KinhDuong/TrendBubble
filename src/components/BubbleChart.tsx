@@ -826,70 +826,67 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
           opacity = 1 - progress;
         }
 
-        const innerGlow = ctx.createRadialGradient(
-          bubble.x,
-          bubble.y,
-          displayRadius,
-          bubble.x,
-          bubble.y,
-          Math.max(0, displayRadius - 10)
-        );
         if (theme === 'dark') {
+          // Dark theme: gradients and glows
+          const innerGlow = ctx.createRadialGradient(
+            bubble.x,
+            bubble.y,
+            displayRadius,
+            bubble.x,
+            bubble.y,
+            Math.max(0, displayRadius - 10)
+          );
           innerGlow.addColorStop(0, `rgba(${colorRgb[0]}, ${colorRgb[1]}, ${colorRgb[2]}, ${0.8 * opacity * colorIntensity})`);
           innerGlow.addColorStop(1, 'rgba(20, 20, 20, 0)');
-        } else {
-          innerGlow.addColorStop(0, `rgba(${colorRgb[0]}, ${colorRgb[1]}, ${colorRgb[2]}, ${0.4 * opacity})`);
-          innerGlow.addColorStop(1, 'rgba(255, 255, 255, 0)');
-        }
 
-        const gradient = ctx.createRadialGradient(
-          bubble.x - displayRadius * 0.3,
-          bubble.y - displayRadius * 0.3,
-          0,
-          bubble.x,
-          bubble.y,
-          displayRadius
-        );
-
-        if (theme === 'dark') {
+          const gradient = ctx.createRadialGradient(
+            bubble.x - displayRadius * 0.3,
+            bubble.y - displayRadius * 0.3,
+            0,
+            bubble.x,
+            bubble.y,
+            displayRadius
+          );
           gradient.addColorStop(0, `rgba(50, 50, 50, ${0.9 * opacity})`);
           gradient.addColorStop(0.5, `rgba(30, 30, 30, ${0.85 * opacity})`);
           gradient.addColorStop(1, `rgba(20, 20, 20, ${0.9 * opacity})`);
+
+          ctx.beginPath();
+          ctx.arc(bubble.x, bubble.y, displayRadius, 0, Math.PI * 2);
+          ctx.fillStyle = gradient;
+          ctx.fill();
+
+          ctx.beginPath();
+          ctx.arc(bubble.x, bubble.y, displayRadius, 0, Math.PI * 2);
+          ctx.fillStyle = innerGlow;
+          ctx.fill();
+
+          if (bubble.isSpawning) {
+            const glowIntensity = bubble.spawnProgress || 0;
+            ctx.shadowColor = bubble.color;
+            ctx.shadowBlur = Math.max(15, displayRadius / 3) * glowIntensity;
+          } else {
+            ctx.shadowColor = bubble.color;
+            ctx.shadowBlur = Math.max(8, displayRadius / 8) * colorIntensity;
+          }
+
+          ctx.shadowOffsetX = 0;
+          ctx.shadowOffsetY = 0;
+          ctx.beginPath();
+          ctx.arc(bubble.x, bubble.y, displayRadius, 0, Math.PI * 2);
+          ctx.strokeStyle = bubble.color;
+          ctx.globalAlpha = opacity * colorIntensity;
+          ctx.lineWidth = 1;
+          ctx.stroke();
+          ctx.shadowBlur = 0;
+          ctx.globalAlpha = 1;
         } else {
-          // Solid color bubbles for light theme
-          gradient.addColorStop(0, `rgba(${colorRgb[0]}, ${colorRgb[1]}, ${colorRgb[2]}, ${opacity})`);
-          gradient.addColorStop(1, `rgba(${colorRgb[0] * 0.8}, ${colorRgb[1] * 0.8}, ${colorRgb[2] * 0.8}, ${opacity})`);
+          // Light theme: flat solid color, no gradients or shadows
+          ctx.beginPath();
+          ctx.arc(bubble.x, bubble.y, displayRadius, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(${colorRgb[0]}, ${colorRgb[1]}, ${colorRgb[2]}, ${opacity})`;
+          ctx.fill();
         }
-
-        ctx.beginPath();
-        ctx.arc(bubble.x, bubble.y, displayRadius, 0, Math.PI * 2);
-        ctx.fillStyle = gradient;
-        ctx.fill();
-
-        ctx.beginPath();
-        ctx.arc(bubble.x, bubble.y, displayRadius, 0, Math.PI * 2);
-        ctx.fillStyle = innerGlow;
-        ctx.fill();
-
-        if (bubble.isSpawning) {
-          const glowIntensity = bubble.spawnProgress || 0;
-          ctx.shadowColor = bubble.color;
-          ctx.shadowBlur = Math.max(15, displayRadius / 3) * glowIntensity;
-        } else {
-          ctx.shadowColor = bubble.color;
-          ctx.shadowBlur = theme === 'dark' ? Math.max(8, displayRadius / 8) * colorIntensity : Math.max(8, displayRadius / 8);
-        }
-
-        ctx.shadowOffsetX = 0;
-        ctx.shadowOffsetY = 0;
-        ctx.beginPath();
-        ctx.arc(bubble.x, bubble.y, displayRadius, 0, Math.PI * 2);
-        ctx.strokeStyle = bubble.color;
-        ctx.globalAlpha = theme === 'dark' ? opacity * colorIntensity : opacity;
-        ctx.lineWidth = 1;
-        ctx.stroke();
-        ctx.shadowBlur = 0;
-        ctx.globalAlpha = 1;
 
         if (bubble.isPinned) {
           ctx.beginPath();
