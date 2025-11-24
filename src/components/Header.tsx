@@ -38,7 +38,7 @@ export default function Header({ theme, isAdmin, onLoginClick, onLogout, title =
 
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className={`${theme === 'dark' ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'} transition-colors`}
+            className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded transition-colors"
             aria-label="Menu"
             aria-expanded={isMenuOpen}
           >
