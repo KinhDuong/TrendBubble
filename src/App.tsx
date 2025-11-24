@@ -1582,7 +1582,7 @@ function HomePage() {
           </>
         )}
         {latestPages.length > 0 && (
-        <section className="max-w-7xl mx-auto mt-8 mb-8 px-4 md:px-6" aria-labelledby="latest-pages-heading">
+        <section className="max-w-7xl mx-auto mt-8 mb-0 px-4 md:px-6" aria-labelledby="latest-pages-heading">
           <h2 id="latest-pages-heading" className={`text-2xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
             Latest
           </h2>
