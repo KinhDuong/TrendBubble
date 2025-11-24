@@ -5,6 +5,7 @@ import BubbleChart from '../components/BubbleChart';
 import Footer from '../components/Footer';
 import Header from '../components/Header';
 import FilterMenu from '../components/FilterMenu';
+import ComparisonPanel from '../components/ComparisonPanel';
 import { TrendingTopic } from '../types';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
@@ -50,6 +51,7 @@ function DynamicPage() {
   const [sortField, setSortField] = useState<SortField>('searchVolume');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const [sourceFilter, setSourceFilter] = useState<string>('all');
+  const [comparingTopics, setComparingTopics] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     loadPageData();
@@ -567,7 +569,14 @@ function DynamicPage() {
               )}
               {topics.length > 0 && viewMode === 'bubble' && (
                 <>
-                  <BubbleChart topics={topics} maxDisplay={maxBubbles} theme={theme} onBubbleTimingUpdate={handleBubbleTimingUpdate} />
+                  <BubbleChart
+                    topics={topics}
+                    maxDisplay={maxBubbles}
+                    theme={theme}
+                    onBubbleTimingUpdate={handleBubbleTimingUpdate}
+                    comparingTopics={comparingTopics}
+                    onComparingTopicsChange={setComparingTopics}
+                  />
 
                   <div className={`w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'} py-6 mt-8`}>
                     <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4 overflow-hidden">
@@ -895,6 +904,18 @@ function DynamicPage() {
           )}
         </main>
       </div>
+      <ComparisonPanel
+        topics={topics.filter(t => comparingTopics.has(t.name))}
+        theme={theme}
+        onClose={() => setComparingTopics(new Set())}
+        onRemoveTopic={(topicName) => {
+          setComparingTopics(prev => {
+            const next = new Set(prev);
+            next.delete(topicName);
+            return next;
+          });
+        }}
+      />
       <Footer theme={theme} />
     </>
   );

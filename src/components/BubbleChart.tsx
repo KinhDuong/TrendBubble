@@ -1,11 +1,15 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { TrendingTopic } from '../types';
+import BubbleTooltip from './BubbleTooltip';
+import { supabase } from '../lib/supabase';
 
 interface BubbleChartProps {
   topics: TrendingTopic[];
   maxDisplay: number;
   theme: 'dark' | 'light';
   onBubbleTimingUpdate?: (nextPopTime: number | null, createdTime?: number, lifetime?: number) => void;
+  comparingTopics?: Set<string>;
+  onComparingTopicsChange?: (topics: Set<string>) => void;
 }
 
 interface Bubble {
@@ -24,9 +28,10 @@ interface Bubble {
   isSpawning?: boolean;
   spawnProgress?: number;
   isHovered?: boolean;
+  isComparing?: boolean;
 }
 
-export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingUpdate }: BubbleChartProps) {
+export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingUpdate, comparingTopics: externalComparingTopics, onComparingTopicsChange }: BubbleChartProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const bubblesRef = useRef<Bubble[]>([]);
   const animationFrameRef = useRef<number>();
@@ -35,8 +40,84 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
   const initialLoadQueueRef = useRef<number[]>([]);
   const lastSpawnTimeRef = useRef<number>(0);
   const hoveredBubbleRef = useRef<Bubble | null>(null);
+  const [tooltipData, setTooltipData] = useState<{ topic: TrendingTopic; x: number; y: number } | null>(null);
+  const [favorites, setFavorites] = useState<Set<string>>(new Set());
+  const [internalComparingTopics, setInternalComparingTopics] = useState<Set<string>>(new Set());
+  const [userId, setUserId] = useState<string | null>(null);
+
+  const comparingTopics = externalComparingTopics || internalComparingTopics;
+  const setComparingTopics = onComparingTopicsChange || setInternalComparingTopics;
 
   const bubbleLifetimes = [40000, 60000, 80000, 100000, 120000];
+
+  useEffect(() => {
+    const loadUserData = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setUserId(user.id);
+        const { data: favs } = await supabase
+          .from('user_favorites')
+          .select('topic_name')
+          .eq('user_id', user.id);
+
+        if (favs) {
+          setFavorites(new Set(favs.map(f => f.topic_name)));
+        }
+      }
+    };
+    loadUserData();
+  }, []);
+
+  const handleToggleFavorite = async (topicName: string) => {
+    if (!userId) {
+      alert('Please sign in to save favorites');
+      return;
+    }
+
+    const isFavorited = favorites.has(topicName);
+
+    if (isFavorited) {
+      await supabase
+        .from('user_favorites')
+        .delete()
+        .eq('user_id', userId)
+        .eq('topic_name', topicName);
+
+      setFavorites(prev => {
+        const next = new Set(prev);
+        next.delete(topicName);
+        return next;
+      });
+    } else {
+      await supabase
+        .from('user_favorites')
+        .insert({ user_id: userId, topic_name: topicName });
+
+      setFavorites(prev => new Set(prev).add(topicName));
+    }
+  };
+
+  const handleToggleCompare = (topicName: string) => {
+    setComparingTopics(prev => {
+      const next = new Set(prev);
+      if (next.has(topicName)) {
+        next.delete(topicName);
+        bubblesRef.current.forEach(b => {
+          if (b.topic.name === topicName) b.isComparing = false;
+        });
+      } else {
+        if (next.size >= 5) {
+          alert('You can compare up to 5 topics at a time');
+          return prev;
+        }
+        next.add(topicName);
+        bubblesRef.current.forEach(b => {
+          if (b.topic.name === topicName) b.isComparing = true;
+        });
+      }
+      return next;
+    });
+  };
 
   const handleCanvasClick = (event: MouseEvent) => {
     const canvas = canvasRef.current;
@@ -94,18 +175,32 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
 
         bubble.isHovered = false;
 
-        if (distance <= bubble.radius && bubble.topic.url) {
+        if (distance <= bubble.radius) {
           isOverBubble = true;
           bubble.isHovered = true;
           hoveredBubbleRef.current = bubble;
+          setTooltipData({
+            topic: bubble.topic,
+            x: event.clientX,
+            y: event.clientY
+          });
           break;
         }
+      }
+
+      if (!isOverBubble) {
+        setTooltipData(null);
       }
 
       canvas.style.cursor = isOverBubble ? 'pointer' : 'default';
     };
 
+    const handleMouseLeave = () => {
+      setTooltipData(null);
+    };
+
     canvas.addEventListener('mousemove', handleMouseMove);
+    canvas.addEventListener('mouseleave', handleMouseLeave);
 
     const volumes = topics.map(t => t.searchVolume).sort((a, b) => b - a);
     const maxSearchVolume = volumes[0];
@@ -462,6 +557,16 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
         ctx.shadowBlur = 0;
         ctx.globalAlpha = 1;
 
+        if (bubble.isComparing) {
+          ctx.beginPath();
+          ctx.arc(bubble.x, bubble.y, displayRadius + 4, 0, Math.PI * 2);
+          ctx.strokeStyle = '#3B82F6';
+          ctx.lineWidth = 3;
+          ctx.setLineDash([5, 5]);
+          ctx.stroke();
+          ctx.setLineDash([]);
+        }
+
         if (opacity > 0.1) {
           ctx.globalAlpha = opacity;
           const textBrightness = theme === 'dark' ? (1 - ageRatio * 0.3) : 1;
@@ -531,12 +636,24 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
   }, [topics, maxDisplay, theme]);
 
   return (
-    <div className="w-full h-full">
+    <div className="w-full h-full relative">
       <canvas
         ref={canvasRef}
         className="w-full"
         style={{ background: 'transparent' }}
       />
+      {tooltipData && (
+        <BubbleTooltip
+          topic={tooltipData.topic}
+          x={tooltipData.x}
+          y={tooltipData.y}
+          theme={theme}
+          isFavorited={favorites.has(tooltipData.topic.name)}
+          onToggleFavorite={() => handleToggleFavorite(tooltipData.topic.name)}
+          onCompare={() => handleToggleCompare(tooltipData.topic.name)}
+          isComparing={comparingTopics.has(tooltipData.topic.name)}
+        />
+      )}
     </div>
   );
 }

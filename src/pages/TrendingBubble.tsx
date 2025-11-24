@@ -7,6 +7,7 @@ import Login from '../components/Login';
 import Footer from '../components/Footer';
 import Header from '../components/Header';
 import FilterMenu from '../components/FilterMenu';
+import ComparisonPanel from '../components/ComparisonPanel';
 import { TrendingTopic } from '../types';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
@@ -39,6 +40,7 @@ function TrendingBubble() {
   const [oldestBubbleLifetime, setOldestBubbleLifetime] = useState<number | null>(null);
   const [sortField, setSortField] = useState<SortField>('rank');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
+  const [comparingTopics, setComparingTopics] = useState<Set<string>>(new Set());
   const [uploadMessage, setUploadMessage] = useState<string | null>(null);
   const [isPaused, setIsPaused] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
@@ -856,7 +858,14 @@ function TrendingBubble() {
           <>
             {topics.length > 0 && (
               viewMode === 'bubble' ? (
-                <BubbleChart topics={topics} maxDisplay={maxBubbles} theme={theme} onBubbleTimingUpdate={handleBubbleTimingUpdate} isPaused={isPaused} />
+                <BubbleChart
+                  topics={topics}
+                  maxDisplay={maxBubbles}
+                  theme={theme}
+                  onBubbleTimingUpdate={handleBubbleTimingUpdate}
+                  comparingTopics={comparingTopics}
+                  onComparingTopicsChange={setComparingTopics}
+                />
               ) : (
               <div className="max-w-7xl mx-auto">
                 <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-lg border overflow-hidden shadow-sm`}>
@@ -935,6 +944,18 @@ function TrendingBubble() {
           </>
         )}
       </div>
+      <ComparisonPanel
+        topics={topics.filter(t => comparingTopics.has(t.name))}
+        theme={theme}
+        onClose={() => setComparingTopics(new Set())}
+        onRemoveTopic={(topicName) => {
+          setComparingTopics(prev => {
+            const next = new Set(prev);
+            next.delete(topicName);
+            return next;
+          });
+        }}
+      />
       <Footer theme={theme} />
     </>
   );
