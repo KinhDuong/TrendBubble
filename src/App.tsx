@@ -63,6 +63,7 @@ function HomePage() {
     { value: 'google_trends', label: 'Google Trends' },
     { value: 'user_upload', label: 'My Uploads' }
   ]);
+  const [showFullTop10, setShowFullTop10] = useState<boolean>(false);
 
   useEffect(() => {
     loadTopics();
@@ -1416,19 +1417,19 @@ function HomePage() {
 
                 <section className="max-w-7xl mx-auto mt-8 mb-0 md:mb-8" aria-labelledby="top-trending-heading">
                   <h2 id="top-trending-heading" className={`text-2xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                    Top 10 Trending Topics Today
+                    {showFullTop10 ? 'All Trending Topics' : 'Top 10 Trending Topics Today'}
                   </h2>
                   <p className={`mb-4 text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                    Discover the most popular trending topics ranked by search volume
+                    {showFullTop10 ? 'Complete list of all trending topics ranked by search volume' : 'Discover the most popular trending topics ranked by search volume'}
                   </p>
                   <ol className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-lg overflow-hidden shadow-sm list-none`} itemScope itemType="https://schema.org/ItemList">
                     {[...topics]
                       .sort((a, b) => b.searchVolume - a.searchVolume)
-                      .slice(0, 10)
+                      .slice(0, showFullTop10 ? undefined : 10)
                       .map((topic, index) => (
                         <li
                           key={index}
-                          className={`px-6 py-4 flex items-center gap-4 ${theme === 'dark' ? 'hover:bg-gray-750' : 'hover:bg-gray-50'} transition-colors ${index < 9 ? (theme === 'dark' ? 'border-b border-gray-700' : 'border-b border-gray-200') : ''}`}
+                          className={`px-6 py-4 flex items-center gap-4 ${theme === 'dark' ? 'hover:bg-gray-750' : 'hover:bg-gray-50'} transition-colors ${index < (showFullTop10 ? topics.length - 1 : 9) ? (theme === 'dark' ? 'border-b border-gray-700' : 'border-b border-gray-200') : ''}`}
                           itemProp="itemListElement"
                           itemScope
                           itemType="https://schema.org/ListItem"
@@ -1468,6 +1469,16 @@ function HomePage() {
                         </li>
                       ))}
                   </ol>
+                  {topics.length > 10 && (
+                    <div className="mt-4 text-center">
+                      <button
+                        onClick={() => setShowFullTop10(!showFullTop10)}
+                        className={`px-6 py-2 rounded-lg font-semibold transition-colors ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white'}`}
+                      >
+                        {showFullTop10 ? 'Show Top 10 Only' : 'See Full List'}
+                      </button>
+                    </div>
+                  )}
                 </section>
               </>
             )}
