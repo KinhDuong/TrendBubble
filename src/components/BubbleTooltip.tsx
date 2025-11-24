@@ -24,6 +24,7 @@ export default function BubbleTooltip({
   isComparing,
   onClose
 }: BubbleTooltipProps) {
+  const isMobile = window.innerWidth < 768;
   const tooltipWidth = 280;
   const tooltipHeight = 200;
   const offset = 5;
@@ -51,6 +52,147 @@ export default function BubbleTooltip({
     };
     return sourceMap[source] || source.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
   };
+
+  if (isMobile) {
+    return (
+      <>
+        <div
+          className="fixed inset-0 z-40 bg-black/50 animate-in fade-in duration-200"
+          onClick={onClose}
+        />
+        <div
+          className={`fixed bottom-0 left-0 right-0 z-50 ${
+            theme === 'dark' ? 'bg-gray-800' : 'bg-white'
+          } rounded-t-2xl shadow-2xl p-4 pb-6 animate-in slide-in-from-bottom duration-300`}
+        >
+          <div className="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-4" />
+          <button
+            onClick={onClose}
+            className={`absolute top-4 right-4 p-2 rounded-full ${
+              theme === 'dark' ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-100 hover:bg-gray-200'
+            } transition-colors`}
+          >
+            <X size={18} className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} />
+          </button>
+          <div className="space-y-4">
+            <div>
+              <h3 className={`font-bold text-xl mb-2 pr-10 ${
+                theme === 'dark' ? 'text-white' : 'text-gray-900'
+              }`}>
+                {topic.name.replace(/"/g, '')}
+              </h3>
+              {topic.category && (
+                <div className="flex items-center gap-1">
+                  <Tag size={14} className={theme === 'dark' ? 'text-gray-400' : 'text-gray-500'} />
+                  <span className={`text-sm ${
+                    theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                  }`}>
+                    {topic.category}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            <div className={`border-t ${
+              theme === 'dark' ? 'border-gray-700' : 'border-gray-200'
+            } pt-4 space-y-3`}>
+              <div className="flex items-center justify-between">
+                <span className={`text-sm ${
+                  theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                }`}>
+                  Search Volume
+                </span>
+                <div className="flex items-center gap-1">
+                  <TrendingUp size={16} className="text-blue-500" />
+                  <span className={`font-semibold text-base ${
+                    theme === 'dark' ? 'text-white' : 'text-gray-900'
+                  }`}>
+                    {topic.searchVolumeRaw.replace(/"/g, '')}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <span className={`text-sm ${
+                  theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                }`}>
+                  Source
+                </span>
+                <span className={`text-sm font-medium px-2 py-1 rounded ${
+                  topic.source === 'user_upload'
+                    ? theme === 'dark' ? 'bg-green-900/30 text-green-400' : 'bg-green-100 text-green-700'
+                    : theme === 'dark' ? 'bg-blue-900/30 text-blue-400' : 'bg-blue-100 text-blue-700'
+                }`}>
+                  {getSourceLabel(topic.source)}
+                </span>
+              </div>
+
+              {topic.pubDate && (
+                <div className="flex items-center justify-between">
+                  <span className={`text-sm ${
+                    theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                  }`}>
+                    Started
+                  </span>
+                  <div className="flex items-center gap-1">
+                    <Clock size={16} className={theme === 'dark' ? 'text-gray-400' : 'text-gray-500'} />
+                    <span className={`text-sm ${
+                      theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                    }`}>
+                      {formatDate(topic.pubDate)}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className={`border-t ${
+              theme === 'dark' ? 'border-gray-700' : 'border-gray-200'
+            } pt-4 flex gap-3`}>
+              <button
+                onClick={onTogglePin}
+                className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-base font-medium transition-colors ${
+                  isPinned
+                    ? 'bg-purple-500 text-white hover:bg-purple-600 active:bg-purple-700'
+                    : theme === 'dark'
+                    ? 'bg-gray-700 text-gray-300 hover:bg-gray-600 active:bg-gray-500'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200 active:bg-gray-300'
+                }`}
+              >
+                <Pin size={16} className={isPinned ? 'rotate-45' : ''} />
+                {isPinned ? 'Pinned' : 'Pin'}
+              </button>
+              <button
+                onClick={onCompare}
+                className={`flex-1 px-4 py-3 rounded-lg text-base font-medium transition-colors ${
+                  isComparing
+                    ? 'bg-blue-500 text-white hover:bg-blue-600 active:bg-blue-700'
+                    : theme === 'dark'
+                    ? 'bg-gray-700 text-gray-300 hover:bg-gray-600 active:bg-gray-500'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200 active:bg-gray-300'
+                }`}
+              >
+                {isComparing ? 'Selected' : 'Compare'}
+              </button>
+            </div>
+
+            {topic.url && (
+              <a
+                href={topic.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`block text-center text-base font-medium py-2 ${
+                  theme === 'dark' ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'
+                } transition-colors`}
+              >
+                Learn more →
+              </a>
+            )}
+          </div>
+        </div>
+      </>
+    );
+  }
 
   return (
     <>
