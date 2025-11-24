@@ -71,14 +71,14 @@ export default function FilterMenu({
 
   if (variant === 'bubble') {
     return (
-      <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white border-b border-gray-200'} shadow-md`}>
+      <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white border-b border-gray-200 shadow-lg'}`}>
         <div className="px-4 md:px-6 py-3">
           <div className="flex items-center justify-center">
             <div className="overflow-x-auto">
               <div className="flex items-center gap-2 md:gap-4">
                 {viewMode === 'bubble' && maxBubbles !== undefined && onMaxBubblesChange && (
                   <>
-                    <label htmlFor="maxBubbles" className="text-xs md:text-sm font-medium text-white">
+                    <label htmlFor="maxBubbles" className={`text-xs md:text-sm font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                       Max:
                     </label>
                     <select
@@ -100,7 +100,7 @@ export default function FilterMenu({
                 )}
                 {viewMode === 'bubble' && onBubbleLayoutChange && (
                   <>
-                    <label htmlFor="bubbleLayout" className="text-xs md:text-sm font-medium text-white">
+                    <label htmlFor="bubbleLayout" className={`text-xs md:text-sm font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                       Layout:
                     </label>
                     <select
@@ -121,7 +121,7 @@ export default function FilterMenu({
                     <Divider />
                   </>
                 )}
-                <label htmlFor="categoryFilter" className="text-xs md:text-sm font-medium text-white">
+                <label htmlFor="categoryFilter" className={`text-xs md:text-sm font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                   Category:
                 </label>
                 <select
@@ -138,7 +138,7 @@ export default function FilterMenu({
                 <Divider />
                 {sourceFilter !== undefined && sources && onSourceFilterChange && (
                   <>
-                    <label htmlFor="sourceFilter" className="text-xs md:text-sm font-medium text-white">
+                    <label htmlFor="sourceFilter" className={`text-xs md:text-sm font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                       Source:
                     </label>
                     <select
@@ -157,7 +157,7 @@ export default function FilterMenu({
                     <Divider />
                   </>
                 )}
-                <label htmlFor="dateFilter" className="text-xs md:text-sm font-medium text-white">
+                <label htmlFor="dateFilter" className={`text-xs md:text-sm font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                   Date:
                 </label>
                 <select
@@ -174,7 +174,7 @@ export default function FilterMenu({
                   <option value="year">Year</option>
                 </select>
                 <Divider />
-                <label htmlFor="themeFilter" className="text-xs md:text-sm font-medium text-white">
+                <label htmlFor="themeFilter" className={`text-xs md:text-sm font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                   Style:
                 </label>
                 <select
@@ -245,7 +245,7 @@ export default function FilterMenu({
   }
 
   return (
-    <nav className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white border-b border-gray-200'} shadow-md`} aria-label="Trending topics filters">
+    <nav className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white border-b border-gray-200 shadow-lg'}`} aria-label="Trending topics filters">
       <div className="px-4 md:px-6 py-3">
         <div className="flex items-center justify-center">
           <div className="overflow-x-auto">
@@ -314,7 +314,7 @@ export default function FilterMenu({
               {viewMode === 'bubble' && maxBubbles !== undefined && onMaxBubblesChange && (
                 <>
                   <div className="flex items-center gap-2">
-                    <label htmlFor="maxBubbles" className="text-xs font-medium whitespace-nowrap text-white">
+                    <label htmlFor="maxBubbles" className={`text-xs font-medium whitespace-nowrap ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                       Bubbles:
                     </label>
                     <select
@@ -339,7 +339,7 @@ export default function FilterMenu({
               {viewMode === 'bubble' && onBubbleLayoutChange && (
                 <>
                   <div className="flex items-center gap-2">
-                    <label htmlFor="bubbleLayout" className="text-xs font-medium whitespace-nowrap text-white">
+                    <label htmlFor="bubbleLayout" className={`text-xs font-medium whitespace-nowrap ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                       Layout:
                     </label>
                     <select

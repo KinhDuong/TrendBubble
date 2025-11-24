@@ -856,9 +856,9 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
           gradient.addColorStop(0.5, `rgba(30, 30, 30, ${0.85 * opacity})`);
           gradient.addColorStop(1, `rgba(20, 20, 20, ${0.9 * opacity})`);
         } else {
-          gradient.addColorStop(0, `rgba(250, 250, 255, ${0.95 * opacity})`);
-          gradient.addColorStop(0.5, `rgba(240, 242, 250, ${0.9 * opacity})`);
-          gradient.addColorStop(1, `rgba(230, 235, 245, ${0.95 * opacity})`);
+          // Solid color bubbles for light theme
+          gradient.addColorStop(0, `rgba(${colorRgb[0]}, ${colorRgb[1]}, ${colorRgb[2]}, ${opacity})`);
+          gradient.addColorStop(1, `rgba(${colorRgb[0] * 0.8}, ${colorRgb[1] * 0.8}, ${colorRgb[2] * 0.8}, ${opacity})`);
         }
 
         ctx.beginPath();
@@ -913,7 +913,7 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
           ctx.globalAlpha = opacity;
           const textBrightness = theme === 'dark' ? (1 - ageRatio * 0.3) : 1;
           const textAlpha = theme === 'dark' ? textBrightness : 1;
-          ctx.fillStyle = theme === 'dark' ? `rgba(255, 255, 255, ${textAlpha})` : 'rgb(30, 30, 30)';
+          ctx.fillStyle = theme === 'dark' ? `rgba(255, 255, 255, ${textAlpha})` : 'rgba(255, 255, 255, 0.95)';
           const isMobile = window.innerWidth < 768;
           const fontSize = Math.max(isMobile ? 9 : 10, displayRadius / (isMobile ? 3.2 : 3.5));
           ctx.font = `bold ${fontSize}px sans-serif`;
@@ -955,7 +955,7 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
 
           ctx.font = `${Math.max(8, displayRadius / 5)}px sans-serif`;
           const volumeAlpha = theme === 'dark' ? 0.9 * textBrightness : 0.9;
-          ctx.fillStyle = theme === 'dark' ? `rgba(200, 200, 200, ${volumeAlpha * opacity})` : `rgba(60, 60, 60, ${0.9 * opacity})`;
+          ctx.fillStyle = theme === 'dark' ? `rgba(200, 200, 200, ${volumeAlpha * opacity})` : `rgba(255, 255, 255, ${0.85 * opacity})`;
           const volumeY = startY + displayLines.length * lineHeight + Math.max(4, displayRadius / 10);
           const cleanVolume = bubble.topic.searchVolumeRaw.replace(/"/g, '');
           ctx.fillText(cleanVolume, bubble.x, volumeY);
