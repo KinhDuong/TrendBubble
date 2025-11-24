@@ -71,7 +71,7 @@ export default function FilterMenu({
 
   if (variant === 'bubble') {
     return (
-      <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} shadow-md`}>
+      <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white border-b border-gray-200'} shadow-md`}>
         <div className="px-4 md:px-6 py-3">
           <div className="flex items-center justify-center">
             <div className="overflow-x-auto">
@@ -190,7 +190,7 @@ export default function FilterMenu({
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => onViewModeChange(viewMode === 'bubble' ? 'list' : 'bubble')}
-                    className={`px-3 md:px-4 py-1 md:py-1.5 text-xs md:text-sm font-medium ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'} rounded transition-colors text-white`}
+                    className={`px-3 md:px-4 py-1 md:py-1.5 text-xs md:text-sm font-medium ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-600 hover:bg-blue-700'} rounded transition-colors text-white`}
                   >
                     {viewMode === 'bubble' ? 'List' : 'Bubble'}
                   </button>
@@ -245,14 +245,14 @@ export default function FilterMenu({
   }
 
   return (
-    <nav className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} shadow-md`} aria-label="Trending topics filters">
+    <nav className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white border-b border-gray-200'} shadow-md`} aria-label="Trending topics filters">
       <div className="px-4 md:px-6 py-3">
         <div className="flex items-center justify-center">
           <div className="overflow-x-auto">
             <div className="flex items-center gap-3 md:gap-4">
               <button
                 onClick={() => onViewModeChange(viewMode === 'bubble' ? 'list' : 'bubble')}
-                className={`px-4 py-1.5 text-xs font-medium ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'} rounded transition-colors text-white whitespace-nowrap`}
+                className={`px-4 py-1.5 text-xs font-medium ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-600 hover:bg-blue-700'} rounded transition-colors text-white whitespace-nowrap`}
                 aria-label={`Switch to ${viewMode === 'bubble' ? 'list' : 'bubble'} view`}
               >
                 {viewMode === 'bubble' ? 'List' : 'Bubble'}
@@ -260,7 +260,7 @@ export default function FilterMenu({
               {onRefresh && nextBubbleIn !== undefined && bubbleProgress !== undefined && (
                 <button
                   onClick={onRefresh}
-                  className={`flex items-center gap-1 px-2 md:px-4 py-1.5 text-xs font-medium ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'} rounded transition-colors text-white whitespace-nowrap`}
+                  className={`flex items-center gap-1 px-2 md:px-4 py-1.5 text-xs font-medium ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-600 hover:bg-blue-700'} rounded transition-colors text-white whitespace-nowrap`}
                   aria-label="Refresh trending topics"
                   title="Refresh trending topics"
                 >

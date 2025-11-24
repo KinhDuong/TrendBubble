@@ -636,7 +636,7 @@ function DynamicPage() {
                     <p className={`mb-4 text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
                       {showFullList ? 'Complete list ranked by search volume' : 'Discover the most popular topics ranked by search volume'}
                     </p>
-                    <ol className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-lg overflow-hidden shadow-sm list-none`} itemScope itemType="https://schema.org/ItemList">
+                    <ol className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white shadow-md border border-gray-200'} rounded-lg overflow-hidden list-none`} itemScope itemType="https://schema.org/ItemList">
                       {displayTopics.map((topic, index) => (
                         <li
                           key={index}
@@ -684,7 +684,7 @@ function DynamicPage() {
                       <div className="mt-4 text-center">
                         <button
                           onClick={() => setShowFullList(!showFullList)}
-                          className={`px-6 py-2 rounded-lg font-semibold transition-colors ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white'}`}
+                          className={`px-6 py-2 rounded-lg font-semibold transition-colors ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-600 hover:bg-blue-700 shadow-sm hover:shadow text-white'}`}
                         >
                           {showFullList ? 'Show Top 10 Only' : 'See Full List'}
                         </button>
@@ -695,8 +695,8 @@ function DynamicPage() {
               )}
               {topics.length > 0 && viewMode === 'list' && (
               <div className="max-w-7xl mx-auto">
-                <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-lg border overflow-hidden shadow-sm`}>
-                  <div className={`hidden md:grid grid-cols-5 gap-4 px-6 py-4 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'} font-semibold text-sm`}>
+                <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200 shadow-md'} rounded-lg border overflow-hidden`}>
+                  <div className={`hidden md:grid grid-cols-5 gap-4 px-6 py-4 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200'} font-semibold text-sm`}>
                     <button
                       onClick={() => handleSort('name')}
                       className={`flex items-center gap-1 hover:${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'} transition-colors`}
@@ -812,7 +812,7 @@ function DynamicPage() {
                 <a
                   key={page.id}
                   href={page.page_url}
-                  className={`group block ${theme === 'dark' ? 'bg-gray-800 hover:bg-gray-750' : 'bg-white hover:bg-gray-50'} rounded-lg overflow-hidden shadow-sm transition-all hover:shadow-md`}
+                  className={`group block ${theme === 'dark' ? 'bg-gray-800 hover:bg-gray-750' : 'bg-white hover:bg-gray-50 border border-gray-200'} rounded-lg overflow-hidden shadow-md transition-all hover:shadow-lg`}
                 >
                   <div className="flex flex-row">
                     <div className={`w-2/5 ${theme === 'dark' ? 'bg-gradient-to-br from-blue-900 to-blue-800' : 'bg-gradient-to-br from-blue-100 to-blue-50'} flex items-center justify-center p-4`}>
@@ -857,7 +857,7 @@ function DynamicPage() {
                 Find answers to common questions about {pageData.meta_title.toLowerCase()} and how to use our real-time trending topics platform to discover viral content, analyze search trends, and stay ahead of what's trending online.
               </p>
               <div className="space-y-6">
-                <details className={`group ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-sm`}>
+                <details className={`group ${theme === 'dark' ? 'bg-gray-800' : 'bg-white border border-gray-200 shadow-md'} rounded-lg`}>
                   <summary className={`cursor-pointer px-6 py-4 font-semibold ${theme === 'dark' ? 'text-white hover:text-blue-400' : 'text-gray-900 hover:text-blue-600'} transition-colors list-none flex items-center justify-between`}>
                     <span>What are the top trending topics for {sourceName}?</span>
                     <span className="ml-2 text-2xl group-open:rotate-45 transition-transform">+</span>
@@ -870,7 +870,7 @@ function DynamicPage() {
                   </div>
                 </details>
 
-                <details className={`group ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-sm`}>
+                <details className={`group ${theme === 'dark' ? 'bg-gray-800' : 'bg-white border border-gray-200 shadow-md'} rounded-lg`}>
                   <summary className={`cursor-pointer px-6 py-4 font-semibold ${theme === 'dark' ? 'text-white hover:text-blue-400' : 'text-gray-900 hover:text-blue-600'} transition-colors list-none flex items-center justify-between`}>
                     <span>How often is this trending data updated?</span>
                     <span className="ml-2 text-2xl group-open:rotate-45 transition-transform">+</span>
@@ -893,7 +893,7 @@ function DynamicPage() {
                   </div>
                 </details>
 
-                <details className={`group ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-sm`}>
+                <details className={`group ${theme === 'dark' ? 'bg-gray-800' : 'bg-white border border-gray-200 shadow-md'} rounded-lg`}>
                   <summary className={`cursor-pointer px-6 py-4 font-semibold ${theme === 'dark' ? 'text-white hover:text-blue-400' : 'text-gray-900 hover:text-blue-600'} transition-colors list-none flex items-center justify-between`}>
                     <span>What does search volume mean?</span>
                     <span className="ml-2 text-2xl group-open:rotate-45 transition-transform">+</span>
@@ -907,7 +907,7 @@ function DynamicPage() {
                   </div>
                 </details>
 
-                <details className={`group ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-sm`}>
+                <details className={`group ${theme === 'dark' ? 'bg-gray-800' : 'bg-white border border-gray-200 shadow-md'} rounded-lg`}>
                   <summary className={`cursor-pointer px-6 py-4 font-semibold ${theme === 'dark' ? 'text-white hover:text-blue-400' : 'text-gray-900 hover:text-blue-600'} transition-colors list-none flex items-center justify-between`}>
                     <span>How can I use this trending data?</span>
                     <span className="ml-2 text-2xl group-open:rotate-45 transition-transform">+</span>
@@ -921,7 +921,7 @@ function DynamicPage() {
                   </div>
                 </details>
 
-                <details className={`group ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-sm`}>
+                <details className={`group ${theme === 'dark' ? 'bg-gray-800' : 'bg-white border border-gray-200 shadow-md'} rounded-lg`}>
                   <summary className={`cursor-pointer px-6 py-4 font-semibold ${theme === 'dark' ? 'text-white hover:text-blue-400' : 'text-gray-900 hover:text-blue-600'} transition-colors list-none flex items-center justify-between`}>
                     <span>Can I switch between bubble and list views?</span>
                     <span className="ml-2 text-2xl group-open:rotate-45 transition-transform">+</span>

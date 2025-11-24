@@ -9,7 +9,7 @@ interface HeaderProps {
 
 export default function Header({ theme, isAdmin, onLoginClick, title = 'Google Trending Topics - Real-Time Search Trends' }: HeaderProps) {
   return (
-    <header className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-b`}>
+    <header className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200 shadow-sm'} border-b`}>
       <div className="px-4 md:px-6 py-4">
         <div className="flex items-center justify-between">
           <a href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
@@ -17,7 +17,7 @@ export default function Header({ theme, isAdmin, onLoginClick, title = 'Google T
               <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-blue-600"></div>
               <TrendingUp size={24} strokeWidth={4} className="text-white relative z-10" />
             </div>
-            <h1 className="text-xl md:text-2xl font-bold text-white">{title}</h1>
+            <h1 className={`text-xl md:text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{title}</h1>
           </a>
           {!isAdmin && (
             <button

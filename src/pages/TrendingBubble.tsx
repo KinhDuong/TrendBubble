@@ -665,7 +665,7 @@ function TrendingBubble() {
               <button
                 onClick={manualUpdate}
                 disabled={loading}
-                className={`px-3 md:px-4 py-1.5 md:py-2 ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600' : 'bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300'} disabled:cursor-not-allowed rounded-lg transition-colors text-xs md:text-sm font-medium text-white`}
+                className={`px-3 md:px-4 py-1.5 md:py-2 ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600' : 'bg-blue-600 hover:bg-blue-700 shadow-sm hover:shadow disabled:bg-gray-300'} disabled:cursor-not-allowed rounded-lg transition-colors text-xs md:text-sm font-medium text-white`}
               >
                 {loading ? 'Updating...' : 'Update Now'}
               </button>
@@ -821,7 +821,7 @@ function TrendingBubble() {
                         </div>
                         <button
                           onClick={() => restoreBackup(backup)}
-                          className={`px-4 py-2 ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'} rounded-lg transition-colors text-sm font-medium text-white`}
+                          className={`px-4 py-2 ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-600 hover:bg-blue-700 shadow-sm hover:shadow'} rounded-lg transition-colors text-sm font-medium text-white`}
                         >
                           Restore
                         </button>

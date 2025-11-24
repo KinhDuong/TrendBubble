@@ -833,7 +833,7 @@ function HomePage() {
                     location.pathname === '/'
                       ? theme === 'dark'
                         ? 'bg-blue-600 text-white'
-                        : 'bg-blue-500 text-white'
+                        : 'bg-blue-600 text-white shadow-sm'
                       : theme === 'dark'
                       ? 'text-gray-400 hover:text-white hover:bg-gray-700'
                       : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
@@ -848,7 +848,7 @@ function HomePage() {
                     location.pathname === '/trending-bubble'
                       ? theme === 'dark'
                         ? 'bg-blue-600 text-white'
-                        : 'bg-blue-500 text-white'
+                        : 'bg-blue-600 text-white shadow-sm'
                       : theme === 'dark'
                       ? 'text-gray-400 hover:text-white hover:bg-gray-700'
                       : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
@@ -870,7 +870,7 @@ function HomePage() {
               <button
                 onClick={manualUpdate}
                 disabled={loading}
-                className={`px-3 md:px-4 py-1.5 md:py-2 ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600' : 'bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300'} disabled:cursor-not-allowed rounded-lg transition-colors text-xs md:text-sm font-medium text-white`}
+                className={`px-3 md:px-4 py-1.5 md:py-2 ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600' : 'bg-blue-600 hover:bg-blue-700 shadow-sm hover:shadow disabled:bg-gray-300'} disabled:cursor-not-allowed rounded-lg transition-colors text-xs md:text-sm font-medium text-white`}
               >
                 {loading ? 'Updating...' : 'Update Now'}
               </button>
@@ -919,7 +919,7 @@ function HomePage() {
             <div className="flex flex-col md:flex-row items-start md:items-center gap-3">
               <button
                 onClick={() => setShowAddSource(true)}
-                className={`px-3 py-1 ${theme === 'dark' ? 'bg-teal-600 hover:bg-teal-700' : 'bg-teal-500 hover:bg-teal-600'} rounded transition-colors text-xs font-medium text-white`}
+                className={`px-3 py-1 ${theme === 'dark' ? 'bg-teal-600 hover:bg-teal-700' : 'bg-teal-600 hover:bg-teal-700 shadow-sm hover:shadow'} rounded transition-colors text-xs font-medium text-white`}
               >
                 Add Source
               </button>
@@ -947,7 +947,7 @@ function HomePage() {
               </div>
               <button
                 onClick={() => setShowAddCategory(true)}
-                className={`px-3 py-1 ${theme === 'dark' ? 'bg-teal-600 hover:bg-teal-700' : 'bg-teal-500 hover:bg-teal-600'} rounded transition-colors text-xs font-medium text-white`}
+                className={`px-3 py-1 ${theme === 'dark' ? 'bg-teal-600 hover:bg-teal-700' : 'bg-teal-600 hover:bg-teal-700 shadow-sm hover:shadow'} rounded transition-colors text-xs font-medium text-white`}
               >
                 Add Category
               </button>
@@ -968,13 +968,13 @@ function HomePage() {
             <div className={`${theme === 'dark' ? 'border-gray-700' : 'border-gray-300'} border-t pt-3 flex gap-2`}>
               <button
                 onClick={() => setShowCreatePage(true)}
-                className={`px-3 py-1 ${theme === 'dark' ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-indigo-500 hover:bg-indigo-600'} rounded transition-colors text-xs font-medium text-white`}
+                className={`px-3 py-1 ${theme === 'dark' ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-indigo-600 hover:bg-indigo-700 shadow-sm hover:shadow'} rounded transition-colors text-xs font-medium text-white`}
               >
                 Create New Page
               </button>
               <button
                 onClick={loadAllPages}
-                className={`px-3 py-1 ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'} rounded transition-colors text-xs font-medium text-white`}
+                className={`px-3 py-1 ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-600 hover:bg-blue-700 shadow-sm hover:shadow'} rounded transition-colors text-xs font-medium text-white`}
               >
                 View All Pages
               </button>
@@ -1047,7 +1047,7 @@ function HomePage() {
                         </div>
                         <button
                           onClick={() => restoreBackup(backup)}
-                          className={`px-4 py-2 ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'} rounded-lg transition-colors text-sm font-medium text-white`}
+                          className={`px-4 py-2 ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-600 hover:bg-blue-700 shadow-sm hover:shadow'} rounded-lg transition-colors text-sm font-medium text-white`}
                         >
                           Restore
                         </button>
@@ -1118,14 +1118,14 @@ function HomePage() {
                         setShowAddCategory(false);
                         setNewCategory('');
                       }}
-                      className={`px-4 py-2 ${theme === 'dark' ? 'bg-gray-600 hover:bg-gray-700' : 'bg-gray-300 hover:bg-gray-400'} rounded-lg transition-colors text-sm font-medium`}
+                      className={`px-4 py-2 ${theme === 'dark' ? 'bg-gray-600 hover:bg-gray-700' : 'bg-gray-200 hover:bg-gray-300 border border-gray-300'} rounded-lg transition-colors text-sm font-medium`}
                     >
                       Cancel
                     </button>
                     <button
                       onClick={handleAddCategory}
                       disabled={!newCategory.trim()}
-                      className={`px-4 py-2 ${theme === 'dark' ? 'bg-teal-600 hover:bg-teal-700 disabled:bg-gray-600' : 'bg-teal-500 hover:bg-teal-600 disabled:bg-gray-300'} disabled:cursor-not-allowed rounded-lg transition-colors text-sm font-medium text-white`}
+                      className={`px-4 py-2 ${theme === 'dark' ? 'bg-teal-600 hover:bg-teal-700 disabled:bg-gray-600' : 'bg-teal-600 hover:bg-teal-700 shadow-sm hover:shadow disabled:bg-gray-300'} disabled:cursor-not-allowed rounded-lg transition-colors text-sm font-medium text-white`}
                     >
                       Add Category
                     </button>
@@ -1189,14 +1189,14 @@ function HomePage() {
                         setNewSourceValue('');
                         setNewSourceLabel('');
                       }}
-                      className={`px-4 py-2 ${theme === 'dark' ? 'bg-gray-600 hover:bg-gray-700' : 'bg-gray-300 hover:bg-gray-400'} rounded-lg transition-colors text-sm font-medium`}
+                      className={`px-4 py-2 ${theme === 'dark' ? 'bg-gray-600 hover:bg-gray-700' : 'bg-gray-200 hover:bg-gray-300 border border-gray-300'} rounded-lg transition-colors text-sm font-medium`}
                     >
                       Cancel
                     </button>
                     <button
                       onClick={handleAddSource}
                       disabled={!newSourceValue.trim() || !newSourceLabel.trim()}
-                      className={`px-4 py-2 ${theme === 'dark' ? 'bg-teal-600 hover:bg-teal-700 disabled:bg-gray-600' : 'bg-teal-500 hover:bg-teal-600 disabled:bg-gray-300'} disabled:cursor-not-allowed rounded-lg transition-colors text-sm font-medium text-white`}
+                      className={`px-4 py-2 ${theme === 'dark' ? 'bg-teal-600 hover:bg-teal-700 disabled:bg-gray-600' : 'bg-teal-600 hover:bg-teal-700 shadow-sm hover:shadow disabled:bg-gray-300'} disabled:cursor-not-allowed rounded-lg transition-colors text-sm font-medium text-white`}
                     >
                       Add Source
                     </button>
@@ -1354,14 +1354,14 @@ function HomePage() {
                         setNewPageMetaTitle('');
                         setNewPageMetaDescription('');
                       }}
-                      className={`px-4 py-2 ${theme === 'dark' ? 'bg-gray-600 hover:bg-gray-700' : 'bg-gray-300 hover:bg-gray-400'} rounded-lg transition-colors text-sm font-medium`}
+                      className={`px-4 py-2 ${theme === 'dark' ? 'bg-gray-600 hover:bg-gray-700' : 'bg-gray-200 hover:bg-gray-300 border border-gray-300'} rounded-lg transition-colors text-sm font-medium`}
                     >
                       Cancel
                     </button>
                     <button
                       onClick={handleCreatePage}
                       disabled={!newPageUrl.trim() || !newPageMetaTitle.trim() || !newPageMetaDescription.trim()}
-                      className={`px-4 py-2 ${theme === 'dark' ? 'bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-600' : 'bg-indigo-500 hover:bg-indigo-600 disabled:bg-gray-300'} disabled:cursor-not-allowed rounded-lg transition-colors text-sm font-medium text-white`}
+                      className={`px-4 py-2 ${theme === 'dark' ? 'bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-600' : 'bg-indigo-600 hover:bg-indigo-700 shadow-sm hover:shadow disabled:bg-gray-300'} disabled:cursor-not-allowed rounded-lg transition-colors text-sm font-medium text-white`}
                     >
                       Create Page
                     </button>
@@ -1422,7 +1422,7 @@ function HomePage() {
                   <p className={`mb-4 text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
                     {showFullTop10 ? 'Complete list of all trending topics ranked by search volume' : 'Discover the most popular trending topics ranked by search volume'}
                   </p>
-                  <ol className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-lg overflow-hidden shadow-sm list-none`} itemScope itemType="https://schema.org/ItemList">
+                  <ol className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white shadow-md border border-gray-200'} rounded-lg overflow-hidden list-none`} itemScope itemType="https://schema.org/ItemList">
                     {[...topics]
                       .sort((a, b) => b.searchVolume - a.searchVolume)
                       .slice(0, showFullTop10 ? undefined : 10)
@@ -1473,7 +1473,7 @@ function HomePage() {
                     <div className="mt-4 text-center">
                       <button
                         onClick={() => setShowFullTop10(!showFullTop10)}
-                        className={`px-6 py-2 rounded-lg font-semibold transition-colors ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white'}`}
+                        className={`px-6 py-2 rounded-lg font-semibold transition-colors ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-600 hover:bg-blue-700 shadow-sm hover:shadow text-white'}`}
                       >
                         {showFullTop10 ? 'Show Top 10 Only' : 'See Full List'}
                       </button>
@@ -1484,8 +1484,8 @@ function HomePage() {
             )}
             {topics.length > 0 && viewMode === 'list' && (
               <div className="max-w-7xl mx-auto">
-                <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-lg border overflow-hidden shadow-sm`}>
-                  <div className={`hidden md:grid grid-cols-5 gap-4 px-6 py-4 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'} font-semibold text-sm`}>
+                <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200 shadow-md'} rounded-lg border overflow-hidden`}>
+                  <div className={`hidden md:grid grid-cols-5 gap-4 px-6 py-4 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200'} font-semibold text-sm`}>
                     <button
                       onClick={() => handleSort('name')}
                       className={`flex items-center gap-1 hover:${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'} transition-colors`}
@@ -1593,7 +1593,7 @@ function HomePage() {
                 <a
                   key={page.id}
                   href={page.page_url}
-                  className={`group block ${theme === 'dark' ? 'bg-gray-800 hover:bg-gray-750' : 'bg-white hover:bg-gray-50'} rounded-lg overflow-hidden shadow-sm transition-all hover:shadow-md`}
+                  className={`group block ${theme === 'dark' ? 'bg-gray-800 hover:bg-gray-750' : 'bg-white hover:bg-gray-50 border border-gray-200'} rounded-lg overflow-hidden shadow-md transition-all hover:shadow-lg`}
                 >
                   <div className="flex flex-row">
                     <div className={`w-2/5 ${theme === 'dark' ? 'bg-gradient-to-br from-blue-900 to-blue-800' : 'bg-gradient-to-br from-blue-100 to-blue-50'} flex items-center justify-center p-4`}>
