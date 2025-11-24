@@ -361,7 +361,8 @@ function DynamicPage() {
     );
   }
 
-  const topTopics = [...topics].sort((a, b) => b.searchVolume - a.searchVolume).slice(0, 10);
+  const topTopics = [...topics].sort((a, b) => b.searchVolume - a.searchVolume);
+  const displayTopics = showFullList ? topTopics : topTopics.slice(0, 10);
   const topTopicNames = topTopics.slice(0, 5).map(t => t.name.replace(/"/g, '')).join(', ');
   const currentDate = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
   const lastUpdated = topics.length > 0 ? new Date(Math.max(...topics.map(t => new Date(t.pubDate || t.createdAt || Date.now()).getTime()))) : new Date();
@@ -617,16 +618,16 @@ function DynamicPage() {
 
                   <section className="max-w-7xl mx-auto mt-8 mb-0 md:mb-8" aria-labelledby="top-trending-heading">
                     <h2 id="top-trending-heading" className={`text-2xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                      Top 10 Trending Topics
+                      {showFullList ? 'All Trending Topics' : 'Top 10 Trending Topics'}
                     </h2>
                     <p className={`mb-4 text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                      Discover the most popular trending topics ranked by search volume
+                      {showFullList ? 'Complete list of all trending topics ranked by search volume' : 'Discover the most popular trending topics ranked by search volume'}
                     </p>
                     <ol className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-lg overflow-hidden shadow-sm list-none`} itemScope itemType="https://schema.org/ItemList">
-                      {topTopics.map((topic, index) => (
+                      {displayTopics.map((topic, index) => (
                         <li
                           key={index}
-                          className={`px-6 py-4 flex items-center gap-4 ${theme === 'dark' ? 'hover:bg-gray-750' : 'hover:bg-gray-50'} transition-colors ${index < 9 ? (theme === 'dark' ? 'border-b border-gray-700' : 'border-b border-gray-200') : ''}`}
+                          className={`px-6 py-4 flex items-center gap-4 ${theme === 'dark' ? 'hover:bg-gray-750' : 'hover:bg-gray-50'} transition-colors ${index < displayTopics.length - 1 ? (theme === 'dark' ? 'border-b border-gray-700' : 'border-b border-gray-200') : ''}`}
                           itemProp="itemListElement"
                           itemScope
                           itemType="https://schema.org/ListItem"
@@ -666,7 +667,7 @@ function DynamicPage() {
                         </li>
                       ))}
                     </ol>
-                    {topTopics.length < getSortedTopics().length && (
+                    {topTopics.length > 10 && (
                       <div className="mt-4 text-center">
                         <button
                           onClick={() => setShowFullList(!showFullList)}
@@ -679,65 +680,7 @@ function DynamicPage() {
                   </section>
                 </>
               )}
-              {topics.length > 0 && viewMode === 'list' && showFullList && (
-                <section className="max-w-7xl mx-auto mb-8 px-4 md:px-6">
-                  <h2 className={`text-2xl md:text-3xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                    All Trending Topics
-                  </h2>
-                  <p className={`mb-4 text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                    Complete list of all trending topics ranked by search volume
-                  </p>
-                  <ol className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-lg overflow-hidden shadow-sm list-none`}>
-                    {getSortedTopics().map((topic, index) => (
-                      <li
-                        key={index}
-                        className={`px-6 py-4 flex items-center gap-4 ${theme === 'dark' ? 'hover:bg-gray-750' : 'hover:bg-gray-50'} transition-colors ${index < getSortedTopics().length - 1 ? (theme === 'dark' ? 'border-b border-gray-700' : 'border-b border-gray-200') : ''}`}
-                      >
-                        <div className={`w-12 flex items-center justify-center`} aria-label={`Rank ${index + 1}`}>
-                          <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold ${theme === 'dark' ? 'bg-blue-600 text-white' : 'bg-blue-500 text-white'} shadow-md`}>
-                            {index + 1}
-                          </div>
-                        </div>
-                        <article className="flex-1">
-                          <h3 className="font-semibold text-lg mb-1">{topic.name.replace(/"/g, '')}</h3>
-                          <div className="flex flex-wrap items-center gap-3 text-sm">
-                            <span className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                              {topic.searchVolumeRaw.replace(/"/g, '')} searches
-                            </span>
-                            <span className={`px-2 py-0.5 rounded text-xs ${topic.source === 'user_upload' ? (theme === 'dark' ? 'bg-green-900/30 text-green-400' : 'bg-green-100 text-green-700') : (theme === 'dark' ? 'bg-blue-900/30 text-blue-400' : 'bg-blue-100 text-blue-700')}`}>
-                              {(() => {
-                                const found = sources.find(s => s.value === topic.source);
-                                if (found) return found.label;
-                                if (topic.source) return topic.source.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-                                return 'Trending';
-                              })()}
-                            </span>
-                            {topic.category && (
-                              <span className={`px-2 py-0.5 rounded text-xs ${theme === 'dark' ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-700'}`}>
-                                {topic.category}
-                              </span>
-                            )}
-                            {topic.pubDate && (
-                              <time className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`} dateTime={new Date(topic.pubDate).toISOString()}>
-                                {new Date(topic.pubDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                              </time>
-                            )}
-                          </div>
-                        </article>
-                      </li>
-                    ))}
-                  </ol>
-                  <div className="mt-4 text-center">
-                    <button
-                      onClick={() => setShowFullList(false)}
-                      className={`px-6 py-2 rounded-lg font-semibold transition-colors ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white'}`}
-                    >
-                      Show Top 10 Only
-                    </button>
-                  </div>
-                </section>
-              )}
-              {topics.length > 0 && viewMode === 'list' && !showFullList && (
+              {topics.length > 0 && viewMode === 'list' && (
               <div className="max-w-7xl mx-auto">
                 <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-lg border overflow-hidden shadow-sm`}>
                   <div className={`hidden md:grid grid-cols-5 gap-4 px-6 py-4 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'} font-semibold text-sm`}>
