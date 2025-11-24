@@ -358,14 +358,133 @@ function DynamicPage() {
   }
 
   const topTopics = [...topics].sort((a, b) => b.searchVolume - a.searchVolume).slice(0, 10);
+  const topTopicNames = topTopics.slice(0, 5).map(t => t.name.replace(/"/g, '')).join(', ');
+  const currentDate = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  const lastUpdated = topics.length > 0 ? new Date(Math.max(...topics.map(t => new Date(t.pubDate || t.createdAt || Date.now()).getTime()))) : new Date();
+
+  const pageUrl = typeof window !== 'undefined' ? window.location.href : `https://googletrendingtopics.com/${pageData.page_url}`;
+  const sourceName = sources.find(s => s.value === pageData.source)?.label || 'Custom';
+
+  const enhancedTitle = `${pageData.meta_title} - ${currentDate}`;
+  const enhancedDescription = topTopicNames
+    ? `${pageData.meta_description} Top trending: ${topTopicNames}. Updated ${lastUpdated.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}.`
+    : pageData.meta_description;
+
+  const keywords = topTopics.slice(0, 10).map(t => t.name.replace(/"/g, '')).join(', ') + ', trending topics, search trends, real-time trends, trend analysis';
 
   return (
     <>
       <Helmet>
-        <title>{pageData.meta_title}</title>
-        <meta name="description" content={pageData.meta_description} />
-        <meta property="og:title" content={pageData.meta_title} />
-        <meta property="og:description" content={pageData.meta_description} />
+        <title>{enhancedTitle}</title>
+        <meta name="description" content={enhancedDescription} />
+        <meta name="keywords" content={keywords} />
+        <meta name="author" content="Google Trending Topics" />
+        <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+        <link rel="canonical" href={pageUrl} />
+
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={pageUrl} />
+        <meta property="og:title" content={enhancedTitle} />
+        <meta property="og:description" content={enhancedDescription} />
+        <meta property="og:site_name" content="Google Trending Topics" />
+        <meta property="og:locale" content="en_US" />
+        <meta property="og:updated_time" content={lastUpdated.toISOString()} />
+
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:url" content={pageUrl} />
+        <meta name="twitter:title" content={enhancedTitle} />
+        <meta name="twitter:description" content={enhancedDescription} />
+
+        <meta property="article:published_time" content={pageData.created_at} />
+        <meta property="article:modified_time" content={lastUpdated.toISOString()} />
+        <meta property="article:section" content="Trending Topics" />
+        <meta property="article:tag" content={topTopicNames} />
+
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebPage",
+            "name": enhancedTitle,
+            "description": enhancedDescription,
+            "url": pageUrl,
+            "datePublished": pageData.created_at,
+            "dateModified": lastUpdated.toISOString(),
+            "author": {
+              "@type": "Organization",
+              "name": "Google Trending Topics"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "Google Trending Topics",
+              "url": "https://googletrendingtopics.com"
+            },
+            "breadcrumb": {
+              "@type": "BreadcrumbList",
+              "itemListElement": [
+                {
+                  "@type": "ListItem",
+                  "position": 1,
+                  "name": "Home",
+                  "item": "https://googletrendingtopics.com"
+                },
+                {
+                  "@type": "ListItem",
+                  "position": 2,
+                  "name": pageData.meta_title,
+                  "item": pageUrl
+                }
+              ]
+            },
+            "mainEntity": {
+              "@type": "ItemList",
+              "name": "Top Trending Topics",
+              "description": "Current trending topics ranked by search volume",
+              "numberOfItems": topTopics.length,
+              "itemListElement": topTopics.map((topic, index) => ({
+                "@type": "ListItem",
+                "position": index + 1,
+                "item": {
+                  "@type": "Thing",
+                  "name": topic.name.replace(/"/g, ''),
+                  "description": `${topic.searchVolumeRaw.replace(/"/g, '')} searches`
+                }
+              }))
+            }
+          })}
+        </script>
+
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": [
+              {
+                "@type": "Question",
+                "name": `What are the top trending topics for ${sourceName}?`,
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": `The top trending topics for ${sourceName} as of ${currentDate} are: ${topTopicNames}. These topics are ranked by search volume and updated in real-time.`
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "How often is this trending data updated?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Our trending topics data is updated in real-time, with the latest update at " + lastUpdated.toLocaleString('en-US', { timeZone: 'America/New_York', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true }) + " ET."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "What does search volume mean?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Search volume indicates how many times a topic has been searched. Higher search volumes indicate more popular and trending topics that are capturing public attention."
+                }
+              }
+            ]
+          })}
+        </script>
       </Helmet>
 
       <Header
@@ -410,6 +529,42 @@ function DynamicPage() {
           )}
           {!loading && (
             <>
+              {topics.length > 0 && (
+                <article className="max-w-7xl mx-auto mb-8">
+                  <header>
+                    <h1 className={`text-3xl md:text-4xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                      {pageData.meta_title}
+                    </h1>
+                    <div className={`flex flex-wrap items-center gap-3 mb-4 text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                      <time dateTime={lastUpdated.toISOString()}>
+                        Last updated: {lastUpdated.toLocaleString('en-US', {
+                          timeZone: 'America/New_York',
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric',
+                          hour: 'numeric',
+                          minute: '2-digit',
+                          hour12: true
+                        })} ET
+                      </time>
+                      <span className={`px-2 py-1 rounded text-xs ${theme === 'dark' ? 'bg-blue-900/30 text-blue-400' : 'bg-blue-100 text-blue-700'}`}>
+                        {topics.length} trending topics
+                      </span>
+                    </div>
+                  </header>
+                  <div className={`prose ${theme === 'dark' ? 'prose-invert' : ''} max-w-none`}>
+                    <p className={`text-lg leading-relaxed mb-4 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                      {pageData.meta_description}
+                    </p>
+                    {topTopicNames && (
+                      <p className={`text-base leading-relaxed ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                        Currently trending: <strong className={theme === 'dark' ? 'text-white' : 'text-gray-900'}>{topTopicNames}</strong>.
+                        Explore our interactive visualization to discover real-time search trends, analyze topic popularity, and stay updated with what's capturing attention right now.
+                      </p>
+                    )}
+                  </div>
+                </article>
+              )}
               {topics.length > 0 && viewMode === 'bubble' && (
                 <>
                   <BubbleChart topics={topics} maxDisplay={maxBubbles} theme={theme} onBubbleTimingUpdate={handleBubbleTimingUpdate} />
@@ -651,6 +806,93 @@ function DynamicPage() {
           </div>
         </section>
       )}
+
+          {topics.length > 0 && (
+            <section className="max-w-7xl mx-auto mt-12 mb-8 px-4 md:px-6" aria-labelledby="faq-heading">
+              <h2 id="faq-heading" className={`text-2xl md:text-3xl font-bold mb-6 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                Frequently Asked Questions
+              </h2>
+              <div className="space-y-6">
+                <details className={`group ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-sm`}>
+                  <summary className={`cursor-pointer px-6 py-4 font-semibold ${theme === 'dark' ? 'text-white hover:text-blue-400' : 'text-gray-900 hover:text-blue-600'} transition-colors list-none flex items-center justify-between`}>
+                    <span>What are the top trending topics for {sourceName}?</span>
+                    <span className="ml-2 text-2xl group-open:rotate-45 transition-transform">+</span>
+                  </summary>
+                  <div className={`px-6 pb-4 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                    <p>
+                      The top trending topics for {sourceName} as of {currentDate} are: <strong>{topTopicNames}</strong>.
+                      These topics are ranked by search volume and updated in real-time to reflect what people are searching for right now.
+                    </p>
+                  </div>
+                </details>
+
+                <details className={`group ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-sm`}>
+                  <summary className={`cursor-pointer px-6 py-4 font-semibold ${theme === 'dark' ? 'text-white hover:text-blue-400' : 'text-gray-900 hover:text-blue-600'} transition-colors list-none flex items-center justify-between`}>
+                    <span>How often is this trending data updated?</span>
+                    <span className="ml-2 text-2xl group-open:rotate-45 transition-transform">+</span>
+                  </summary>
+                  <div className={`px-6 pb-4 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                    <p>
+                      Our trending topics data is updated in real-time. The latest update was at{' '}
+                      <time dateTime={lastUpdated.toISOString()}>
+                        {lastUpdated.toLocaleString('en-US', {
+                          timeZone: 'America/New_York',
+                          month: 'short',
+                          day: 'numeric',
+                          hour: 'numeric',
+                          minute: '2-digit',
+                          hour12: true
+                        })} ET
+                      </time>.
+                      We continuously monitor search trends to bring you the most current information about what's trending.
+                    </p>
+                  </div>
+                </details>
+
+                <details className={`group ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-sm`}>
+                  <summary className={`cursor-pointer px-6 py-4 font-semibold ${theme === 'dark' ? 'text-white hover:text-blue-400' : 'text-gray-900 hover:text-blue-600'} transition-colors list-none flex items-center justify-between`}>
+                    <span>What does search volume mean?</span>
+                    <span className="ml-2 text-2xl group-open:rotate-45 transition-transform">+</span>
+                  </summary>
+                  <div className={`px-6 pb-4 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                    <p>
+                      Search volume indicates how many times a topic has been searched. Higher search volumes indicate more popular
+                      and trending topics that are capturing public attention. We track this metric to help you identify which topics
+                      are gaining momentum and becoming viral across the internet.
+                    </p>
+                  </div>
+                </details>
+
+                <details className={`group ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-sm`}>
+                  <summary className={`cursor-pointer px-6 py-4 font-semibold ${theme === 'dark' ? 'text-white hover:text-blue-400' : 'text-gray-900 hover:text-blue-600'} transition-colors list-none flex items-center justify-between`}>
+                    <span>How can I use this trending data?</span>
+                    <span className="ml-2 text-2xl group-open:rotate-45 transition-transform">+</span>
+                  </summary>
+                  <div className={`px-6 pb-4 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                    <p>
+                      You can use this trending data for content creation, marketing strategies, staying informed about current events,
+                      identifying viral topics, and understanding what captures public interest. Our interactive visualization allows you
+                      to filter by category and date range to find trends most relevant to your needs.
+                    </p>
+                  </div>
+                </details>
+
+                <details className={`group ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-sm`}>
+                  <summary className={`cursor-pointer px-6 py-4 font-semibold ${theme === 'dark' ? 'text-white hover:text-blue-400' : 'text-gray-900 hover:text-blue-600'} transition-colors list-none flex items-center justify-between`}>
+                    <span>Can I switch between bubble and list views?</span>
+                    <span className="ml-2 text-2xl group-open:rotate-45 transition-transform">+</span>
+                  </summary>
+                  <div className={`px-6 pb-4 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                    <p>
+                      Yes! Use the view toggle in the filter menu to switch between our interactive bubble chart visualization and
+                      a sortable list view. The bubble chart provides a visual representation of trending topics where bubble size
+                      represents search volume, while the list view offers detailed sorting and filtering capabilities.
+                    </p>
+                  </div>
+                </details>
+              </div>
+            </section>
+          )}
         </main>
       </div>
       <Footer theme={theme} />
