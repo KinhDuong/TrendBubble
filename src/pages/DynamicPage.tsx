@@ -777,6 +777,9 @@ function DynamicPage() {
           <h2 id="latest-pages-heading" className={`text-2xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
             Latest
           </h2>
+          <p className={`text-sm mb-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+            Explore the latest trending topics pages across different categories and sources. Stay informed with real-time updates on what's capturing attention and driving search volume across the internet.
+          </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {latestPages.map((page) => {
               const sourceInfo = sources.find(s => s.value === page.source);
@@ -825,6 +828,9 @@ function DynamicPage() {
               <h2 id="faq-heading" className={`text-2xl md:text-3xl font-bold mb-6 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                 Frequently Asked Questions
               </h2>
+              <p className={`text-sm mb-6 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                Find answers to common questions about {pageData.meta_title.toLowerCase()} and how to use our real-time trending topics platform to discover viral content, analyze search trends, and stay ahead of what's trending online.
+              </p>
               <div className="space-y-6">
                 <details className={`group ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-sm`}>
                   <summary className={`cursor-pointer px-6 py-4 font-semibold ${theme === 'dark' ? 'text-white hover:text-blue-400' : 'text-gray-900 hover:text-blue-600'} transition-colors list-none flex items-center justify-between`}>
