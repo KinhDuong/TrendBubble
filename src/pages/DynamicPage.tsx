@@ -511,7 +511,7 @@ function DynamicPage() {
         isAdmin={isAdmin}
         onLoginClick={() => {}}
         onLogout={logout}
-        title={pageData.meta_title}
+        title="Trending Bubble"
       />
 
       <FilterMenu
