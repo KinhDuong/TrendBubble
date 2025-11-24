@@ -211,6 +211,47 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
       return colors[index % colors.length];
     };
 
+    const findNonOverlappingPosition = (
+      initialX: number,
+      initialY: number,
+      radius: number,
+      canvasDisplayWidth: number,
+      canvasDisplayHeight: number,
+      existingBubbles: Bubble[],
+      maxAttempts: number = 100,
+      searchRadius: number = 50
+    ): { x: number; y: number } => {
+      let x = initialX;
+      let y = initialY;
+      let attempts = 0;
+      const minSpacing = 10;
+
+      while (attempts < maxAttempts) {
+        const hasOverlap = existingBubbles.some(other => {
+          const dx = x - other.x;
+          const dy = y - other.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          return dist < radius + other.radius + minSpacing;
+        });
+
+        if (!hasOverlap) {
+          return { x, y };
+        }
+
+        const angle = (attempts / maxAttempts) * Math.PI * 2 * 3;
+        const distance = (attempts / maxAttempts) * searchRadius;
+        x = initialX + Math.cos(angle) * distance;
+        y = initialY + Math.sin(angle) * distance;
+
+        x = Math.max(radius + 20, Math.min(canvasDisplayWidth - radius - 20, x));
+        y = Math.max(radius + 20, Math.min(canvasDisplayHeight - radius - 20, y));
+
+        attempts++;
+      }
+
+      return { x: initialX, y: initialY };
+    };
+
     const calculateLayoutPosition = (
       topicIndex: number,
       radius: number,
@@ -219,7 +260,8 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
       existingBubbles: Bubble[]
     ): { x: number; y: number } => {
       const topic = topics[topicIndex];
-      const padding = 80;
+      const padding = 100;
+      let initialX: number, initialY: number;
 
       switch (layout) {
         case 'grid': {
@@ -236,10 +278,9 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
           const row = Math.floor(topicIndex / cols);
           const col = topicIndex % cols;
 
-          return {
-            x: padding + col * cellWidth + cellWidth / 2,
-            y: padding + row * cellHeight + cellHeight / 2
-          };
+          initialX = padding + col * cellWidth + cellWidth / 2;
+          initialY = padding + row * cellHeight + cellHeight / 2;
+          return findNonOverlappingPosition(initialX, initialY, radius, canvasDisplayWidth, canvasDisplayHeight, existingBubbles, 50, 30);
         }
 
         case 'circular': {
@@ -248,17 +289,20 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
           const maxRadius = Math.min(canvasDisplayWidth, canvasDisplayHeight) / 2 - padding - radius * 2;
 
           const displayCount = Math.min(maxDisplay, topics.length);
-          const angle = (topicIndex / displayCount) * Math.PI * 2;
-
+          const itemsPerRing = Math.ceil(Math.sqrt(displayCount / 2));
           const volumeRatio = topic.searchVolume / (Math.max(...topics.map(t => t.searchVolume)) || 1);
-          const minDistance = maxRadius * 0.3;
-          const maxDistance = maxRadius * 0.85;
-          const distance = minDistance + volumeRatio * (maxDistance - minDistance);
 
-          return {
-            x: centerX + Math.cos(angle) * distance,
-            y: centerY + Math.sin(angle) * distance
-          };
+          const ringCount = Math.ceil(displayCount / itemsPerRing);
+          const ringIndex = Math.floor(topicIndex / itemsPerRing);
+          const posInRing = topicIndex % itemsPerRing;
+
+          const distance = maxRadius * (0.3 + (ringIndex / Math.max(1, ringCount - 1)) * 0.6);
+          const angleStep = (Math.PI * 2) / itemsPerRing;
+          const angle = posInRing * angleStep;
+
+          initialX = centerX + Math.cos(angle) * distance;
+          initialY = centerY + Math.sin(angle) * distance;
+          return findNonOverlappingPosition(initialX, initialY, radius, canvasDisplayWidth, canvasDisplayHeight, existingBubbles, 50, 40);
         }
 
         case 'timeline': {
@@ -271,15 +315,15 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
           const sortedIndex = sortedTopics.findIndex(t => t.name === topic.name);
           const displayCount = Math.min(maxDisplay, topics.length);
 
-          const availableWidth = canvasDisplayWidth - padding * 2;
+          const availableWidth = canvasDisplayWidth - padding * 2 - radius * 4;
           const spacing = availableWidth / Math.max(1, displayCount - 1);
-          const x = padding + sortedIndex * spacing;
+          initialX = padding + radius * 2 + sortedIndex * spacing;
 
           const normalizedVolume = topic.searchVolume / (Math.max(...topics.map(t => t.searchVolume)) || 1);
-          const availableHeight = canvasDisplayHeight - padding * 2 - radius * 2;
-          const y = canvasDisplayHeight - padding - radius - normalizedVolume * availableHeight * 0.7;
+          const availableHeight = canvasDisplayHeight - padding * 2 - radius * 4;
+          initialY = canvasDisplayHeight - padding - radius * 2 - normalizedVolume * availableHeight * 0.7;
 
-          return { x, y };
+          return findNonOverlappingPosition(initialX, initialY, radius, canvasDisplayWidth, canvasDisplayHeight, existingBubbles, 50, 30);
         }
 
         case 'importance': {
@@ -300,14 +344,13 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
             ? bubblesRef.current.reduce((sum, b) => sum + b.baseRadius, 0) / bubblesRef.current.length
             : radius;
 
-          const ringSpacing = Math.max(averageRadius * 3, 100);
+          const ringSpacing = Math.max(averageRadius * 4, 120);
           const ringRadius = (ring + 1) * ringSpacing;
           const angle = (posInRing / itemsPerRing) * Math.PI * 2;
 
-          return {
-            x: centerX + Math.cos(angle) * ringRadius,
-            y: centerY + Math.sin(angle) * ringRadius
-          };
+          initialX = centerX + Math.cos(angle) * ringRadius;
+          initialY = centerY + Math.sin(angle) * ringRadius;
+          return findNonOverlappingPosition(initialX, initialY, radius, canvasDisplayWidth, canvasDisplayHeight, existingBubbles, 50, 40);
         }
 
         case 'hierarchical': {
@@ -341,33 +384,32 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
           const itemCol = indexInCategory % itemsPerRow;
           const itemRow = Math.floor(indexInCategory / itemsPerRow);
 
-          const clusterPadding = Math.min(clusterWidth, clusterHeight) * 0.15;
-          const itemSpacing = (Math.min(clusterWidth, clusterHeight) - clusterPadding * 2) / (itemsPerRow + 0.5);
+          const clusterPadding = Math.min(clusterWidth, clusterHeight) * 0.2;
+          const itemSpacing = (Math.min(clusterWidth, clusterHeight) - clusterPadding * 2) / (itemsPerRow + 1);
 
-          return {
-            x: clusterCenterX - (itemsPerRow * itemSpacing) / 2 + itemCol * itemSpacing + itemSpacing / 2,
-            y: clusterCenterY - (itemsPerRow * itemSpacing) / 2 + itemRow * itemSpacing + itemSpacing / 2
-          };
+          initialX = clusterCenterX - (itemsPerRow * itemSpacing) / 2 + itemCol * itemSpacing + itemSpacing;
+          initialY = clusterCenterY - (itemsPerRow * itemSpacing) / 2 + itemRow * itemSpacing + itemSpacing;
+          return findNonOverlappingPosition(initialX, initialY, radius, canvasDisplayWidth, canvasDisplayHeight, existingBubbles, 50, 30);
         }
 
         case 'scatter': {
           const ageInDays = topic.createdAt || topic.pubDate
             ? (Date.now() - new Date(topic.createdAt || topic.pubDate || '').getTime()) / (1000 * 60 * 60 * 24)
-            : Math.random() * 30;
+            : topicIndex * 5;
 
           const maxAge = Math.max(...topics.map(t => {
             const date = t.createdAt || t.pubDate;
             return date ? (Date.now() - new Date(date).getTime()) / (1000 * 60 * 60 * 24) : 0;
           }), 1);
 
-          const availableWidth = canvasDisplayWidth - padding * 2 - radius * 2;
-          const availableHeight = canvasDisplayHeight - padding * 2 - radius * 2;
+          const availableWidth = canvasDisplayWidth - padding * 2 - radius * 4;
+          const availableHeight = canvasDisplayHeight - padding * 2 - radius * 4;
 
-          const x = padding + radius + (ageInDays / maxAge) * availableWidth;
+          initialX = padding + radius * 2 + (ageInDays / maxAge) * availableWidth;
           const normalizedVolume = topic.searchVolume / (Math.max(...topics.map(t => t.searchVolume)) || 1);
-          const y = canvasDisplayHeight - padding - radius - normalizedVolume * availableHeight;
+          initialY = canvasDisplayHeight - padding - radius * 2 - normalizedVolume * availableHeight;
 
-          return { x, y };
+          return findNonOverlappingPosition(initialX, initialY, radius, canvasDisplayWidth, canvasDisplayHeight, existingBubbles, 50, 40);
         }
 
         case 'packed': {
@@ -383,13 +425,13 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
           let placed = false;
           let attempts = 0;
           let x = centerX, y = centerY;
-          const spiralIncrement = 0.5;
-          let spiralRadius = radius * 2;
-          let spiralAngle = volumeIndex * 0.5;
+          const spiralIncrement = 0.3;
+          let spiralRadius = radius * 3;
+          let spiralAngle = volumeIndex * 0.8;
 
-          while (!placed && attempts < 200) {
+          while (!placed && attempts < 300) {
             spiralAngle += spiralIncrement;
-            spiralRadius += spiralIncrement * 2;
+            spiralRadius += spiralIncrement * 3;
 
             x = centerX + Math.cos(spiralAngle) * spiralRadius;
             y = centerY + Math.sin(spiralAngle) * spiralRadius;
@@ -404,7 +446,7 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
               const dx = x - other.x;
               const dy = y - other.y;
               const dist = Math.sqrt(dx * dx + dy * dy);
-              return dist < radius + other.radius + 5;
+              return dist < radius + other.radius + 10;
             });
 
             if (!hasOverlap) placed = true;
