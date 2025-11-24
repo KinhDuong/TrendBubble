@@ -71,7 +71,7 @@ export default function FilterMenu({
 
   if (variant === 'bubble') {
     return (
-      <div className={`${theme === 'dark' ? 'bg-gray-800 shadow-[0_-8px_24px_rgba(0,0,0,0.8)]' : 'bg-white shadow-[0_-8px_24px_rgba(0,0,0,0.3)]'}`}>
+      <div className={`${theme === 'dark' ? 'bg-gray-800 shadow-[0_8px_24px_rgba(0,0,0,0.8)]' : 'bg-white shadow-[0_8px_24px_rgba(0,0,0,0.3)]'}`}>
         <div className="px-4 md:px-6 py-3">
           <div className="flex items-center justify-center">
             <div className="overflow-x-auto">
@@ -257,7 +257,7 @@ export default function FilterMenu({
   }
 
   return (
-    <nav className={`${theme === 'dark' ? 'bg-gray-800 shadow-[0_-8px_24px_rgba(0,0,0,0.8)]' : 'bg-white shadow-[0_-8px_24px_rgba(0,0,0,0.3)]'}`} aria-label="Trending topics filters">
+    <nav className={`${theme === 'dark' ? 'bg-gray-800 shadow-[0_8px_24px_rgba(0,0,0,0.8)]' : 'bg-white shadow-[0_8px_24px_rgba(0,0,0,0.3)]'}`} aria-label="Trending topics filters">
       <div className="px-4 md:px-6 py-3">
         <div className="flex items-center justify-center">
           <div className="overflow-x-auto">
