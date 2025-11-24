@@ -38,11 +38,11 @@ export default function Header({ theme, isAdmin, onLoginClick, onLogout, title =
 
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded transition-colors"
+            className={`p-2 rounded transition-colors ${theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-200'}`}
             aria-label="Menu"
             aria-expanded={isMenuOpen}
           >
-            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            {isMenuOpen ? <X size={24} className={theme === 'dark' ? 'text-gray-300' : 'text-gray-700'} /> : <Menu size={24} className={theme === 'dark' ? 'text-gray-300' : 'text-gray-700'} />}
           </button>
         </div>
       </div>
