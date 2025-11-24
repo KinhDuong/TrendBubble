@@ -558,11 +558,11 @@ function DynamicPage() {
                     </div>
                   </header>
                   <div className={`prose ${theme === 'dark' ? 'prose-invert' : ''} max-w-none`}>
-                    <p className={`text-base leading-relaxed mb-4 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                    <p className={`text-sm leading-relaxed mb-4 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
                       {pageData.meta_description}
                     </p>
                     {topTopicNames && (
-                      <p className={`text-base leading-relaxed ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                      <p className={`text-sm leading-relaxed ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
                         Currently trending: <strong className={theme === 'dark' ? 'text-white' : 'text-gray-900'}>{topTopicNames}</strong>.
                         Explore our interactive visualization to discover real-time search trends, analyze topic popularity, and stay updated with what's capturing attention right now.
                       </p>
