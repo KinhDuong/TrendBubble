@@ -857,7 +857,7 @@ function DynamicPage() {
                 Find answers to common questions about {pageData.meta_title.toLowerCase()} and how to use our real-time trending topics platform to discover viral content, analyze search trends, and stay ahead of what's trending online.
               </p>
               <div className="space-y-6">
-                <details className={`group ${theme === 'dark' ? 'bg-gray-800' : 'bg-white border border-gray-200 shadow-md'} rounded-lg`}>
+                <details className={`group ${theme === 'dark' ? 'bg-gray-800' : 'bg-white border border-gray-200'} rounded-lg`}>
                   <summary className={`cursor-pointer px-6 py-4 font-semibold ${theme === 'dark' ? 'text-white hover:text-blue-400' : 'text-gray-900 hover:text-blue-600'} transition-colors list-none flex items-center justify-between`}>
                     <span>What are the top trending topics for {sourceName}?</span>
                     <span className="ml-2 text-2xl group-open:rotate-45 transition-transform">+</span>
@@ -870,7 +870,7 @@ function DynamicPage() {
                   </div>
                 </details>
 
-                <details className={`group ${theme === 'dark' ? 'bg-gray-800' : 'bg-white border border-gray-200 shadow-md'} rounded-lg`}>
+                <details className={`group ${theme === 'dark' ? 'bg-gray-800' : 'bg-white border border-gray-200'} rounded-lg`}>
                   <summary className={`cursor-pointer px-6 py-4 font-semibold ${theme === 'dark' ? 'text-white hover:text-blue-400' : 'text-gray-900 hover:text-blue-600'} transition-colors list-none flex items-center justify-between`}>
                     <span>How often is this trending data updated?</span>
                     <span className="ml-2 text-2xl group-open:rotate-45 transition-transform">+</span>
@@ -893,7 +893,7 @@ function DynamicPage() {
                   </div>
                 </details>
 
-                <details className={`group ${theme === 'dark' ? 'bg-gray-800' : 'bg-white border border-gray-200 shadow-md'} rounded-lg`}>
+                <details className={`group ${theme === 'dark' ? 'bg-gray-800' : 'bg-white border border-gray-200'} rounded-lg`}>
                   <summary className={`cursor-pointer px-6 py-4 font-semibold ${theme === 'dark' ? 'text-white hover:text-blue-400' : 'text-gray-900 hover:text-blue-600'} transition-colors list-none flex items-center justify-between`}>
                     <span>What does search volume mean?</span>
                     <span className="ml-2 text-2xl group-open:rotate-45 transition-transform">+</span>
@@ -907,7 +907,7 @@ function DynamicPage() {
                   </div>
                 </details>
 
-                <details className={`group ${theme === 'dark' ? 'bg-gray-800' : 'bg-white border border-gray-200 shadow-md'} rounded-lg`}>
+                <details className={`group ${theme === 'dark' ? 'bg-gray-800' : 'bg-white border border-gray-200'} rounded-lg`}>
                   <summary className={`cursor-pointer px-6 py-4 font-semibold ${theme === 'dark' ? 'text-white hover:text-blue-400' : 'text-gray-900 hover:text-blue-600'} transition-colors list-none flex items-center justify-between`}>
                     <span>How can I use this trending data?</span>
                     <span className="ml-2 text-2xl group-open:rotate-45 transition-transform">+</span>
@@ -921,7 +921,7 @@ function DynamicPage() {
                   </div>
                 </details>
 
-                <details className={`group ${theme === 'dark' ? 'bg-gray-800' : 'bg-white border border-gray-200 shadow-md'} rounded-lg`}>
+                <details className={`group ${theme === 'dark' ? 'bg-gray-800' : 'bg-white border border-gray-200'} rounded-lg`}>
                   <summary className={`cursor-pointer px-6 py-4 font-semibold ${theme === 'dark' ? 'text-white hover:text-blue-400' : 'text-gray-900 hover:text-blue-600'} transition-colors list-none flex items-center justify-between`}>
                     <span>Can I switch between bubble and list views?</span>
                     <span className="ml-2 text-2xl group-open:rotate-45 transition-transform">+</span>
