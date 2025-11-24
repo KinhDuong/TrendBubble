@@ -196,7 +196,7 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
 
       const exponentialScale = Math.pow(normalizedScale, 0.5);
 
-      const baseMin = (isMobile ? 25 : 40) * densityFactor;
+      const baseMin = (isMobile ? 30 : 40) * densityFactor;
       const baseMax = (isMobile ? 70 : 120) * densityFactor;
 
       const scaledSize = baseMin + exponentialScale * (baseMax - baseMin);
@@ -730,8 +730,8 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
         // Start shrinking when density exceeds threshold
         // Mobile: less aggressive shrinking, Desktop: more aggressive
         const isMobile = window.innerWidth < 768;
-        const densityThreshold = isMobile ? 0.8 : 0.6;
-        const shrinkAmount = isMobile ? 0.35 : 0.4; // Mobile: shrink up to 35%, Desktop: shrink up to 40%
+        const densityThreshold = isMobile ? 0.85 : 0.6;
+        const shrinkAmount = isMobile ? 0.3 : 0.4; // Mobile: shrink up to 30%, Desktop: shrink up to 40%
 
         if (densityRatio > densityThreshold) {
           const excessDensity = Math.min(densityRatio - densityThreshold, 0.2) / 0.2;
