@@ -582,7 +582,7 @@ function DynamicPage() {
                     comparingTopics={comparingTopics}
                     onComparingTopicsChange={setComparingTopics}
                   />
-                  {!showFullList && (
+
                   <div className={`w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'} py-6 mt-8`}>
                     <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4 overflow-hidden">
                       <div className="flex items-center gap-4 min-w-0 flex-shrink-0">
@@ -614,10 +614,8 @@ function DynamicPage() {
                       </div>
                     </div>
                   </div>
-                  )}
 
-                  {!showFullList && (
-                  <section className="max-w-7xl mx-auto mt-8 mb-0 md:mb-8 px-4 md:px-6" aria-labelledby="top-trending-heading">
+                  <section className="max-w-7xl mx-auto mt-8 mb-0 md:mb-8" aria-labelledby="top-trending-heading">
                     <h2 id="top-trending-heading" className={`text-2xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                       Top 10 Trending Topics
                     </h2>
@@ -679,7 +677,6 @@ function DynamicPage() {
                       </div>
                     )}
                   </section>
-                  )}
                 </>
               )}
               {topics.length > 0 && viewMode === 'list' && showFullList && (
