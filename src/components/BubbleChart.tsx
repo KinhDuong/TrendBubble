@@ -453,7 +453,7 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
         let opacity = 1;
 
         const age = Date.now() - bubble.createdAt;
-        const ageRatio = Math.min(age / bubble.lifetime, 1);
+        const ageRatio = bubble.isPinned ? 0 : Math.min(age / bubble.lifetime, 1);
         const brightnessBoost = bubble.isHovered ? 0.3 : 0;
         const colorIntensity = theme === 'dark' ? (1 - ageRatio * 0.6 + brightnessBoost) : (1 + brightnessBoost);
 
