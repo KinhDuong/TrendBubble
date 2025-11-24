@@ -1436,7 +1436,7 @@ function HomePage() {
                         >
                           <meta itemProp="position" content={String(index + 1)} />
                           <div className={`w-12 flex items-center justify-center`} aria-label={`Rank ${index + 1}`}>
-                            <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold ${theme === 'dark' ? 'bg-blue-600 text-white' : 'bg-blue-500 text-white'} shadow-md`}>
+                            <div className={`text-2xl font-bold ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
                               {index + 1}
                             </div>
                           </div>
