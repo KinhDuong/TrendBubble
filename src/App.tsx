@@ -1381,8 +1381,10 @@ function HomePage() {
           <>
             {topics.length > 0 && viewMode === 'bubble' && (
               <>
-                <div className={`rounded-lg ${theme === 'light' ? 'bg-white shadow-md' : ''}`}>
-                  <BubbleChart topics={topics} maxDisplay={maxBubbles} theme={theme} layout={bubbleLayout} onBubbleTimingUpdate={handleBubbleTimingUpdate} />
+                <div className={`w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] ${theme === 'light' ? 'bg-white' : ''}`}>
+                  <div className="max-w-7xl mx-auto">
+                    <BubbleChart topics={topics} maxDisplay={maxBubbles} theme={theme} layout={bubbleLayout} onBubbleTimingUpdate={handleBubbleTimingUpdate} />
+                  </div>
                 </div>
 
                 {/* Branded Attribution Section - Full Width */}
