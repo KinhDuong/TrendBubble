@@ -198,7 +198,7 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
       if (!isOverBubble && !isTooltipHovered) {
         tooltipHideTimeoutRef.current = setTimeout(() => {
           setTooltipData(null);
-        }, 200);
+        }, 300);
       }
 
       canvas.style.cursor = isOverBubble ? 'pointer' : 'default';
@@ -208,7 +208,7 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
       if (!isTooltipHovered) {
         tooltipHideTimeoutRef.current = setTimeout(() => {
           setTooltipData(null);
-        }, 200);
+        }, 300);
       }
     };
 
@@ -681,7 +681,7 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
             setIsTooltipHovered(false);
             tooltipHideTimeoutRef.current = setTimeout(() => {
               setTooltipData(null);
-            }, 200);
+            }, 300);
           }}
         />
       )}

@@ -28,8 +28,9 @@ export default function BubbleTooltip({
 }: BubbleTooltipProps) {
   const tooltipWidth = 280;
   const tooltipHeight = 200;
+  const offset = 5;
 
-  const left = x + tooltipWidth > window.innerWidth ? x - tooltipWidth - 10 : x + 10;
+  const left = x + tooltipWidth + offset > window.innerWidth ? x - tooltipWidth - offset : x + offset;
   const top = y + tooltipHeight > window.innerHeight ? y - tooltipHeight : y;
 
   const formatDate = (dateString: string | null) => {
@@ -53,15 +54,32 @@ export default function BubbleTooltip({
     return sourceMap[source] || source.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
   };
 
+  const isLeftSide = left < x;
+  const bridgeLeft = isLeftSide ? left + tooltipWidth : x;
+  const bridgeWidth = isLeftSide ? x - (left + tooltipWidth) + 50 : left - x + 50;
+
   return (
-    <div
-      className={`fixed z-50 pointer-events-auto ${
-        theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-      } border rounded-lg shadow-2xl p-4 transition-all duration-200`}
-      style={{ left: `${left}px`, top: `${top}px`, width: `${tooltipWidth}px` }}
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
-    >
+    <>
+      <div
+        className="fixed z-50 pointer-events-auto"
+        style={{
+          left: `${bridgeLeft}px`,
+          top: `${top}px`,
+          width: `${bridgeWidth}px`,
+          height: `${Math.min(tooltipHeight, 150)}px`,
+          background: 'transparent'
+        }}
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
+      />
+      <div
+        className={`fixed z-50 pointer-events-auto ${
+          theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
+        } border rounded-lg shadow-2xl p-4`}
+        style={{ left: `${left}px`, top: `${top}px`, width: `${tooltipWidth}px` }}
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
+      >
       <div className="space-y-3">
         <div>
           <h3 className={`font-bold text-lg mb-1 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
@@ -160,5 +178,6 @@ export default function BubbleTooltip({
         )}
       </div>
     </div>
+    </>
   );
 }
