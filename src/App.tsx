@@ -6,7 +6,7 @@ import FileUpload from './components/FileUpload';
 import Login from './components/Login';
 import Footer from './components/Footer';
 import Header from './components/Header';
-import FilterMenu from './components/FilterMenu';
+import FilterMenu, { BubbleLayout } from './components/FilterMenu';
 import TrendingBubble from './pages/TrendingBubble';
 import DynamicPage from './pages/DynamicPage';
 import { TrendingTopic } from './types';
@@ -57,6 +57,7 @@ function HomePage() {
   const [showAllPages, setShowAllPages] = useState(false);
   const [allPages, setAllPages] = useState<any[]>([]);
   const [latestPages, setLatestPages] = useState<any[]>([]);
+  const [bubbleLayout, setBubbleLayout] = useState<BubbleLayout>('force');
   const [sources, setSources] = useState<Array<{value: string, label: string}>>([
     { value: 'all', label: 'All' },
     { value: 'google_trends', label: 'Google Trends' },
@@ -999,6 +1000,7 @@ function HomePage() {
         searchQuery={searchQuery}
         nextBubbleIn={nextBubbleIn}
         bubbleProgress={bubbleProgress}
+        bubbleLayout={bubbleLayout}
         onViewModeChange={setViewMode}
         onDateFilterChange={setDateFilter}
         onCategoryFilterChange={setCategoryFilter}
@@ -1010,6 +1012,7 @@ function HomePage() {
           setViewMode('bubble');
         }}
         onRefresh={loadTopics}
+        onBubbleLayoutChange={setBubbleLayout}
         variant="homepage"
       />
 
@@ -1376,7 +1379,7 @@ function HomePage() {
           <>
             {topics.length > 0 && viewMode === 'bubble' && (
               <>
-                <BubbleChart topics={topics} maxDisplay={maxBubbles} theme={theme} onBubbleTimingUpdate={handleBubbleTimingUpdate} />
+                <BubbleChart topics={topics} maxDisplay={maxBubbles} theme={theme} layout={bubbleLayout} onBubbleTimingUpdate={handleBubbleTimingUpdate} />
 
                 {/* Branded Attribution Section - Full Width */}
                 <div className={`w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'} py-6 mt-8`}>
