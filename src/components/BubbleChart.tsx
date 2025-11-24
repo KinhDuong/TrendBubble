@@ -2,11 +2,13 @@ import { useEffect, useRef, useState } from 'react';
 import { TrendingTopic } from '../types';
 import BubbleTooltip from './BubbleTooltip';
 import { supabase } from '../lib/supabase';
+import { BubbleLayout } from './FilterMenu';
 
 interface BubbleChartProps {
   topics: TrendingTopic[];
   maxDisplay: number;
   theme: 'dark' | 'light';
+  layout?: BubbleLayout;
   onBubbleTimingUpdate?: (nextPopTime: number | null, createdTime?: number, lifetime?: number) => void;
   comparingTopics?: Set<string>;
   onComparingTopicsChange?: (topics: Set<string>) => void;
@@ -32,7 +34,7 @@ interface Bubble {
   isPinned?: boolean;
 }
 
-export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingUpdate, comparingTopics: externalComparingTopics, onComparingTopicsChange }: BubbleChartProps) {
+export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force', onBubbleTimingUpdate, comparingTopics: externalComparingTopics, onComparingTopicsChange }: BubbleChartProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const bubblesRef = useRef<Bubble[]>([]);
   const animationFrameRef = useRef<number>();
@@ -209,6 +211,178 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
       return colors[index % colors.length];
     };
 
+    const calculateLayoutPosition = (
+      topicIndex: number,
+      radius: number,
+      canvasDisplayWidth: number,
+      canvasDisplayHeight: number,
+      existingBubbles: Bubble[]
+    ): { x: number; y: number } => {
+      const topic = topics[topicIndex];
+      const padding = 50;
+
+      switch (layout) {
+        case 'grid': {
+          const cols = Math.ceil(Math.sqrt(maxDisplay));
+          const cellWidth = (canvasDisplayWidth - padding * 2) / cols;
+          const cellHeight = (canvasDisplayHeight - padding * 2) / cols;
+          const row = Math.floor(topicIndex / cols);
+          const col = topicIndex % cols;
+          return {
+            x: padding + col * cellWidth + cellWidth / 2,
+            y: padding + row * cellHeight + cellHeight / 2
+          };
+        }
+
+        case 'circular': {
+          const centerX = canvasDisplayWidth / 2;
+          const centerY = canvasDisplayHeight / 2;
+          const maxRadius = Math.min(canvasDisplayWidth, canvasDisplayHeight) / 2 - padding - radius;
+          const angle = (topicIndex / maxDisplay) * Math.PI * 2;
+          const distance = (topic.searchVolume / topics[0]?.searchVolume || 0.5) * maxRadius * 0.7;
+          return {
+            x: centerX + Math.cos(angle) * distance,
+            y: centerY + Math.sin(angle) * distance
+          };
+        }
+
+        case 'timeline': {
+          const sortedTopics = [...topics].sort((a, b) => {
+            const dateA = new Date(a.createdAt || a.pubDate || '').getTime();
+            const dateB = new Date(b.createdAt || b.pubDate || '').getTime();
+            return dateA - dateB;
+          });
+          const sortedIndex = sortedTopics.findIndex(t => t.name === topic.name);
+          const x = padding + (sortedIndex / Math.max(1, topics.length - 1)) * (canvasDisplayWidth - padding * 2);
+          const normalizedVolume = topic.searchVolume / (topics[0]?.searchVolume || 1);
+          const y = canvasDisplayHeight - padding - normalizedVolume * (canvasDisplayHeight - padding * 2) * 0.8;
+          return { x, y };
+        }
+
+        case 'importance': {
+          const centerX = canvasDisplayWidth / 2;
+          const centerY = canvasDisplayHeight / 2;
+          const sortedByVolume = [...topics].sort((a, b) => b.searchVolume - a.searchVolume);
+          const volumeIndex = sortedByVolume.findIndex(t => t.name === topic.name);
+          const ring = Math.floor(volumeIndex / 8);
+          const posInRing = volumeIndex % 8;
+          const ringRadius = ring * 120 + 100;
+          const angle = (posInRing / 8) * Math.PI * 2;
+          return {
+            x: centerX + Math.cos(angle) * ringRadius,
+            y: centerY + Math.sin(angle) * ringRadius
+          };
+        }
+
+        case 'hierarchical': {
+          const categoryGroups = topics.reduce((acc, t) => {
+            const cat = t.category || 'Uncategorized';
+            if (!acc[cat]) acc[cat] = [];
+            acc[cat].push(t);
+            return acc;
+          }, {} as Record<string, TrendingTopic[]>);
+
+          const categories = Object.keys(categoryGroups);
+          const topicCategory = topic.category || 'Uncategorized';
+          const categoryIndex = categories.indexOf(topicCategory);
+          const topicsInCategory = categoryGroups[topicCategory];
+          const indexInCategory = topicsInCategory.findIndex(t => t.name === topic.name);
+
+          const cols = Math.ceil(Math.sqrt(categories.length));
+          const categoryCol = categoryIndex % cols;
+          const categoryRow = Math.floor(categoryIndex / cols);
+          const clusterWidth = (canvasDisplayWidth - padding * 2) / cols;
+          const clusterHeight = (canvasDisplayHeight - padding * 2) / cols;
+
+          const clusterCenterX = padding + categoryCol * clusterWidth + clusterWidth / 2;
+          const clusterCenterY = padding + categoryRow * clusterHeight + clusterHeight / 2;
+
+          const itemsPerRow = Math.ceil(Math.sqrt(topicsInCategory.length));
+          const itemCol = indexInCategory % itemsPerRow;
+          const itemRow = Math.floor(indexInCategory / itemsPerRow);
+          const itemSpacing = Math.min(clusterWidth, clusterHeight) / (itemsPerRow + 1);
+
+          return {
+            x: clusterCenterX - (itemsPerRow * itemSpacing) / 2 + itemCol * itemSpacing + itemSpacing,
+            y: clusterCenterY - (itemsPerRow * itemSpacing) / 2 + itemRow * itemSpacing + itemSpacing
+          };
+        }
+
+        case 'scatter': {
+          const ageInDays = topic.createdAt || topic.pubDate
+            ? (Date.now() - new Date(topic.createdAt || topic.pubDate || '').getTime()) / (1000 * 60 * 60 * 24)
+            : 0;
+          const maxAge = Math.max(...topics.map(t => {
+            const date = t.createdAt || t.pubDate;
+            return date ? (Date.now() - new Date(date).getTime()) / (1000 * 60 * 60 * 24) : 0;
+          }), 1);
+
+          const x = padding + (ageInDays / maxAge) * (canvasDisplayWidth - padding * 2);
+          const normalizedVolume = topic.searchVolume / (Math.max(...topics.map(t => t.searchVolume)) || 1);
+          const y = canvasDisplayHeight - padding - normalizedVolume * (canvasDisplayHeight - padding * 2);
+          return { x, y };
+        }
+
+        case 'packed': {
+          const centerX = canvasDisplayWidth / 2;
+          const centerY = canvasDisplayHeight / 2;
+          const sortedByVolume = [...topics].sort((a, b) => b.searchVolume - a.searchVolume);
+          const volumeIndex = sortedByVolume.findIndex(t => t.name === topic.name);
+
+          if (volumeIndex === 0) {
+            return { x: centerX, y: centerY };
+          }
+
+          let placed = false;
+          let attempts = 0;
+          let x = centerX, y = centerY;
+
+          while (!placed && attempts < 100) {
+            const angle = Math.random() * Math.PI * 2;
+            const distance = Math.sqrt(volumeIndex) * radius * 2;
+            x = centerX + Math.cos(angle) * distance;
+            y = centerY + Math.sin(angle) * distance;
+
+            const hasOverlap = existingBubbles.some(other => {
+              const dx = x - other.x;
+              const dy = y - other.y;
+              const dist = Math.sqrt(dx * dx + dy * dy);
+              return dist < radius + other.radius;
+            });
+
+            if (!hasOverlap) placed = true;
+            attempts++;
+          }
+
+          return { x, y };
+        }
+
+        case 'force':
+        default: {
+          let x, y;
+          let attempts = 0;
+          const maxAttempts = 50;
+
+          do {
+            x = Math.random() * (canvasDisplayWidth - radius * 2 - padding * 2) + radius + padding;
+            y = Math.random() * (canvasDisplayHeight - radius * 2 - padding * 2) + radius + padding;
+            attempts++;
+
+            const hasOverlap = existingBubbles.some(other => {
+              const dx = x - other.x;
+              const dy = y - other.y;
+              const distance = Math.sqrt(dx * dx + dy * dy);
+              return distance < radius + other.radius + 10;
+            });
+
+            if (!hasOverlap || attempts >= maxAttempts) break;
+          } while (true);
+
+          return { x, y };
+        }
+      }
+    };
+
     const createBubble = (topicIndex: number, existingBubbles: Bubble[] = []): Bubble => {
       const topic = topics[topicIndex];
       const randomLifetime = bubbleLifetimes[Math.floor(Math.random() * bubbleLifetimes.length)];
@@ -217,31 +391,16 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
       const canvasDisplayWidth = canvas.width / dpr;
       const canvasDisplayHeight = canvas.height / dpr;
 
-      let x, y;
-      let attempts = 0;
-      const maxAttempts = 50;
+      const { x, y } = calculateLayoutPosition(topicIndex, radius, canvasDisplayWidth, canvasDisplayHeight, existingBubbles);
 
-      do {
-        x = Math.random() * (canvasDisplayWidth - radius * 2 - 100) + radius + 50;
-        y = Math.random() * (canvasDisplayHeight - radius * 2 - 100) + radius + 50;
-        attempts++;
-
-        const hasOverlap = existingBubbles.some(other => {
-          const dx = x - other.x;
-          const dy = y - other.y;
-          const distance = Math.sqrt(dx * dx + dy * dy);
-          return distance < radius + other.radius + 10;
-        });
-
-        if (!hasOverlap || attempts >= maxAttempts) break;
-      } while (true);
+      const usePhysics = layout === 'force';
 
       return {
         topic,
         x,
         y,
-        vx: (Math.random() - 0.5) * 0.25,
-        vy: (Math.random() - 0.5) * 0.25,
+        vx: usePhysics ? (Math.random() - 0.5) * 0.25 : 0,
+        vy: usePhysics ? (Math.random() - 0.5) * 0.25 : 0,
         radius,
         baseRadius: radius,
         color: getRandomColor(topicIndex),
@@ -331,15 +490,17 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
       }
 
       bubblesRef.current.forEach((bubble) => {
-        const speedLimit = 1.5;
-        const currentSpeed = Math.sqrt(bubble.vx * bubble.vx + bubble.vy * bubble.vy);
-        if (currentSpeed > speedLimit) {
-          bubble.vx = (bubble.vx / currentSpeed) * speedLimit;
-          bubble.vy = (bubble.vy / currentSpeed) * speedLimit;
-        }
+        if (layout === 'force') {
+          const speedLimit = 1.5;
+          const currentSpeed = Math.sqrt(bubble.vx * bubble.vx + bubble.vy * bubble.vy);
+          if (currentSpeed > speedLimit) {
+            bubble.vx = (bubble.vx / currentSpeed) * speedLimit;
+            bubble.vy = (bubble.vy / currentSpeed) * speedLimit;
+          }
 
-        bubble.vx *= 0.998;
-        bubble.vy *= 0.998;
+          bubble.vx *= 0.998;
+          bubble.vy *= 0.998;
+        }
 
         if (bubble.isSpawning) {
           bubble.spawnProgress = Math.min((bubble.spawnProgress || 0) + 0.05, 1);
@@ -353,7 +514,7 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
           bubble.popProgress = Math.min((bubble.popProgress || 0) + 0.08, 1);
         }
 
-        if (!bubble.isPopping) {
+        if (!bubble.isPopping && layout === 'force') {
           bubble.x += bubble.vx;
           bubble.y += bubble.vy;
 
@@ -371,10 +532,12 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
         }
       });
 
-      for (let i = 0; i < bubblesRef.current.length; i++) {
-        for (let j = i + 1; j < bubblesRef.current.length; j++) {
-          if (checkCollision(bubblesRef.current[i], bubblesRef.current[j])) {
-            resolveCollision(bubblesRef.current[i], bubblesRef.current[j]);
+      if (layout === 'force') {
+        for (let i = 0; i < bubblesRef.current.length; i++) {
+          for (let j = i + 1; j < bubblesRef.current.length; j++) {
+            if (checkCollision(bubblesRef.current[i], bubblesRef.current[j])) {
+              resolveCollision(bubblesRef.current[i], bubblesRef.current[j]);
+            }
           }
         }
       }
@@ -617,7 +780,7 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, [topics, maxDisplay, theme]);
+  }, [topics, maxDisplay, theme, layout]);
 
   return (
     <div className="w-full h-full relative">

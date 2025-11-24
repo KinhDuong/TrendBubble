@@ -576,6 +576,7 @@ function DynamicPage() {
                     topics={topics}
                     maxDisplay={maxBubbles}
                     theme={theme}
+                    layout={bubbleLayout}
                     onBubbleTimingUpdate={handleBubbleTimingUpdate}
                     comparingTopics={comparingTopics}
                     onComparingTopicsChange={setComparingTopics}
