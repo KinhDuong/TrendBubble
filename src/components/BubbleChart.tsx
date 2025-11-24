@@ -32,6 +32,8 @@ interface Bubble {
   isHovered?: boolean;
   isComparing?: boolean;
   isPinned?: boolean;
+  layoutX?: number;
+  layoutY?: number;
 }
 
 export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force', onBubbleTimingUpdate, comparingTopics: externalComparingTopics, onComparingTopicsChange }: BubbleChartProps) {
@@ -521,6 +523,8 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
         topic,
         x,
         y,
+        layoutX: x,
+        layoutY: y,
         vx: usePhysics ? (Math.random() - 0.5) * 0.25 : 0,
         vy: usePhysics ? (Math.random() - 0.5) * 0.25 : 0,
         radius,
@@ -654,29 +658,49 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
         }
       });
 
-      for (let i = 0; i < bubblesRef.current.length; i++) {
-        for (let j = i + 1; j < bubblesRef.current.length; j++) {
-          const b1 = bubblesRef.current[i];
-          const b2 = bubblesRef.current[j];
+      if (layout === 'force') {
+        for (let i = 0; i < bubblesRef.current.length; i++) {
+          for (let j = i + 1; j < bubblesRef.current.length; j++) {
+            if (checkCollision(bubblesRef.current[i], bubblesRef.current[j])) {
+              resolveCollision(bubblesRef.current[i], bubblesRef.current[j]);
+            }
+          }
+        }
+      } else {
+        bubblesRef.current.forEach((bubble) => {
+          if (!bubble.isSpawning && !bubble.isPinned && bubble.layoutX !== undefined && bubble.layoutY !== undefined) {
+            const dx = bubble.layoutX - bubble.x;
+            const dy = bubble.layoutY - bubble.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
 
-          if (checkCollision(b1, b2)) {
-            if (layout === 'force') {
-              resolveCollision(b1, b2);
-            } else {
+            if (distance > 0.5) {
+              const pullStrength = 0.05;
+              bubble.x += dx * pullStrength;
+              bubble.y += dy * pullStrength;
+            }
+          }
+        });
+
+        for (let i = 0; i < bubblesRef.current.length; i++) {
+          for (let j = i + 1; j < bubblesRef.current.length; j++) {
+            const b1 = bubblesRef.current[i];
+            const b2 = bubblesRef.current[j];
+
+            if (checkCollision(b1, b2)) {
               const dx = b2.x - b1.x;
               const dy = b2.y - b1.y;
               const distance = Math.sqrt(dx * dx + dy * dy);
 
               if (distance === 0) continue;
 
-              const minDist = b1.radius + b2.radius + 5;
+              const minDist = b1.radius + b2.radius + 3;
               const overlap = minDist - distance;
 
               if (overlap > 0) {
                 const nx = dx / distance;
                 const ny = dy / distance;
 
-                const separationForce = overlap * 0.5;
+                const separationForce = overlap * 0.3;
 
                 if (!b1.isPinned && !b1.isSpawning) {
                   b1.x -= nx * separationForce;
@@ -692,25 +716,29 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
         }
       }
 
-      // Calculate density and adjust bubble sizes
+      // Calculate density and adjust bubble sizes (only for force layout)
       const canvasDisplayWidth = canvas.width / dpr;
       const canvasDisplayHeight = canvas.height / dpr;
-      const canvasArea = canvasDisplayWidth * canvasDisplayHeight;
 
-      // Calculate total bubble area
-      const totalBubbleArea = bubblesRef.current.reduce((sum, bubble) => {
-        return sum + Math.PI * bubble.baseRadius * bubble.baseRadius;
-      }, 0);
-
-      // Density ratio: how much of the canvas is covered by bubbles
-      const densityRatio = totalBubbleArea / canvasArea;
-
-      // Start shrinking when density exceeds 0.6 (60% coverage)
-      // Fully shrink to 60% at 0.8 (80% coverage)
       let shrinkFactor = 1.0;
-      if (densityRatio > 0.6) {
-        const excessDensity = Math.min(densityRatio - 0.6, 0.2) / 0.2;
-        shrinkFactor = 1.0 - (excessDensity * 0.4); // Shrink up to 40%
+
+      if (layout === 'force') {
+        const canvasArea = canvasDisplayWidth * canvasDisplayHeight;
+
+        // Calculate total bubble area
+        const totalBubbleArea = bubblesRef.current.reduce((sum, bubble) => {
+          return sum + Math.PI * bubble.baseRadius * bubble.baseRadius;
+        }, 0);
+
+        // Density ratio: how much of the canvas is covered by bubbles
+        const densityRatio = totalBubbleArea / canvasArea;
+
+        // Start shrinking when density exceeds 0.6 (60% coverage)
+        // Fully shrink to 60% at 0.8 (80% coverage)
+        if (densityRatio > 0.6) {
+          const excessDensity = Math.min(densityRatio - 0.6, 0.2) / 0.2;
+          shrinkFactor = 1.0 - (excessDensity * 0.4); // Shrink up to 40%
+        }
       }
 
       // Smoothly transition bubble sizes
