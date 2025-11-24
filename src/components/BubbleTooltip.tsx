@@ -10,6 +10,8 @@ interface BubbleTooltipProps {
   onToggleFavorite: () => void;
   onCompare: () => void;
   isComparing: boolean;
+  onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
 }
 
 export default function BubbleTooltip({
@@ -20,7 +22,9 @@ export default function BubbleTooltip({
   isFavorited,
   onToggleFavorite,
   onCompare,
-  isComparing
+  isComparing,
+  onMouseEnter,
+  onMouseLeave
 }: BubbleTooltipProps) {
   const tooltipWidth = 280;
   const tooltipHeight = 200;
@@ -55,6 +59,8 @@ export default function BubbleTooltip({
         theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
       } border rounded-lg shadow-2xl p-4 transition-all duration-200`}
       style={{ left: `${left}px`, top: `${top}px`, width: `${tooltipWidth}px` }}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
     >
       <div className="space-y-3">
         <div>

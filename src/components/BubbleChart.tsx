@@ -40,7 +40,9 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
   const initialLoadQueueRef = useRef<number[]>([]);
   const lastSpawnTimeRef = useRef<number>(0);
   const hoveredBubbleRef = useRef<Bubble | null>(null);
+  const tooltipHideTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [tooltipData, setTooltipData] = useState<{ topic: TrendingTopic; x: number; y: number } | null>(null);
+  const [isTooltipHovered, setIsTooltipHovered] = useState(false);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [internalComparingTopics, setInternalComparingTopics] = useState<Set<string>>(new Set());
   const [userId, setUserId] = useState<string | null>(null);
@@ -168,6 +170,11 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
       let isOverBubble = false;
       hoveredBubbleRef.current = null;
 
+      if (tooltipHideTimeoutRef.current) {
+        clearTimeout(tooltipHideTimeoutRef.current);
+        tooltipHideTimeoutRef.current = null;
+      }
+
       for (const bubble of bubblesRef.current) {
         const dx = x - bubble.x;
         const dy = y - bubble.y;
@@ -188,15 +195,21 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
         }
       }
 
-      if (!isOverBubble) {
-        setTooltipData(null);
+      if (!isOverBubble && !isTooltipHovered) {
+        tooltipHideTimeoutRef.current = setTimeout(() => {
+          setTooltipData(null);
+        }, 200);
       }
 
       canvas.style.cursor = isOverBubble ? 'pointer' : 'default';
     };
 
     const handleMouseLeave = () => {
-      setTooltipData(null);
+      if (!isTooltipHovered) {
+        tooltipHideTimeoutRef.current = setTimeout(() => {
+          setTooltipData(null);
+        }, 200);
+      }
     };
 
     canvas.addEventListener('mousemove', handleMouseMove);
@@ -629,8 +642,13 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
     return () => {
       window.removeEventListener('resize', updateCanvasSize);
       canvas.removeEventListener('click', handleCanvasClick);
+      canvas.removeEventListener('mousemove', handleMouseMove);
+      canvas.removeEventListener('mouseleave', handleMouseLeave);
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
+      }
+      if (tooltipHideTimeoutRef.current) {
+        clearTimeout(tooltipHideTimeoutRef.current);
       }
     };
   }, [topics, maxDisplay, theme]);
@@ -652,6 +670,19 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
           onToggleFavorite={() => handleToggleFavorite(tooltipData.topic.name)}
           onCompare={() => handleToggleCompare(tooltipData.topic.name)}
           isComparing={comparingTopics.has(tooltipData.topic.name)}
+          onMouseEnter={() => {
+            if (tooltipHideTimeoutRef.current) {
+              clearTimeout(tooltipHideTimeoutRef.current);
+              tooltipHideTimeoutRef.current = null;
+            }
+            setIsTooltipHovered(true);
+          }}
+          onMouseLeave={() => {
+            setIsTooltipHovered(false);
+            tooltipHideTimeoutRef.current = setTimeout(() => {
+              setTooltipData(null);
+            }, 200);
+          }}
         />
       )}
     </div>
