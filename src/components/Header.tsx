@@ -33,7 +33,7 @@ export default function Header({ theme, isAdmin, onLoginClick, onLogout, title =
               <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-blue-600"></div>
               <TrendingUp size={24} strokeWidth={4} className="text-white relative z-10" />
             </div>
-            <h1 className={`text-xl md:text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{title}</h1>
+            <h1 className={`text-xl md:text-2xl font-bold tracking-tight ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`} style={{ fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", fontWeight: 700, letterSpacing: '-0.02em' }}>{title}</h1>
           </a>
 
           <button
