@@ -730,7 +730,7 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
         // Start shrinking when density exceeds threshold
         // Mobile: less aggressive shrinking, Desktop: more aggressive
         const isMobile = window.innerWidth < 768;
-        const densityThreshold = isMobile ? 0.75 : 0.6;
+        const densityThreshold = isMobile ? 0.8 : 0.6;
         const shrinkAmount = isMobile ? 0.35 : 0.4; // Mobile: shrink up to 35%, Desktop: shrink up to 40%
 
         if (densityRatio > densityThreshold) {
