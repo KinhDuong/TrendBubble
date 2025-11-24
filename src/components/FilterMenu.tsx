@@ -1,4 +1,4 @@
-import { X, Play, Pause } from 'lucide-react';
+import { X, Play, Pause, Moon, Sun } from 'lucide-react';
 
 export type BubbleLayout = 'force' | 'hierarchical' | 'grid' | 'circular' | 'timeline' | 'packed' | 'scatter' | 'importance';
 
@@ -174,18 +174,14 @@ export default function FilterMenu({
                   <option value="year">Year</option>
                 </select>
                 <Divider />
-                <label htmlFor="themeFilter" className={`text-xs md:text-sm font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                  Style:
-                </label>
-                <select
-                  id="themeFilter"
-                  value={theme}
-                  onChange={(e) => onThemeChange(e.target.value as 'dark' | 'light')}
-                  className={`${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} border rounded px-2 md:px-3 py-1 md:py-1.5 text-xs md:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                <button
+                  onClick={() => onThemeChange(theme === 'dark' ? 'light' : 'dark')}
+                  className={`flex items-center gap-1.5 px-3 md:px-4 py-1 md:py-1.5 text-xs md:text-sm font-medium ${theme === 'dark' ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'} rounded transition-colors ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}
+                  title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
                 >
-                  <option value="dark">Dark</option>
-                  <option value="light">Light</option>
-                </select>
+                  {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+                  {theme === 'dark' ? 'Light' : 'Dark'}
+                </button>
                 <Divider />
                 <div className="flex items-center gap-2">
                   <button
@@ -363,16 +359,14 @@ export default function FilterMenu({
                 </>
               )}
               <div className="flex items-center gap-2">
-                <select
-                  id="themeFilter"
-                  value={theme}
-                  onChange={(e) => onThemeChange(e.target.value as 'dark' | 'light')}
-                  className={`flex-1 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} border rounded px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500`}
-                  aria-label="Select theme style"
+                <button
+                  onClick={() => onThemeChange(theme === 'dark' ? 'light' : 'dark')}
+                  className={`flex-1 flex items-center justify-center gap-1.5 px-2 py-1 text-xs font-medium ${theme === 'dark' ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'} rounded transition-colors ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}
+                  title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
                 >
-                  <option value="dark">Dark</option>
-                  <option value="light">Light</option>
-                </select>
+                  {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
+                  {theme === 'dark' ? 'Light' : 'Dark'}
+                </button>
               </div>
               <Divider />
               {onSearchQueryChange && onSearchClear && (
