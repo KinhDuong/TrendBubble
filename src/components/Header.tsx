@@ -25,7 +25,7 @@ export default function Header({ theme, isAdmin, onLoginClick, onLogout, title =
   };
 
   return (
-    <header className={`${theme === 'dark' ? 'border-gray-700' : 'bg-white border-gray-200 shadow-sm'} border-b relative`} style={theme === 'dark' ? { backgroundColor: '#1e1e21' } : {}}>
+    <header className={`${theme === 'dark' ? 'border-gray-700' : 'border-gray-200 shadow-sm'} border-b relative`} style={{ backgroundColor: theme === 'dark' ? '#1e1e21' : '#f1f3f4' }}>
       <div className="px-4 md:px-6 py-4">
         <div className="flex items-center justify-between">
           <a href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
