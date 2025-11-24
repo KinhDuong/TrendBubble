@@ -21,7 +21,7 @@ function TrendingBubble() {
   const location = useLocation();
   const [topics, setTopics] = useState<TrendingTopic[]>([]);
   const isMobile = window.innerWidth < 768;
-  const [maxBubbles, setMaxBubbles] = useState<number>(isMobile ? 40 : 60);
+  const [maxBubbles, setMaxBubbles] = useState<number>(isMobile ? 40 : 50);
   const [dateFilter, setDateFilter] = useState<'now' | 'all' | '24h' | 'week' | 'month' | 'year'>('now');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [categories, setCategories] = useState<string[]>([]);
