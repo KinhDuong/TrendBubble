@@ -29,6 +29,7 @@ interface Bubble {
   spawnProgress?: number;
   isHovered?: boolean;
   isComparing?: boolean;
+  isPinned?: boolean;
 }
 
 export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingUpdate, comparingTopics: externalComparingTopics, onComparingTopicsChange }: BubbleChartProps) {
@@ -41,7 +42,7 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
   const lastSpawnTimeRef = useRef<number>(0);
   const hoveredBubbleRef = useRef<Bubble | null>(null);
   const [tooltipData, setTooltipData] = useState<{ topic: TrendingTopic; x: number; y: number } | null>(null);
-  const [favorites, setFavorites] = useState<Set<string>>(new Set());
+  const [pinnedTopics, setPinnedTopics] = useState<Set<string>>(new Set());
   const [internalComparingTopics, setInternalComparingTopics] = useState<Set<string>>(new Set());
   const [userId, setUserId] = useState<string | null>(null);
 
@@ -55,47 +56,29 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         setUserId(user.id);
-        const { data: favs } = await supabase
-          .from('user_favorites')
-          .select('topic_name')
-          .eq('user_id', user.id);
-
-        if (favs) {
-          setFavorites(new Set(favs.map(f => f.topic_name)));
-        }
       }
     };
     loadUserData();
   }, []);
 
-  const handleToggleFavorite = async (topicName: string) => {
-    if (!userId) {
-      alert('Please sign in to save favorites');
-      return;
-    }
-
-    const isFavorited = favorites.has(topicName);
-
-    if (isFavorited) {
-      await supabase
-        .from('user_favorites')
-        .delete()
-        .eq('user_id', userId)
-        .eq('topic_name', topicName);
-
-      setFavorites(prev => {
-        const next = new Set(prev);
+  const handleTogglePin = (topicName: string) => {
+    setPinnedTopics(prev => {
+      const next = new Set(prev);
+      if (next.has(topicName)) {
         next.delete(topicName);
-        return next;
-      });
-    } else {
-      await supabase
-        .from('user_favorites')
-        .insert({ user_id: userId, topic_name: topicName });
-
-      setFavorites(prev => new Set(prev).add(topicName));
-    }
+        bubblesRef.current.forEach(b => {
+          if (b.topic.name === topicName) b.isPinned = false;
+        });
+      } else {
+        next.add(topicName);
+        bubblesRef.current.forEach(b => {
+          if (b.topic.name === topicName) b.isPinned = true;
+        });
+      }
+      return next;
+    });
   };
+
 
   const handleToggleCompare = (topicName: string) => {
     setComparingTopics(prev => {
@@ -266,6 +249,8 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
         lifetime: randomLifetime,
         isSpawning: true,
         spawnProgress: 0,
+        isPinned: pinnedTopics.has(topic.name),
+        isComparing: comparingTopics.has(topic.name),
       };
     };
 
@@ -338,7 +323,7 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
         }
       } else if (topics.length > maxDisplay) {
         bubblesRef.current.forEach((bubble) => {
-          if (!bubble.isPopping && !bubble.isSpawning && (now - bubble.createdAt) >= bubble.lifetime) {
+          if (!bubble.isPopping && !bubble.isSpawning && !bubble.isPinned && (now - bubble.createdAt) >= bubble.lifetime) {
             bubble.isPopping = true;
             bubble.popProgress = 0;
           }
@@ -547,6 +532,14 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
         ctx.shadowBlur = 0;
         ctx.globalAlpha = 1;
 
+        if (bubble.isPinned) {
+          ctx.beginPath();
+          ctx.arc(bubble.x, bubble.y, displayRadius + 4, 0, Math.PI * 2);
+          ctx.strokeStyle = '#A855F7';
+          ctx.lineWidth = 3;
+          ctx.stroke();
+        }
+
         if (bubble.isComparing) {
           ctx.beginPath();
           ctx.arc(bubble.x, bubble.y, displayRadius + 4, 0, Math.PI * 2);
@@ -639,8 +632,8 @@ export default function BubbleChart({ topics, maxDisplay, theme, onBubbleTimingU
           x={tooltipData.x}
           y={tooltipData.y}
           theme={theme}
-          isFavorited={favorites.has(tooltipData.topic.name)}
-          onToggleFavorite={() => handleToggleFavorite(tooltipData.topic.name)}
+          isPinned={pinnedTopics.has(tooltipData.topic.name)}
+          onTogglePin={() => handleTogglePin(tooltipData.topic.name)}
           onCompare={() => handleToggleCompare(tooltipData.topic.name)}
           isComparing={comparingTopics.has(tooltipData.topic.name)}
           onClose={() => setTooltipData(null)}

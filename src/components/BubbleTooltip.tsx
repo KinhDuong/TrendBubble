@@ -1,13 +1,13 @@
 import { TrendingTopic } from '../types';
-import { TrendingUp, Clock, Tag, Star, X } from 'lucide-react';
+import { TrendingUp, Clock, Tag, Pin, X } from 'lucide-react';
 
 interface BubbleTooltipProps {
   topic: TrendingTopic;
   x: number;
   y: number;
   theme: 'dark' | 'light';
-  isFavorited: boolean;
-  onToggleFavorite: () => void;
+  isPinned: boolean;
+  onTogglePin: () => void;
   onCompare: () => void;
   isComparing: boolean;
   onClose: () => void;
@@ -18,8 +18,8 @@ export default function BubbleTooltip({
   x,
   y,
   theme,
-  isFavorited,
-  onToggleFavorite,
+  isPinned,
+  onTogglePin,
   onCompare,
   isComparing,
   onClose
@@ -131,17 +131,17 @@ export default function BubbleTooltip({
 
         <div className={`border-t ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'} pt-3 flex gap-2`}>
           <button
-            onClick={onToggleFavorite}
+            onClick={onTogglePin}
             className={`flex-1 flex items-center justify-center gap-1 px-3 py-2 rounded text-sm font-medium transition-colors ${
-              isFavorited
-                ? 'bg-yellow-500 text-white hover:bg-yellow-600'
+              isPinned
+                ? 'bg-purple-500 text-white hover:bg-purple-600'
                 : theme === 'dark'
                 ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
-            <Star size={14} fill={isFavorited ? 'currentColor' : 'none'} />
-            {isFavorited ? 'Saved' : 'Save'}
+            <Pin size={14} className={isPinned ? 'rotate-45' : ''} />
+            {isPinned ? 'Pinned' : 'Pin'}
           </button>
           <button
             onClick={onCompare}
