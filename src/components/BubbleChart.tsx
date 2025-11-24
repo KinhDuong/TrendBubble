@@ -693,40 +693,6 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
             }
           }
         });
-
-        for (let i = 0; i < bubblesRef.current.length; i++) {
-          for (let j = i + 1; j < bubblesRef.current.length; j++) {
-            const b1 = bubblesRef.current[i];
-            const b2 = bubblesRef.current[j];
-
-            if (checkCollision(b1, b2)) {
-              const dx = b2.x - b1.x;
-              const dy = b2.y - b1.y;
-              const distance = Math.sqrt(dx * dx + dy * dy);
-
-              if (distance === 0) continue;
-
-              const minDist = b1.radius + b2.radius + 3;
-              const overlap = minDist - distance;
-
-              if (overlap > 0) {
-                const nx = dx / distance;
-                const ny = dy / distance;
-
-                const separationForce = overlap * 0.3;
-
-                if (!b1.isPinned && !b1.isSpawning) {
-                  b1.x -= nx * separationForce;
-                  b1.y -= ny * separationForce;
-                }
-                if (!b2.isPinned && !b2.isSpawning) {
-                  b2.x += nx * separationForce;
-                  b2.y += ny * separationForce;
-                }
-              }
-            }
-          }
-        }
       }
 
       // Calculate density and adjust bubble sizes (only for force layout)
