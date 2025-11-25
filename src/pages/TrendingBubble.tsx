@@ -50,12 +50,14 @@ function TrendingBubble() {
   const [showAddSource, setShowAddSource] = useState(false);
   const [bubbleLayout, setBubbleLayout] = useState<BubbleLayout>('force');
   const bubbleChartRef = useRef<HTMLDivElement>(null);
+  const [latestPages, setLatestPages] = useState<any[]>([]);
 
   useEffect(() => {
     loadTopics();
     loadThemePreference();
     loadCategories();
     loadSources();
+    loadLatestPages();
     updateCountdown();
     const interval = setInterval(updateCountdown, 1000);
     return () => clearInterval(interval);
@@ -247,6 +249,24 @@ function TrendingBubble() {
       }
     } catch (error) {
       console.error('Error loading sources:', error);
+    }
+  };
+
+  const loadLatestPages = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('pages')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      if (error) throw error;
+
+      if (data) {
+        setLatestPages(data);
+      }
+    } catch (error) {
+      console.error('Error loading latest pages:', error);
     }
   };
 
@@ -881,17 +901,50 @@ function TrendingBubble() {
           <>
             {topics.length > 0 && (
               viewMode === 'bubble' ? (
-                <div ref={bubbleChartRef}>
-                  <BubbleChart
-                    topics={topics}
-                    maxDisplay={maxBubbles}
-                    theme={theme}
-                    layout={bubbleLayout}
-                    onBubbleTimingUpdate={handleBubbleTimingUpdate}
-                    comparingTopics={comparingTopics}
-                    onComparingTopicsChange={setComparingTopics}
-                  />
-                </div>
+                <>
+                  <div ref={bubbleChartRef}>
+                    <BubbleChart
+                      topics={topics}
+                      maxDisplay={maxBubbles}
+                      theme={theme}
+                      layout={bubbleLayout}
+                      onBubbleTimingUpdate={handleBubbleTimingUpdate}
+                      comparingTopics={comparingTopics}
+                      onComparingTopicsChange={setComparingTopics}
+                    />
+                  </div>
+                  <div className={`w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'} py-6 mt-8`}>
+                    <div className="max-w-7xl mx-auto px-4">
+                      <div className="flex items-center gap-4 mb-4 flex-shrink-0">
+                        <div className="relative w-12 h-12 flex-shrink-0 rounded-full shadow-lg border-4 border-gray-900 overflow-hidden flex items-center justify-center">
+                          <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-blue-600"></div>
+                          <TrendingUp size={24} strokeWidth={4} className="text-white relative z-10" />
+                        </div>
+                        <div className="flex flex-col min-w-0">
+                          <div className={`text-xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                            TrendingBubble
+                          </div>
+                          <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                            Real-time Trending Topics Visualization
+                          </span>
+                        </div>
+                      </div>
+                      {latestPages.length > 0 && (
+                        <div className="flex flex-wrap gap-x-4 gap-y-2">
+                          {latestPages.map((page, index) => (
+                            <a
+                              key={page.id}
+                              href={page.page_url}
+                              className={`text-sm ${theme === 'dark' ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'} transition-colors hover:underline`}
+                            >
+                              {page.meta_title}
+                            </a>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </>
               ) : (
               <div className="max-w-7xl mx-auto">
                 <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-lg border overflow-hidden shadow-sm`}>
