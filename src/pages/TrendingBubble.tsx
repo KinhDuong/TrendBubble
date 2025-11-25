@@ -776,6 +776,7 @@ function TrendingBubble() {
         onLoginClick={() => setShowLogin(true)}
         onLogout={logout}
         title="Google Trending Topics"
+        useH1={true}
       />
 
       <FilterMenu

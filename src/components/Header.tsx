@@ -7,9 +7,10 @@ interface HeaderProps {
   onLoginClick: () => void;
   onLogout?: () => void;
   title?: string;
+  useH1?: boolean;
 }
 
-export default function Header({ theme, isAdmin, onLoginClick, onLogout, title = 'Trending Bubbles' }: HeaderProps) {
+export default function Header({ theme, isAdmin, onLoginClick, onLogout, title = 'Trending Bubbles', useH1 = false }: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const handleLogout = () => {
@@ -32,7 +33,11 @@ export default function Header({ theme, isAdmin, onLoginClick, onLogout, title =
             <div className={`relative w-12 h-12 flex-shrink-0 rounded-full shadow-lg border-4 border-blue-600 overflow-hidden flex items-center justify-center ${theme === 'dark' ? 'bg-transparent' : 'bg-transparent'}`}>
               <TrendingUp size={24} strokeWidth={4} className="text-blue-600 relative z-10" />
             </div>
-            <div className="text-xl md:text-2xl font-bold tracking-tight text-blue-600" style={{ fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", fontWeight: 700, letterSpacing: '-0.02em' }}>{title}</div>
+            {useH1 ? (
+              <h1 className="text-xl md:text-2xl font-bold tracking-tight text-blue-600" style={{ fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", fontWeight: 700, letterSpacing: '-0.02em' }}>{title}</h1>
+            ) : (
+              <div className="text-xl md:text-2xl font-bold tracking-tight text-blue-600" style={{ fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", fontWeight: 700, letterSpacing: '-0.02em' }}>{title}</div>
+            )}
           </a>
 
           <div className="relative">
