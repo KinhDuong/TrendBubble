@@ -131,14 +131,16 @@ function DynamicPage() {
       if (error) throw error;
 
       if (!data) {
-        navigate('/');
+        setPageData(null);
+        setLoading(false);
         return;
       }
 
       setPageData(data);
     } catch (error) {
       console.error('Error loading page data:', error);
-      navigate('/');
+      setPageData(null);
+      setLoading(false);
     }
   };
 
@@ -380,11 +382,40 @@ function DynamicPage() {
     return sortDirection === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />;
   };
 
-  if (!pageData) {
+  if (loading) {
     return (
       <div className={`min-h-screen flex items-center justify-center ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'}`}>
         <div className="text-xl">Loading...</div>
       </div>
+    );
+  }
+
+  if (!pageData) {
+    return (
+      <>
+        <Header
+          theme={theme}
+          isAdmin={isAdmin}
+          onLoginClick={() => {}}
+          onLogout={logout}
+          title="Trending Bubble"
+        />
+        <div className={`min-h-screen flex items-center justify-center ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'} px-4`}>
+          <div className="text-center max-w-md">
+            <h1 className="text-4xl font-bold mb-4">Page not found</h1>
+            <p className={`mb-6 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+              Looks like you've followed a broken link or entered a URL that doesn't exist on this site.
+            </p>
+            <a
+              href="/"
+              className={`inline-block px-6 py-3 rounded-lg font-semibold transition-colors ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-600 hover:bg-blue-700 shadow-sm hover:shadow text-white'}`}
+            >
+              Back to home
+            </a>
+          </div>
+        </div>
+        <Footer theme={theme} />
+      </>
     );
   }
 
