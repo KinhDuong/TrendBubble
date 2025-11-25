@@ -57,7 +57,7 @@ export default function ComparisonPanel({ topics, theme, onClose, onRemoveTopic 
         </div>
 
         <div className="overflow-x-auto pb-2">
-          <div className="flex items-end justify-center gap-8 py-8 min-h-[280px]">
+          <div className="flex items-end justify-center gap-4 py-8 min-h-[280px]">
             {topics.map((topic) => {
               const size = getBubbleSize(topic.searchVolume);
               const fontSize = getFontSize(size);
@@ -66,7 +66,7 @@ export default function ComparisonPanel({ topics, theme, onClose, onRemoveTopic 
                 <div
                   key={topic.name}
                   className="flex flex-col items-center gap-3 relative"
-                  style={{ minWidth: `${maxSize + 40}px` }}
+                  style={{ width: `${size}px` }}
                 >
                   <button
                     onClick={() => onRemoveTopic(topic.name)}
