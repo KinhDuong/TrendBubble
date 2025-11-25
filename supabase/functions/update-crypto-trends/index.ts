@@ -48,11 +48,11 @@ Deno.serve(async (req: Request) => {
     const coins: CoinGeckoCoin[] = await response.json();
     console.log(`Received ${coins.length} coins from CoinGecko`);
 
-    // Filter by volume and sort by absolute 24h % change (both gains and losses)
+    // Filter by volume and sort by absolute 1h % change (both gains and losses)
     const topCoins = coins
       .filter(coin => coin.total_volume > 1000000) // Min $1M volume
-      .filter(coin => coin.price_change_percentage_24h_in_currency !== null && coin.price_change_percentage_24h_in_currency !== undefined)
-      .sort((a, b) => Math.abs(b.price_change_percentage_24h_in_currency) - Math.abs(a.price_change_percentage_24h_in_currency))
+      .filter(coin => coin.price_change_percentage_1h_in_currency !== null && coin.price_change_percentage_1h_in_currency !== undefined)
+      .sort((a, b) => Math.abs(b.price_change_percentage_1h_in_currency) - Math.abs(a.price_change_percentage_1h_in_currency))
       .slice(0, 100); // Top 100 by volatility
 
     console.log(`Filtered to ${topCoins.length} top volatile cryptos`);
@@ -79,10 +79,10 @@ Deno.serve(async (req: Request) => {
         ? `$${crypto.current_price.toFixed(2)}`
         : `$${crypto.current_price.toFixed(6)}`;
 
-      // Use absolute price change percentage for bubble size (multiply by 100,000 for appropriate sizing)
+      // Use absolute 1h price change percentage for bubble size (multiply by 100,000 for appropriate sizing)
       // Example: 5% gain/loss = 500,000, 10% gain/loss = 1,000,000
-      const searchVolume = Math.floor(Math.abs(crypto.price_change_percentage_24h_in_currency) * 100000);
-      const searchVolumeRaw = `${change24h}% (24h) • ${change1h}% (1h) • ${priceFormatted} • ${volumeFormatted}`;
+      const searchVolume = Math.floor(Math.abs(crypto.price_change_percentage_1h_in_currency) * 100000);
+      const searchVolumeRaw = `${change1h}% (1h) • ${change24h}% (24h) • ${priceFormatted} • ${volumeFormatted}`;
 
       // Generate CoinGecko URL
       const coinUrl = `https://www.coingecko.com/en/coins/${crypto.id}`;
