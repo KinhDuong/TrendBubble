@@ -304,7 +304,7 @@ function DynamicPage() {
         .from('pages')
         .select('*')
         .order('created_at', { ascending: false })
-        .limit(4);
+        .limit(10);
 
       if (error) throw error;
 
@@ -686,8 +686,8 @@ function DynamicPage() {
                   </div>
 
                   <div className={`w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'} py-6 mt-8`}>
-                    <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4 overflow-hidden">
-                      <div className="flex items-center gap-4 min-w-0 flex-shrink-0">
+                    <div className="max-w-7xl mx-auto px-4">
+                      <div className="flex items-center gap-4 mb-4 flex-shrink-0">
                         <div className="relative w-12 h-12 flex-shrink-0 rounded-full shadow-lg border-4 border-gray-900 overflow-hidden flex items-center justify-center">
                           <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-blue-600"></div>
                           <TrendingUp size={24} strokeWidth={4} className="text-white relative z-10" />
@@ -701,19 +701,19 @@ function DynamicPage() {
                           </span>
                         </div>
                       </div>
-                      <div className="flex flex-col md:flex-row items-center gap-4 min-w-0">
-                        <div className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} whitespace-nowrap`}>
-                          <span className="font-medium">Source:</span> {sources.find(s => s.value === pageData.source)?.label || 'Custom'}
+                      {latestPages.length > 0 && (
+                        <div className="flex flex-wrap gap-x-4 gap-y-2">
+                          {latestPages.map((page, index) => (
+                            <a
+                              key={page.id}
+                              href={page.page_url}
+                              className={`text-sm ${theme === 'dark' ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'} transition-colors hover:underline`}
+                            >
+                              {page.meta_title}
+                            </a>
+                          ))}
                         </div>
-                        <a
-                          href={typeof window !== 'undefined' ? window.location.href : '/'}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className={`text-sm font-medium ${theme === 'dark' ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'} transition-colors truncate max-w-xs`}
-                        >
-                          {typeof window !== 'undefined' ? window.location.host : 'trendingbubble.com'}
-                        </a>
-                      </div>
+                      )}
                     </div>
                   </div>
 
