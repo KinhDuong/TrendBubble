@@ -47,7 +47,7 @@ export default function Header({ theme, isAdmin, onLoginClick, onLogout, title =
       </div>
 
       {isMenuOpen && (
-        <div className={`absolute top-full right-0 w-64 ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-l border-b shadow-lg z-50`}>
+        <div className={`absolute top-full right-2 md:right-3 w-64 ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-l border-b shadow-lg z-50`}>
           <nav className="py-2">
             <a
               href="/"
