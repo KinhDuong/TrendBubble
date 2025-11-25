@@ -32,8 +32,8 @@ Deno.serve(async (req: Request) => {
 
     console.log("Fetching CoinGecko crypto data...");
 
-    // Fetch top 100 coins by market cap from CoinGecko (free tier, no API key needed)
-    const coingeckoUrl = "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=false&price_change_percentage=24h";
+    // Fetch top 250 coins by market cap from CoinGecko (free tier, no API key needed)
+    const coingeckoUrl = "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=250&page=1&sparkline=false&price_change_percentage=24h";
     const response = await fetch(coingeckoUrl, {
       headers: {
         'Accept': 'application/json',
@@ -50,9 +50,9 @@ Deno.serve(async (req: Request) => {
     // Filter and sort by 24h % gain, prioritize high volume coins
     const topGainers = coins
       .filter(coin => coin.price_change_percentage_24h > 0) // Only gainers
-      .filter(coin => coin.total_volume > 5000000) // Min $5M volume
+      .filter(coin => coin.total_volume > 1000000) // Min $1M volume
       .sort((a, b) => b.price_change_percentage_24h - a.price_change_percentage_24h)
-      .slice(0, 50); // Top 50 gainers
+      .slice(0, 100); // Top 100 gainers
 
     console.log(`Filtered to ${topGainers.length} top crypto gainers`);
 
