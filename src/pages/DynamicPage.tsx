@@ -809,7 +809,7 @@ function DynamicPage() {
                         <div>
                           <h3 className={`text-xl font-bold mb-3 flex items-center gap-2 ${theme === 'dark' ? 'text-green-400' : 'text-green-600'}`}>
                             <ArrowUp size={24} />
-                            Top 10 Gainers
+                            Top 10 Gainers ({cryptoTimeframe.toUpperCase()})
                           </h3>
                           <ol className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white shadow-md border border-gray-200'} rounded-lg overflow-hidden list-none`}>
                             {topGainers.map((topic, index) => {
@@ -847,7 +847,7 @@ function DynamicPage() {
                         <div>
                           <h3 className={`text-xl font-bold mb-3 flex items-center gap-2 ${theme === 'dark' ? 'text-red-400' : 'text-red-600'}`}>
                             <ArrowDown size={24} />
-                            Top 10 Losers
+                            Top 10 Losers ({cryptoTimeframe.toUpperCase()})
                           </h3>
                           <ol className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white shadow-md border border-gray-200'} rounded-lg overflow-hidden list-none`}>
                             {topLosers.map((topic, index) => {
