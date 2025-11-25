@@ -389,6 +389,31 @@ function DynamicPage() {
   }
 
   const topTopics = [...topics].sort((a, b) => b.searchVolume - a.searchVolume);
+
+  // For crypto pages, split into gainers and losers
+  const isCryptoPage = pageData?.source === 'coingecko_crypto';
+  let topGainers: TrendingTopic[] = [];
+  let topLosers: TrendingTopic[] = [];
+
+  if (isCryptoPage) {
+    const getCryptoChange = (topic: TrendingTopic): number => {
+      if (!topic.crypto_data) return 0;
+      const timeframeMap = {
+        '1h': 'change_1h',
+        '24h': 'change_24h',
+        '7d': 'change_7d',
+        '30d': 'change_30d',
+        '1y': 'change_1y',
+      };
+      const field = timeframeMap[cryptoTimeframe] as keyof typeof topic.crypto_data;
+      return topic.crypto_data[field] || 0;
+    };
+
+    const sortedByChange = [...topics].sort((a, b) => getCryptoChange(b) - getCryptoChange(a));
+    topGainers = sortedByChange.filter(t => getCryptoChange(t) > 0).slice(0, showFullList ? sortedByChange.length : 10);
+    topLosers = sortedByChange.filter(t => getCryptoChange(t) < 0).slice(-10).reverse();
+  }
+
   const displayTopics = showFullList ? topTopics : topTopics.slice(0, 10);
   const topTopicNames = topTopics.slice(0, 5).map(t => t.name.replace(/"/g, '')).join(', ');
   const currentDate = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
@@ -652,67 +677,161 @@ function DynamicPage() {
                   </div>
 
                   <section className="max-w-7xl mx-auto mt-8 mb-0 md:mb-8" aria-labelledby="top-trending-heading">
-                    <h2 id="top-trending-heading" className={`text-2xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                      {top10Title}
-                    </h2>
-                    {topTopicNames && (
-                      <p className={`mb-4 text-sm leading-relaxed ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                        Currently trending: <strong className={theme === 'dark' ? 'text-white' : 'text-gray-900'}>{topTopicNames}</strong>.
-                        Explore our interactive visualization to discover real-time search trends, analyze topic popularity, and stay updated with what's capturing attention right now.
-                      </p>
+                    {!isCryptoPage && (
+                      <>
+                        <h2 id="top-trending-heading" className={`text-2xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                          {top10Title}
+                        </h2>
+                        {topTopicNames && (
+                          <p className={`mb-4 text-sm leading-relaxed ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                            Currently trending: <strong className={theme === 'dark' ? 'text-white' : 'text-gray-900'}>{topTopicNames}</strong>.
+                            Explore our interactive visualization to discover real-time search trends, analyze topic popularity, and stay updated with what's capturing attention right now.
+                          </p>
+                        )}
+                      </>
                     )}
-                    <ol className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white shadow-md border border-gray-200'} rounded-lg overflow-hidden list-none`} itemScope itemType="https://schema.org/ItemList">
-                      {displayTopics.map((topic, index) => (
-                        <li
-                          key={index}
-                          className={`px-6 py-4 flex items-center gap-4 ${theme === 'dark' ? 'hover:bg-gray-750' : 'hover:bg-gray-50'} transition-colors ${index < displayTopics.length - 1 ? (theme === 'dark' ? 'border-b border-gray-700' : 'border-b border-gray-200') : ''}`}
-                          itemProp="itemListElement"
-                          itemScope
-                          itemType="https://schema.org/ListItem"
-                        >
-                          <meta itemProp="position" content={String(index + 1)} />
-                          <div className={`w-12 flex items-center justify-center`} aria-label={`Rank ${index + 1}`}>
-                            <div className={`text-2xl font-bold ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-                              {index + 1}
+                    {isCryptoPage && (
+                      <h2 id="top-trending-heading" className={`text-2xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                        Top 10 Gainers & Losers
+                      </h2>
+                    )}
+
+                    {!isCryptoPage && (
+                      <>
+                        <ol className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white shadow-md border border-gray-200'} rounded-lg overflow-hidden list-none`} itemScope itemType="https://schema.org/ItemList">
+                          {displayTopics.map((topic, index) => (
+                          <li
+                            key={index}
+                            className={`px-6 py-4 flex items-center gap-4 ${theme === 'dark' ? 'hover:bg-gray-750' : 'hover:bg-gray-50'} transition-colors ${index < displayTopics.length - 1 ? (theme === 'dark' ? 'border-b border-gray-700' : 'border-b border-gray-200') : ''}`}
+                            itemProp="itemListElement"
+                            itemScope
+                            itemType="https://schema.org/ListItem"
+                          >
+                            <meta itemProp="position" content={String(index + 1)} />
+                            <div className={`w-12 flex items-center justify-center`} aria-label={`Rank ${index + 1}`}>
+                              <div className={`text-2xl font-bold ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                                {index + 1}
+                              </div>
                             </div>
-                          </div>
-                          <article className="flex-1" itemProp="item" itemScope itemType="https://schema.org/Thing">
-                            <h3 className="font-semibold text-lg mb-1" itemProp="name">{topic.name.replace(/"/g, '')}</h3>
-                            <div className="flex flex-wrap items-center gap-3 text-sm">
-                              <span className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`} itemProp="description">
-                                {topic.searchVolumeRaw.replace(/"/g, '')} searches
-                              </span>
-                              <span className={`px-2 py-0.5 rounded text-xs ${topic.source === 'user_upload' ? (theme === 'dark' ? 'bg-green-900/30 text-green-400' : 'bg-green-100 text-green-700') : (theme === 'dark' ? 'bg-blue-900/30 text-blue-400' : 'bg-blue-100 text-blue-700')}`}>
-                                {(() => {
-                                  const found = sources.find(s => s.value === topic.source);
-                                  if (found) return found.label;
-                                  if (topic.source) return topic.source.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-                                  return 'Trending';
-                                })()}
-                              </span>
-                              {topic.category && (
-                                <span className={`px-2 py-0.5 rounded text-xs ${theme === 'dark' ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-700'}`}>
-                                  {topic.category}
+                            <article className="flex-1" itemProp="item" itemScope itemType="https://schema.org/Thing">
+                              <h3 className="font-semibold text-lg mb-1" itemProp="name">{topic.name.replace(/"/g, '')}</h3>
+                              <div className="flex flex-wrap items-center gap-3 text-sm">
+                                <span className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`} itemProp="description">
+                                  {topic.searchVolumeRaw.replace(/"/g, '')} searches
                                 </span>
-                              )}
-                              {topic.pubDate && (
-                                <time className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`} dateTime={new Date(topic.pubDate).toISOString()}>
-                                  {new Date(topic.pubDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                                </time>
-                              )}
-                            </div>
-                          </article>
-                        </li>
-                      ))}
-                    </ol>
-                    {topTopics.length > 10 && (
-                      <div className="mt-4 text-center">
-                        <button
-                          onClick={() => setShowFullList(!showFullList)}
-                          className={`px-6 py-2 rounded-lg font-semibold transition-colors ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-600 hover:bg-blue-700 shadow-sm hover:shadow text-white'}`}
-                        >
-                          {showFullList ? 'Show Top 10 Only' : 'See Full List'}
-                        </button>
+                                <span className={`px-2 py-0.5 rounded text-xs ${topic.source === 'user_upload' ? (theme === 'dark' ? 'bg-green-900/30 text-green-400' : 'bg-green-100 text-green-700') : (theme === 'dark' ? 'bg-blue-900/30 text-blue-400' : 'bg-blue-100 text-blue-700')}`}>
+                                  {(() => {
+                                    const found = sources.find(s => s.value === topic.source);
+                                    if (found) return found.label;
+                                    if (topic.source) return topic.source.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+                                    return 'Trending';
+                                  })()}
+                                </span>
+                                {topic.category && (
+                                  <span className={`px-2 py-0.5 rounded text-xs ${theme === 'dark' ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-700'}`}>
+                                    {topic.category}
+                                  </span>
+                                )}
+                                {topic.pubDate && (
+                                  <time className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`} dateTime={new Date(topic.pubDate).toISOString()}>
+                                    {new Date(topic.pubDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                  </time>
+                                )}
+                              </div>
+                            </article>
+                          </li>
+                          ))}
+                        </ol>
+                        {topTopics.length > 10 && (
+                          <div className="mt-4 text-center">
+                            <button
+                              onClick={() => setShowFullList(!showFullList)}
+                              className={`px-6 py-2 rounded-lg font-semibold transition-colors ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-600 hover:bg-blue-700 shadow-sm hover:shadow text-white'}`}
+                            >
+                              {showFullList ? 'Show Top 10 Only' : 'See Full List'}
+                            </button>
+                          </div>
+                        )}
+                      </>
+                    )}
+
+                    {isCryptoPage && (
+                      <div className="grid md:grid-cols-2 gap-6">
+                        {/* Top Gainers */}
+                        <div>
+                          <h3 className={`text-xl font-bold mb-3 flex items-center gap-2 ${theme === 'dark' ? 'text-green-400' : 'text-green-600'}`}>
+                            <ArrowUp size={24} />
+                            Top 10 Gainers
+                          </h3>
+                          <ol className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white shadow-md border border-gray-200'} rounded-lg overflow-hidden list-none`}>
+                            {topGainers.map((topic, index) => {
+                              const change = topic.crypto_data?.[`change_${cryptoTimeframe}` as keyof typeof topic.crypto_data] || 0;
+                              return (
+                                <li
+                                  key={index}
+                                  className={`px-4 py-3 flex items-center gap-3 ${theme === 'dark' ? 'hover:bg-gray-750' : 'hover:bg-gray-50'} transition-colors ${index < topGainers.length - 1 ? (theme === 'dark' ? 'border-b border-gray-700' : 'border-b border-gray-200') : ''}`}
+                                >
+                                  <div className={`w-8 flex items-center justify-center`}>
+                                    <div className={`text-lg font-bold ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                                      {index + 1}
+                                    </div>
+                                  </div>
+                                  <div className="flex-1">
+                                    <h4 className="font-semibold mb-1">{topic.name.replace(/"/g, '')}</h4>
+                                    <div className="flex items-center gap-2 text-sm">
+                                      <span className="text-green-500 font-bold">
+                                        +{typeof change === 'number' ? change.toFixed(2) : change}%
+                                      </span>
+                                      {topic.crypto_data?.formatted?.price && (
+                                        <span className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}>
+                                          {topic.crypto_data.formatted.price}
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
+                                </li>
+                              );
+                            })}
+                          </ol>
+                        </div>
+
+                        {/* Top Losers */}
+                        <div>
+                          <h3 className={`text-xl font-bold mb-3 flex items-center gap-2 ${theme === 'dark' ? 'text-red-400' : 'text-red-600'}`}>
+                            <ArrowDown size={24} />
+                            Top 10 Losers
+                          </h3>
+                          <ol className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white shadow-md border border-gray-200'} rounded-lg overflow-hidden list-none`}>
+                            {topLosers.map((topic, index) => {
+                              const change = topic.crypto_data?.[`change_${cryptoTimeframe}` as keyof typeof topic.crypto_data] || 0;
+                              return (
+                                <li
+                                  key={index}
+                                  className={`px-4 py-3 flex items-center gap-3 ${theme === 'dark' ? 'hover:bg-gray-750' : 'hover:bg-gray-50'} transition-colors ${index < topLosers.length - 1 ? (theme === 'dark' ? 'border-b border-gray-700' : 'border-b border-gray-200') : ''}`}
+                                >
+                                  <div className={`w-8 flex items-center justify-center`}>
+                                    <div className={`text-lg font-bold ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                                      {index + 1}
+                                    </div>
+                                  </div>
+                                  <div className="flex-1">
+                                    <h4 className="font-semibold mb-1">{topic.name.replace(/"/g, '')}</h4>
+                                    <div className="flex items-center gap-2 text-sm">
+                                      <span className="text-red-500 font-bold">
+                                        {typeof change === 'number' ? change.toFixed(2) : change}%
+                                      </span>
+                                      {topic.crypto_data?.formatted?.price && (
+                                        <span className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}>
+                                          {topic.crypto_data.formatted.price}
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
+                                </li>
+                              );
+                            })}
+                          </ol>
+                        </div>
                       </div>
                     )}
                   </section>
