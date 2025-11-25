@@ -691,9 +691,23 @@ function DynamicPage() {
                       </>
                     )}
                     {isCryptoPage && (
-                      <h2 id="top-trending-heading" className={`text-2xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                        Top 10 Gainers & Losers
-                      </h2>
+                      <>
+                        <h2 id="top-trending-heading" className={`text-2xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                          Top 10 Gainers & Losers
+                        </h2>
+                        {topGainers.length > 0 && topLosers.length > 0 && (
+                          <p className={`mb-6 text-sm leading-relaxed ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                            Track the biggest movers in cryptocurrency markets right now.
+                            {topGainers[0] && (
+                              <> Leading the gainers is <strong className={theme === 'dark' ? 'text-green-400' : 'text-green-600'}>{topGainers[0].name.replace(/"/g, '')}</strong> with a {cryptoTimeframe === '1h' ? '1-hour' : cryptoTimeframe === '24h' ? '24-hour' : cryptoTimeframe === '7d' ? '7-day' : cryptoTimeframe === '30d' ? '30-day' : '1-year'} gain of <strong className={theme === 'dark' ? 'text-green-400' : 'text-green-600'}>+{(topGainers[0].crypto_data?.[`change_${cryptoTimeframe}` as keyof typeof topGainers[0].crypto_data] || 0).toFixed(2)}%</strong></>
+                            )}
+                            {topLosers[0] && (
+                              <>, while <strong className={theme === 'dark' ? 'text-red-400' : 'text-red-600'}>{topLosers[0].name.replace(/"/g, '')}</strong> leads the decline with <strong className={theme === 'dark' ? 'text-red-400' : 'text-red-600'}>{(topLosers[0].crypto_data?.[`change_${cryptoTimeframe}` as keyof typeof topLosers[0].crypto_data] || 0).toFixed(2)}%</strong> change</>
+                            )}.
+                            Monitor real-time cryptocurrency price movements, analyze market trends, and discover top performing digital assets. Updated every 5 minutes with live data from CoinGecko, our cryptocurrency tracker helps you identify trading opportunities and stay informed about market volatility across Bitcoin, Ethereum, and thousands of altcoins.
+                          </p>
+                        )}
+                      </>
                     )}
 
                     {!isCryptoPage && (
