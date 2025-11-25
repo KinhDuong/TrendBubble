@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import BubbleChart from '../components/BubbleChart';
@@ -56,6 +56,30 @@ function DynamicPage() {
   const [bubbleLayout, setBubbleLayout] = useState<BubbleLayout>('force');
   const [showFullList, setShowFullList] = useState<boolean>(false);
   const [cryptoTimeframe, setCryptoTimeframe] = useState<CryptoTimeframe>('1h');
+
+  const sortedTopics = useMemo(() => {
+    if (pageData?.source !== 'coingecko_crypto' || !topics.length) {
+      return topics;
+    }
+
+    return [...topics].sort((a, b) => {
+      if (!a.crypto_data || !b.crypto_data) return 0;
+
+      const timeframeMap = {
+        '1h': 'change_1h',
+        '24h': 'change_24h',
+        '7d': 'change_7d',
+        '30d': 'change_30d',
+        '1y': 'change_1y',
+      } as const;
+
+      const fieldName = timeframeMap[cryptoTimeframe];
+      const aValue = Math.abs(a.crypto_data[fieldName]);
+      const bValue = Math.abs(b.crypto_data[fieldName]);
+
+      return bValue - aValue;
+    });
+  }, [topics, cryptoTimeframe, pageData?.source]);
 
   useEffect(() => {
     loadPageData();
@@ -212,7 +236,8 @@ function DynamicPage() {
           createdAt: topic.created_at,
           pubDate: topic.pub_date,
           category: topic.category,
-          source: topic.source
+          source: topic.source,
+          crypto_data: topic.crypto_data
         }));
         setTopics(formattedTopics);
       } else {
@@ -583,7 +608,7 @@ function DynamicPage() {
               {topics.length > 0 && viewMode === 'bubble' && (
                 <>
                   <BubbleChart
-                    topics={topics}
+                    topics={sortedTopics}
                     maxDisplay={maxBubbles}
                     theme={theme}
                     layout={bubbleLayout}
