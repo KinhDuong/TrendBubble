@@ -13,6 +13,7 @@ interface BubbleChartProps {
   onBubbleTimingUpdate?: (nextPopTime: number | null, createdTime?: number, lifetime?: number) => void;
   comparingTopics?: Set<string>;
   onComparingTopicsChange?: (topics: Set<string>) => void;
+  useCryptoColors?: boolean;
 }
 
 interface Bubble {
@@ -37,7 +38,7 @@ interface Bubble {
   layoutY?: number;
 }
 
-export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force', onBubbleTimingUpdate, comparingTopics: externalComparingTopics, onComparingTopicsChange }: BubbleChartProps) {
+export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force', onBubbleTimingUpdate, comparingTopics: externalComparingTopics, onComparingTopicsChange, useCryptoColors = false }: BubbleChartProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const bubblesRef = useRef<Bubble[]>([]);
   const animationFrameRef = useRef<number>();
@@ -207,6 +208,21 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
       const layoutScaleFactor = layout === 'force' ? 1.0 : 0.4;
 
       return Math.max(baseMin * layoutScaleFactor, scaledSize * layoutScaleFactor);
+    };
+
+    const getCryptoColorByGain = (searchVolume: number) => {
+      const percentGain = searchVolume / 100000;
+
+      if (percentGain >= 30) return '#00C853';
+      if (percentGain >= 20) return '#1DE9B6';
+      if (percentGain >= 15) return '#00E676';
+      if (percentGain >= 10) return '#69F0AE';
+      if (percentGain >= 7) return '#76FF03';
+      if (percentGain >= 5) return '#B2FF59';
+      if (percentGain >= 3) return '#CDDC39';
+      if (percentGain >= 2) return '#FFD600';
+      if (percentGain >= 1) return '#FFAB00';
+      return '#FF6D00';
     };
 
     const getRandomColor = (index: number) => {
@@ -551,7 +567,7 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
         vy: usePhysics ? (Math.random() - 0.5) * 0.25 : 0,
         radius: isStaticLayout ? radius : 0,
         baseRadius: radius,
-        color: getRandomColor(topicIndex),
+        color: useCryptoColors ? getCryptoColorByGain(topic.searchVolume) : getRandomColor(topicIndex),
         createdAt: Date.now(),
         lifetime: randomLifetime,
         isSpawning: !isStaticLayout,
