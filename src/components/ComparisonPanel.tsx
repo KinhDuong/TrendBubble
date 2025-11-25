@@ -57,14 +57,14 @@ export default function ComparisonPanel({ topics, theme, onClose, onRemoveTopic 
               return (
                 <div
                   key={topic.name}
-                  className="flex flex-col items-center gap-3 relative"
+                  className="flex flex-col items-center gap-3 relative group"
                   style={{ width: `${size}px` }}
                 >
                   <button
                     onClick={() => onRemoveTopic(topic.name)}
-                    className={`absolute -top-2 -right-2 z-10 p-1.5 rounded-full ${
+                    className={`absolute -top-2 -right-2 z-10 p-1.5 rounded-full opacity-0 group-hover:opacity-100 ${
                       theme === 'dark' ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'
-                    } transition-colors shadow-lg`}
+                    } transition-all shadow-lg`}
                   >
                     <X size={14} className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} />
                   </button>
