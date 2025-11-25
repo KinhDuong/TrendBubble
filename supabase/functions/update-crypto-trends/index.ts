@@ -72,8 +72,9 @@ Deno.serve(async (req: Request) => {
         ? `$${crypto.current_price.toFixed(2)}`
         : `$${crypto.current_price.toFixed(6)}`;
 
-      // Use volume as search volume for ranking
-      const searchVolume = Math.floor(crypto.total_volume);
+      // Use price change percentage for bubble size (multiply by 100,000 for appropriate sizing)
+      // Example: 5% gain = 500,000, 10% gain = 1,000,000
+      const searchVolume = Math.floor(crypto.price_change_percentage_24h * 100000);
       const searchVolumeRaw = `+${changePercent}% • ${priceFormatted} • ${volumeFormatted}`;
 
       // Generate CoinGecko URL
