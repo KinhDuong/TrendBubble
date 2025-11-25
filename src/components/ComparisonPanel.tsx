@@ -20,6 +20,10 @@ export default function ComparisonPanel({ topics, theme, onClose, onRemoveTopic 
     return minSize + (maxSize - minSize) * ratio;
   };
 
+  const getFontSize = (size: number) => {
+    return Math.max(12, size / 8);
+  };
+
   const formatDate = (dateString: string | null) => {
     if (!dateString) return 'N/A';
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -56,7 +60,7 @@ export default function ComparisonPanel({ topics, theme, onClose, onRemoveTopic 
           <div className="flex items-end justify-center gap-8 py-8 min-h-[280px]">
             {topics.map((topic) => {
               const size = getBubbleSize(topic.searchVolume);
-              const fontSize = Math.max(10, size / 12);
+              const fontSize = getFontSize(size);
 
               return (
                 <div
@@ -98,15 +102,6 @@ export default function ComparisonPanel({ topics, theme, onClose, onRemoveTopic 
                   </div>
 
                   <div className="text-center space-y-1 max-w-[200px]">
-                    {topic.category && (
-                      <div className="flex items-center justify-center gap-1">
-                        <Tag size={12} className={theme === 'dark' ? 'text-gray-400' : 'text-gray-500'} />
-                        <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                          {topic.category}
-                        </span>
-                      </div>
-                    )}
-
                     {topic.pubDate && (
                       <div className="flex items-center justify-center gap-1">
                         <Calendar size={12} className={theme === 'dark' ? 'text-gray-400' : 'text-gray-500'} />
