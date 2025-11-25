@@ -30,7 +30,7 @@ function DynamicPage() {
   const [pageData, setPageData] = useState<PageData | null>(null);
   const [topics, setTopics] = useState<TrendingTopic[]>([]);
   const isMobile = window.innerWidth < 768;
-  const [maxBubbles, setMaxBubbles] = useState<number>(isMobile ? 40 : 50);
+  const [maxBubbles, setMaxBubbles] = useState<number>(isMobile ? 40 : 100);
   const [dateFilter, setDateFilter] = useState<'now' | 'all' | '24h' | 'week' | 'month' | 'year'>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [categories, setCategories] = useState<string[]>([]);
