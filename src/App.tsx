@@ -67,6 +67,7 @@ function HomePage() {
   ]);
   const [showFullTop10, setShowFullTop10] = useState<boolean>(false);
   const [comparingTopics, setComparingTopics] = useState<Set<string>>(new Set());
+  const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
   const bubbleChartRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -221,6 +222,7 @@ function HomePage() {
           source: topic.source
         }));
         setTopics(formattedTopics);
+        setLastUpdated(new Date());
       } else {
         setTopics([]);
       }
@@ -1389,14 +1391,25 @@ function HomePage() {
               <article className="max-w-7xl mx-auto mb-8">
                 <header>
                   <div className="flex items-center justify-between gap-4 mb-4">
-                    <h1 className={`text-3xl md:text-4xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                      Trending Bubbles
-                    </h1>
+                    <h2 className={`text-3xl md:text-4xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                      Real-Time Trending Topics, People, Sports, Entertainment & Politics Bubble Charts
+                    </h2>
                     {viewMode === 'bubble' && topics.length > 0 && (
                       <ShareSnapshot theme={theme} canvasRef={bubbleChartRef} variant="inline" />
                     )}
                   </div>
                   <div className={`flex flex-wrap items-center gap-3 mb-4 text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                    <time dateTime={lastUpdated.toISOString()}>
+                      Last updated: {lastUpdated.toLocaleString('en-US', {
+                        timeZone: 'America/New_York',
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric',
+                        hour: 'numeric',
+                        minute: '2-digit',
+                        hour12: true
+                      })} ET
+                    </time>
                     <span className={`px-2 py-1 rounded text-xs ${theme === 'dark' ? 'bg-blue-900/30 text-blue-400' : 'bg-blue-100 text-blue-700'}`}>
                       {topics.length} trending topics
                     </span>
