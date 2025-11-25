@@ -969,7 +969,15 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
             ctx.fillText(line, bubble.x, startY + i * lineHeight);
           });
 
-          if (!useCryptoColors) {
+          if (useCryptoColors) {
+            ctx.font = `${Math.max(8, displayRadius / 5)}px sans-serif`;
+            const volumeAlpha = theme === 'dark' ? 0.9 * textBrightness : 0.9;
+            ctx.fillStyle = theme === 'dark' ? `rgba(200, 200, 200, ${volumeAlpha * opacity})` : `rgba(255, 255, 255, ${0.85 * opacity})`;
+            const volumeY = startY + displayLines.length * lineHeight + Math.max(4, displayRadius / 10);
+            const cleanVolume = bubble.topic.searchVolumeRaw.replace(/"/g, '');
+            const gainPercentage = cleanVolume.split('•')[0].trim();
+            ctx.fillText(gainPercentage, bubble.x, volumeY);
+          } else {
             ctx.font = `${Math.max(8, displayRadius / 5)}px sans-serif`;
             const volumeAlpha = theme === 'dark' ? 0.9 * textBrightness : 0.9;
             ctx.fillStyle = theme === 'dark' ? `rgba(200, 200, 200, ${volumeAlpha * opacity})` : `rgba(255, 255, 255, ${0.85 * opacity})`;
