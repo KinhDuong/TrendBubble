@@ -687,23 +687,12 @@ function DynamicPage() {
 
                   <div className={`w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'} py-6 mt-8`}>
                     <div className="max-w-7xl mx-auto px-4">
-                      <div className="flex items-center gap-4 mb-4 flex-shrink-0">
-                        <div className="relative w-12 h-12 flex-shrink-0 rounded-full shadow-lg border-4 border-gray-900 overflow-hidden flex items-center justify-center">
-                          <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-blue-600"></div>
-                          <TrendingUp size={24} strokeWidth={4} className="text-white relative z-10" />
-                        </div>
-                        <div className="flex flex-col min-w-0">
-                          <div className={`text-xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                            TrendingBubble
-                          </div>
-                          <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                            Real-time Trending Topics Visualization
-                          </span>
-                        </div>
-                      </div>
+                      <h2 className={`text-xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                        Featured
+                      </h2>
                       {latestPages.length > 0 && (
                         <div className="flex flex-wrap gap-x-4 gap-y-2">
-                          {latestPages.map((page, index) => (
+                          {latestPages.map((page) => (
                             <a
                               key={page.id}
                               href={page.page_url}
