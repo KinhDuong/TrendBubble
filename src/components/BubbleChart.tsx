@@ -1069,6 +1069,7 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
           onCompare={() => handleToggleCompare(tooltipData.topic.name)}
           isComparing={comparingTopics.has(tooltipData.topic.name)}
           onClose={() => setTooltipData(null)}
+          cryptoTimeframe={cryptoTimeframe}
         />
       )}
       {showMaxCompareMessage && (

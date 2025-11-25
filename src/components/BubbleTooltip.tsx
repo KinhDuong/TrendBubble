@@ -1,4 +1,4 @@
-import { TrendingTopic } from '../types';
+import { TrendingTopic, CryptoTimeframe } from '../types';
 import { TrendingUp, Clock, Tag, Pin, X } from 'lucide-react';
 
 interface BubbleTooltipProps {
@@ -11,6 +11,7 @@ interface BubbleTooltipProps {
   onCompare: () => void;
   isComparing: boolean;
   onClose: () => void;
+  cryptoTimeframe?: CryptoTimeframe;
 }
 
 export default function BubbleTooltip({
@@ -22,7 +23,8 @@ export default function BubbleTooltip({
   onTogglePin,
   onCompare,
   isComparing,
-  onClose
+  onClose,
+  cryptoTimeframe = '1h'
 }: BubbleTooltipProps) {
   const isMobile = window.innerWidth < 768;
   const tooltipWidth = 280;
@@ -51,6 +53,27 @@ export default function BubbleTooltip({
       'custom': 'Custom'
     };
     return sourceMap[source] || source.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+  };
+
+  const getDisplayVolume = () => {
+    if (topic.crypto_data && topic.source === 'coingecko_crypto') {
+      const timeframeMap = {
+        '1h': topic.crypto_data.formatted.change_1h,
+        '24h': topic.crypto_data.formatted.change_24h,
+        '7d': topic.crypto_data.formatted.change_7d,
+        '30d': topic.crypto_data.formatted.change_30d,
+        '1y': topic.crypto_data.formatted.change_1y,
+      };
+      const timeframeLabel = {
+        '1h': '1h',
+        '24h': '24h',
+        '7d': '7d',
+        '30d': '30d',
+        '1y': '1y',
+      };
+      return `${timeframeMap[cryptoTimeframe]}% (${timeframeLabel[cryptoTimeframe]}) • ${topic.crypto_data.formatted.price} • ${topic.crypto_data.formatted.volume}`;
+    }
+    return topic.searchVolumeRaw.replace(/"/g, '');
   };
 
   if (isMobile) {
@@ -107,7 +130,7 @@ export default function BubbleTooltip({
                   <span className={`font-semibold text-base ${
                     theme === 'dark' ? 'text-white' : 'text-gray-900'
                   }`}>
-                    {topic.searchVolumeRaw.replace(/"/g, '')}
+                    {getDisplayVolume()}
                   </span>
                 </div>
               </div>
@@ -238,7 +261,7 @@ export default function BubbleTooltip({
             <div className="flex items-center gap-1">
               <TrendingUp size={14} className="text-blue-500" />
               <span className={`font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                {topic.searchVolumeRaw.replace(/"/g, '')}
+                {getDisplayVolume()}
               </span>
             </div>
           </div>

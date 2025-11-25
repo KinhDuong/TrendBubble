@@ -91,7 +91,8 @@ Deno.serve(async (req: Request) => {
       // Use absolute 1h price change percentage for bubble size (multiply by 100,000 for appropriate sizing)
       // Example: 5% gain/loss = 500,000, 10% gain/loss = 1,000,000
       const searchVolume = Math.floor(Math.abs(crypto.price_change_percentage_1h_in_currency) * 100000);
-      const searchVolumeRaw = `${change1h}% (1h) • ${change24h}% (24h) • ${priceFormatted} • ${volumeFormatted}`;
+      // Store generic format - frontend will compute based on selected timeframe
+      const searchVolumeRaw = `${priceFormatted} • ${volumeFormatted}`;
 
       // Store all timeframe data in crypto_data field
       const cryptoData = {
