@@ -14,7 +14,8 @@ interface CoinGeckoCoin {
   current_price: number;
   market_cap: number;
   total_volume: number;
-  price_change_percentage_24h: number;
+  price_change_percentage_1h_in_currency: number;
+  price_change_percentage_24h_in_currency: number;
 }
 
 Deno.serve(async (req: Request) => {
@@ -33,7 +34,7 @@ Deno.serve(async (req: Request) => {
     console.log("Fetching CoinGecko crypto data...");
 
     // Fetch top 250 coins by market cap from CoinGecko (free tier, no API key needed)
-    const coingeckoUrl = "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=250&page=1&sparkline=false&price_change_percentage=24h";
+    const coingeckoUrl = "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=250&page=1&sparkline=false&price_change_percentage=1h,24h";
     const response = await fetch(coingeckoUrl, {
       headers: {
         'Accept': 'application/json',
@@ -49,9 +50,9 @@ Deno.serve(async (req: Request) => {
 
     // Filter and sort by 24h % gain, prioritize high volume coins
     const topGainers = coins
-      .filter(coin => coin.price_change_percentage_24h > 0) // Only gainers
+      .filter(coin => coin.price_change_percentage_24h_in_currency > 0) // Only gainers
       .filter(coin => coin.total_volume > 1000000) // Min $1M volume
-      .sort((a, b) => b.price_change_percentage_24h - a.price_change_percentage_24h)
+      .sort((a, b) => b.price_change_percentage_24h_in_currency - a.price_change_percentage_24h_in_currency)
       .slice(0, 100); // Top 100 gainers
 
     console.log(`Filtered to ${topGainers.length} top crypto gainers`);
@@ -63,7 +64,10 @@ Deno.serve(async (req: Request) => {
     for (let index = 0; index < topGainers.length; index++) {
       const crypto = topGainers[index];
       const name = `${crypto.name} (${crypto.symbol.toUpperCase()})`;
-      const changePercent = crypto.price_change_percentage_24h.toFixed(2);
+
+      const change1h = crypto.price_change_percentage_1h_in_currency?.toFixed(2) || '0.00';
+      const change24h = crypto.price_change_percentage_24h_in_currency?.toFixed(2) || '0.00';
+
       const volumeFormatted = crypto.total_volume > 1000000000
         ? `$${(crypto.total_volume / 1000000000).toFixed(2)}B`
         : `$${(crypto.total_volume / 1000000).toFixed(2)}M`;
@@ -74,8 +78,8 @@ Deno.serve(async (req: Request) => {
 
       // Use price change percentage for bubble size (multiply by 100,000 for appropriate sizing)
       // Example: 5% gain = 500,000, 10% gain = 1,000,000
-      const searchVolume = Math.floor(crypto.price_change_percentage_24h * 100000);
-      const searchVolumeRaw = `+${changePercent}% • ${priceFormatted} • ${volumeFormatted}`;
+      const searchVolume = Math.floor(crypto.price_change_percentage_24h_in_currency * 100000);
+      const searchVolumeRaw = `+${change24h}% (24h) • +${change1h}% (1h) • ${priceFormatted} • ${volumeFormatted}`;
 
       // Generate CoinGecko URL
       const coinUrl = `https://www.coingecko.com/en/coins/${crypto.id}`;
