@@ -102,7 +102,7 @@ export default function Header({ theme, isAdmin, onLoginClick, onLogout, title =
                 <Search size={18} className={`ml-3 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`} />
                 <input
                   type="text"
-                  placeholder="Search pages..."
+                  placeholder="Search"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onFocus={() => setIsSearchOpen(true)}
