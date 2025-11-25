@@ -7,6 +7,7 @@ import Login from './components/Login';
 import Footer from './components/Footer';
 import Header from './components/Header';
 import FilterMenu, { BubbleLayout } from './components/FilterMenu';
+import ComparisonPanel from './components/ComparisonPanel';
 import TrendingBubble from './pages/TrendingBubble';
 import DynamicPage from './pages/DynamicPage';
 import { TrendingTopic } from './types';
@@ -64,6 +65,7 @@ function HomePage() {
     { value: 'user_upload', label: 'My Uploads' }
   ]);
   const [showFullTop10, setShowFullTop10] = useState<boolean>(false);
+  const [comparingTopics, setComparingTopics] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     loadTopics();
@@ -1381,7 +1383,7 @@ function HomePage() {
           <>
             {topics.length > 0 && viewMode === 'bubble' && (
               <>
-                <BubbleChart topics={topics} maxDisplay={maxBubbles} theme={theme} layout={bubbleLayout} onBubbleTimingUpdate={handleBubbleTimingUpdate} />
+                <BubbleChart topics={topics} maxDisplay={maxBubbles} theme={theme} layout={bubbleLayout} onBubbleTimingUpdate={handleBubbleTimingUpdate} comparingTopics={comparingTopics} onComparingTopicsChange={setComparingTopics} />
 
                 {/* Branded Attribution Section - Full Width */}
                 <div className={`w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'} py-6 mt-8`}>
@@ -1631,6 +1633,18 @@ function HomePage() {
       )}
       </main>
       </div>
+      <ComparisonPanel
+        topics={topics.filter(t => comparingTopics.has(t.name))}
+        theme={theme}
+        onClose={() => setComparingTopics(new Set())}
+        onRemoveTopic={(topicName) => {
+          setComparingTopics(prev => {
+            const next = new Set(prev);
+            next.delete(topicName);
+            return next;
+          });
+        }}
+      />
       <Footer theme={theme} />
     </>
   );
