@@ -12,6 +12,13 @@ export default function ComparisonPanel({ topics, theme, onClose, onRemoveTopic 
   if (topics.length === 0) return null;
 
   const maxVolume = Math.max(...topics.map(t => t.searchVolume));
+  const minSize = 80;
+  const maxSize = 200;
+
+  const getBubbleSize = (volume: number) => {
+    const ratio = volume / maxVolume;
+    return minSize + (maxSize - minSize) * ratio;
+  };
 
   const formatDate = (dateString: string | null) => {
     if (!dateString) return 'N/A';
@@ -46,50 +53,53 @@ export default function ComparisonPanel({ topics, theme, onClose, onRemoveTopic 
         </div>
 
         <div className="overflow-x-auto pb-2">
-          <div className="grid gap-3" style={{ gridTemplateColumns: `repeat(${topics.length}, minmax(250px, 1fr))` }}>
+          <div className="flex items-end justify-center gap-8 py-8 min-h-[280px]">
             {topics.map((topic) => {
-              const volumePercentage = (topic.searchVolume / maxVolume) * 100;
+              const size = getBubbleSize(topic.searchVolume);
+              const fontSize = Math.max(10, size / 12);
 
               return (
                 <div
                   key={topic.name}
-                  className={`${
-                    theme === 'dark' ? 'bg-gray-750 border-gray-700' : 'bg-gray-50 border-gray-200'
-                  } border rounded-lg p-4 relative`}
+                  className="flex flex-col items-center gap-3 relative"
+                  style={{ minWidth: `${maxSize + 40}px` }}
                 >
                   <button
                     onClick={() => onRemoveTopic(topic.name)}
-                    className={`absolute top-2 right-2 p-1 rounded hover:${
-                      theme === 'dark' ? 'bg-gray-600' : 'bg-gray-200'
-                    } transition-colors`}
+                    className={`absolute -top-2 -right-2 z-10 p-1.5 rounded-full ${
+                      theme === 'dark' ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'
+                    } transition-colors shadow-lg`}
                   >
                     <X size={14} className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} />
                   </button>
 
-                  <h4 className={`font-bold text-sm mb-3 pr-6 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                    {topic.name.replace(/"/g, '')}
-                  </h4>
-
-                  <div className="space-y-3">
-                    <div>
-                      <div className="flex items-center justify-between mb-1">
-                        <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                          Search Volume
-                        </span>
-                        <span className={`text-sm font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                          {topic.searchVolumeRaw.replace(/"/g, '')}
-                        </span>
+                  <div
+                    className="relative flex items-center justify-center rounded-full shadow-lg transition-all duration-500"
+                    style={{
+                      width: `${size}px`,
+                      height: `${size}px`,
+                      background: `radial-gradient(circle at 30% 30%, rgba(59, 130, 246, 0.9), rgba(37, 99, 235, 0.95))`,
+                    }}
+                  >
+                    <div className="text-center px-3">
+                      <div
+                        className="font-bold text-white break-words"
+                        style={{ fontSize: `${fontSize}px`, lineHeight: '1.2' }}
+                      >
+                        {topic.name.replace(/"/g, '')}
                       </div>
-                      <div className="w-full bg-gray-700 rounded-full h-2">
-                        <div
-                          className="bg-blue-500 h-2 rounded-full transition-all duration-500"
-                          style={{ width: `${volumePercentage}%` }}
-                        />
+                      <div
+                        className="text-white/80 mt-1"
+                        style={{ fontSize: `${fontSize * 0.7}px` }}
+                      >
+                        {topic.searchVolumeRaw.replace(/"/g, '')}
                       </div>
                     </div>
+                  </div>
 
+                  <div className="text-center space-y-1 max-w-[200px]">
                     {topic.category && (
-                      <div className="flex items-center gap-1">
+                      <div className="flex items-center justify-center gap-1">
                         <Tag size={12} className={theme === 'dark' ? 'text-gray-400' : 'text-gray-500'} />
                         <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
                           {topic.category}
@@ -98,7 +108,7 @@ export default function ComparisonPanel({ topics, theme, onClose, onRemoveTopic 
                     )}
 
                     {topic.pubDate && (
-                      <div className="flex items-center gap-1">
+                      <div className="flex items-center justify-center gap-1">
                         <Calendar size={12} className={theme === 'dark' ? 'text-gray-400' : 'text-gray-500'} />
                         <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
                           {formatDate(topic.pubDate)}
