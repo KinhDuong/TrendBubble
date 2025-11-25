@@ -1,4 +1,4 @@
-import { X, TrendingUp, Calendar, Tag } from 'lucide-react';
+import { X, TrendingUp } from 'lucide-react';
 import { TrendingTopic } from '../types';
 
 interface ComparisonPanelProps {
@@ -11,6 +11,7 @@ interface ComparisonPanelProps {
 export default function ComparisonPanel({ topics, theme, onClose, onRemoveTopic }: ComparisonPanelProps) {
   if (topics.length === 0) return null;
 
+  const sortedTopics = [...topics].sort((a, b) => b.searchVolume - a.searchVolume);
   const maxVolume = Math.max(...topics.map(t => t.searchVolume));
   const minSize = 80;
   const maxSize = 200;
@@ -22,15 +23,6 @@ export default function ComparisonPanel({ topics, theme, onClose, onRemoveTopic 
 
   const getFontSize = (size: number) => {
     return Math.max(12, size / 8);
-  };
-
-  const formatDate = (dateString: string | null) => {
-    if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
-    });
   };
 
   return (
@@ -58,7 +50,7 @@ export default function ComparisonPanel({ topics, theme, onClose, onRemoveTopic 
 
         <div className="overflow-x-auto pb-2">
           <div className="flex items-end justify-center gap-4 py-8 min-h-[280px]">
-            {topics.map((topic) => {
+            {sortedTopics.map((topic) => {
               const size = getBubbleSize(topic.searchVolume);
               const fontSize = getFontSize(size);
 
@@ -99,30 +91,6 @@ export default function ComparisonPanel({ topics, theme, onClose, onRemoveTopic 
                         {topic.searchVolumeRaw.replace(/"/g, '')}
                       </div>
                     </div>
-                  </div>
-
-                  <div className="text-center space-y-1 max-w-[200px]">
-                    {topic.pubDate && (
-                      <div className="flex items-center justify-center gap-1">
-                        <Calendar size={12} className={theme === 'dark' ? 'text-gray-400' : 'text-gray-500'} />
-                        <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                          {formatDate(topic.pubDate)}
-                        </span>
-                      </div>
-                    )}
-
-                    {topic.url && (
-                      <a
-                        href={topic.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={`block text-xs font-medium ${
-                          theme === 'dark' ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'
-                        } transition-colors`}
-                      >
-                        Learn more →
-                      </a>
-                    )}
                   </div>
                 </div>
               );
