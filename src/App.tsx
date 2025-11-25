@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import BubbleChart from './components/BubbleChart';
@@ -8,6 +8,7 @@ import Footer from './components/Footer';
 import Header from './components/Header';
 import FilterMenu, { BubbleLayout } from './components/FilterMenu';
 import ComparisonPanel from './components/ComparisonPanel';
+import ShareSnapshot from './components/ShareSnapshot';
 import TrendingBubble from './pages/TrendingBubble';
 import DynamicPage from './pages/DynamicPage';
 import { TrendingTopic } from './types';
@@ -66,6 +67,7 @@ function HomePage() {
   ]);
   const [showFullTop10, setShowFullTop10] = useState<boolean>(false);
   const [comparingTopics, setComparingTopics] = useState<Set<string>>(new Set());
+  const bubbleChartRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     loadTopics();
@@ -1021,6 +1023,12 @@ function HomePage() {
         variant="homepage"
       />
 
+      {viewMode === 'bubble' && !loading && topics.length > 0 && (
+        <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} shadow-sm px-4 md:px-6 py-3 flex justify-end`}>
+          <ShareSnapshot theme={theme} canvasRef={bubbleChartRef} variant="inline" />
+        </div>
+      )}
+
       <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900 text-white' : 'text-gray-900'} px-2 md:px-6 py-2 md:py-6 pb-0`} style={theme === 'light' ? { backgroundColor: '#f1f3f4' } : {}}>
         {showBackups && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -1384,7 +1392,9 @@ function HomePage() {
           <>
             {topics.length > 0 && viewMode === 'bubble' && (
               <>
-                <BubbleChart topics={topics} maxDisplay={maxBubbles} theme={theme} layout={bubbleLayout} onBubbleTimingUpdate={handleBubbleTimingUpdate} comparingTopics={comparingTopics} onComparingTopicsChange={setComparingTopics} />
+                <div ref={bubbleChartRef}>
+                  <BubbleChart topics={topics} maxDisplay={maxBubbles} theme={theme} layout={bubbleLayout} onBubbleTimingUpdate={handleBubbleTimingUpdate} comparingTopics={comparingTopics} onComparingTopicsChange={setComparingTopics} />
+                </div>
 
                 {/* Branded Attribution Section - Full Width */}
                 <div className={`w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'} py-6 mt-8`}>

@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import BubbleChart from '../components/BubbleChart';
@@ -6,6 +6,7 @@ import Footer from '../components/Footer';
 import Header from '../components/Header';
 import FilterMenu, { BubbleLayout } from '../components/FilterMenu';
 import ComparisonPanel from '../components/ComparisonPanel';
+import ShareSnapshot from '../components/ShareSnapshot';
 import { TrendingTopic, CryptoTimeframe } from '../types';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
@@ -56,6 +57,7 @@ function DynamicPage() {
   const [bubbleLayout, setBubbleLayout] = useState<BubbleLayout>('force');
   const [showFullList, setShowFullList] = useState<boolean>(false);
   const [cryptoTimeframe, setCryptoTimeframe] = useState<CryptoTimeframe>('1h');
+  const bubbleChartRef = useRef<HTMLDivElement>(null);
 
   const sortedTopics = useMemo(() => {
     if (pageData?.source !== 'coingecko_crypto' || !topics.length) {
@@ -629,6 +631,12 @@ function DynamicPage() {
         variant="homepage"
       />
 
+      {viewMode === 'bubble' && !loading && topics.length > 0 && (
+        <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} shadow-sm px-4 md:px-6 py-3 flex justify-end`}>
+          <ShareSnapshot theme={theme} canvasRef={bubbleChartRef} variant="inline" />
+        </div>
+      )}
+
       <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'} px-2 md:px-6 py-2 md:py-6 pb-0`}>
         <main role="main" aria-label="Trending topics visualization">
           {loading && (
@@ -663,17 +671,19 @@ function DynamicPage() {
               )}
               {topics.length > 0 && viewMode === 'bubble' && (
                 <>
-                  <BubbleChart
-                    topics={sortedTopics}
-                    maxDisplay={maxBubbles}
-                    theme={theme}
-                    layout={bubbleLayout}
-                    onBubbleTimingUpdate={handleBubbleTimingUpdate}
-                    comparingTopics={comparingTopics}
-                    onComparingTopicsChange={setComparingTopics}
-                    useCryptoColors={pageData?.source === 'coingecko_crypto'}
-                    cryptoTimeframe={cryptoTimeframe}
-                  />
+                  <div ref={bubbleChartRef}>
+                    <BubbleChart
+                      topics={sortedTopics}
+                      maxDisplay={maxBubbles}
+                      theme={theme}
+                      layout={bubbleLayout}
+                      onBubbleTimingUpdate={handleBubbleTimingUpdate}
+                      comparingTopics={comparingTopics}
+                      onComparingTopicsChange={setComparingTopics}
+                      useCryptoColors={pageData?.source === 'coingecko_crypto'}
+                      cryptoTimeframe={cryptoTimeframe}
+                    />
+                  </div>
 
                   <div className={`w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'} py-6 mt-8`}>
                     <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4 overflow-hidden">

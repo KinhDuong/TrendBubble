@@ -5,9 +5,10 @@ import html2canvas from 'html2canvas';
 interface ShareSnapshotProps {
   theme: 'dark' | 'light';
   canvasRef: React.RefObject<HTMLDivElement>;
+  variant?: 'floating' | 'inline';
 }
 
-export default function ShareSnapshot({ theme, canvasRef }: ShareSnapshotProps) {
+export default function ShareSnapshot({ theme, canvasRef, variant = 'floating' }: ShareSnapshotProps) {
   const [isCapturing, setIsCapturing] = useState(false);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [showShareMenu, setShowShareMenu] = useState(false);
@@ -99,20 +100,32 @@ export default function ShareSnapshot({ theme, canvasRef }: ShareSnapshotProps) 
     window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`, '_blank');
   };
 
+  const buttonClasses = variant === 'inline'
+    ? `flex items-center gap-2 px-3 md:px-4 py-2 rounded-lg transition-all ${
+        isCapturing
+          ? theme === 'dark'
+            ? 'bg-gray-600 cursor-not-allowed'
+            : 'bg-gray-300 cursor-not-allowed'
+          : theme === 'dark'
+          ? 'bg-blue-600 hover:bg-blue-700'
+          : 'bg-blue-500 hover:bg-blue-600'
+      } text-white font-medium text-sm shadow-md`
+    : `fixed bottom-6 right-6 z-40 flex items-center gap-2 px-4 py-3 rounded-full shadow-lg transition-all ${
+        isCapturing
+          ? theme === 'dark'
+            ? 'bg-gray-600 cursor-not-allowed'
+            : 'bg-gray-300 cursor-not-allowed'
+          : theme === 'dark'
+          ? 'bg-blue-600 hover:bg-blue-700 hover:shadow-xl'
+          : 'bg-blue-500 hover:bg-blue-600 hover:shadow-xl'
+      } text-white font-medium`;
+
   return (
     <>
       <button
         onClick={captureSnapshot}
         disabled={isCapturing}
-        className={`fixed bottom-6 right-6 z-40 flex items-center gap-2 px-4 py-3 rounded-full shadow-lg transition-all ${
-          isCapturing
-            ? theme === 'dark'
-              ? 'bg-gray-600 cursor-not-allowed'
-              : 'bg-gray-300 cursor-not-allowed'
-            : theme === 'dark'
-            ? 'bg-blue-600 hover:bg-blue-700 hover:shadow-xl'
-            : 'bg-blue-500 hover:bg-blue-600 hover:shadow-xl'
-        } text-white font-medium`}
+        className={buttonClasses}
         title="Capture & Share"
       >
         {isCapturing ? (
