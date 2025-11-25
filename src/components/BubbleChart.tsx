@@ -213,16 +213,12 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
     const getCryptoColorByGain = (searchVolume: number) => {
       const percentGain = searchVolume / 100000;
 
-      if (percentGain >= 30) return '#00C853';
-      if (percentGain >= 20) return '#1DE9B6';
-      if (percentGain >= 15) return '#00E676';
-      if (percentGain >= 10) return '#69F0AE';
-      if (percentGain >= 7) return '#76FF03';
-      if (percentGain >= 5) return '#B2FF59';
-      if (percentGain >= 3) return '#CDDC39';
-      if (percentGain >= 2) return '#FFD600';
-      if (percentGain >= 1) return '#FFAB00';
-      return '#FF6D00';
+      if (percentGain >= 10) return '#1B5E20';
+      if (percentGain >= 5) return '#2E7D32';
+      if (percentGain >= 2) return '#388E3C';
+      if (percentGain >= 0.5) return '#C62828';
+      if (percentGain >= 0.1) return '#D32F2F';
+      return '#E53935';
     };
 
     const getRandomColor = (index: number) => {
