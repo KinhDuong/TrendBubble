@@ -184,23 +184,27 @@ export default function FilterMenu({
                     <Divider />
                   </>
                 )}
-                <label htmlFor="dateFilter" className={`text-xs md:text-sm font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                  Date:
-                </label>
-                <select
-                  id="dateFilter"
-                  value={dateFilter}
-                  onChange={(e) => onDateFilterChange(e.target.value as 'now' | 'all' | '24h' | 'week' | 'month' | 'year')}
-                  className={`${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} border rounded px-2 md:px-3 py-1 md:py-1.5 text-xs md:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500`}
-                >
-                  <option value="now">Now</option>
-                  <option value="all">All Time</option>
-                  <option value="24h">24 Hours</option>
-                  <option value="week">Week</option>
-                  <option value="month">Month</option>
-                  <option value="year">Year</option>
-                </select>
-                <Divider />
+                {!showCryptoTimeframe && (
+                  <>
+                    <label htmlFor="dateFilter" className={`text-xs md:text-sm font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                      Date:
+                    </label>
+                    <select
+                      id="dateFilter"
+                      value={dateFilter}
+                      onChange={(e) => onDateFilterChange(e.target.value as 'now' | 'all' | '24h' | 'week' | 'month' | 'year')}
+                      className={`${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} border rounded px-2 md:px-3 py-1 md:py-1.5 text-xs md:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                    >
+                      <option value="now">Now</option>
+                      <option value="all">All Time</option>
+                      <option value="24h">24 Hours</option>
+                      <option value="week">Week</option>
+                      <option value="month">Month</option>
+                      <option value="year">Year</option>
+                    </select>
+                    <Divider />
+                  </>
+                )}
                 <div className={`flex items-center gap-1 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'} rounded p-1`}>
                   <button
                     onClick={() => onThemeChange('dark')}
@@ -318,23 +322,50 @@ export default function FilterMenu({
                 </button>
               )}
               <Divider />
-              <div className="flex items-center gap-2">
-                <select
-                  id="dateFilter"
-                  value={dateFilter}
-                  onChange={(e) => onDateFilterChange(e.target.value as 'now' | 'all' | '24h' | 'week' | 'month' | 'year')}
-                  className={`flex-1 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} border rounded px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500`}
-                  aria-label="Filter trending topics by date range"
-                >
-                  <option value="now">Trending Now</option>
-                  <option value="all">All Time</option>
-                  <option value="24h">24 Hours</option>
-                  <option value="week">Week</option>
-                  <option value="month">Month</option>
-                  <option value="year">Year</option>
-                </select>
-              </div>
-              <Divider />
+              {!showCryptoTimeframe && (
+                <>
+                  <div className="flex items-center gap-2">
+                    <select
+                      id="dateFilter"
+                      value={dateFilter}
+                      onChange={(e) => onDateFilterChange(e.target.value as 'now' | 'all' | '24h' | 'week' | 'month' | 'year')}
+                      className={`flex-1 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} border rounded px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                      aria-label="Filter trending topics by date range"
+                    >
+                      <option value="now">Trending Now</option>
+                      <option value="all">All Time</option>
+                      <option value="24h">24 Hours</option>
+                      <option value="week">Week</option>
+                      <option value="month">Month</option>
+                      <option value="year">Year</option>
+                    </select>
+                  </div>
+                  <Divider />
+                </>
+              )}
+              {showCryptoTimeframe && onCryptoTimeframeChange && (
+                <>
+                  <div className="flex items-center gap-2">
+                    <label htmlFor="cryptoTimeframe" className={`text-xs font-medium whitespace-nowrap ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                      Timeframe:
+                    </label>
+                    <select
+                      id="cryptoTimeframe"
+                      value={cryptoTimeframe}
+                      onChange={(e) => onCryptoTimeframeChange(e.target.value as CryptoTimeframe)}
+                      className={`flex-1 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} border rounded px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                      aria-label="Select crypto timeframe"
+                    >
+                      <option value="1h">1 Hour</option>
+                      <option value="24h">24 Hours</option>
+                      <option value="7d">7 Days</option>
+                      <option value="30d">30 Days</option>
+                      <option value="1y">1 Year</option>
+                    </select>
+                  </div>
+                  <Divider />
+                </>
+              )}
               <div className="flex items-center gap-2">
                 <select
                   id="categoryFilter"
