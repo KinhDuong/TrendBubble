@@ -92,20 +92,24 @@ export default function Header({ theme, isAdmin, onLoginClick, onLogout, title =
     <header className={`${theme === 'dark' ? 'bg-gray-900 border-gray-700' : 'bg-gray-100 border-gray-200 shadow-sm'} border-b`}>
       <div className="px-2 md:px-3 py-2 relative">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
-          <a href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+          {/* Logo and Title - Hide on mobile when search is expanded */}
+          <a
+            href="/"
+            className={`flex items-center gap-3 hover:opacity-80 transition-opacity ${isSearchExpanded ? 'hidden md:flex' : 'flex'}`}
+          >
             <div className={`relative w-12 h-12 flex-shrink-0 rounded-full shadow-lg border-4 border-blue-600 overflow-hidden flex items-center justify-center ${theme === 'dark' ? 'bg-transparent' : 'bg-transparent'}`}>
               <TrendingUp size={24} strokeWidth={4} className="text-blue-600 relative z-10" />
             </div>
-{useH1 ? (
+            {useH1 ? (
               <h1 className="text-xl md:text-2xl font-bold tracking-tight text-blue-600" style={{ fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", fontWeight: 700, letterSpacing: '-0.02em' }}>{title}</h1>
             ) : (
               <div className="text-xl md:text-2xl font-bold tracking-tight text-blue-600" style={{ fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", fontWeight: 700, letterSpacing: '-0.02em' }}>{title}</div>
             )}
           </a>
 
-          <div className="flex items-center gap-2">
-            <div className="relative" ref={searchRef}>
-              {/* Mobile: Show icon only, expand on click */}
+          <div className={`flex items-center gap-2 ${isSearchExpanded ? 'flex-1 md:flex-none' : ''}`}>
+            <div className={`relative ${isSearchExpanded ? 'flex-1 md:flex-none' : ''}`} ref={searchRef}>
+              {/* Mobile: Show icon only when not expanded */}
               {!isSearchExpanded && (
                 <button
                   onClick={handleSearchIconClick}
@@ -116,9 +120,9 @@ export default function Header({ theme, isAdmin, onLoginClick, onLogout, title =
                 </button>
               )}
 
-              {/* Mobile: Expanded search input */}
+              {/* Mobile: Expanded search input - inline, not absolute */}
               {isSearchExpanded && (
-                <div className={`md:hidden absolute right-0 top-0 flex items-center ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-lg border ${theme === 'dark' ? 'border-gray-700' : 'border-gray-300'} shadow-lg z-50`}>
+                <div className={`md:hidden flex items-center ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-lg border ${theme === 'dark' ? 'border-gray-700' : 'border-gray-300'}`}>
                   <Search size={18} className={`ml-3 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`} />
                   <input
                     type="text"
@@ -127,7 +131,7 @@ export default function Header({ theme, isAdmin, onLoginClick, onLogout, title =
                     onChange={(e) => setSearchQuery(e.target.value)}
                     onFocus={() => setIsSearchOpen(true)}
                     autoFocus
-                    className={`px-3 py-2 w-64 ${theme === 'dark' ? 'bg-gray-800 text-gray-200 placeholder-gray-500' : 'bg-white text-gray-900 placeholder-gray-400'} rounded-lg focus:outline-none`}
+                    className={`px-3 py-2 flex-1 ${theme === 'dark' ? 'bg-gray-800 text-gray-200 placeholder-gray-500' : 'bg-white text-gray-900 placeholder-gray-400'} rounded-lg focus:outline-none`}
                   />
                 </div>
               )}
