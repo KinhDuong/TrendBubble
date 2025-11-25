@@ -49,6 +49,7 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
   const [pinnedTopics, setPinnedTopics] = useState<Set<string>>(new Set());
   const [internalComparingTopics, setInternalComparingTopics] = useState<Set<string>>(new Set());
   const [userId, setUserId] = useState<string | null>(null);
+  const [showMaxCompareMessage, setShowMaxCompareMessage] = useState(false);
 
   const comparingTopics = externalComparingTopics || internalComparingTopics;
   const setComparingTopics = onComparingTopicsChange || setInternalComparingTopics;
@@ -94,7 +95,8 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
         });
       } else {
         if (next.size >= 5) {
-          alert('You can compare up to 5 topics at a time');
+          setShowMaxCompareMessage(true);
+          setTimeout(() => setShowMaxCompareMessage(false), 3000);
           return prev;
         }
         next.add(topicName);
@@ -998,6 +1000,15 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
           isComparing={comparingTopics.has(tooltipData.topic.name)}
           onClose={() => setTooltipData(null)}
         />
+      )}
+      {showMaxCompareMessage && (
+        <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 animate-fade-in">
+          <div className={`px-6 py-3 rounded-lg shadow-lg ${
+            theme === 'dark' ? 'bg-gray-800 text-white border border-gray-700' : 'bg-white text-gray-900 border border-gray-200'
+          }`}>
+            <p className="text-sm font-medium">You can compare up to 5 topics at a time</p>
+          </div>
+        </div>
       )}
     </div>
   );
