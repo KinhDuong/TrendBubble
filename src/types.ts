@@ -1,3 +1,22 @@
+export interface CryptoData {
+  change_1h: number;
+  change_24h: number;
+  change_7d: number;
+  change_30d: number;
+  change_1y: number;
+  current_price: number;
+  volume_24h: number;
+  formatted: {
+    change_1h: string;
+    change_24h: string;
+    change_7d: string;
+    change_30d: string;
+    change_1y: string;
+    price: string;
+    volume: string;
+  };
+}
+
 export interface TrendingTopic {
   name: string;
   searchVolume: number;
@@ -7,4 +26,7 @@ export interface TrendingTopic {
   pubDate?: string;
   category?: string;
   source?: string;
+  crypto_data?: CryptoData;
 }
+
+export type CryptoTimeframe = '1h' | '24h' | '7d' | '30d' | '1y';

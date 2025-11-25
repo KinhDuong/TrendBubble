@@ -1,4 +1,5 @@
 import { X, Play, Pause, Moon, Sun } from 'lucide-react';
+import { CryptoTimeframe } from '../types';
 
 export type BubbleLayout = 'force' | 'hierarchical' | 'grid' | 'circular' | 'timeline' | 'packed' | 'scatter' | 'importance';
 
@@ -19,6 +20,8 @@ interface FilterMenuProps {
   nextUpdateIn?: string;
   updateProgress?: number;
   bubbleLayout?: BubbleLayout;
+  cryptoTimeframe?: CryptoTimeframe;
+  showCryptoTimeframe?: boolean;
   onViewModeChange: (mode: 'bubble' | 'list') => void;
   onDateFilterChange: (filter: 'now' | 'all' | '24h' | 'week' | 'month' | 'year') => void;
   onCategoryFilterChange: (category: string) => void;
@@ -30,6 +33,7 @@ interface FilterMenuProps {
   onRefresh?: () => void;
   onPauseToggle?: () => void;
   onBubbleLayoutChange?: (layout: BubbleLayout) => void;
+  onCryptoTimeframeChange?: (timeframe: CryptoTimeframe) => void;
   variant?: 'homepage' | 'bubble';
 }
 
@@ -50,6 +54,8 @@ export default function FilterMenu({
   nextUpdateIn,
   updateProgress,
   bubbleLayout = 'force',
+  cryptoTimeframe = '1h',
+  showCryptoTimeframe = false,
   onViewModeChange,
   onDateFilterChange,
   onCategoryFilterChange,
@@ -61,6 +67,7 @@ export default function FilterMenu({
   onRefresh,
   onPauseToggle,
   onBubbleLayoutChange,
+  onCryptoTimeframeChange,
   variant = 'homepage'
 }: FilterMenuProps) {
   if (loading) return null;
@@ -94,6 +101,26 @@ export default function FilterMenu({
                       <option value={100}>100</option>
                       <option value={150}>150</option>
                       <option value={200}>200</option>
+                    </select>
+                    <Divider />
+                  </>
+                )}
+                {showCryptoTimeframe && onCryptoTimeframeChange && (
+                  <>
+                    <label htmlFor="cryptoTimeframe" className={`text-xs md:text-sm font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                      Timeframe:
+                    </label>
+                    <select
+                      id="cryptoTimeframe"
+                      value={cryptoTimeframe}
+                      onChange={(e) => onCryptoTimeframeChange(e.target.value as CryptoTimeframe)}
+                      className={`${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} border rounded px-2 md:px-3 py-1 md:py-1.5 text-xs md:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                    >
+                      <option value="1h">1 Hour</option>
+                      <option value="24h">24 Hours</option>
+                      <option value="7d">7 Days</option>
+                      <option value="30d">30 Days</option>
+                      <option value="1y">1 Year</option>
                     </select>
                     <Divider />
                   </>

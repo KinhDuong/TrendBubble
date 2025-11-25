@@ -16,6 +16,9 @@ interface CoinGeckoCoin {
   total_volume: number;
   price_change_percentage_1h_in_currency: number;
   price_change_percentage_24h_in_currency: number;
+  price_change_percentage_7d_in_currency: number;
+  price_change_percentage_30d_in_currency: number;
+  price_change_percentage_1y_in_currency: number;
 }
 
 Deno.serve(async (req: Request) => {
@@ -34,7 +37,7 @@ Deno.serve(async (req: Request) => {
     console.log("Fetching CoinGecko crypto data...");
 
     // Fetch top 250 coins by market cap from CoinGecko (free tier, no API key needed)
-    const coingeckoUrl = "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=250&page=1&sparkline=false&price_change_percentage=1h,24h";
+    const coingeckoUrl = "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=250&page=1&sparkline=false&price_change_percentage=1h,24h,7d,30d,1y";
     const response = await fetch(coingeckoUrl, {
       headers: {
         'Accept': 'application/json',
@@ -67,9 +70,15 @@ Deno.serve(async (req: Request) => {
 
       const change1hValue = crypto.price_change_percentage_1h_in_currency || 0;
       const change24hValue = crypto.price_change_percentage_24h_in_currency || 0;
+      const change7dValue = crypto.price_change_percentage_7d_in_currency || 0;
+      const change30dValue = crypto.price_change_percentage_30d_in_currency || 0;
+      const change1yValue = crypto.price_change_percentage_1y_in_currency || 0;
 
       const change1h = change1hValue >= 0 ? `+${change1hValue.toFixed(2)}` : change1hValue.toFixed(2);
       const change24h = change24hValue >= 0 ? `+${change24hValue.toFixed(2)}` : change24hValue.toFixed(2);
+      const change7d = change7dValue >= 0 ? `+${change7dValue.toFixed(2)}` : change7dValue.toFixed(2);
+      const change30d = change30dValue >= 0 ? `+${change30dValue.toFixed(2)}` : change30dValue.toFixed(2);
+      const change1y = change1yValue >= 0 ? `+${change1yValue.toFixed(2)}` : change1yValue.toFixed(2);
 
       const volumeFormatted = crypto.total_volume > 1000000000
         ? `$${(crypto.total_volume / 1000000000).toFixed(2)}B`
@@ -83,6 +92,26 @@ Deno.serve(async (req: Request) => {
       // Example: 5% gain/loss = 500,000, 10% gain/loss = 1,000,000
       const searchVolume = Math.floor(Math.abs(crypto.price_change_percentage_1h_in_currency) * 100000);
       const searchVolumeRaw = `${change1h}% (1h) • ${change24h}% (24h) • ${priceFormatted} • ${volumeFormatted}`;
+
+      // Store all timeframe data in crypto_data field
+      const cryptoData = {
+        change_1h: change1hValue,
+        change_24h: change24hValue,
+        change_7d: change7dValue,
+        change_30d: change30dValue,
+        change_1y: change1yValue,
+        current_price: crypto.current_price,
+        volume_24h: crypto.total_volume,
+        formatted: {
+          change_1h: change1h,
+          change_24h: change24h,
+          change_7d: change7d,
+          change_30d: change30d,
+          change_1y: change1y,
+          price: priceFormatted,
+          volume: volumeFormatted,
+        }
+      };
 
       // Generate CoinGecko URL
       const coinUrl = `https://www.coingecko.com/en/coins/${crypto.id}`;
@@ -104,6 +133,7 @@ Deno.serve(async (req: Request) => {
             rank: index + 1,
             last_seen: now,
             url: coinUrl,
+            crypto_data: cryptoData,
           })
           .eq("id", existing.id);
         updatedTopicsCount++;
@@ -121,6 +151,7 @@ Deno.serve(async (req: Request) => {
             pub_date: now,
             category: 'Cryptocurrency',
             source: 'coingecko_crypto',
+            crypto_data: cryptoData,
           });
         newTopicsCount++;
       }

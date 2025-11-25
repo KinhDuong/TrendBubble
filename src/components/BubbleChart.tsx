@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { TrendingTopic } from '../types';
+import { TrendingTopic, CryptoTimeframe } from '../types';
 import BubbleTooltip from './BubbleTooltip';
 import { supabase } from '../lib/supabase';
 import { BubbleLayout } from './FilterMenu';
@@ -14,6 +14,7 @@ interface BubbleChartProps {
   comparingTopics?: Set<string>;
   onComparingTopicsChange?: (topics: Set<string>) => void;
   useCryptoColors?: boolean;
+  cryptoTimeframe?: CryptoTimeframe;
 }
 
 interface Bubble {
@@ -38,7 +39,7 @@ interface Bubble {
   layoutY?: number;
 }
 
-export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force', onBubbleTimingUpdate, comparingTopics: externalComparingTopics, onComparingTopicsChange, useCryptoColors = false }: BubbleChartProps) {
+export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force', onBubbleTimingUpdate, comparingTopics: externalComparingTopics, onComparingTopicsChange, useCryptoColors = false, cryptoTimeframe = '1h' }: BubbleChartProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const bubblesRef = useRef<Bubble[]>([]);
   const animationFrameRef = useRef<number>();
@@ -183,7 +184,44 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
 
     canvas.addEventListener('mousemove', handleMouseMove);
 
-    const volumes = topics.map(t => t.searchVolume).sort((a, b) => b - a);
+    const getCryptoValue = (topic: TrendingTopic): number => {
+      if (!topic.crypto_data || !useCryptoColors) return topic.searchVolume;
+
+      const timeframeMap = {
+        '1h': topic.crypto_data.change_1h,
+        '24h': topic.crypto_data.change_24h,
+        '7d': topic.crypto_data.change_7d,
+        '30d': topic.crypto_data.change_30d,
+        '1y': topic.crypto_data.change_1y,
+      };
+
+      const changeValue = timeframeMap[cryptoTimeframe];
+      return Math.floor(Math.abs(changeValue) * 100000);
+    };
+
+    const getCryptoDisplayText = (topic: TrendingTopic): string => {
+      if (!topic.crypto_data || !useCryptoColors) return topic.searchVolumeRaw;
+
+      const timeframeMap = {
+        '1h': topic.crypto_data.formatted.change_1h,
+        '24h': topic.crypto_data.formatted.change_24h,
+        '7d': topic.crypto_data.formatted.change_7d,
+        '30d': topic.crypto_data.formatted.change_30d,
+        '1y': topic.crypto_data.formatted.change_1y,
+      };
+
+      const timeframeLabel = {
+        '1h': '1h',
+        '24h': '24h',
+        '7d': '7d',
+        '30d': '30d',
+        '1y': '1y',
+      };
+
+      return `${timeframeMap[cryptoTimeframe]}% (${timeframeLabel[cryptoTimeframe]}) • ${topic.crypto_data.formatted.price} • ${topic.crypto_data.formatted.volume}`;
+    };
+
+    const volumes = topics.map(t => getCryptoValue(t)).sort((a, b) => b - a);
     const maxSearchVolume = volumes[0];
     const medianVolume = volumes[Math.floor(volumes.length / 2)];
     const minVolume = volumes[volumes.length - 1];
@@ -549,7 +587,8 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
     const createBubble = (topicIndex: number, existingBubbles: Bubble[] = []): Bubble => {
       const topic = topics[topicIndex];
       const randomLifetime = bubbleLifetimes[Math.floor(Math.random() * bubbleLifetimes.length)];
-      const radius = calculateBubbleSize(topic.searchVolume);
+      const cryptoValue = getCryptoValue(topic);
+      const radius = calculateBubbleSize(cryptoValue);
       const dpr = window.devicePixelRatio || 1;
       const canvasDisplayWidth = canvas.width / dpr;
       const canvasDisplayHeight = canvas.height / dpr;
@@ -570,7 +609,7 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
         vy: usePhysics ? (Math.random() - 0.5) * 0.25 : 0,
         radius: isStaticLayout ? radius : 0,
         baseRadius: radius,
-        color: useCryptoColors ? getCryptoColorByGain(topic.searchVolume, topic.searchVolumeRaw) : getRandomColor(topicIndex),
+        color: useCryptoColors ? getCryptoColorByGain(cryptoValue, getCryptoDisplayText(topic)) : getRandomColor(topicIndex),
         createdAt: Date.now(),
         lifetime: randomLifetime,
         isSpawning: !isStaticLayout,
@@ -981,7 +1020,8 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
             const volumeAlpha = theme === 'dark' ? 0.9 * textBrightness : 0.9;
             ctx.fillStyle = theme === 'dark' ? `rgba(200, 200, 200, ${volumeAlpha * opacity})` : `rgba(255, 255, 255, ${0.85 * opacity})`;
             const volumeY = startY + displayLines.length * lineHeight + Math.max(4, displayRadius / 10);
-            const cleanVolume = bubble.topic.searchVolumeRaw.replace(/"/g, '');
+            const displayText = getCryptoDisplayText(bubble.topic);
+            const cleanVolume = displayText.replace(/"/g, '');
             const gainPercentage = cleanVolume.split('•')[0].trim();
             ctx.fillText(gainPercentage, bubble.x, volumeY);
           } else {
@@ -1009,7 +1049,7 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, [topics, maxDisplay, theme, layout]);
+  }, [topics, maxDisplay, theme, layout, cryptoTimeframe, useCryptoColors]);
 
   return (
     <div className="w-full h-full relative">

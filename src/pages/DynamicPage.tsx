@@ -6,7 +6,7 @@ import Footer from '../components/Footer';
 import Header from '../components/Header';
 import FilterMenu, { BubbleLayout } from '../components/FilterMenu';
 import ComparisonPanel from '../components/ComparisonPanel';
-import { TrendingTopic } from '../types';
+import { TrendingTopic, CryptoTimeframe } from '../types';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
 import { TrendingUp, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
@@ -55,6 +55,7 @@ function DynamicPage() {
   const [comparingTopics, setComparingTopics] = useState<Set<string>>(new Set());
   const [bubbleLayout, setBubbleLayout] = useState<BubbleLayout>('force');
   const [showFullList, setShowFullList] = useState<boolean>(false);
+  const [cryptoTimeframe, setCryptoTimeframe] = useState<CryptoTimeframe>('1h');
 
   useEffect(() => {
     loadPageData();
@@ -528,6 +529,8 @@ function DynamicPage() {
         nextBubbleIn={nextBubbleIn}
         bubbleProgress={bubbleProgress}
         bubbleLayout={bubbleLayout}
+        cryptoTimeframe={cryptoTimeframe}
+        showCryptoTimeframe={pageData?.source === 'coingecko_crypto'}
         onViewModeChange={setViewMode}
         onDateFilterChange={setDateFilter}
         onCategoryFilterChange={setCategoryFilter}
@@ -541,6 +544,7 @@ function DynamicPage() {
         }}
         onRefresh={loadTopics}
         onBubbleLayoutChange={setBubbleLayout}
+        onCryptoTimeframeChange={setCryptoTimeframe}
         variant="homepage"
       />
 
@@ -587,6 +591,7 @@ function DynamicPage() {
                     comparingTopics={comparingTopics}
                     onComparingTopicsChange={setComparingTopics}
                     useCryptoColors={pageData?.source === 'coingecko_crypto'}
+                    cryptoTimeframe={cryptoTimeframe}
                   />
 
                   <div className={`w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'} py-6 mt-8`}>
