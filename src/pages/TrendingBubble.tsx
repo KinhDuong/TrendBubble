@@ -609,9 +609,22 @@ function TrendingBubble() {
       <Helmet>
         <title>Trending Bubble Chart - Interactive Google Trends Visualization</title>
         <meta name="description" content={`Watch ${totalTopics} trending topics in an interactive animated bubble chart. See search volumes visualize in real-time: ${topTopicNames || 'live Google trends visualization'}. Updated continuously.`} />
+        <meta name="keywords" content="google trends, trending topics, search trends, real-time trends, bubble chart, trend visualization, search volume, trending now, google analytics, trend tracker" />
+        <meta name="author" content="Google Trending Topics" />
+        <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+        <link rel="canonical" href="https://googletrendingtopics.com/trending-bubble" />
+
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://googletrendingtopics.com/trending-bubble" />
         <meta property="og:title" content="Trending Bubble - Interactive Real-Time Trends Visualization" />
         <meta property="og:description" content={`Interactive bubble chart showing ${totalTopics} trending topics with animated visualization. Watch trends grow and shrink in real-time.`} />
-        <link rel="canonical" href="https://googletrendingtopics.com/trending-bubble" />
+        <meta property="og:site_name" content="Google Trending Topics" />
+        <meta property="og:locale" content="en_US" />
+
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:url" content="https://googletrendingtopics.com/trending-bubble" />
+        <meta name="twitter:title" content="Trending Bubble - Interactive Real-Time Trends Visualization" />
+        <meta name="twitter:description" content={`Interactive bubble chart showing ${totalTopics} trending topics with animated visualization. Watch trends grow and shrink in real-time.`} />
       </Helmet>
       {isAdmin && (
         <header className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-b py-4 md:py-6 px-3 md:px-6 shadow-sm`}>
