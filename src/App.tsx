@@ -1634,9 +1634,9 @@ function HomePage() {
                 <a
                   key={page.id}
                   href={page.page_url}
-                  className={`group block ${theme === 'dark' ? 'bg-gray-800 hover:bg-gray-750' : 'bg-white hover:bg-gray-50 border border-gray-200'} rounded-lg overflow-hidden shadow-md transition-all hover:shadow-lg`}
+                  className={`group block ${theme === 'dark' ? 'bg-gray-800 hover:bg-gray-750' : 'bg-white hover:bg-gray-50 border border-gray-200'} rounded-lg overflow-hidden shadow-md transition-all hover:shadow-lg h-full`}
                 >
-                  <div className="flex flex-row">
+                  <div className="flex flex-row h-full min-h-[180px]">
                     <div className={`w-2/5 ${theme === 'dark' ? 'bg-gradient-to-br from-blue-900 to-blue-800' : 'bg-gradient-to-br from-blue-100 to-blue-50'} flex items-center justify-center p-4`}>
                       <div className="text-center">
                         <div className={`text-4xl font-bold ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'} mb-2`}>
@@ -1649,8 +1649,8 @@ function HomePage() {
                         )}
                       </div>
                     </div>
-                    <div className="w-3/5 p-4 flex flex-col justify-between">
-                      <div>
+                    <div className="w-3/5 p-4 flex flex-col">
+                      <div className="flex-shrink-0">
                         <div className={`text-xs font-semibold uppercase tracking-wide mb-1 ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
                           {sourceInfo ? sourceInfo.label : page.source} <span className="mx-1">|</span> {new Date(page.created_at).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}
                         </div>
@@ -1658,7 +1658,7 @@ function HomePage() {
                           {page.meta_title}
                         </h3>
                       </div>
-                      <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} line-clamp-2`}>
+                      <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} line-clamp-2 mt-auto`}>
                         {page.meta_description}
                       </p>
                     </div>
