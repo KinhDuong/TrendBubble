@@ -24,12 +24,14 @@ export default function Header({ theme, isAdmin, onLoginClick, onLogout, title =
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Page[]>([]);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
         setIsSearchOpen(false);
+        setIsSearchExpanded(false);
       }
     };
 
@@ -77,8 +79,13 @@ export default function Header({ theme, isAdmin, onLoginClick, onLogout, title =
 
   const handleSearchResultClick = () => {
     setIsSearchOpen(false);
+    setIsSearchExpanded(false);
     setSearchQuery('');
     setSearchResults([]);
+  };
+
+  const handleSearchIconClick = () => {
+    setIsSearchExpanded(true);
   };
 
   return (
@@ -89,16 +96,44 @@ export default function Header({ theme, isAdmin, onLoginClick, onLogout, title =
             <div className={`relative w-12 h-12 flex-shrink-0 rounded-full shadow-lg border-4 border-blue-600 overflow-hidden flex items-center justify-center ${theme === 'dark' ? 'bg-transparent' : 'bg-transparent'}`}>
               <TrendingUp size={24} strokeWidth={4} className="text-blue-600 relative z-10" />
             </div>
-            {useH1 ? (
-              <h1 className="text-xl md:text-2xl font-bold tracking-tight text-blue-600 hidden sm:block" style={{ fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", fontWeight: 700, letterSpacing: '-0.02em' }}>{title}</h1>
+{useH1 ? (
+              <h1 className="text-xl md:text-2xl font-bold tracking-tight text-blue-600" style={{ fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", fontWeight: 700, letterSpacing: '-0.02em' }}>{title}</h1>
             ) : (
-              <div className="text-xl md:text-2xl font-bold tracking-tight text-blue-600 hidden sm:block" style={{ fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", fontWeight: 700, letterSpacing: '-0.02em' }}>{title}</div>
+              <div className="text-xl md:text-2xl font-bold tracking-tight text-blue-600" style={{ fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", fontWeight: 700, letterSpacing: '-0.02em' }}>{title}</div>
             )}
           </a>
 
           <div className="flex items-center gap-2">
             <div className="relative" ref={searchRef}>
-              <div className={`flex items-center ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-lg border ${theme === 'dark' ? 'border-gray-700' : 'border-gray-300'}`}>
+              {/* Mobile: Show icon only, expand on click */}
+              {!isSearchExpanded && (
+                <button
+                  onClick={handleSearchIconClick}
+                  className={`md:hidden p-2 rounded transition-colors ${theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-200'}`}
+                  aria-label="Search"
+                >
+                  <Search size={20} className={theme === 'dark' ? 'text-gray-300' : 'text-gray-700'} />
+                </button>
+              )}
+
+              {/* Mobile: Expanded search input */}
+              {isSearchExpanded && (
+                <div className={`md:hidden absolute right-0 top-0 flex items-center ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-lg border ${theme === 'dark' ? 'border-gray-700' : 'border-gray-300'} shadow-lg z-50`}>
+                  <Search size={18} className={`ml-3 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`} />
+                  <input
+                    type="text"
+                    placeholder="Search"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onFocus={() => setIsSearchOpen(true)}
+                    autoFocus
+                    className={`px-3 py-2 w-64 ${theme === 'dark' ? 'bg-gray-800 text-gray-200 placeholder-gray-500' : 'bg-white text-gray-900 placeholder-gray-400'} rounded-lg focus:outline-none`}
+                  />
+                </div>
+              )}
+
+              {/* Desktop: Always show full search input */}
+              <div className={`hidden md:flex items-center ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-lg border ${theme === 'dark' ? 'border-gray-700' : 'border-gray-300'}`}>
                 <Search size={18} className={`ml-3 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`} />
                 <input
                   type="text"
@@ -106,7 +141,7 @@ export default function Header({ theme, isAdmin, onLoginClick, onLogout, title =
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onFocus={() => setIsSearchOpen(true)}
-                  className={`px-3 py-2 w-32 md:w-48 ${theme === 'dark' ? 'bg-gray-800 text-gray-200 placeholder-gray-500' : 'bg-white text-gray-900 placeholder-gray-400'} rounded-lg focus:outline-none`}
+                  className={`px-3 py-2 w-48 ${theme === 'dark' ? 'bg-gray-800 text-gray-200 placeholder-gray-500' : 'bg-white text-gray-900 placeholder-gray-400'} rounded-lg focus:outline-none`}
                 />
               </div>
 
