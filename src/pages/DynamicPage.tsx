@@ -574,11 +574,6 @@ function DynamicPage() {
                       </span>
                     </div>
                   </header>
-                  <div className={`prose ${theme === 'dark' ? 'prose-invert' : ''} max-w-none`}>
-                    <p className={`text-sm leading-relaxed ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                      {pageData.meta_description}
-                    </p>
-                  </div>
                 </article>
               )}
               {topics.length > 0 && viewMode === 'bubble' && (
