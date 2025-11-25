@@ -25,8 +25,8 @@ export default function Header({ theme, isAdmin, onLoginClick, onLogout, title =
   };
 
   return (
-    <header className={`${theme === 'dark' ? 'bg-gray-900 border-gray-700' : 'bg-gray-100 border-gray-200 shadow-sm'} border-b relative`}>
-      <div className="px-2 md:px-3 py-2">
+    <header className={`${theme === 'dark' ? 'bg-gray-900 border-gray-700' : 'bg-gray-100 border-gray-200 shadow-sm'} border-b`}>
+      <div className="px-2 md:px-3 py-2 relative">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <a href="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
             <div className={`relative w-12 h-12 flex-shrink-0 rounded-full shadow-lg border-4 border-blue-600 overflow-hidden flex items-center justify-center ${theme === 'dark' ? 'bg-transparent' : 'bg-transparent'}`}>
@@ -35,19 +35,18 @@ export default function Header({ theme, isAdmin, onLoginClick, onLogout, title =
             <h1 className="text-xl md:text-2xl font-bold tracking-tight text-blue-600" style={{ fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", fontWeight: 700, letterSpacing: '-0.02em' }}>{title}</h1>
           </a>
 
-          <button
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className={`p-2 rounded transition-colors ${theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-200'}`}
-            aria-label="Menu"
-            aria-expanded={isMenuOpen}
-          >
-            {isMenuOpen ? <X size={24} className={theme === 'dark' ? 'text-gray-300' : 'text-gray-700'} /> : <Menu size={24} className={theme === 'dark' ? 'text-gray-300' : 'text-gray-700'} />}
-          </button>
-        </div>
-      </div>
+          <div className="relative">
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className={`p-2 rounded transition-colors ${theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-200'}`}
+              aria-label="Menu"
+              aria-expanded={isMenuOpen}
+            >
+              {isMenuOpen ? <X size={24} className={theme === 'dark' ? 'text-gray-300' : 'text-gray-700'} /> : <Menu size={24} className={theme === 'dark' ? 'text-gray-300' : 'text-gray-700'} />}
+            </button>
 
-      {isMenuOpen && (
-        <div className={`absolute top-full right-2 md:right-3 w-64 ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-l border-b shadow-lg z-50`}>
+            {isMenuOpen && (
+              <div className={`absolute top-full right-0 mt-2 w-64 ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border rounded-lg shadow-lg z-50`}>
           <nav className="py-2">
             <a
               href="/"
@@ -100,8 +99,11 @@ export default function Header({ theme, isAdmin, onLoginClick, onLogout, title =
               </button>
             )}
           </nav>
+              </div>
+            )}
+          </div>
         </div>
-      )}
+      </div>
     </header>
   );
 }
