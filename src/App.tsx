@@ -1018,14 +1018,6 @@ function HomePage() {
         variant="homepage"
       />
 
-      {!loading && topics.length > 0 && viewMode === 'bubble' && (
-        <div className={`w-screen py-4 ${theme === 'dark' ? 'bg-gray-900' : 'bg-white'}`} style={{ minHeight: '600px' }}>
-          <div className="max-w-7xl mx-auto h-full">
-            <BubbleChart topics={topics} maxDisplay={maxBubbles} theme={theme} layout={bubbleLayout} onBubbleTimingUpdate={handleBubbleTimingUpdate} />
-          </div>
-        </div>
-      )}
-
       <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900 text-white' : 'text-gray-900'} px-2 md:px-6 py-2 md:py-6 pb-0`} style={theme === 'light' ? { backgroundColor: '#f1f3f4' } : {}}>
         {showBackups && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -1389,6 +1381,8 @@ function HomePage() {
           <>
             {topics.length > 0 && viewMode === 'bubble' && (
               <>
+                <BubbleChart topics={topics} maxDisplay={maxBubbles} theme={theme} layout={bubbleLayout} onBubbleTimingUpdate={handleBubbleTimingUpdate} />
+
                 {/* Branded Attribution Section - Full Width */}
                 <div className={`w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'} py-6 mt-8`}>
                   <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4 overflow-hidden">
