@@ -101,15 +101,15 @@ export default function ShareSnapshot({ theme, canvasRef, variant = 'floating' }
   };
 
   const buttonClasses = variant === 'inline'
-    ? `flex items-center gap-2 px-3 md:px-4 py-2 rounded-lg transition-all ${
+    ? `flex items-center gap-2 px-3 md:px-4 py-1.5 text-xs md:text-sm font-medium transition-colors text-white whitespace-nowrap rounded ${
         isCapturing
           ? theme === 'dark'
             ? 'bg-gray-600 cursor-not-allowed'
             : 'bg-gray-300 cursor-not-allowed'
           : theme === 'dark'
           ? 'bg-blue-600 hover:bg-blue-700'
-          : 'bg-blue-500 hover:bg-blue-600'
-      } text-white font-medium text-sm shadow-md`
+          : 'bg-blue-600 hover:bg-blue-700'
+      }`
     : `fixed bottom-6 right-6 z-40 flex items-center gap-2 px-4 py-3 rounded-full shadow-lg transition-all ${
         isCapturing
           ? theme === 'dark'
@@ -136,7 +136,7 @@ export default function ShareSnapshot({ theme, canvasRef, variant = 'floating' }
         ) : (
           <>
             <Camera size={20} />
-            <span className="hidden md:inline">Snapshot</span>
+            <span className="hidden md:inline">Snapshot & Share</span>
           </>
         )}
       </button>

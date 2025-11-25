@@ -1024,7 +1024,7 @@ function HomePage() {
       />
 
       {viewMode === 'bubble' && !loading && topics.length > 0 && (
-        <div className="px-4 md:px-6 py-3 flex justify-end">
+        <div className={`px-4 md:px-6 py-3 flex justify-end ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}>
           <ShareSnapshot theme={theme} canvasRef={bubbleChartRef} variant="inline" />
         </div>
       )}
