@@ -991,6 +991,7 @@ function HomePage() {
         isAdmin={isAdmin}
         onLoginClick={() => setShowLogin(true)}
         onLogout={logout}
+        useH1={true}
       />
 
       <FilterMenu
