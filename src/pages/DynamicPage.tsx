@@ -631,11 +631,6 @@ function DynamicPage() {
         variant="homepage"
       />
 
-      {viewMode === 'bubble' && !loading && topics.length > 0 && (
-        <div className={`px-4 md:px-6 py-3 flex justify-end ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}>
-          <ShareSnapshot theme={theme} canvasRef={bubbleChartRef} variant="inline" />
-        </div>
-      )}
 
       <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'} px-2 md:px-6 py-2 md:py-6 pb-0`}>
         <main role="main" aria-label="Trending topics visualization">
@@ -647,9 +642,14 @@ function DynamicPage() {
               {topics.length > 0 && (
                 <article className="max-w-7xl mx-auto mb-8">
                   <header>
-                    <h1 className={`text-3xl md:text-4xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                      {pageData.meta_title}
-                    </h1>
+                    <div className="flex items-center justify-between gap-4 mb-4">
+                      <h1 className={`text-3xl md:text-4xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                        {pageData.meta_title}
+                      </h1>
+                      {viewMode === 'bubble' && topics.length > 0 && (
+                        <ShareSnapshot theme={theme} canvasRef={bubbleChartRef} variant="inline" />
+                      )}
+                    </div>
                     <div className={`flex flex-wrap items-center gap-3 mb-4 text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
                       <time dateTime={lastUpdated.toISOString()}>
                         Last updated: {lastUpdated.toLocaleString('en-US', {

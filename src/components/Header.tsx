@@ -9,6 +9,7 @@ interface HeaderProps {
   onLogout?: () => void;
   title?: string;
   useH1?: boolean;
+  snapshotButton?: React.ReactNode;
 }
 
 interface Page {
@@ -19,7 +20,7 @@ interface Page {
   source: string;
 }
 
-export default function Header({ theme, isAdmin, onLoginClick, onLogout, title = 'Trending Bubbles', useH1 = false }: HeaderProps) {
+export default function Header({ theme, isAdmin, onLoginClick, onLogout, title = 'Trending Bubbles', useH1 = false, snapshotButton }: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Page[]>([]);
@@ -100,11 +101,14 @@ export default function Header({ theme, isAdmin, onLoginClick, onLogout, title =
             <div className={`relative w-12 h-12 flex-shrink-0 rounded-full shadow-lg border-4 border-blue-600 overflow-hidden flex items-center justify-center ${theme === 'dark' ? 'bg-transparent' : 'bg-transparent'}`}>
               <TrendingUp size={24} strokeWidth={4} className="text-blue-600 relative z-10" />
             </div>
-            {useH1 ? (
-              <h1 className="text-xl md:text-2xl font-bold tracking-tight text-blue-600" style={{ fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", fontWeight: 700, letterSpacing: '-0.02em' }}>{title}</h1>
-            ) : (
-              <div className="text-xl md:text-2xl font-bold tracking-tight text-blue-600" style={{ fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", fontWeight: 700, letterSpacing: '-0.02em' }}>{title}</div>
-            )}
+            <div className="flex items-center gap-3">
+              {useH1 ? (
+                <h1 className="text-xl md:text-2xl font-bold tracking-tight text-blue-600" style={{ fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", fontWeight: 700, letterSpacing: '-0.02em' }}>{title}</h1>
+              ) : (
+                <div className="text-xl md:text-2xl font-bold tracking-tight text-blue-600" style={{ fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", fontWeight: 700, letterSpacing: '-0.02em' }}>{title}</div>
+              )}
+              {snapshotButton}
+            </div>
           </a>
 
           <div className={`flex items-center gap-2 ${isSearchExpanded ? 'flex-1 md:flex-none' : ''}`}>

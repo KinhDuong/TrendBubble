@@ -779,6 +779,9 @@ function TrendingBubble() {
         onLogout={logout}
         title="Google Trending Topics"
         useH1={true}
+        snapshotButton={viewMode === 'bubble' && !loading && topics.length > 0 ? (
+          <ShareSnapshot theme={theme} canvasRef={bubbleChartRef} variant="inline" />
+        ) : null}
       />
 
       <FilterMenu
@@ -979,9 +982,6 @@ function TrendingBubble() {
           });
         }}
       />
-      {viewMode === 'bubble' && !loading && topics.length > 0 && (
-        <ShareSnapshot theme={theme} canvasRef={bubbleChartRef} />
-      )}
       <Footer theme={theme} />
     </>
   );
