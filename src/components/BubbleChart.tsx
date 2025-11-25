@@ -3,6 +3,7 @@ import { TrendingTopic } from '../types';
 import BubbleTooltip from './BubbleTooltip';
 import { supabase } from '../lib/supabase';
 import { BubbleLayout } from './FilterMenu';
+import { X } from 'lucide-react';
 
 interface BubbleChartProps {
   topics: TrendingTopic[];
@@ -1003,10 +1004,14 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
       )}
       {showMaxCompareMessage && (
         <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 animate-fade-in">
-          <div className={`px-6 py-3 rounded-lg shadow-lg ${
-            theme === 'dark' ? 'bg-gray-800 text-white border border-gray-700' : 'bg-white text-gray-900 border border-gray-200'
-          }`}>
+          <div className="bg-orange-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-3">
             <p className="text-sm font-medium">You can compare up to 5 topics at a time</p>
+            <button
+              onClick={() => setShowMaxCompareMessage(false)}
+              className="p-1 hover:bg-orange-600 rounded transition-colors"
+            >
+              <X size={16} />
+            </button>
           </div>
         </div>
       )}
