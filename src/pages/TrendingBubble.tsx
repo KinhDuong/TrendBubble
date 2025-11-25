@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import BubbleChart from '../components/BubbleChart';
@@ -8,6 +8,7 @@ import Footer from '../components/Footer';
 import Header from '../components/Header';
 import FilterMenu, { BubbleLayout } from '../components/FilterMenu';
 import ComparisonPanel from '../components/ComparisonPanel';
+import ShareSnapshot from '../components/ShareSnapshot';
 import { TrendingTopic } from '../types';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
@@ -48,6 +49,7 @@ function TrendingBubble() {
   const [customSourceInput, setCustomSourceInput] = useState<string>('');
   const [showAddSource, setShowAddSource] = useState(false);
   const [bubbleLayout, setBubbleLayout] = useState<BubbleLayout>('force');
+  const bubbleChartRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     loadTopics();
@@ -876,15 +878,17 @@ function TrendingBubble() {
           <>
             {topics.length > 0 && (
               viewMode === 'bubble' ? (
-                <BubbleChart
-                  topics={topics}
-                  maxDisplay={maxBubbles}
-                  theme={theme}
-                  layout={bubbleLayout}
-                  onBubbleTimingUpdate={handleBubbleTimingUpdate}
-                  comparingTopics={comparingTopics}
-                  onComparingTopicsChange={setComparingTopics}
-                />
+                <div ref={bubbleChartRef}>
+                  <BubbleChart
+                    topics={topics}
+                    maxDisplay={maxBubbles}
+                    theme={theme}
+                    layout={bubbleLayout}
+                    onBubbleTimingUpdate={handleBubbleTimingUpdate}
+                    comparingTopics={comparingTopics}
+                    onComparingTopicsChange={setComparingTopics}
+                  />
+                </div>
               ) : (
               <div className="max-w-7xl mx-auto">
                 <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-lg border overflow-hidden shadow-sm`}>
@@ -975,6 +979,9 @@ function TrendingBubble() {
           });
         }}
       />
+      {viewMode === 'bubble' && !loading && topics.length > 0 && (
+        <ShareSnapshot theme={theme} canvasRef={bubbleChartRef} />
+      )}
       <Footer theme={theme} />
     </>
   );
