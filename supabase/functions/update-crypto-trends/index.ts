@@ -48,25 +48,28 @@ Deno.serve(async (req: Request) => {
     const coins: CoinGeckoCoin[] = await response.json();
     console.log(`Received ${coins.length} coins from CoinGecko`);
 
-    // Filter and sort by 24h % gain, prioritize high volume coins
-    const topGainers = coins
-      .filter(coin => coin.price_change_percentage_24h_in_currency > 0) // Only gainers
+    // Filter by volume and sort by absolute 24h % change (both gains and losses)
+    const topCoins = coins
       .filter(coin => coin.total_volume > 1000000) // Min $1M volume
-      .sort((a, b) => b.price_change_percentage_24h_in_currency - a.price_change_percentage_24h_in_currency)
-      .slice(0, 100); // Top 100 gainers
+      .filter(coin => coin.price_change_percentage_24h_in_currency !== null && coin.price_change_percentage_24h_in_currency !== undefined)
+      .sort((a, b) => Math.abs(b.price_change_percentage_24h_in_currency) - Math.abs(a.price_change_percentage_24h_in_currency))
+      .slice(0, 100); // Top 100 by volatility
 
-    console.log(`Filtered to ${topGainers.length} top crypto gainers`);
+    console.log(`Filtered to ${topCoins.length} top volatile cryptos`);
 
     const now = new Date().toISOString();
     let newTopicsCount = 0;
     let updatedTopicsCount = 0;
 
-    for (let index = 0; index < topGainers.length; index++) {
-      const crypto = topGainers[index];
+    for (let index = 0; index < topCoins.length; index++) {
+      const crypto = topCoins[index];
       const name = `${crypto.name} (${crypto.symbol.toUpperCase()})`;
 
-      const change1h = crypto.price_change_percentage_1h_in_currency?.toFixed(2) || '0.00';
-      const change24h = crypto.price_change_percentage_24h_in_currency?.toFixed(2) || '0.00';
+      const change1hValue = crypto.price_change_percentage_1h_in_currency || 0;
+      const change24hValue = crypto.price_change_percentage_24h_in_currency || 0;
+
+      const change1h = change1hValue >= 0 ? `+${change1hValue.toFixed(2)}` : change1hValue.toFixed(2);
+      const change24h = change24hValue >= 0 ? `+${change24hValue.toFixed(2)}` : change24hValue.toFixed(2);
 
       const volumeFormatted = crypto.total_volume > 1000000000
         ? `$${(crypto.total_volume / 1000000000).toFixed(2)}B`
@@ -76,10 +79,10 @@ Deno.serve(async (req: Request) => {
         ? `$${crypto.current_price.toFixed(2)}`
         : `$${crypto.current_price.toFixed(6)}`;
 
-      // Use price change percentage for bubble size (multiply by 100,000 for appropriate sizing)
-      // Example: 5% gain = 500,000, 10% gain = 1,000,000
-      const searchVolume = Math.floor(crypto.price_change_percentage_24h_in_currency * 100000);
-      const searchVolumeRaw = `+${change24h}% (24h) • +${change1h}% (1h) • ${priceFormatted} • ${volumeFormatted}`;
+      // Use absolute price change percentage for bubble size (multiply by 100,000 for appropriate sizing)
+      // Example: 5% gain/loss = 500,000, 10% gain/loss = 1,000,000
+      const searchVolume = Math.floor(Math.abs(crypto.price_change_percentage_24h_in_currency) * 100000);
+      const searchVolumeRaw = `${change24h}% (24h) • ${change1h}% (1h) • ${priceFormatted} • ${volumeFormatted}`;
 
       // Generate CoinGecko URL
       const coinUrl = `https://www.coingecko.com/en/coins/${crypto.id}`;
@@ -129,7 +132,7 @@ Deno.serve(async (req: Request) => {
       JSON.stringify({
         success: true,
         message: `Updated crypto trends: ${newTopicsCount} new, ${updatedTopicsCount} updated`,
-        count: topGainers.length,
+        count: topCoins.length,
         timestamp: new Date().toISOString(),
       }),
       {

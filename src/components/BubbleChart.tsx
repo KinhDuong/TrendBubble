@@ -210,15 +210,22 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
       return Math.max(baseMin * layoutScaleFactor, scaledSize * layoutScaleFactor);
     };
 
-    const getCryptoColorByGain = (searchVolume: number) => {
-      const percentGain = searchVolume / 100000;
+    const getCryptoColorByGain = (searchVolume: number, searchVolumeRaw: string) => {
+      // Extract the 24h percentage from searchVolumeRaw
+      const match = searchVolumeRaw.match(/^([+-]?\d+\.?\d*)%/);
+      if (!match) return '#22C55E'; // Default to green if parsing fails
 
-      if (percentGain >= 5) return '#0D7C4E';
-      if (percentGain >= 2) return '#16A34A';
-      if (percentGain >= 0) return '#22C55E';
-      if (percentGain >= -2) return '#DC2626';
-      if (percentGain >= -5) return '#B91C1C';
-      return '#991B1B';
+      const percentChange = parseFloat(match[1]);
+
+      // Green shades for gains
+      if (percentChange >= 5) return '#0D7C4E';  // Dark green
+      if (percentChange >= 2) return '#16A34A';  // Medium green
+      if (percentChange >= 0) return '#22C55E';  // Light green
+
+      // Red shades for losses
+      if (percentChange >= -2) return '#DC2626'; // Light red
+      if (percentChange >= -5) return '#B91C1C'; // Medium red
+      return '#991B1B'; // Dark red
     };
 
     const getRandomColor = (index: number) => {
@@ -563,7 +570,7 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
         vy: usePhysics ? (Math.random() - 0.5) * 0.25 : 0,
         radius: isStaticLayout ? radius : 0,
         baseRadius: radius,
-        color: useCryptoColors ? getCryptoColorByGain(topic.searchVolume) : getRandomColor(topicIndex),
+        color: useCryptoColors ? getCryptoColorByGain(topic.searchVolume, topic.searchVolumeRaw) : getRandomColor(topicIndex),
         createdAt: Date.now(),
         lifetime: randomLifetime,
         isSpawning: !isStaticLayout,
