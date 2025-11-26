@@ -831,6 +831,14 @@ snapshotButton={null}
         variant="bubble"
       />
 
+      {viewMode === 'bubble' && !loading && topics.length > 0 && (
+        <AnimationSelector
+          theme={theme}
+          selectedAnimation={animationStyle}
+          onAnimationChange={setAnimationStyle}
+        />
+      )}
+
       <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'} px-2 md:px-6 py-2 md:py-6 pb-0`}>
         {showBackups && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -1025,14 +1033,6 @@ snapshotButton={null}
           });
         }}
       />
-
-      {viewMode === 'bubble' && !loading && topics.length > 0 && (
-        <AnimationSelector
-          theme={theme}
-          selectedAnimation={animationStyle}
-          onAnimationChange={setAnimationStyle}
-        />
-      )}
 
       <Footer theme={theme} />
     </>
