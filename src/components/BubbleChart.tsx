@@ -625,7 +625,7 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
     initialLoadQueueRef.current = [];
 
     if (layout === 'force') {
-      for (let i = 0; i < initialCount; i++) {
+      for (let i = initialCount - 1; i >= 0; i--) {
         initialLoadQueueRef.current.push(i);
       }
     } else {

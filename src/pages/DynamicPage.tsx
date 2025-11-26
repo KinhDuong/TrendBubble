@@ -243,7 +243,14 @@ function DynamicPage() {
           source: topic.source,
           crypto_data: topic.crypto_data
         }));
-        setTopics(formattedTopics);
+
+        const sortedTopics = [...formattedTopics].sort((a, b) => {
+          const aValue = a.searchVolumeRaw ?? a.searchVolume;
+          const bValue = b.searchVolumeRaw ?? b.searchVolume;
+          return bValue - aValue;
+        });
+
+        setTopics(sortedTopics);
       } else {
         setTopics([]);
       }
