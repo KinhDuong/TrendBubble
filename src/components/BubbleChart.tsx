@@ -686,7 +686,13 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
       const now = Date.now();
 
       if (initialLoadQueueRef.current.length > 0) {
-        const spawnDelay = 100;
+        let spawnDelay = 100;
+        if (topics.length < 30) {
+          spawnDelay = 300;
+        } else if (topics.length <= 50) {
+          spawnDelay = 200;
+        }
+
         if (now - lastSpawnTimeRef.current >= spawnDelay) {
           const nextTopicIndex = initialLoadQueueRef.current.shift();
           if (nextTopicIndex !== undefined) {
@@ -718,7 +724,14 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
         }
 
         if (bubble.isSpawning) {
-          bubble.spawnProgress = Math.min((bubble.spawnProgress || 0) + 0.05, 1);
+          let spawnSpeed = 0.05;
+          if (topics.length < 30) {
+            spawnSpeed = 0.02;
+          } else if (topics.length <= 50) {
+            spawnSpeed = 0.035;
+          }
+
+          bubble.spawnProgress = Math.min((bubble.spawnProgress || 0) + spawnSpeed, 1);
           if (bubble.spawnProgress >= 1) {
             bubble.isSpawning = false;
             bubble.createdAt = Date.now();
@@ -883,8 +896,20 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
 
         if (bubble.isSpawning) {
           const progress = bubble.spawnProgress || 0;
-          displayRadius = bubble.radius * progress;
-          opacity = progress;
+
+          let easedProgress = progress;
+          if (topics.length < 30) {
+            easedProgress = progress < 0.5
+              ? 4 * progress * progress * progress
+              : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+          } else if (topics.length <= 50) {
+            easedProgress = progress < 0.5
+              ? 2 * progress * progress
+              : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+          }
+
+          displayRadius = bubble.radius * easedProgress;
+          opacity = easedProgress;
         } else if (bubble.isPopping) {
           const progress = bubble.popProgress || 0;
           displayRadius = bubble.radius * (1 + progress * 0.5);
@@ -929,7 +954,15 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
           if (bubble.isSpawning) {
             const glowIntensity = bubble.spawnProgress || 0;
             ctx.shadowColor = bubble.color;
-            ctx.shadowBlur = Math.max(15, displayRadius / 3) * glowIntensity;
+            let shadowBlur = Math.max(15, displayRadius / 3) * glowIntensity;
+
+            if (topics.length < 30) {
+              shadowBlur = Math.max(30, displayRadius / 2) * glowIntensity;
+            } else if (topics.length <= 50) {
+              shadowBlur = Math.max(22, displayRadius / 2.5) * glowIntensity;
+            }
+
+            ctx.shadowBlur = shadowBlur;
           } else {
             ctx.shadowColor = bubble.color;
             ctx.shadowBlur = Math.max(8, displayRadius / 8) * colorIntensity;
