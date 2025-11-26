@@ -686,10 +686,11 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
       const now = Date.now();
 
       if (initialLoadQueueRef.current.length > 0) {
+        const displayCount = Math.min(maxDisplay, topics.length);
         let spawnDelay = 100;
-        if (topics.length < 30) {
+        if (displayCount < 30) {
           spawnDelay = 300;
-        } else if (topics.length <= 50) {
+        } else if (displayCount <= 50) {
           spawnDelay = 200;
         }
 
@@ -724,10 +725,11 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
         }
 
         if (bubble.isSpawning) {
+          const displayCount = Math.min(maxDisplay, topics.length);
           let spawnSpeed = 0.05;
-          if (topics.length < 30) {
+          if (displayCount < 30) {
             spawnSpeed = 0.02;
-          } else if (topics.length <= 50) {
+          } else if (displayCount <= 50) {
             spawnSpeed = 0.035;
           }
 
@@ -896,13 +898,14 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
 
         if (bubble.isSpawning) {
           const progress = bubble.spawnProgress || 0;
+          const displayCount = Math.min(maxDisplay, topics.length);
 
           let easedProgress = progress;
-          if (topics.length < 30) {
+          if (displayCount < 30) {
             easedProgress = progress < 0.5
               ? 4 * progress * progress * progress
               : 1 - Math.pow(-2 * progress + 2, 3) / 2;
-          } else if (topics.length <= 50) {
+          } else if (displayCount <= 50) {
             easedProgress = progress < 0.5
               ? 2 * progress * progress
               : 1 - Math.pow(-2 * progress + 2, 2) / 2;
@@ -953,12 +956,13 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
 
           if (bubble.isSpawning) {
             const glowIntensity = bubble.spawnProgress || 0;
+            const displayCount = Math.min(maxDisplay, topics.length);
             ctx.shadowColor = bubble.color;
             let shadowBlur = Math.max(15, displayRadius / 3) * glowIntensity;
 
-            if (topics.length < 30) {
+            if (displayCount < 30) {
               shadowBlur = Math.max(30, displayRadius / 2) * glowIntensity;
-            } else if (topics.length <= 50) {
+            } else if (displayCount <= 50) {
               shadowBlur = Math.max(22, displayRadius / 2.5) * glowIntensity;
             }
 
