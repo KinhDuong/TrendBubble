@@ -641,14 +641,6 @@ snapshotButton={null}
         variant="homepage"
       />
 
-      {viewMode === 'bubble' && !loading && sortedTopics.length > 0 && (
-        <AnimationSelector
-          theme={theme}
-          selectedAnimation={animationStyle}
-          onAnimationChange={setAnimationStyle}
-        />
-      )}
-
       <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'} px-2 md:px-6 py-2 md:py-6 pb-0`}>
         <main role="main" aria-label="Trending topics visualization">
           {loading && (
@@ -664,7 +656,14 @@ snapshotButton={null}
                         {pageData.meta_title}
                       </h1>
                       {viewMode === 'bubble' && topics.length > 0 && (
-                        <ShareSnapshot theme={theme} canvasRef={bubbleChartRef} variant="inline" />
+                        <div className="flex items-center gap-2">
+                          <AnimationSelector
+                            theme={theme}
+                            selectedAnimation={animationStyle}
+                            onAnimationChange={setAnimationStyle}
+                          />
+                          <ShareSnapshot theme={theme} canvasRef={bubbleChartRef} variant="inline" />
+                        </div>
                       )}
                     </div>
                     <div className={`flex flex-wrap items-center gap-3 mb-4 text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
