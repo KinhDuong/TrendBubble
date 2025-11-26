@@ -605,13 +605,7 @@ function DynamicPage() {
         onLoginClick={() => {}}
         onLogout={logout}
         title="Trending Bubble"
-        snapshotButton={viewMode === 'bubble' && !loading && sortedTopics.length > 0 ? (
-          <AnimationSelector
-            theme={theme}
-            selectedAnimation={animationStyle}
-            onAnimationChange={setAnimationStyle}
-          />
-        ) : null}
+snapshotButton={null}
       />
 
       <FilterMenu
@@ -646,6 +640,14 @@ function DynamicPage() {
         onCryptoTimeframeChange={setCryptoTimeframe}
         variant="homepage"
       />
+
+      {viewMode === 'bubble' && !loading && sortedTopics.length > 0 && (
+        <AnimationSelector
+          theme={theme}
+          selectedAnimation={animationStyle}
+          onAnimationChange={setAnimationStyle}
+        />
+      )}
 
       <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'} px-2 md:px-6 py-2 md:py-6 pb-0`}>
         <main role="main" aria-label="Trending topics visualization">

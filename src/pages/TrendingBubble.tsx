@@ -801,13 +801,7 @@ function TrendingBubble() {
         onLogout={logout}
         title="Google Trending Topics"
         useH1={true}
-        snapshotButton={viewMode === 'bubble' && !loading && topics.length > 0 ? (
-          <AnimationSelector
-            theme={theme}
-            selectedAnimation={animationStyle}
-            onAnimationChange={setAnimationStyle}
-          />
-        ) : null}
+snapshotButton={null}
       />
 
       <FilterMenu
@@ -836,6 +830,14 @@ function TrendingBubble() {
         onBubbleLayoutChange={setBubbleLayout}
         variant="bubble"
       />
+
+      {viewMode === 'bubble' && !loading && topics.length > 0 && (
+        <AnimationSelector
+          theme={theme}
+          selectedAnimation={animationStyle}
+          onAnimationChange={setAnimationStyle}
+        />
+      )}
 
       <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'} px-2 md:px-6 py-2 md:py-6 pb-0`}>
         {showBackups && (
