@@ -42,8 +42,6 @@ interface Bubble {
   layoutY?: number;
   rotation?: number;
   initialY?: number;
-  currentDisplayValue?: number;
-  targetDisplayValue?: number;
 }
 
 export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force', onBubbleTimingUpdate, comparingTopics: externalComparingTopics, onComparingTopicsChange, useCryptoColors = false, cryptoTimeframe = '1h', animationStyle = 'default' }: BubbleChartProps) {
@@ -625,8 +623,6 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
         isComparing: comparingTopics.has(topic.name),
         rotation: 0,
         initialY: y,
-        currentDisplayValue: 0,
-        targetDisplayValue: topic.searchVolume,
       };
     };
 
@@ -700,7 +696,7 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
         const displayCount = Math.min(maxDisplay, topics.length);
         let spawnDelay = 100;
         if (displayCount < 30) {
-          spawnDelay = 500;
+          spawnDelay = 300;
         } else if (displayCount <= 50) {
           spawnDelay = 200;
         }
@@ -748,21 +744,6 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
           if (bubble.spawnProgress >= 1) {
             bubble.isSpawning = false;
             bubble.createdAt = Date.now();
-          }
-        }
-
-        // Animate the number counting up
-        if (bubble.currentDisplayValue !== undefined && bubble.targetDisplayValue !== undefined) {
-          if (bubble.currentDisplayValue < bubble.targetDisplayValue) {
-            const displayCount = Math.min(maxDisplay, topics.length);
-            let increment = Math.ceil(bubble.targetDisplayValue / 20);
-            if (displayCount < 30) {
-              increment = Math.ceil(bubble.targetDisplayValue / 40);
-            }
-            bubble.currentDisplayValue = Math.min(
-              bubble.currentDisplayValue + increment,
-              bubble.targetDisplayValue
-            );
           }
         }
 
@@ -1170,13 +1151,8 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
             const volumeAlpha = theme === 'dark' ? 0.9 * textBrightness : 0.9;
             ctx.fillStyle = theme === 'dark' ? `rgba(200, 200, 200, ${volumeAlpha * opacity})` : `rgba(255, 255, 255, ${0.85 * opacity})`;
             const volumeY = startY + displayLines.length * lineHeight + Math.max(4, displayRadius / 10);
-
-            // Use animated value or fallback to actual value
-            const displayValue = bubble.currentDisplayValue !== undefined
-              ? Math.floor(bubble.currentDisplayValue).toLocaleString()
-              : bubble.topic.searchVolumeRaw.replace(/"/g, '');
-
-            ctx.fillText(displayValue, bubble.x, volumeY);
+            const cleanVolume = bubble.topic.searchVolumeRaw.replace(/"/g, '');
+            ctx.fillText(cleanVolume, bubble.x, volumeY);
           }
           ctx.globalAlpha = 1;
         }
