@@ -35,34 +35,25 @@ export default function AnimationSelector({ theme, selectedAnimation, onAnimatio
   }, []);
 
   return (
-    <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} border-b ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'} px-4 md:px-6 py-3`}>
-      <div className="flex items-center justify-center gap-3">
-        <Sparkles size={18} className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} />
-        <span className={`text-xs md:text-sm font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-          Animation:
-        </span>
-        <div className="relative" ref={dropdownRef}>
-          <button
-            onClick={() => setIsOpen(!isOpen)}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded text-xs md:text-sm font-medium transition-colors ${
-              theme === 'dark'
-                ? 'bg-gray-700 hover:bg-gray-600 text-white border border-gray-600'
-                : 'bg-white hover:bg-gray-50 text-gray-900 border border-gray-300'
-            }`}
-            aria-label="Select animation style"
-          >
-            {animations.find(a => a.value === selectedAnimation)?.label || 'Default'}
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-          </button>
+    <div className="relative" ref={dropdownRef}>
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className={`p-2 rounded transition-colors ${
+          theme === 'dark'
+            ? 'hover:bg-gray-700 text-gray-400 hover:text-white'
+            : 'hover:bg-gray-100 text-gray-600 hover:text-gray-900'
+        }`}
+        aria-label="Select animation style"
+      >
+        <Sparkles size={20} />
+      </button>
 
-          {isOpen && (
-            <div
-              className={`absolute top-full left-0 mt-2 w-64 ${
-                theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-              } border rounded-lg shadow-lg z-50`}
-            >
+      {isOpen && (
+        <div
+          className={`absolute top-full right-0 mt-2 w-64 ${
+            theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
+          } border rounded-lg shadow-lg z-50`}
+        >
           <div className={`px-4 py-3 border-b ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
             <div className={`font-semibold text-sm ${theme === 'dark' ? 'text-gray-200' : 'text-gray-900'}`}>
               Animation Style
@@ -108,8 +99,6 @@ export default function AnimationSelector({ theme, selectedAnimation, onAnimatio
           </div>
         </div>
       )}
-        </div>
-      </div>
     </div>
   );
 }
