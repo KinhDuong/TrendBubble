@@ -5,6 +5,8 @@ import { supabase } from '../lib/supabase';
 import { BubbleLayout } from './FilterMenu';
 import { X } from 'lucide-react';
 
+export type AnimationStyle = 'default' | 'bounce' | 'elastic' | 'spiral' | 'drop' | 'pulse' | 'shimmer';
+
 interface BubbleChartProps {
   topics: TrendingTopic[];
   maxDisplay: number;
@@ -15,6 +17,7 @@ interface BubbleChartProps {
   onComparingTopicsChange?: (topics: Set<string>) => void;
   useCryptoColors?: boolean;
   cryptoTimeframe?: CryptoTimeframe;
+  animationStyle?: AnimationStyle;
 }
 
 interface Bubble {
@@ -37,9 +40,11 @@ interface Bubble {
   isPinned?: boolean;
   layoutX?: number;
   layoutY?: number;
+  rotation?: number;
+  initialY?: number;
 }
 
-export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force', onBubbleTimingUpdate, comparingTopics: externalComparingTopics, onComparingTopicsChange, useCryptoColors = false, cryptoTimeframe = '1h' }: BubbleChartProps) {
+export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force', onBubbleTimingUpdate, comparingTopics: externalComparingTopics, onComparingTopicsChange, useCryptoColors = false, cryptoTimeframe = '1h', animationStyle = 'default' }: BubbleChartProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const bubblesRef = useRef<Bubble[]>([]);
   const animationFrameRef = useRef<number>();
@@ -616,6 +621,8 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
         spawnProgress: isStaticLayout ? 1 : 0,
         isPinned: pinnedTopics.has(topic.name),
         isComparing: comparingTopics.has(topic.name),
+        rotation: 0,
+        initialY: y,
       };
     };
 
@@ -911,8 +918,51 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
               : 1 - Math.pow(-2 * progress + 2, 2) / 2;
           }
 
-          displayRadius = bubble.radius * easedProgress;
-          opacity = easedProgress;
+          switch (animationStyle) {
+            case 'bounce':
+              const bounceProgress = easedProgress < 0.8
+                ? easedProgress / 0.8
+                : 1 + Math.sin((easedProgress - 0.8) * Math.PI * 5) * 0.1;
+              displayRadius = bubble.radius * bounceProgress;
+              opacity = Math.min(easedProgress * 1.5, 1);
+              break;
+
+            case 'elastic':
+              const elasticProgress = easedProgress === 1
+                ? 1
+                : Math.pow(2, -10 * easedProgress) * Math.sin((easedProgress - 0.1) * 5 * Math.PI) + 1;
+              displayRadius = bubble.radius * elasticProgress;
+              opacity = Math.min(easedProgress * 1.5, 1);
+              break;
+
+            case 'spiral':
+              bubble.rotation = (1 - easedProgress) * Math.PI * 4;
+              displayRadius = bubble.radius * easedProgress;
+              opacity = easedProgress;
+              break;
+
+            case 'drop':
+              const dropY = -100 * (1 - easedProgress) * (1 - easedProgress);
+              bubble.y = (bubble.initialY || bubble.layoutY || bubble.y) + dropY;
+              displayRadius = bubble.radius * easedProgress;
+              opacity = easedProgress;
+              break;
+
+            case 'pulse':
+              const pulseScale = 1 + Math.sin(progress * Math.PI * 3) * 0.2 * (1 - easedProgress);
+              displayRadius = bubble.radius * easedProgress * pulseScale;
+              opacity = easedProgress;
+              break;
+
+            case 'shimmer':
+              displayRadius = bubble.radius * easedProgress;
+              opacity = easedProgress;
+              break;
+
+            default:
+              displayRadius = bubble.radius * easedProgress;
+              opacity = easedProgress;
+          }
         } else if (bubble.isPopping) {
           const progress = bubble.popProgress || 0;
           displayRadius = bubble.radius * (1 + progress * 0.5);
@@ -920,6 +970,16 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
         }
 
         if (theme === 'dark') {
+          // Save context for rotation
+          ctx.save();
+
+          // Apply rotation for spiral animation
+          if (bubble.isSpawning && animationStyle === 'spiral' && bubble.rotation !== undefined) {
+            ctx.translate(bubble.x, bubble.y);
+            ctx.rotate(bubble.rotation);
+            ctx.translate(-bubble.x, -bubble.y);
+          }
+
           // Dark theme: gradients and glows
           const innerGlow = ctx.createRadialGradient(
             bubble.x,
@@ -966,6 +1026,11 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
               shadowBlur = Math.max(22, displayRadius / 2.5) * glowIntensity;
             }
 
+            // Enhanced glow for pulse and shimmer
+            if (animationStyle === 'pulse' || animationStyle === 'shimmer') {
+              shadowBlur *= 1.5;
+            }
+
             ctx.shadowBlur = shadowBlur;
           } else {
             ctx.shadowColor = bubble.color;
@@ -982,6 +1047,26 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
           ctx.stroke();
           ctx.shadowBlur = 0;
           ctx.globalAlpha = 1;
+
+          // Shimmer sparkles effect
+          if (bubble.isSpawning && animationStyle === 'shimmer') {
+            const progress = bubble.spawnProgress || 0;
+            const numSparkles = 8;
+            for (let i = 0; i < numSparkles; i++) {
+              const angle = (i / numSparkles) * Math.PI * 2;
+              const distance = displayRadius * (0.8 + Math.sin(progress * Math.PI * 4 + angle) * 0.3);
+              const sparkleX = bubble.x + Math.cos(angle) * distance;
+              const sparkleY = bubble.y + Math.sin(angle) * distance;
+              const sparkleSize = 2 * progress;
+
+              ctx.beginPath();
+              ctx.arc(sparkleX, sparkleY, sparkleSize, 0, Math.PI * 2);
+              ctx.fillStyle = `rgba(${colorRgb[0]}, ${colorRgb[1]}, ${colorRgb[2]}, ${opacity * 0.8})`;
+              ctx.fill();
+            }
+          }
+
+          ctx.restore();
         } else {
           // Light theme: flat solid color, no gradients or shadows
           ctx.beginPath();

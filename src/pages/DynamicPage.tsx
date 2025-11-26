@@ -7,6 +7,7 @@ import Header from '../components/Header';
 import FilterMenu, { BubbleLayout } from '../components/FilterMenu';
 import ComparisonPanel from '../components/ComparisonPanel';
 import ShareSnapshot from '../components/ShareSnapshot';
+import AnimationSelector, { AnimationStyle } from '../components/AnimationSelector';
 import { TrendingTopic, CryptoTimeframe } from '../types';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
@@ -58,6 +59,7 @@ function DynamicPage() {
   const [showFullList, setShowFullList] = useState<boolean>(false);
   const [cryptoTimeframe, setCryptoTimeframe] = useState<CryptoTimeframe>('1h');
   const bubbleChartRef = useRef<HTMLDivElement>(null);
+  const [animationStyle, setAnimationStyle] = useState<AnimationStyle>('default');
 
   const sortedTopics = useMemo(() => {
     if (pageData?.source !== 'coingecko_crypto' || !topics.length) {
@@ -603,6 +605,16 @@ function DynamicPage() {
         onLoginClick={() => {}}
         onLogout={logout}
         title="Trending Bubble"
+        snapshotButton={viewMode === 'bubble' && !loading && sortedTopics.length > 0 ? (
+          <div className="flex items-center gap-2">
+            <AnimationSelector
+              theme={theme}
+              selectedAnimation={animationStyle}
+              onAnimationChange={setAnimationStyle}
+            />
+            <ShareSnapshot theme={theme} canvasRef={bubbleChartRef} variant="inline" />
+          </div>
+        ) : null}
       />
 
       <FilterMenu
@@ -689,6 +701,7 @@ function DynamicPage() {
                       onComparingTopicsChange={setComparingTopics}
                       useCryptoColors={pageData?.source === 'coingecko_crypto'}
                       cryptoTimeframe={cryptoTimeframe}
+                      animationStyle={animationStyle}
                     />
                   </div>
 

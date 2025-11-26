@@ -9,6 +9,7 @@ import Header from '../components/Header';
 import FilterMenu, { BubbleLayout } from '../components/FilterMenu';
 import ComparisonPanel from '../components/ComparisonPanel';
 import ShareSnapshot from '../components/ShareSnapshot';
+import AnimationSelector, { AnimationStyle } from '../components/AnimationSelector';
 import { TrendingTopic } from '../types';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
@@ -51,6 +52,7 @@ function TrendingBubble() {
   const [bubbleLayout, setBubbleLayout] = useState<BubbleLayout>('force');
   const bubbleChartRef = useRef<HTMLDivElement>(null);
   const [latestPages, setLatestPages] = useState<any[]>([]);
+  const [animationStyle, setAnimationStyle] = useState<AnimationStyle>('default');
 
   useEffect(() => {
     loadTopics();
@@ -800,7 +802,14 @@ function TrendingBubble() {
         title="Google Trending Topics"
         useH1={true}
         snapshotButton={viewMode === 'bubble' && !loading && topics.length > 0 ? (
-          <ShareSnapshot theme={theme} canvasRef={bubbleChartRef} variant="inline" />
+          <div className="flex items-center gap-2">
+            <AnimationSelector
+              theme={theme}
+              selectedAnimation={animationStyle}
+              onAnimationChange={setAnimationStyle}
+            />
+            <ShareSnapshot theme={theme} canvasRef={bubbleChartRef} variant="inline" />
+          </div>
         ) : null}
       />
 
@@ -911,6 +920,7 @@ function TrendingBubble() {
                       onBubbleTimingUpdate={handleBubbleTimingUpdate}
                       comparingTopics={comparingTopics}
                       onComparingTopicsChange={setComparingTopics}
+                      animationStyle={animationStyle}
                     />
                   </div>
                   <div className={`w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-200'} border-t border-b py-6 mt-8`}>
