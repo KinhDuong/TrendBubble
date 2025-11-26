@@ -1171,7 +1171,7 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, [topics, maxDisplay, theme, layout, cryptoTimeframe, useCryptoColors]);
+  }, [topics, maxDisplay, theme, layout, cryptoTimeframe, useCryptoColors, animationStyle]);
 
   return (
     <div className="w-full h-full relative">
