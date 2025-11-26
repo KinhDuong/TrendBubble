@@ -38,18 +38,21 @@ export default function AnimationSelector({ theme, selectedAnimation, onAnimatio
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`p-2 rounded transition-colors ${
-          theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-200'
-        }`}
+        className={`flex items-center gap-2 px-4 py-3 rounded-full shadow-lg transition-all ${
+          theme === 'dark'
+            ? 'bg-blue-600 hover:bg-blue-700 hover:shadow-xl'
+            : 'bg-blue-500 hover:bg-blue-600 hover:shadow-xl'
+        } text-white font-medium`}
         aria-label="Animation style"
         title="Animation style"
       >
-        <Sparkles size={20} className={theme === 'dark' ? 'text-gray-300' : 'text-gray-700'} />
+        <Sparkles size={20} />
+        <span className="hidden md:inline">Animation</span>
       </button>
 
       {isOpen && (
         <div
-          className={`absolute top-full left-0 mt-2 w-72 ${
+          className={`absolute bottom-full right-0 mb-2 w-72 ${
             theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
           } border rounded-lg shadow-lg z-50`}
         >

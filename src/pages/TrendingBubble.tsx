@@ -801,16 +801,7 @@ function TrendingBubble() {
         onLogout={logout}
         title="Google Trending Topics"
         useH1={true}
-        snapshotButton={viewMode === 'bubble' && !loading && topics.length > 0 ? (
-          <div className="flex items-center gap-2">
-            <AnimationSelector
-              theme={theme}
-              selectedAnimation={animationStyle}
-              onAnimationChange={setAnimationStyle}
-            />
-            <ShareSnapshot theme={theme} canvasRef={bubbleChartRef} variant="inline" />
-          </div>
-        ) : null}
+snapshotButton={null}
       />
 
       <FilterMenu
@@ -1034,6 +1025,18 @@ function TrendingBubble() {
           });
         }}
       />
+
+      {viewMode === 'bubble' && !loading && topics.length > 0 && (
+        <div className="fixed bottom-6 right-6 z-40 flex flex-col gap-3">
+          <AnimationSelector
+            theme={theme}
+            selectedAnimation={animationStyle}
+            onAnimationChange={setAnimationStyle}
+          />
+          <ShareSnapshot theme={theme} canvasRef={bubbleChartRef} />
+        </div>
+      )}
+
       <Footer theme={theme} />
     </>
   );
