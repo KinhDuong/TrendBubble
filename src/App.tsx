@@ -56,6 +56,7 @@ function HomePage() {
   const [newPageSource, setNewPageSource] = useState<string>('all');
   const [newPageMetaTitle, setNewPageMetaTitle] = useState<string>('');
   const [newPageMetaDescription, setNewPageMetaDescription] = useState<string>('');
+  const [newPageSummary, setNewPageSummary] = useState<string>('');
   const [showAllPages, setShowAllPages] = useState(false);
   const [allPages, setAllPages] = useState<any[]>([]);
   const [latestPages, setLatestPages] = useState<any[]>([]);
@@ -668,6 +669,7 @@ function HomePage() {
           source: newPageSource,
           meta_title: newPageMetaTitle,
           meta_description: newPageMetaDescription,
+          summary: newPageSummary.trim() || null,
           user_id: user.id
         });
 
@@ -684,6 +686,7 @@ function HomePage() {
       setNewPageSource('all');
       setNewPageMetaTitle('');
       setNewPageMetaDescription('');
+      setNewPageSummary('');
       setShowCreatePage(false);
       await loadLatestPages();
       alert(`Page created successfully! Visit ${pageUrl}`);
@@ -1246,6 +1249,12 @@ function HomePage() {
                             <p className={`text-sm mb-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
                               {page.meta_description}
                             </p>
+                            {page.summary && (
+                              <div className={`text-xs mb-2 p-2 rounded ${theme === 'dark' ? 'bg-gray-600 text-gray-300' : 'bg-gray-100 text-gray-700'}`}>
+                                <div className={`font-medium mb-1 ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'}`}>Summary:</div>
+                                <div className="line-clamp-3">{page.summary}</div>
+                              </div>
+                            )}
                             <div className="flex flex-wrap items-center gap-3 text-xs">
                               <a
                                 href={page.page_url}
@@ -1291,6 +1300,7 @@ function HomePage() {
                     setNewPageSource('all');
                     setNewPageMetaTitle('');
                     setNewPageMetaDescription('');
+                    setNewPageSummary('');
                   }}
                   className={`${theme === 'dark' ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'} text-2xl leading-none`}
                 >
@@ -1354,6 +1364,22 @@ function HomePage() {
                       className={`w-full ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'} border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none`}
                     />
                   </div>
+                  <div>
+                    <label htmlFor="newPageSummary" className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                      Summary
+                    </label>
+                    <textarea
+                      id="newPageSummary"
+                      value={newPageSummary}
+                      onChange={(e) => setNewPageSummary(e.target.value)}
+                      placeholder="Add rich text content for the page (supports HTML)..."
+                      rows={6}
+                      className={`w-full ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'} border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y`}
+                    />
+                    <p className={`mt-1 text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                      Optional. You can use HTML tags for formatting.
+                    </p>
+                  </div>
                   <div className="flex justify-end gap-3">
                     <button
                       onClick={() => {
@@ -1362,6 +1388,7 @@ function HomePage() {
                         setNewPageSource('all');
                         setNewPageMetaTitle('');
                         setNewPageMetaDescription('');
+                        setNewPageSummary('');
                       }}
                       className={`px-4 py-2 ${theme === 'dark' ? 'bg-gray-600 hover:bg-gray-700' : 'bg-gray-200 hover:bg-gray-300 border border-gray-300'} rounded-lg transition-colors text-sm font-medium`}
                     >
