@@ -32,8 +32,6 @@ function HomePage() {
   const [viewMode, setViewMode] = useState<'bubble' | 'list'>('bubble');
   const [loading, setLoading] = useState(true);
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
-  const [showBackups, setShowBackups] = useState(false);
-  const [backups, setBackups] = useState<any[]>([]);
   const [nextUpdateIn, setNextUpdateIn] = useState<string>('');
   const [updateProgress, setUpdateProgress] = useState<number>(0);
   const [nextBubbleIn, setNextBubbleIn] = useState<string>('');
@@ -316,46 +314,6 @@ function HomePage() {
     }
   };
 
-  const loadBackups = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('backups')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setBackups(data || []);
-      setShowBackups(true);
-    } catch (error) {
-      console.error('Error loading backups:', error);
-      alert('Failed to load backups');
-    }
-  };
-
-  const restoreBackup = async (backup: any) => {
-    if (!confirm(`Restore backup from ${new Date(backup.created_at).toLocaleString()}? This will replace all current data.`)) {
-      return;
-    }
-
-    try {
-      const backupTopics = JSON.parse(backup.content);
-
-      await supabase.from('trending_topics').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-
-      const { error } = await supabase
-        .from('trending_topics')
-        .insert(backupTopics);
-
-      if (error) throw error;
-
-      await loadTopics();
-      setShowBackups(false);
-      alert('Backup restored successfully!');
-    } catch (error) {
-      console.error('Error restoring backup:', error);
-      alert('Failed to restore backup');
-    }
-  };
 
   const manualUpdate = async () => {
     try {
@@ -956,12 +914,6 @@ function HomePage() {
               >
                 Save
               </button>
-              <button
-                onClick={loadBackups}
-                className={`px-3 md:px-4 py-1.5 md:py-2 ${theme === 'dark' ? 'bg-purple-600 hover:bg-purple-700' : 'bg-purple-500 hover:bg-purple-600'} rounded-lg transition-colors text-xs md:text-sm font-medium text-white`}
-              >
-                Restore
-              </button>
               <div className={`flex items-center gap-1.5 px-2 py-1 rounded ${theme === 'dark' ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-600'}`}>
                 <div className="relative h-3 w-3">
                   <svg className="h-3 w-3 -rotate-90" viewBox="0 0 24 24">
@@ -1097,48 +1049,6 @@ function HomePage() {
 
 
       <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900 text-white' : 'text-gray-900'} px-2 md:px-6 py-2 md:py-6 pb-0`} style={theme === 'light' ? { backgroundColor: '#f1f3f4' } : {}}>
-        {showBackups && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] overflow-hidden`}>
-              <div className={`${theme === 'dark' ? 'bg-gray-700 border-gray-600' : 'bg-gray-100 border-gray-200'} border-b px-6 py-4 flex justify-between items-center`}>
-                <h2 className="text-xl font-bold">Restore Backup</h2>
-                <button
-                  onClick={() => setShowBackups(false)}
-                  className={`${theme === 'dark' ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'} text-2xl leading-none`}
-                >
-                  ×
-                </button>
-              </div>
-              <div className="overflow-y-auto max-h-[calc(80vh-80px)]">
-                {backups.length === 0 ? (
-                  <div className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} text-center py-8`}>
-                    No backups found
-                  </div>
-                ) : (
-                  <div className={`divide-y ${theme === 'dark' ? 'divide-gray-700' : 'divide-gray-200'}`}>
-                    {backups.map((backup) => (
-                      <div key={backup.id} className={`px-6 py-4 flex justify-between items-center ${theme === 'dark' ? 'hover:bg-gray-750' : 'hover:bg-gray-50'}`}>
-                        <div>
-                          <div className="font-medium">{backup.name}</div>
-                          <div className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                            {new Date(backup.created_at).toLocaleString()}
-                          </div>
-                        </div>
-                        <button
-                          onClick={() => restoreBackup(backup)}
-                          className={`px-4 py-2 ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-600 hover:bg-blue-700 shadow-sm hover:shadow'} rounded-lg transition-colors text-sm font-medium text-white`}
-                        >
-                          Restore
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-
         {uploadMessage && (
           <div className="fixed top-4 right-4 z-50 max-w-md">
             <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border rounded-lg shadow-xl p-4`}>
