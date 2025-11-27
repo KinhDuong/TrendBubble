@@ -60,6 +60,12 @@ function HomePage() {
   const [showAllPages, setShowAllPages] = useState(false);
   const [allPages, setAllPages] = useState<any[]>([]);
   const [latestPages, setLatestPages] = useState<any[]>([]);
+  const [editingPage, setEditingPage] = useState<any | null>(null);
+  const [editPageUrl, setEditPageUrl] = useState<string>('');
+  const [editPageSource, setEditPageSource] = useState<string>('all');
+  const [editPageMetaTitle, setEditPageMetaTitle] = useState<string>('');
+  const [editPageMetaDescription, setEditPageMetaDescription] = useState<string>('');
+  const [editPageSummary, setEditPageSummary] = useState<string>('');
   const [bubbleLayout, setBubbleLayout] = useState<BubbleLayout>('force');
   const [sources, setSources] = useState<Array<{value: string, label: string}>>([
     { value: 'all', label: 'All' },
@@ -734,6 +740,67 @@ function HomePage() {
     }
   };
 
+  const handleEditPage = (page: any) => {
+    setEditingPage(page);
+    setEditPageUrl(page.page_url);
+    setEditPageSource(page.source);
+    setEditPageMetaTitle(page.meta_title);
+    setEditPageMetaDescription(page.meta_description);
+    setEditPageSummary(page.summary || '');
+  };
+
+  const handleCancelEdit = () => {
+    setEditingPage(null);
+    setEditPageUrl('');
+    setEditPageSource('all');
+    setEditPageMetaTitle('');
+    setEditPageMetaDescription('');
+    setEditPageSummary('');
+  };
+
+  const handleUpdatePage = async () => {
+    if (!editingPage || !editPageUrl.trim() || !editPageMetaTitle.trim() || !editPageMetaDescription.trim()) {
+      alert('Please fill in all required fields');
+      return;
+    }
+
+    let pageUrl = editPageUrl.trim();
+    if (!pageUrl.startsWith('/')) {
+      pageUrl = '/' + pageUrl;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('pages')
+        .update({
+          page_url: pageUrl,
+          source: editPageSource,
+          meta_title: editPageMetaTitle,
+          meta_description: editPageMetaDescription,
+          summary: editPageSummary.trim() || null,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', editingPage.id);
+
+      if (error) {
+        if (error.code === '23505') {
+          alert('A page with this URL already exists');
+        } else {
+          throw error;
+        }
+        return;
+      }
+
+      handleCancelEdit();
+      await loadAllPages();
+      await loadLatestPages();
+      alert('Page updated successfully!');
+    } catch (error) {
+      console.error('Error updating page:', error);
+      alert('Failed to update page');
+    }
+  };
+
   const loadLatestPages = async () => {
     try {
       const { data, error } = await supabase
@@ -1225,7 +1292,10 @@ function HomePage() {
               <div className={`${theme === 'dark' ? 'bg-gray-700 border-gray-600' : 'bg-gray-100 border-gray-200'} border-b px-6 py-4 flex justify-between items-center`}>
                 <h2 className="text-xl font-bold">All Pages</h2>
                 <button
-                  onClick={() => setShowAllPages(false)}
+                  onClick={() => {
+                    setShowAllPages(false);
+                    handleCancelEdit();
+                  }}
                   className={`${theme === 'dark' ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'} text-2xl leading-none`}
                 >
                   ×
@@ -1243,42 +1313,133 @@ function HomePage() {
                         key={page.id}
                         className={`${theme === 'dark' ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'} border rounded-lg p-4`}
                       >
-                        <div className="flex items-start justify-between gap-4">
-                          <div className="flex-1 min-w-0">
-                            <h3 className="font-semibold text-lg mb-1">{page.meta_title}</h3>
-                            <p className={`text-sm mb-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                              {page.meta_description}
-                            </p>
-                            {page.summary && (
-                              <div className={`text-xs mb-2 p-2 rounded ${theme === 'dark' ? 'bg-gray-600 text-gray-300' : 'bg-gray-100 text-gray-700'}`}>
-                                <div className={`font-medium mb-1 ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'}`}>Summary:</div>
-                                <div className="line-clamp-3">{page.summary}</div>
-                              </div>
-                            )}
-                            <div className="flex flex-wrap items-center gap-3 text-xs">
-                              <a
-                                href={page.page_url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className={`font-mono ${theme === 'dark' ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'} hover:underline`}
+                        {editingPage?.id === page.id ? (
+                          <div className="space-y-3">
+                            <div>
+                              <label htmlFor={`edit-url-${page.id}`} className={`block text-xs font-medium mb-1 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                                Page URL *
+                              </label>
+                              <input
+                                id={`edit-url-${page.id}`}
+                                type="text"
+                                value={editPageUrl}
+                                onChange={(e) => setEditPageUrl(e.target.value)}
+                                className={`w-full ${theme === 'dark' ? 'bg-gray-600 border-gray-500 text-white' : 'bg-white border-gray-300 text-gray-900'} border rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                              />
+                            </div>
+                            <div>
+                              <label htmlFor={`edit-source-${page.id}`} className={`block text-xs font-medium mb-1 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                                Source *
+                              </label>
+                              <select
+                                id={`edit-source-${page.id}`}
+                                value={editPageSource}
+                                onChange={(e) => setEditPageSource(e.target.value)}
+                                className={`w-full ${theme === 'dark' ? 'bg-gray-600 border-gray-500 text-white' : 'bg-white border-gray-300 text-gray-900'} border rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500`}
                               >
-                                {page.page_url}
-                              </a>
-                              <span className={`px-2 py-0.5 rounded ${theme === 'dark' ? 'bg-gray-600 text-gray-300' : 'bg-gray-200 text-gray-700'}`}>
-                                Source: {sources.find(s => s.value === page.source)?.label || page.source}
-                              </span>
-                              <span className={`${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
-                                Created: {new Date(page.created_at).toLocaleDateString()}
-                              </span>
+                                {sources.map(source => (
+                                  <option key={source.value} value={source.value}>{source.label}</option>
+                                ))}
+                              </select>
+                            </div>
+                            <div>
+                              <label htmlFor={`edit-title-${page.id}`} className={`block text-xs font-medium mb-1 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                                Meta Title *
+                              </label>
+                              <input
+                                id={`edit-title-${page.id}`}
+                                type="text"
+                                value={editPageMetaTitle}
+                                onChange={(e) => setEditPageMetaTitle(e.target.value)}
+                                className={`w-full ${theme === 'dark' ? 'bg-gray-600 border-gray-500 text-white' : 'bg-white border-gray-300 text-gray-900'} border rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                              />
+                            </div>
+                            <div>
+                              <label htmlFor={`edit-desc-${page.id}`} className={`block text-xs font-medium mb-1 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                                Meta Description *
+                              </label>
+                              <textarea
+                                id={`edit-desc-${page.id}`}
+                                value={editPageMetaDescription}
+                                onChange={(e) => setEditPageMetaDescription(e.target.value)}
+                                rows={3}
+                                className={`w-full ${theme === 'dark' ? 'bg-gray-600 border-gray-500 text-white' : 'bg-white border-gray-300 text-gray-900'} border rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none`}
+                              />
+                            </div>
+                            <div>
+                              <label htmlFor={`edit-summary-${page.id}`} className={`block text-xs font-medium mb-1 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                                Summary
+                              </label>
+                              <textarea
+                                id={`edit-summary-${page.id}`}
+                                value={editPageSummary}
+                                onChange={(e) => setEditPageSummary(e.target.value)}
+                                rows={4}
+                                className={`w-full ${theme === 'dark' ? 'bg-gray-600 border-gray-500 text-white' : 'bg-white border-gray-300 text-gray-900'} border rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y`}
+                              />
+                            </div>
+                            <div className="flex justify-end gap-2">
+                              <button
+                                onClick={handleCancelEdit}
+                                className={`px-3 py-1.5 ${theme === 'dark' ? 'bg-gray-600 hover:bg-gray-700' : 'bg-gray-300 hover:bg-gray-400'} rounded transition-colors text-xs font-medium`}
+                              >
+                                Cancel
+                              </button>
+                              <button
+                                onClick={handleUpdatePage}
+                                disabled={!editPageUrl.trim() || !editPageMetaTitle.trim() || !editPageMetaDescription.trim()}
+                                className={`px-3 py-1.5 ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600' : 'bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300'} disabled:cursor-not-allowed rounded transition-colors text-xs font-medium text-white`}
+                              >
+                                Save
+                              </button>
                             </div>
                           </div>
-                          <button
-                            onClick={() => handleDeletePage(page.id)}
-                            className={`px-3 py-1.5 ${theme === 'dark' ? 'bg-red-600 hover:bg-red-700' : 'bg-red-500 hover:bg-red-600'} rounded transition-colors text-xs font-medium text-white flex-shrink-0`}
-                          >
-                            Delete
-                          </button>
-                        </div>
+                        ) : (
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-semibold text-lg mb-1">{page.meta_title}</h3>
+                              <p className={`text-sm mb-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                                {page.meta_description}
+                              </p>
+                              {page.summary && (
+                                <div className={`text-xs mb-2 p-2 rounded ${theme === 'dark' ? 'bg-gray-600 text-gray-300' : 'bg-gray-100 text-gray-700'}`}>
+                                  <div className={`font-medium mb-1 ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'}`}>Summary:</div>
+                                  <div className="line-clamp-3">{page.summary}</div>
+                                </div>
+                              )}
+                              <div className="flex flex-wrap items-center gap-3 text-xs">
+                                <a
+                                  href={page.page_url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className={`font-mono ${theme === 'dark' ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'} hover:underline`}
+                                >
+                                  {page.page_url}
+                                </a>
+                                <span className={`px-2 py-0.5 rounded ${theme === 'dark' ? 'bg-gray-600 text-gray-300' : 'bg-gray-200 text-gray-700'}`}>
+                                  Source: {sources.find(s => s.value === page.source)?.label || page.source}
+                                </span>
+                                <span className={`${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
+                                  Created: {new Date(page.created_at).toLocaleDateString()}
+                                </span>
+                              </div>
+                            </div>
+                            <div className="flex flex-col gap-2 flex-shrink-0">
+                              <button
+                                onClick={() => handleEditPage(page)}
+                                className={`px-3 py-1.5 ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'} rounded transition-colors text-xs font-medium text-white`}
+                              >
+                                Edit
+                              </button>
+                              <button
+                                onClick={() => handleDeletePage(page.id)}
+                                className={`px-3 py-1.5 ${theme === 'dark' ? 'bg-red-600 hover:bg-red-700' : 'bg-red-500 hover:bg-red-600'} rounded transition-colors text-xs font-medium text-white`}
+                              >
+                                Delete
+                              </button>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
