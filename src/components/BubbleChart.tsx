@@ -49,6 +49,7 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
   const bubblesRef = useRef<Bubble[]>([]);
   const animationFrameRef = useRef<number>();
   const displayedIndicesRef = useRef<Set<number>>(new Set());
+  const displayedTopicNamesRef = useRef<Set<string>>(new Set());
   const nextIndexRef = useRef<number>(0);
   const initialLoadQueueRef = useRef<number[]>([]);
   const lastSpawnTimeRef = useRef<number>(0);
@@ -627,6 +628,7 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
     };
 
     displayedIndicesRef.current.clear();
+    displayedTopicNamesRef.current.clear();
     const initialCount = Math.min(maxDisplay, topics.length);
     bubblesRef.current = [];
     initialLoadQueueRef.current = [];
@@ -638,6 +640,7 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
     } else {
       for (let i = 0; i < initialCount; i++) {
         displayedIndicesRef.current.add(i);
+        displayedTopicNamesRef.current.add(topics[i].name);
         bubblesRef.current.push(createBubble(i, bubblesRef.current));
       }
     }
@@ -705,6 +708,7 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
           const nextTopicIndex = initialLoadQueueRef.current.shift();
           if (nextTopicIndex !== undefined) {
             displayedIndicesRef.current.add(nextTopicIndex);
+            displayedTopicNamesRef.current.add(topics[nextTopicIndex].name);
             bubblesRef.current.push(createBubble(nextTopicIndex, bubblesRef.current));
             lastSpawnTimeRef.current = now;
           }
@@ -848,6 +852,7 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
           if (topicIndex !== -1) {
             displayedIndicesRef.current.delete(topicIndex);
           }
+          displayedTopicNamesRef.current.delete(bubble.topic.name);
 
           if (layout === 'force') {
             let nextIndex = nextIndexRef.current;
@@ -856,11 +861,14 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
               nextIndexRef.current = 0;
             }
 
-            if (topics.length > 0) {
+            if (topics.length > 0 && !displayedTopicNamesRef.current.has(topics[nextIndex].name)) {
               const newBubble = createBubble(nextIndex, bubblesRef.current);
               displayedIndicesRef.current.add(nextIndex);
+              displayedTopicNamesRef.current.add(topics[nextIndex].name);
               nextIndexRef.current = nextIndex + 1;
               bubblesToAdd.push(newBubble);
+            } else {
+              nextIndexRef.current = nextIndex + 1;
             }
           }
           return false;
@@ -881,9 +889,10 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
             nextIndexRef.current = 0;
           }
 
-          if (!displayedIndicesRef.current.has(nextIndex)) {
+          if (!displayedIndicesRef.current.has(nextIndex) && !displayedTopicNamesRef.current.has(topics[nextIndex].name)) {
             const newBubble = createBubble(nextIndex, currentBubbles);
             displayedIndicesRef.current.add(nextIndex);
+            displayedTopicNamesRef.current.add(topics[nextIndex].name);
             currentBubbles.push(newBubble);
             bubblesRef.current.push(newBubble);
           }
