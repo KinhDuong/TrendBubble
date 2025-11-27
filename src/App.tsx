@@ -52,6 +52,7 @@ function HomePage() {
   const [showCreatePage, setShowCreatePage] = useState(false);
   const [newPageUrl, setNewPageUrl] = useState<string>('');
   const [newPageSource, setNewPageSource] = useState<string>('all');
+  const [newPageTemplate, setNewPageTemplate] = useState<string>('dynamic_page');
   const [newPageMetaTitle, setNewPageMetaTitle] = useState<string>('');
   const [newPageMetaDescription, setNewPageMetaDescription] = useState<string>('');
   const [newPageSummary, setNewPageSummary] = useState<string>('');
@@ -61,6 +62,7 @@ function HomePage() {
   const [editingPage, setEditingPage] = useState<any | null>(null);
   const [editPageUrl, setEditPageUrl] = useState<string>('');
   const [editPageSource, setEditPageSource] = useState<string>('all');
+  const [editPageTemplate, setEditPageTemplate] = useState<string>('dynamic_page');
   const [editPageMetaTitle, setEditPageMetaTitle] = useState<string>('');
   const [editPageMetaDescription, setEditPageMetaDescription] = useState<string>('');
   const [editPageSummary, setEditPageSummary] = useState<string>('');
@@ -70,6 +72,12 @@ function HomePage() {
     { value: 'google_trends', label: 'Google Trends' },
     { value: 'user_upload', label: 'My Uploads' }
   ]);
+  const templateOptions = [
+    { value: 'dynamic_page', label: 'Dynamic Page' },
+    { value: 'google_trends', label: 'Google Trends' },
+    { value: 'crypto', label: 'Crypto' },
+    { value: 'custom', label: 'Custom' }
+  ];
   const [showFullTop10, setShowFullTop10] = useState<boolean>(false);
   const [comparingTopics, setComparingTopics] = useState<Set<string>>(new Set());
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
@@ -631,6 +639,7 @@ function HomePage() {
         .insert({
           page_url: pageUrl,
           source: newPageSource,
+          template: newPageTemplate,
           meta_title: newPageMetaTitle,
           meta_description: newPageMetaDescription,
           summary: newPageSummary.trim() || null,
@@ -648,6 +657,7 @@ function HomePage() {
 
       setNewPageUrl('');
       setNewPageSource('all');
+      setNewPageTemplate('dynamic_page');
       setNewPageMetaTitle('');
       setNewPageMetaDescription('');
       setNewPageSummary('');
@@ -702,6 +712,7 @@ function HomePage() {
     setEditingPage(page);
     setEditPageUrl(page.page_url);
     setEditPageSource(page.source);
+    setEditPageTemplate(page.template || 'dynamic_page');
     setEditPageMetaTitle(page.meta_title);
     setEditPageMetaDescription(page.meta_description);
     setEditPageSummary(page.summary || '');
@@ -711,6 +722,7 @@ function HomePage() {
     setEditingPage(null);
     setEditPageUrl('');
     setEditPageSource('all');
+    setEditPageTemplate('dynamic_page');
     setEditPageMetaTitle('');
     setEditPageMetaDescription('');
     setEditPageSummary('');
@@ -733,6 +745,7 @@ function HomePage() {
         .update({
           page_url: pageUrl,
           source: editPageSource,
+          template: editPageTemplate,
           meta_title: editPageMetaTitle,
           meta_description: editPageMetaDescription,
           summary: editPageSummary.trim() || null,
@@ -1253,6 +1266,21 @@ function HomePage() {
                               </select>
                             </div>
                             <div>
+                              <label htmlFor={`edit-template-${page.id}`} className={`block text-xs font-medium mb-1 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                                Template *
+                              </label>
+                              <select
+                                id={`edit-template-${page.id}`}
+                                value={editPageTemplate}
+                                onChange={(e) => setEditPageTemplate(e.target.value)}
+                                className={`w-full ${theme === 'dark' ? 'bg-gray-600 border-gray-500 text-white' : 'bg-white border-gray-300 text-gray-900'} border rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                              >
+                                {templateOptions.map(template => (
+                                  <option key={template.value} value={template.value}>{template.label}</option>
+                                ))}
+                              </select>
+                            </div>
+                            <div>
                               <label htmlFor={`edit-title-${page.id}`} className={`block text-xs font-medium mb-1 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
                                 Meta Title *
                               </label>
@@ -1326,6 +1354,9 @@ function HomePage() {
                                 >
                                   {page.page_url}
                                 </a>
+                                <span className={`px-2 py-0.5 rounded ${theme === 'dark' ? 'bg-purple-900/30 text-purple-400' : 'bg-purple-100 text-purple-700'}`}>
+                                  Template: {templateOptions.find(t => t.value === page.template)?.label || page.template || 'Dynamic Page'}
+                                </span>
                                 <span className={`px-2 py-0.5 rounded ${theme === 'dark' ? 'bg-gray-600 text-gray-300' : 'bg-gray-200 text-gray-700'}`}>
                                   Source: {sources.find(s => s.value === page.source)?.label || page.source}
                                 </span>
@@ -1369,6 +1400,7 @@ function HomePage() {
                     setShowCreatePage(false);
                     setNewPageUrl('');
                     setNewPageSource('all');
+                    setNewPageTemplate('dynamic_page');
                     setNewPageMetaTitle('');
                     setNewPageMetaDescription('');
                     setNewPageSummary('');
@@ -1406,6 +1438,21 @@ function HomePage() {
                     >
                       {sources.map(source => (
                         <option key={source.value} value={source.value}>{source.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label htmlFor="newPageTemplate" className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                      Template *
+                    </label>
+                    <select
+                      id="newPageTemplate"
+                      value={newPageTemplate}
+                      onChange={(e) => setNewPageTemplate(e.target.value)}
+                      className={`w-full ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                    >
+                      {templateOptions.map(template => (
+                        <option key={template.value} value={template.value}>{template.label}</option>
                       ))}
                     </select>
                   </div>
@@ -1457,6 +1504,7 @@ function HomePage() {
                         setShowCreatePage(false);
                         setNewPageUrl('');
                         setNewPageSource('all');
+                        setNewPageTemplate('dynamic_page');
                         setNewPageMetaTitle('');
                         setNewPageMetaDescription('');
                         setNewPageSummary('');
