@@ -1,8 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
 import BubbleChart from './components/BubbleChart';
 import FileUpload from './components/FileUpload';
 import Login from './components/Login';
@@ -84,33 +82,24 @@ function HomePage() {
   const [comparingTopics, setComparingTopics] = useState<Set<string>>(new Set());
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
   const bubbleChartRef = useRef<HTMLDivElement>(null);
+  const newSummaryRef = useRef<HTMLDivElement>(null);
+  const editSummaryRef = useRef<HTMLDivElement>(null);
 
-  const quillModules = {
-    toolbar: [
-      [{ 'header': [1, 2, 3, false] }],
-      ['bold', 'italic', 'underline', 'strike'],
-      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-      [{ 'indent': '-1'}, { 'indent': '+1' }],
-      ['link', 'image'],
-      [{ 'align': [] }],
-      [{ 'color': [] }, { 'background': [] }],
-      ['blockquote', 'code-block'],
-      ['clean']
-    ],
-    clipboard: {
-      matchVisual: false
+  const handlePaste = (e: React.ClipboardEvent, setter: (value: string) => void, ref: React.RefObject<HTMLDivElement>) => {
+    e.preventDefault();
+    const html = e.clipboardData.getData('text/html');
+    const text = e.clipboardData.getData('text/plain');
+
+    if (html) {
+      document.execCommand('insertHTML', false, html);
+    } else {
+      document.execCommand('insertText', false, text);
+    }
+
+    if (ref.current) {
+      setter(ref.current.innerHTML);
     }
   };
-
-  const quillFormats = [
-    'header',
-    'bold', 'italic', 'underline', 'strike',
-    'list', 'bullet', 'indent',
-    'link', 'image',
-    'align',
-    'color', 'background',
-    'blockquote', 'code-block'
-  ];
 
   useEffect(() => {
     loadTopics();
@@ -1299,19 +1288,23 @@ function HomePage() {
                             </div>
                             <div>
                               <label className={`block text-xs font-medium mb-1 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                                Summary
+                                Summary (Rich HTML)
                               </label>
-                              <div className={theme === 'dark' ? 'quill-dark' : ''}>
-                                <ReactQuill
-                                  theme="snow"
-                                  value={editPageSummary}
-                                  onChange={setEditPageSummary}
-                                  modules={quillModules}
-                                  formats={quillFormats}
-                                  placeholder="Add rich text content..."
-                                  style={{ height: '150px', marginBottom: '50px', fontSize: '14px' }}
-                                />
-                              </div>
+                              <div
+                                ref={editSummaryRef}
+                                contentEditable
+                                onPaste={(e) => handlePaste(e, setEditPageSummary, editSummaryRef)}
+                                onInput={(e) => setEditPageSummary(e.currentTarget.innerHTML)}
+                                dangerouslySetInnerHTML={{ __html: editPageSummary }}
+                                className={`w-full min-h-[150px] max-h-[300px] overflow-y-auto ${theme === 'dark' ? 'bg-gray-600 border-gray-500 text-white' : 'bg-white border-gray-300 text-gray-900'} border-2 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                                style={{
+                                  wordWrap: 'break-word',
+                                  overflowWrap: 'break-word'
+                                }}
+                              />
+                              <p className={`mt-1 text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                                Paste rich content - all formatting preserved
+                              </p>
                             </div>
                             <div className="flex justify-end gap-2">
                               <button
@@ -1484,22 +1477,26 @@ function HomePage() {
                   </div>
                   <div>
                     <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                      Summary
+                      Summary (Rich HTML Editor)
                     </label>
-                    <div className={theme === 'dark' ? 'quill-dark' : ''}>
-                      <ReactQuill
-                        theme="snow"
-                        value={newPageSummary}
-                        onChange={setNewPageSummary}
-                        modules={quillModules}
-                        formats={quillFormats}
-                        placeholder="Add rich text content for the page..."
-                        style={{ height: '200px', marginBottom: '50px' }}
-                      />
+                    <div
+                      ref={newSummaryRef}
+                      contentEditable
+                      onPaste={(e) => handlePaste(e, setNewPageSummary, newSummaryRef)}
+                      onInput={(e) => setNewPageSummary(e.currentTarget.innerHTML)}
+                      dangerouslySetInnerHTML={{ __html: newPageSummary }}
+                      className={`w-full min-h-[200px] max-h-[400px] overflow-y-auto ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} border-2 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+                      style={{
+                        wordWrap: 'break-word',
+                        overflowWrap: 'break-word'
+                      }}
+                    />
+                    <div className={`mt-2 flex flex-wrap gap-2 text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                      <span className="font-medium">Tips:</span>
+                      <span>• Paste content with full formatting preserved</span>
+                      <span>• Tables, images, and complex layouts supported</span>
+                      <span>• All HTML formatting maintained</span>
                     </div>
-                    <p className={`mt-1 text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-                      Optional. Use the toolbar to format text with headings, bold, italic, lists, links, and more.
-                    </p>
                   </div>
                   <div className="flex justify-end gap-3">
                     <button
