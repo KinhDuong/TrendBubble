@@ -703,27 +703,6 @@ snapshotButton={null}
                     />
                   </div>
 
-                  <div className={`w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-200'} border-t border-b py-6 mt-8`}>
-                    <div className="max-w-7xl mx-auto px-4">
-                      <h2 className={`text-xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                        Featured
-                      </h2>
-                      {latestPages.length > 0 && (
-                        <div className="flex flex-wrap gap-x-4 gap-y-2">
-                          {latestPages.map((page) => (
-                            <a
-                              key={page.id}
-                              href={page.page_url}
-                              className={`text-sm ${theme === 'dark' ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'} transition-colors hover:underline`}
-                            >
-                              {page.meta_title}
-                            </a>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
                   {pageData.summary && (
                     <section
                       className="max-w-7xl mx-auto mt-8 mb-6"
@@ -760,6 +739,27 @@ snapshotButton={null}
                       </div>
                     </section>
                   )}
+
+                  <div className={`w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-200'} border-t border-b py-6 mt-8`}>
+                    <div className="max-w-7xl mx-auto px-4">
+                      <h2 className={`text-xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                        Featured
+                      </h2>
+                      {latestPages.length > 0 && (
+                        <div className="flex flex-wrap gap-x-4 gap-y-2">
+                          {latestPages.map((page) => (
+                            <a
+                              key={page.id}
+                              href={page.page_url}
+                              className={`text-sm ${theme === 'dark' ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'} transition-colors hover:underline`}
+                            >
+                              {page.meta_title}
+                            </a>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
 
                   <section className="max-w-7xl mx-auto mt-8 mb-0 md:mb-8" aria-labelledby="top-trending-heading">
                     {!isCryptoPage && (
