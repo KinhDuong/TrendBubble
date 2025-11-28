@@ -1,0 +1,234 @@
+import { createClient } from '@supabase/supabase-js';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { config } from 'dotenv';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+config({ path: path.join(__dirname, '..', '.env') });
+
+const supabaseUrl = process.env.VITE_SUPABASE_URL;
+const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY;
+
+if (!supabaseUrl || !supabaseKey) {
+  console.error('Missing Supabase credentials in environment variables');
+  console.error('VITE_SUPABASE_URL:', supabaseUrl);
+  console.error('VITE_SUPABASE_ANON_KEY:', supabaseKey ? 'present' : 'missing');
+  process.exit(1);
+}
+
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+async function fetchPages() {
+  const { data, error } = await supabase
+    .from('pages')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching pages:', error);
+    return [];
+  }
+
+  return data || [];
+}
+
+async function fetchTopicsForPage(pageSource) {
+  let query = supabase
+    .from('trending_topics')
+    .select('*');
+
+  if (pageSource !== 'all') {
+    query = query.eq('source', pageSource);
+  }
+
+  const { data, error } = await query
+    .order('rank', { ascending: true })
+    .limit(100);
+
+  if (error) {
+    console.error('Error fetching topics:', error);
+    return [];
+  }
+
+  return data || [];
+}
+
+function generateMetaTags(pageData, topics) {
+  const topTopics = [...topics]
+    .sort((a, b) => b.search_volume - a.search_volume)
+    .slice(0, 5)
+    .map(t => t.name.replace(/"/g, ''))
+    .join(', ');
+
+  const currentDate = new Date().toLocaleDateString('en-US', {
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric'
+  });
+
+  const lastUpdated = topics.length > 0
+    ? new Date(Math.max(...topics.map(t => new Date(t.pub_date || t.created_at || Date.now()).getTime())))
+    : new Date();
+
+  const enhancedTitle = `${pageData.meta_title} - ${currentDate}`;
+  const enhancedDescription = topTopics
+    ? `${pageData.meta_description} Top trending: ${topTopics}. Updated ${lastUpdated.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}.`
+    : pageData.meta_description;
+
+  const keywords = topics.slice(0, 10).map(t => t.name.replace(/"/g, '')).join(', ') + ', trending topics, search trends, real-time trends, trend analysis';
+
+  const pageUrl = `https://googletrendingtopics.com${pageData.page_url}`;
+
+  return `
+    <title>${enhancedTitle}</title>
+    <meta name="description" content="${enhancedDescription}" />
+    <meta name="keywords" content="${keywords}" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <link rel="canonical" href="${pageUrl}" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="${pageUrl}" />
+    <meta property="og:title" content="${enhancedTitle}" />
+    <meta property="og:description" content="${enhancedDescription}" />
+    <meta property="og:site_name" content="Google Trending Topics" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="${enhancedTitle}" />
+    <meta name="twitter:description" content="${enhancedDescription}" />
+  `;
+}
+
+function generateContentHTML(pageData, topics) {
+  const topTopics = [...topics]
+    .sort((a, b) => b.search_volume - a.search_volume)
+    .slice(0, 10);
+
+  const isCryptoPage = pageData.source === 'coingecko_crypto';
+
+  let contentHTML = `
+    <div class="dynamic-page-content">
+      <h1>${pageData.meta_title}</h1>
+      <p class="page-description">${pageData.meta_description}</p>
+  `;
+
+  if (pageData.summary) {
+    contentHTML += `
+      <section class="page-summary">
+        <div>${pageData.summary}</div>
+      </section>
+    `;
+  }
+
+  contentHTML += `
+      <section class="top-topics">
+        <h2>Top 10 ${isCryptoPage ? 'Gainers & Losers' : 'Trending Topics'}</h2>
+        <ol class="topics-list">
+  `;
+
+  topTopics.forEach((topic, index) => {
+    const searchVolume = topic.search_volume_raw || topic.search_volume;
+    contentHTML += `
+          <li>
+            <span class="rank">${index + 1}</span>
+            <div class="topic-info">
+              <h3>${topic.name.replace(/"/g, '')}</h3>
+              <p>${searchVolume.toString().replace(/"/g, '')} searches</p>
+              ${topic.category ? `<span class="category">${topic.category}</span>` : ''}
+            </div>
+          </li>
+    `;
+  });
+
+  contentHTML += `
+        </ol>
+      </section>
+    </div>
+  `;
+
+  return contentHTML;
+}
+
+function generateStructuredData(pageData, topics) {
+  const currentDate = new Date().toLocaleDateString('en-US', {
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric'
+  });
+  const pageUrl = `https://googletrendingtopics.com${pageData.page_url}`;
+  const topTopics = [...topics].sort((a, b) => b.search_volume - a.search_volume);
+
+  const webPageSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": `${pageData.meta_title} - ${currentDate}`,
+    "description": pageData.meta_description,
+    "url": pageUrl,
+    "datePublished": pageData.created_at,
+    "dateModified": new Date().toISOString(),
+    "mainEntity": {
+      "@type": "ItemList",
+      "name": "Top Trending Topics",
+      "description": "Current trending topics ranked by search volume",
+      "numberOfItems": topTopics.length,
+      "itemListElement": topTopics.slice(0, 10).map((topic, index) => ({
+        "@type": "ListItem",
+        "position": index + 1,
+        "item": {
+          "@type": "Thing",
+          "name": topic.name.replace(/"/g, ''),
+          "description": `${(topic.search_volume_raw || topic.search_volume).toString().replace(/"/g, '')} searches`
+        }
+      }))
+    }
+  };
+
+  return `<script type="application/ld+json">${JSON.stringify(webPageSchema)}</script>`;
+}
+
+async function prerenderPages() {
+  console.log('Starting pre-rendering process...');
+
+  const pages = await fetchPages();
+  console.log(`Found ${pages.length} pages to pre-render`);
+
+  const distPath = path.join(__dirname, '..', 'dist');
+  const indexPath = path.join(distPath, 'index.html');
+
+  if (!fs.existsSync(indexPath)) {
+    console.error('Build output not found. Run `npm run build` first.');
+    process.exit(1);
+  }
+
+  const baseHTML = fs.readFileSync(indexPath, 'utf-8');
+
+  for (const page of pages) {
+    console.log(`Pre-rendering: ${page.page_url}`);
+
+    const topics = await fetchTopicsForPage(page.source);
+
+    const metaTags = generateMetaTags(page, topics);
+    const contentHTML = generateContentHTML(page, topics);
+    const structuredData = generateStructuredData(page, topics);
+
+    let html = baseHTML
+      .replace('<title>Vite + React + TS</title>', '')
+      .replace('<!-- PRERENDER_META -->', metaTags)
+      .replace('<!-- PRERENDER_STRUCTURED_DATA -->', structuredData)
+      .replace('<div id="root"></div>', `<div id="root">${contentHTML}</div>`);
+
+    const pagePath = page.page_url.replace(/^\//, '');
+    const outputDir = path.join(distPath, pagePath);
+
+    fs.mkdirSync(outputDir, { recursive: true });
+    fs.writeFileSync(path.join(outputDir, 'index.html'), html);
+
+    console.log(`✓ Generated: ${outputDir}/index.html`);
+  }
+
+  console.log('Pre-rendering complete!');
+}
+
+prerenderPages().catch(console.error);
