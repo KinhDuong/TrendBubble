@@ -1272,13 +1272,16 @@ function HomePage() {
                               <label htmlFor={`edit-summary-${page.id}`} className={`block text-xs font-medium mb-1 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
                                 Summary
                               </label>
-                              <textarea
-                                id={`edit-summary-${page.id}`}
-                                value={editPageSummary}
-                                onChange={(e) => setEditPageSummary(e.target.value)}
-                                rows={4}
-                                className={`w-full ${theme === 'dark' ? 'bg-gray-600 border-gray-500 text-white' : 'bg-white border-gray-300 text-gray-900'} border rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y`}
+                              <div
+                                contentEditable
+                                onInput={(e) => setEditPageSummary(e.currentTarget.innerHTML)}
+                                dangerouslySetInnerHTML={{ __html: editPageSummary }}
+                                className={`w-full min-h-[120px] ${theme === 'dark' ? 'bg-gray-600 border-gray-500 text-white' : 'bg-white border-gray-300 text-gray-900'} border rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 overflow-y-auto`}
+                                style={{ maxHeight: '250px' }}
                               />
+                              <p className={`mt-1 text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                                Paste rich text - formatting preserved
+                              </p>
                             </div>
                             <div className="flex justify-end gap-2">
                               <button
@@ -1306,7 +1309,10 @@ function HomePage() {
                               {page.summary && (
                                 <div className={`text-xs mb-2 p-2 rounded ${theme === 'dark' ? 'bg-gray-600 text-gray-300' : 'bg-gray-100 text-gray-700'}`}>
                                   <div className={`font-medium mb-1 ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'}`}>Summary:</div>
-                                  <div className="line-clamp-3">{page.summary}</div>
+                                  <div
+                                    className="line-clamp-3"
+                                    dangerouslySetInnerHTML={{ __html: page.summary }}
+                                  />
                                 </div>
                               )}
                               <div className="flex flex-wrap items-center gap-3 text-xs">
@@ -1450,16 +1456,15 @@ function HomePage() {
                     <label htmlFor="newPageSummary" className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
                       Summary
                     </label>
-                    <textarea
-                      id="newPageSummary"
-                      value={newPageSummary}
-                      onChange={(e) => setNewPageSummary(e.target.value)}
-                      placeholder="Add rich text content for the page (supports HTML)..."
-                      rows={6}
-                      className={`w-full ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'} border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y`}
+                    <div
+                      contentEditable
+                      onInput={(e) => setNewPageSummary(e.currentTarget.innerHTML)}
+                      dangerouslySetInnerHTML={{ __html: newPageSummary }}
+                      className={`w-full min-h-[150px] ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 overflow-y-auto`}
+                      style={{ maxHeight: '300px' }}
                     />
                     <p className={`mt-1 text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-                      Optional. You can use HTML tags for formatting.
+                      Optional. Paste rich text with formatting - HTML will be preserved. Supports bold, italic, lists, links, etc.
                     </p>
                   </div>
                   <div className="flex justify-end gap-3">
