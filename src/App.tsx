@@ -356,6 +356,8 @@ function HomePage() {
   const handleFileUpload = async (parsedTopics: TrendingTopic[]): Promise<void> => {
     try {
       const now = new Date().toISOString();
+
+      // Get all existing topics from the main table
       const { data: existingTopics } = await supabase
         .from('trending_topics')
         .select('*');
@@ -364,16 +366,21 @@ function HomePage() {
         (existingTopics || []).map(t => [t.name.trim().toLowerCase(), t])
       );
 
-      const topicsToInsert = [];
-      const topicsToUpdate = [];
-      const historySnapshots = [];
+      // Track CSV duplicates
       const seenInCSV = new Map<string, number[]>();
       let duplicatesSkipped = 0;
 
+      const historySnapshots = [];
+      let updateCount = 0;
+      let insertCount = 0;
+      let insertErrors = 0;
+
+      // Process each topic from CSV
       for (let index = 0; index < parsedTopics.length; index++) {
         const topic = parsedTopics[index];
         const normalizedName = topic.name.trim().toLowerCase();
 
+        // Skip CSV duplicates
         if (seenInCSV.has(normalizedName)) {
           duplicatesSkipped++;
           seenInCSV.get(normalizedName)!.push(index + 1);
@@ -382,113 +389,69 @@ function HomePage() {
         seenInCSV.set(normalizedName, [index + 1]);
 
         const existing = existingMap.get(normalizedName);
+        const sourceValue = sourceFilter === 'all' ? 'user_upload' : sourceFilter;
 
         if (existing) {
+          // UPDATE existing topic in trending_topics
           const earliestPubDate = !topic.pubDate ? existing.pub_date :
             !existing.pub_date ? topic.pubDate :
             new Date(topic.pubDate) < new Date(existing.pub_date) ? topic.pubDate : existing.pub_date;
 
-          topicsToUpdate.push({
-            id: existing.id,
-            name: topic.name,
-            search_volume: topic.searchVolume,
-            search_volume_raw: topic.searchVolumeRaw,
-            rank: index + 1,
-            url: topic.url || existing.url,
-            pub_date: earliestPubDate,
-            category: topic.category || existing.category,
-            created_at: existing.created_at,
-            source: sourceFilter === 'all' ? 'user_upload' : sourceFilter
-          });
-
-          historySnapshots.push({
-            topic_id: existing.id,
-            name: topic.name,
-            search_volume: topic.searchVolume,
-            search_volume_raw: topic.searchVolumeRaw,
-            rank: index + 1,
-            url: topic.url || existing.url,
-            snapshot_at: now
-          });
-        } else {
-          topicsToInsert.push({
-            name: topic.name,
-            search_volume: topic.searchVolume,
-            search_volume_raw: topic.searchVolumeRaw,
-            rank: index + 1,
-            url: topic.url,
-            pub_date: topic.pubDate,
-            category: topic.category,
-            source: sourceFilter === 'all' ? 'user_upload' : sourceFilter
-          });
-        }
-      }
-
-      let updateCount = 0;
-      if (topicsToUpdate.length > 0) {
-        for (const topic of topicsToUpdate) {
           const { error } = await supabase
             .from('trending_topics')
-            .update(topic)
-            .eq('id', topic.id);
+            .update({
+              search_volume: topic.searchVolume,
+              search_volume_raw: topic.searchVolumeRaw,
+              rank: index + 1,
+              url: topic.url || existing.url,
+              pub_date: earliestPubDate,
+              category: topic.category || existing.category,
+              source: sourceValue,
+              updated_at: now
+            })
+            .eq('id', existing.id);
 
           if (error) {
             console.error(`Error updating topic ${topic.name}:`, error);
+            insertErrors++;
           } else {
             updateCount++;
-          }
-        }
-      }
 
-      let insertCount = 0;
-      let insertErrors = 0;
-      if (topicsToInsert.length > 0) {
-        for (const topic of topicsToInsert) {
+            // Add to history
+            historySnapshots.push({
+              topic_id: existing.id,
+              name: topic.name,
+              search_volume: topic.searchVolume,
+              search_volume_raw: topic.searchVolumeRaw,
+              rank: index + 1,
+              url: topic.url || existing.url,
+              snapshot_at: now
+            });
+          }
+        } else {
+          // INSERT new topic into trending_topics
           const { data, error } = await supabase
             .from('trending_topics')
-            .insert(topic)
+            .insert({
+              name: topic.name,
+              search_volume: topic.searchVolume,
+              search_volume_raw: topic.searchVolumeRaw,
+              rank: index + 1,
+              url: topic.url,
+              pub_date: topic.pubDate,
+              category: topic.category,
+              source: sourceValue
+            })
             .select('id, name, search_volume, search_volume_raw, rank, url')
             .maybeSingle();
 
           if (error) {
-            if (error.code === '23505') {
-              const { data: updateData, error: updateError } = await supabase
-                .from('trending_topics')
-                .update({
-                  search_volume: topic.search_volume,
-                  search_volume_raw: topic.search_volume_raw,
-                  rank: topic.rank,
-                  url: topic.url,
-                  category: topic.category,
-                  pub_date: topic.pub_date
-                })
-                .eq('id', (await supabase
-                  .from('trending_topics')
-                  .select('id')
-                  .ilike('name', topic.name)
-                  .maybeSingle())?.data?.id)
-                .select('id, name, search_volume, search_volume_raw, rank, url')
-                .maybeSingle();
-
-              if (!updateError && updateData) {
-                insertCount++;
-                historySnapshots.push({
-                  topic_id: updateData.id,
-                  name: updateData.name,
-                  search_volume: updateData.search_volume,
-                  search_volume_raw: updateData.search_volume_raw,
-                  rank: updateData.rank,
-                  url: updateData.url,
-                  snapshot_at: now
-                });
-              } else {
-                insertErrors++;
-              }
-            } else {
-              insertErrors++;
-            }
+            console.error(`Error inserting topic ${topic.name}:`, error);
+            insertErrors++;
           } else if (data) {
             insertCount++;
+
+            // Add to history
             historySnapshots.push({
               topic_id: data.id,
               name: data.name,
@@ -502,6 +465,7 @@ function HomePage() {
         }
       }
 
+      // Save all snapshots to history table in batches
       if (historySnapshots.length > 0) {
         const batchSize = 100;
         for (let i = 0; i < historySnapshots.length; i += batchSize) {
