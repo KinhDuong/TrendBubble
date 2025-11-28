@@ -23,6 +23,7 @@ interface PageData {
   meta_title: string;
   meta_description: string;
   created_at: string;
+  summary?: string;
 }
 
 function DynamicPage() {
@@ -722,6 +723,17 @@ snapshotButton={null}
                       )}
                     </div>
                   </div>
+
+                  {pageData.summary && (
+                    <section className="max-w-7xl mx-auto mt-8 mb-6" aria-labelledby="page-summary">
+                      <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-lg border p-6`}>
+                        <div
+                          className={`prose ${theme === 'dark' ? 'prose-invert' : ''} max-w-none text-sm leading-relaxed ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}
+                          dangerouslySetInnerHTML={{ __html: pageData.summary }}
+                        />
+                      </div>
+                    </section>
+                  )}
 
                   <section className="max-w-7xl mx-auto mt-8 mb-0 md:mb-8" aria-labelledby="top-trending-heading">
                     {!isCryptoPage && (
