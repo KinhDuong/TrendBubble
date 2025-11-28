@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 import BubbleChart from './components/BubbleChart';
 import FileUpload from './components/FileUpload';
 import Login from './components/Login';
@@ -82,6 +84,25 @@ function HomePage() {
   const [comparingTopics, setComparingTopics] = useState<Set<string>>(new Set());
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
   const bubbleChartRef = useRef<HTMLDivElement>(null);
+
+  const quillModules = {
+    toolbar: [
+      [{ 'header': [1, 2, 3, false] }],
+      ['bold', 'italic', 'underline', 'strike'],
+      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+      ['link'],
+      [{ 'align': [] }],
+      ['clean']
+    ],
+  };
+
+  const quillFormats = [
+    'header',
+    'bold', 'italic', 'underline', 'strike',
+    'list', 'bullet',
+    'link',
+    'align'
+  ];
 
   useEffect(() => {
     loadTopics();
@@ -1269,19 +1290,20 @@ function HomePage() {
                               />
                             </div>
                             <div>
-                              <label htmlFor={`edit-summary-${page.id}`} className={`block text-xs font-medium mb-1 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                              <label className={`block text-xs font-medium mb-1 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
                                 Summary
                               </label>
-                              <div
-                                contentEditable
-                                onInput={(e) => setEditPageSummary(e.currentTarget.innerHTML)}
-                                dangerouslySetInnerHTML={{ __html: editPageSummary }}
-                                className={`w-full min-h-[120px] ${theme === 'dark' ? 'bg-gray-600 border-gray-500 text-white' : 'bg-white border-gray-300 text-gray-900'} border rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 overflow-y-auto`}
-                                style={{ maxHeight: '250px' }}
-                              />
-                              <p className={`mt-1 text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-                                Paste rich text - formatting preserved
-                              </p>
+                              <div className={theme === 'dark' ? 'quill-dark' : ''}>
+                                <ReactQuill
+                                  theme="snow"
+                                  value={editPageSummary}
+                                  onChange={setEditPageSummary}
+                                  modules={quillModules}
+                                  formats={quillFormats}
+                                  placeholder="Add rich text content..."
+                                  style={{ height: '150px', marginBottom: '50px', fontSize: '14px' }}
+                                />
+                              </div>
                             </div>
                             <div className="flex justify-end gap-2">
                               <button
@@ -1453,18 +1475,22 @@ function HomePage() {
                     />
                   </div>
                   <div>
-                    <label htmlFor="newPageSummary" className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                    <label className={`block text-sm font-medium mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
                       Summary
                     </label>
-                    <div
-                      contentEditable
-                      onInput={(e) => setNewPageSummary(e.currentTarget.innerHTML)}
-                      dangerouslySetInnerHTML={{ __html: newPageSummary }}
-                      className={`w-full min-h-[150px] ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 overflow-y-auto`}
-                      style={{ maxHeight: '300px' }}
-                    />
+                    <div className={theme === 'dark' ? 'quill-dark' : ''}>
+                      <ReactQuill
+                        theme="snow"
+                        value={newPageSummary}
+                        onChange={setNewPageSummary}
+                        modules={quillModules}
+                        formats={quillFormats}
+                        placeholder="Add rich text content for the page..."
+                        style={{ height: '200px', marginBottom: '50px' }}
+                      />
+                    </div>
                     <p className={`mt-1 text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-                      Optional. Paste rich text with formatting - HTML will be preserved. Supports bold, italic, lists, links, etc.
+                      Optional. Use the toolbar to format text with headings, bold, italic, lists, links, and more.
                     </p>
                   </div>
                   <div className="flex justify-end gap-3">
