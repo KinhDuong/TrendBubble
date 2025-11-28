@@ -725,12 +725,32 @@ snapshotButton={null}
                   </div>
 
                   {pageData.summary && (
-                    <section className="max-w-7xl mx-auto mt-8 mb-6" aria-labelledby="page-summary">
+                    <section
+                      className="max-w-7xl mx-auto mt-8 mb-6"
+                      aria-labelledby="page-summary"
+                      itemScope
+                      itemType="https://schema.org/Article"
+                    >
                       <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-lg border p-6`}>
                         <div
-                          className={`prose ${theme === 'dark' ? 'prose-invert' : ''} max-w-none text-sm leading-relaxed ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}
+                          itemProp="articleBody"
+                          className={`
+                            prose ${theme === 'dark' ? 'prose-invert' : ''} max-w-none
+                            ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}
+                            prose-headings:${theme === 'dark' ? 'text-white' : 'text-gray-900'}
+                            prose-p:leading-relaxed
+                            prose-a:${theme === 'dark' ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'}
+                            prose-strong:${theme === 'dark' ? 'text-white' : 'text-gray-900'}
+                            prose-em:${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}
+                            prose-ul:${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}
+                            prose-ol:${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}
+                            prose-li:${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}
+                            prose-blockquote:${theme === 'dark' ? 'text-gray-400 border-gray-600' : 'text-gray-600 border-gray-300'}
+                          `}
                           dangerouslySetInnerHTML={{ __html: pageData.summary }}
                         />
+                        <meta itemProp="author" content="Google Trending Topics" />
+                        <meta itemProp="datePublished" content={pageData.created_at} />
                       </div>
                     </section>
                   )}
