@@ -90,18 +90,26 @@ function HomePage() {
       [{ 'header': [1, 2, 3, false] }],
       ['bold', 'italic', 'underline', 'strike'],
       [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-      ['link'],
+      [{ 'indent': '-1'}, { 'indent': '+1' }],
+      ['link', 'image'],
       [{ 'align': [] }],
+      [{ 'color': [] }, { 'background': [] }],
+      ['blockquote', 'code-block'],
       ['clean']
     ],
+    clipboard: {
+      matchVisual: false
+    }
   };
 
   const quillFormats = [
     'header',
     'bold', 'italic', 'underline', 'strike',
-    'list', 'bullet',
-    'link',
-    'align'
+    'list', 'bullet', 'indent',
+    'link', 'image',
+    'align',
+    'color', 'background',
+    'blockquote', 'code-block'
   ];
 
   useEffect(() => {
