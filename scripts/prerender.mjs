@@ -188,6 +188,85 @@ function generateStructuredData(pageData, topics) {
   return `<script type="application/ld+json">${JSON.stringify(webPageSchema)}</script>`;
 }
 
+async function prerenderHomePage(baseHTML, distPath) {
+  console.log('Pre-rendering home page...');
+
+  const { data: topics } = await supabase
+    .from('trending_topics')
+    .select('*')
+    .order('rank', { ascending: true })
+    .limit(100);
+
+  const topTopics = [...(topics || [])]
+    .sort((a, b) => b.search_volume - a.search_volume)
+    .slice(0, 10)
+    .map(t => t.name.replace(/"/g, ''))
+    .join(', ');
+
+  const currentDate = new Date().toLocaleDateString('en-US', {
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric'
+  });
+
+  const homeMetaTags = `
+    <title>Google Trending Topics - Real-Time Bubble Chart Visualization | ${currentDate}</title>
+    <meta name="description" content="Explore trending topics in real-time with interactive bubble charts. Watch search volumes grow and shrink with live Google Trends data. Top trending now: ${topTopics}. Updated hourly." />
+    <meta name="keywords" content="google trends, trending topics, search trends, real-time trends, bubble chart, trend visualization, search volume, trending now, ${topTopics}" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <link rel="canonical" href="https://googletrendingtopics.com/" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://googletrendingtopics.com/" />
+    <meta property="og:title" content="Google Trending Topics - Real-Time Bubble Chart Visualization" />
+    <meta property="og:description" content="Explore trending topics in real-time with interactive bubble charts. Watch search volumes grow and shrink with live Google Trends data. Updated hourly." />
+    <meta property="og:site_name" content="Google Trending Topics" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Google Trending Topics - Real-Time Bubble Chart Visualization" />
+    <meta name="twitter:description" content="Explore trending topics in real-time with interactive bubble charts. Watch search volumes grow and shrink with live Google Trends data. Updated hourly." />
+  `;
+
+  const homeStructuredData = `<script type="application/ld+json">{
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Google Trending Topics",
+    "description": "Real-time trending topics visualization with interactive bubble charts",
+    "url": "https://googletrendingtopics.com/",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://googletrendingtopics.com/?q={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  }</script>`;
+
+  let html = baseHTML
+    .replace('<title>Vite + React + TS</title>', '')
+    .replace('<!-- PRERENDER_META -->', homeMetaTags)
+    .replace('<!-- PRERENDER_STRUCTURED_DATA -->', homeStructuredData);
+
+  // Ensure GitHub Pages redirect script is present
+  if (!html.includes('sessionStorage.redirect')) {
+    html = html.replace(
+      '<body>',
+      `<body>
+    <script>
+      // GitHub Pages SPA redirect handler
+      (function() {
+        var redirect = sessionStorage.redirect;
+        delete sessionStorage.redirect;
+        if (redirect && redirect != location.href) {
+          history.replaceState(null, null, redirect);
+        }
+      })();
+    </script>`
+    );
+  }
+
+  fs.writeFileSync(path.join(distPath, 'index.html'), html);
+  console.log('✓ Generated: /index.html');
+}
+
 async function prerenderPages() {
   console.log('Starting pre-rendering process...');
 
@@ -203,6 +282,8 @@ async function prerenderPages() {
   }
 
   const baseHTML = fs.readFileSync(indexPath, 'utf-8');
+
+  await prerenderHomePage(baseHTML, distPath);
 
   for (const page of pages) {
     console.log(`Pre-rendering: ${page.page_url}`);
