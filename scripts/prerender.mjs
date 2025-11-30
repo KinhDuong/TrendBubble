@@ -197,6 +197,12 @@ async function prerenderHomePage(baseHTML, distPath) {
     .order('rank', { ascending: true })
     .limit(100);
 
+  const { data: pages } = await supabase
+    .from('pages')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(10);
+
   const topTopics = [...(topics || [])]
     .sort((a, b) => b.search_volume - a.search_volume)
     .slice(0, 10)
@@ -240,10 +246,75 @@ async function prerenderHomePage(baseHTML, distPath) {
     }
   }</script>`;
 
+  // Generate home page content HTML
+  const topTopicsForDisplay = [...(topics || [])]
+    .sort((a, b) => b.search_volume - a.search_volume)
+    .slice(0, 10);
+
+  let homeContentHTML = `
+    <div class="home-page-content">
+      <section class="hero-section">
+        <h1>Google Trending Topics</h1>
+        <p class="hero-description">Explore trending topics in real-time with interactive bubble charts. Watch search volumes grow and shrink with live Google Trends data.</p>
+      </section>
+
+      <section class="top-topics-section">
+        <h2>Top 10 Trending Now</h2>
+        <ol class="topics-list">
+  `;
+
+  topTopicsForDisplay.forEach((topic, index) => {
+    const searchVolume = topic.search_volume_raw || topic.search_volume;
+    homeContentHTML += `
+          <li>
+            <span class="rank">${index + 1}</span>
+            <div class="topic-info">
+              <h3>${topic.name.replace(/"/g, '')}</h3>
+              <p>${searchVolume.toString().replace(/"/g, '')} searches</p>
+              ${topic.category ? `<span class="category">${topic.category}</span>` : ''}
+            </div>
+          </li>
+    `;
+  });
+
+  homeContentHTML += `
+        </ol>
+      </section>
+  `;
+
+  if (pages && pages.length > 0) {
+    homeContentHTML += `
+      <section class="featured-pages-section">
+        <h2>Latest Featured Topics</h2>
+        <ul class="pages-list">
+    `;
+
+    pages.forEach((page) => {
+      homeContentHTML += `
+          <li>
+            <a href="${page.page_url}">
+              <h3>${page.meta_title}</h3>
+              <p>${page.meta_description}</p>
+            </a>
+          </li>
+      `;
+    });
+
+    homeContentHTML += `
+        </ul>
+      </section>
+    `;
+  }
+
+  homeContentHTML += `
+    </div>
+  `;
+
   let html = baseHTML
     .replace('<title>Vite + React + TS</title>', '')
     .replace('<!-- PRERENDER_META -->', homeMetaTags)
-    .replace('<!-- PRERENDER_STRUCTURED_DATA -->', homeStructuredData);
+    .replace('<!-- PRERENDER_STRUCTURED_DATA -->', homeStructuredData)
+    .replace('<div id="root"></div>', `<div id="root">${homeContentHTML}</div>`);
 
   // Ensure GitHub Pages redirect script is present
   if (!html.includes('sessionStorage.redirect')) {
