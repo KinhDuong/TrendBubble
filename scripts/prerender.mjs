@@ -21,6 +21,8 @@ if (!supabaseUrl || !supabaseKey) {
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
+const BASE_URL = process.env.VITE_BASE_URL || 'https://kinhduong.github.io/TrendBubble';
+
 async function fetchPages() {
   const { data, error } = await supabase
     .from('pages')
@@ -80,7 +82,7 @@ function generateMetaTags(pageData, topics) {
 
   const keywords = topics.slice(0, 10).map(t => t.name.replace(/"/g, '')).join(', ') + ', trending topics, search trends, real-time trends, trend analysis';
 
-  const pageUrl = `https://googletrendingtopics.com${pageData.page_url}`;
+  const pageUrl = `${BASE_URL}${pageData.page_url}`;
 
   return `
     <title>${enhancedTitle}</title>
@@ -157,7 +159,7 @@ function generateStructuredData(pageData, topics) {
     day: 'numeric',
     year: 'numeric'
   });
-  const pageUrl = `https://googletrendingtopics.com${pageData.page_url}`;
+  const pageUrl = `${BASE_URL}${pageData.page_url}`;
   const topTopics = [...topics].sort((a, b) => b.search_volume - a.search_volume);
 
   const webPageSchema = {
@@ -220,10 +222,10 @@ async function prerenderHomePage(baseHTML, distPath) {
     <meta name="description" content="Explore trending topics in real-time with interactive bubble charts. Watch search volumes grow and shrink with live Google Trends data. Top trending now: ${topTopics}. Updated hourly." />
     <meta name="keywords" content="google trends, trending topics, search trends, real-time trends, bubble chart, trend visualization, search volume, trending now, ${topTopics}" />
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
-    <link rel="canonical" href="https://googletrendingtopics.com/" />
+    <link rel="canonical" href="${BASE_URL}/" />
 
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://googletrendingtopics.com/" />
+    <meta property="og:url" content="${BASE_URL}/" />
     <meta property="og:title" content="Google Trending Topics - Real-Time Bubble Chart Visualization" />
     <meta property="og:description" content="Explore trending topics in real-time with interactive bubble charts. Watch search volumes grow and shrink with live Google Trends data. Updated hourly." />
     <meta property="og:site_name" content="Google Trending Topics" />
@@ -238,10 +240,10 @@ async function prerenderHomePage(baseHTML, distPath) {
     "@type": "WebSite",
     "name": "Google Trending Topics",
     "description": "Real-time trending topics visualization with interactive bubble charts",
-    "url": "https://googletrendingtopics.com/",
+    "url": "${BASE_URL}/",
     "potentialAction": {
       "@type": "SearchAction",
-      "target": "https://googletrendingtopics.com/?q={search_term_string}",
+      "target": "${BASE_URL}/?q={search_term_string}",
       "query-input": "required name=search_term_string"
     }
   }</script>`;
