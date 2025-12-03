@@ -1,7 +1,6 @@
-import { Menu, X, Home, Compass, Mail, Info, LogIn, LogOut, Search } from 'lucide-react';
+import { BarChart3, Menu, X, Home, Compass, Mail, Info, LogIn, LogOut, Search } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabase';
-import Logo from './Logo';
 
 interface HeaderProps {
   theme: 'dark' | 'light';
@@ -100,7 +99,7 @@ export default function Header({ theme, isAdmin, onLoginClick, onLogout, title =
             className={`flex items-center gap-3 hover:opacity-80 transition-opacity ${isSearchExpanded ? 'hidden md:flex' : 'flex'}`}
           >
             <div className={`relative w-12 h-12 flex-shrink-0 rounded-full shadow-lg border-4 border-blue-600 overflow-hidden flex items-center justify-center ${theme === 'dark' ? 'bg-transparent' : 'bg-transparent'}`}>
-              <Logo size={28} className="text-blue-600 relative z-10" />
+              <BarChart3 size={24} strokeWidth={4} className="text-blue-600 relative z-10" />
             </div>
             <div className="flex items-center gap-3">
               {useH1 ? (
