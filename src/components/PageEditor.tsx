@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import ReactQuill from 'react-quill';
 import { supabase } from '../lib/supabase';
-import { X, Save, Plus } from 'lucide-react';
+import { X, Save, Plus, Code, Eye } from 'lucide-react';
 
 interface Page {
   id: string;
@@ -30,6 +30,7 @@ export default function PageEditor({ theme, onClose, existingPage }: PageEditorP
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [sources, setSources] = useState<Array<{ value: string; label: string }>>([]);
+  const [editorMode, setEditorMode] = useState<'visual' | 'html'>('visual');
 
   useEffect(() => {
     loadSources();
@@ -233,21 +234,72 @@ export default function PageEditor({ theme, onClose, existingPage }: PageEditorP
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">
-                Summary (Rich Text)
-              </label>
-              <div className={`${theme === 'dark' ? 'quill-dark' : ''}`}>
-                <ReactQuill
-                  theme="snow"
-                  value={summary}
-                  onChange={setSummary}
-                  modules={modules}
-                  formats={formats}
-                  placeholder="Write a detailed summary for this page..."
-                  className={`${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-white'} rounded-lg`}
-                  style={{ height: '300px', marginBottom: '50px' }}
-                />
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-medium">
+                  Summary
+                </label>
+                <div className="flex gap-1 bg-gray-200 dark:bg-gray-700 rounded-lg p-1">
+                  <button
+                    type="button"
+                    onClick={() => setEditorMode('visual')}
+                    className={`flex items-center gap-1 px-3 py-1 rounded-md text-xs font-medium transition-colors ${
+                      editorMode === 'visual'
+                        ? theme === 'dark'
+                          ? 'bg-gray-900 text-white'
+                          : 'bg-white text-gray-900 shadow-sm'
+                        : theme === 'dark'
+                        ? 'text-gray-400 hover:text-white'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    <Eye size={14} />
+                    Visual
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setEditorMode('html')}
+                    className={`flex items-center gap-1 px-3 py-1 rounded-md text-xs font-medium transition-colors ${
+                      editorMode === 'html'
+                        ? theme === 'dark'
+                          ? 'bg-gray-900 text-white'
+                          : 'bg-white text-gray-900 shadow-sm'
+                        : theme === 'dark'
+                        ? 'text-gray-400 hover:text-white'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    <Code size={14} />
+                    HTML
+                  </button>
+                </div>
               </div>
+
+              {editorMode === 'visual' ? (
+                <div className={`${theme === 'dark' ? 'quill-dark' : ''}`}>
+                  <ReactQuill
+                    theme="snow"
+                    value={summary}
+                    onChange={setSummary}
+                    modules={modules}
+                    formats={formats}
+                    placeholder="Write a detailed summary for this page..."
+                    className={`${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-white'} rounded-lg`}
+                    style={{ height: '300px', marginBottom: '50px' }}
+                  />
+                </div>
+              ) : (
+                <textarea
+                  value={summary}
+                  onChange={(e) => setSummary(e.target.value)}
+                  placeholder="<p>Paste or write HTML here...</p>"
+                  rows={15}
+                  className={`w-full px-3 py-2 rounded-lg border font-mono text-sm ${
+                    theme === 'dark'
+                      ? 'bg-gray-900 border-gray-700 text-white'
+                      : 'bg-white border-gray-300 text-gray-900'
+                  } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                />
+              )}
             </div>
           </div>
         </div>
