@@ -21,7 +21,7 @@ if (!supabaseUrl || !supabaseKey) {
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-const BASE_URL = process.env.VITE_BASE_URL || 'https://kinhduong.github.io/TrendBubble';
+const BASE_URL = process.env.VITE_BASE_URL || 'https://thetrendingbubble.com';
 
 async function fetchPages() {
   const { data, error } = await supabase
