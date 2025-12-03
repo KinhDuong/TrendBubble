@@ -62,17 +62,6 @@ function DynamicPage() {
   const bubbleChartRef = useRef<HTMLDivElement>(null);
   const [animationStyle, setAnimationStyle] = useState<AnimationStyle>('default');
 
-  const processSummaryHTML = (html: string): string => {
-    if (!html) return html;
-
-    let processed = html;
-
-    processed = processed.replace(/<\/a>(?!\s*<br|<\/p|<\/li|<\/div|<p|<ul|<ol)/gi, '</a><br>');
-    processed = processed.replace(/(<br\s*\/?>\s*){2,}/gi, '<br>');
-
-    return processed;
-  };
-
   const sortedTopics = useMemo(() => {
     if (pageData?.source !== 'coingecko_crypto' || !topics.length) {
       return topics;
@@ -730,7 +719,7 @@ snapshotButton={null}
                             ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}
                             prose-headings:${theme === 'dark' ? 'text-white' : 'text-gray-900'}
                             prose-headings:text-xl md:prose-headings:text-2xl prose-headings:font-bold prose-headings:mt-6 prose-headings:mb-4
-                            prose-p:leading-relaxed prose-p:text-sm md:prose-p:text-base prose-p:mb-4 prose-p:whitespace-pre-line
+                            prose-p:leading-relaxed prose-p:text-sm md:prose-p:text-base prose-p:mb-4
                             prose-a:${theme === 'dark' ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'} prose-a:break-words prose-a:inline prose-a:no-underline hover:prose-a:underline
                             prose-strong:${theme === 'dark' ? 'text-white' : 'text-gray-900'} prose-strong:font-semibold
                             prose-em:${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}
@@ -744,11 +733,10 @@ snapshotButton={null}
                             prose-img:rounded-lg prose-img:max-w-full prose-img:h-auto prose-img:my-4
                             prose-code:${theme === 'dark' ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-900'} prose-code:text-xs md:prose-code:text-sm prose-code:break-words prose-code:px-1 prose-code:py-0.5 prose-code:rounded
                             prose-pre:${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'} prose-pre:overflow-x-auto prose-pre:p-4 prose-pre:rounded-lg
-                            overflow-x-hidden break-words whitespace-pre-line
+                            overflow-x-hidden break-words
                             [&>*]:block [&>p]:block [&>h1]:block [&>h2]:block [&>h3]:block [&>ul]:block [&>ol]:block
-                            [&_br]:block [&_br]:h-0 [&_br]:my-2
                           `}
-                          dangerouslySetInnerHTML={{ __html: processSummaryHTML(pageData.summary) }}
+                          dangerouslySetInnerHTML={{ __html: pageData.summary }}
                         />
                         <meta itemProp="author" content="Google Trending Topics" />
                         <meta itemProp="datePublished" content={pageData.created_at} />
