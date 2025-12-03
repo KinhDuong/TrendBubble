@@ -31,6 +31,7 @@ function HomePage() {
   const [categories, setCategories] = useState<string[]>([]);
   const [viewMode, setViewMode] = useState<'bubble' | 'list'>('bubble');
   const [loading, setLoading] = useState(true);
+  const [connectionError, setConnectionError] = useState(false);
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
   const [nextUpdateIn, setNextUpdateIn] = useState<string>('');
   const [updateProgress, setUpdateProgress] = useState<number>(0);
@@ -254,11 +255,13 @@ function HomePage() {
         }));
         setTopics(formattedTopics);
         setLastUpdated(new Date());
+        setConnectionError(false);
       } else {
         setTopics([]);
       }
     } catch (error) {
       console.error('Error loading topics:', error);
+      setConnectionError(true);
     } finally {
       setLoading(false);
     }
@@ -1562,6 +1565,31 @@ function HomePage() {
                   </div>
                 </header>
               </article>
+            )}
+            {connectionError && (
+              <div className="max-w-4xl mx-auto mt-12">
+                <div className={`${theme === 'dark' ? 'bg-red-900/20 border-red-800' : 'bg-red-50 border-red-200'} border rounded-lg p-8 text-center`}>
+                  <h2 className={`text-2xl font-bold mb-4 ${theme === 'dark' ? 'text-red-400' : 'text-red-700'}`}>
+                    Database Connection Error
+                  </h2>
+                  <p className={`mb-6 ${theme === 'dark' ? 'text-red-300' : 'text-red-600'}`}>
+                    Unable to connect to the database. This usually happens when the site is deployed without proper environment variables.
+                  </p>
+                  <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-300'} border rounded-lg p-6 text-left`}>
+                    <h3 className={`font-semibold mb-3 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>To fix this issue:</h3>
+                    <ol className={`list-decimal list-inside space-y-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                      <li>Go to your repository Settings → Secrets and variables → Actions</li>
+                      <li>Add the following secrets:
+                        <ul className="list-disc list-inside ml-6 mt-2">
+                          <li><code className={`px-2 py-1 rounded text-sm ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'}`}>VITE_SUPABASE_URL</code></li>
+                          <li><code className={`px-2 py-1 rounded text-sm ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'}`}>VITE_SUPABASE_ANON_KEY</code></li>
+                        </ul>
+                      </li>
+                      <li>Go to the Actions tab and manually trigger a new deployment</li>
+                    </ol>
+                  </div>
+                </div>
+              </div>
             )}
             {topics.length > 0 && viewMode === 'bubble' && (
               <>
