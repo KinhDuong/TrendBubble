@@ -1,4 +1,4 @@
-import { BarChart3, Menu, X, Home, Compass, Mail, Info, LogIn, LogOut, Search } from 'lucide-react';
+import { Menu, X, Home, Compass, Mail, Info, LogIn, LogOut, Search } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 
@@ -99,7 +99,11 @@ export default function Header({ theme, isAdmin, onLoginClick, onLogout, title =
             className={`flex items-center gap-3 hover:opacity-80 transition-opacity ${isSearchExpanded ? 'hidden md:flex' : 'flex'}`}
           >
             <div className={`relative w-12 h-12 flex-shrink-0 rounded-full shadow-lg border-4 border-blue-600 overflow-hidden flex items-center justify-center ${theme === 'dark' ? 'bg-transparent' : 'bg-transparent'}`}>
-              <BarChart3 size={24} strokeWidth={4} className="text-blue-600 relative z-10" />
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="relative z-10">
+                <rect x="5" y="6" width="3" height="12" fill="#2563eb" rx="1.5" />
+                <rect x="10.5" y="6" width="3" height="12" fill="#2563eb" rx="1.5" />
+                <rect x="16" y="6" width="3" height="12" fill="#2563eb" rx="1.5" />
+              </svg>
             </div>
             <div className="flex items-center gap-3">
               {useH1 ? (
