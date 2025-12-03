@@ -718,22 +718,23 @@ snapshotButton={null}
                             prose prose-sm md:prose-base ${theme === 'dark' ? 'prose-invert' : ''} max-w-none
                             ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}
                             prose-headings:${theme === 'dark' ? 'text-white' : 'text-gray-900'}
-                            prose-headings:text-xl md:prose-headings:text-2xl
-                            prose-p:leading-relaxed prose-p:text-sm md:prose-p:text-base
-                            prose-a:${theme === 'dark' ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'} prose-a:break-words
-                            prose-strong:${theme === 'dark' ? 'text-white' : 'text-gray-900'}
+                            prose-headings:text-xl md:prose-headings:text-2xl prose-headings:font-bold prose-headings:mt-6 prose-headings:mb-4
+                            prose-p:leading-relaxed prose-p:text-sm md:prose-p:text-base prose-p:mb-4
+                            prose-a:${theme === 'dark' ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'} prose-a:break-words prose-a:inline prose-a:no-underline hover:prose-a:underline
+                            prose-strong:${theme === 'dark' ? 'text-white' : 'text-gray-900'} prose-strong:font-semibold
                             prose-em:${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}
-                            prose-ul:${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'} prose-ul:text-sm md:prose-ul:text-base
-                            prose-ol:${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'} prose-ol:text-sm md:prose-ol:text-base
-                            prose-li:${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'} prose-li:text-sm md:prose-li:text-base
-                            prose-blockquote:${theme === 'dark' ? 'text-gray-400 border-gray-600' : 'text-gray-600 border-gray-300'}
-                            prose-table:${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'} prose-table:text-sm md:prose-table:text-base prose-table:overflow-x-auto
-                            prose-th:${theme === 'dark' ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-900'} prose-th:px-2 md:prose-th:px-4
-                            prose-td:${theme === 'dark' ? 'border-gray-600' : 'border-gray-300'} prose-td:px-2 md:prose-td:px-4
-                            prose-img:rounded-lg prose-img:max-w-full prose-img:h-auto
-                            prose-code:${theme === 'dark' ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-900'} prose-code:text-xs md:prose-code:text-sm prose-code:break-words
-                            prose-pre:${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'} prose-pre:overflow-x-auto
+                            prose-ul:${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'} prose-ul:text-sm md:prose-ul:text-base prose-ul:my-4 prose-ul:list-disc prose-ul:pl-6
+                            prose-ol:${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'} prose-ol:text-sm md:prose-ol:text-base prose-ol:my-4 prose-ol:list-decimal prose-ol:pl-6
+                            prose-li:${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'} prose-li:text-sm md:prose-li:text-base prose-li:mb-2
+                            prose-blockquote:${theme === 'dark' ? 'text-gray-400 border-gray-600' : 'text-gray-600 border-gray-300'} prose-blockquote:pl-4 prose-blockquote:border-l-4 prose-blockquote:italic
+                            prose-table:${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'} prose-table:text-sm md:prose-table:text-base prose-table:overflow-x-auto prose-table:w-full
+                            prose-th:${theme === 'dark' ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-900'} prose-th:px-2 md:prose-th:px-4 prose-th:py-2 prose-th:font-semibold
+                            prose-td:${theme === 'dark' ? 'border-gray-600' : 'border-gray-300'} prose-td:px-2 md:prose-td:px-4 prose-td:py-2
+                            prose-img:rounded-lg prose-img:max-w-full prose-img:h-auto prose-img:my-4
+                            prose-code:${theme === 'dark' ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-900'} prose-code:text-xs md:prose-code:text-sm prose-code:break-words prose-code:px-1 prose-code:py-0.5 prose-code:rounded
+                            prose-pre:${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'} prose-pre:overflow-x-auto prose-pre:p-4 prose-pre:rounded-lg
                             overflow-x-hidden break-words
+                            [&>*]:block [&>p]:block [&>h1]:block [&>h2]:block [&>h3]:block [&>ul]:block [&>ol]:block
                           `}
                           dangerouslySetInnerHTML={{ __html: pageData.summary }}
                         />
