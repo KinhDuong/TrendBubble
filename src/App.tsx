@@ -1566,6 +1566,32 @@ function HomePage() {
                 </header>
               </article>
             )}
+            {!connectionError && topics.length === 0 && (
+              <div className="max-w-4xl mx-auto mt-12">
+                <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-200'} border rounded-lg p-8 text-center`}>
+                  <h2 className={`text-2xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                    No Topics Found
+                  </h2>
+                  <p className={`mb-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                    {(dateFilter !== 'all' || categoryFilter !== 'all' || sourceFilter !== 'all')
+                      ? 'No topics match your current filters. Try adjusting your filter settings.'
+                      : 'The database is currently empty. Topics will appear here once data is added.'}
+                  </p>
+                  {(dateFilter !== 'all' || categoryFilter !== 'all' || sourceFilter !== 'all') && (
+                    <button
+                      onClick={() => {
+                        setDateFilter('all');
+                        setCategoryFilter('all');
+                        setSourceFilter('all');
+                      }}
+                      className={`px-6 py-2 rounded-lg font-semibold transition-colors ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-600 hover:bg-blue-700 shadow-sm hover:shadow text-white'}`}
+                    >
+                      Clear All Filters
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
             {connectionError && (
               <div className="max-w-4xl mx-auto mt-12">
                 <div className={`${theme === 'dark' ? 'bg-red-900/20 border-red-800' : 'bg-red-50 border-red-200'} border rounded-lg p-8 text-center`}>
