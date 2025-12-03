@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
 import { supabase } from '../lib/supabase';
 import { X, Save, Plus } from 'lucide-react';
 
@@ -272,38 +271,105 @@ export default function PageEditor({ theme, onClose, existingPage }: PageEditorP
       </div>
 
       <style>{`
-        .quill-dark .ql-toolbar {
-          background-color: #1f2937;
-          border-color: #374151;
-          border-radius: 0.5rem 0.5rem 0 0;
+        /* Quill Toolbar Styling */
+        .ql-toolbar {
+          border-radius: 0.5rem 0.5rem 0 0 !important;
+          padding: 0.75rem !important;
         }
-        .quill-dark .ql-container {
-          background-color: #111827;
-          border-color: #374151;
-          color: #fff;
-          border-radius: 0 0 0.5rem 0.5rem;
+
+        .ql-container {
+          border-radius: 0 0 0.5rem 0.5rem !important;
+          font-family: inherit !important;
         }
-        .quill-dark .ql-editor.ql-blank::before {
-          color: #6b7280;
-        }
-        .quill-dark .ql-stroke {
-          stroke: #d1d5db;
-        }
-        .quill-dark .ql-fill {
-          fill: #d1d5db;
-        }
-        .quill-dark .ql-picker-label {
-          color: #d1d5db;
-        }
-        .quill-dark .ql-picker-options {
-          background-color: #1f2937;
-          border-color: #374151;
-        }
-        .quill-dark .ql-picker-item:hover {
-          color: #60a5fa;
-        }
+
         .ql-editor {
-          min-height: 250px;
+          min-height: 300px !important;
+          font-size: 1rem !important;
+          line-height: 1.75 !important;
+        }
+
+        /* Dark Theme */
+        .quill-dark .ql-toolbar {
+          background-color: #1f2937 !important;
+          border-color: #374151 !important;
+        }
+
+        .quill-dark .ql-container {
+          background-color: #111827 !important;
+          border-color: #374151 !important;
+        }
+
+        .quill-dark .ql-editor {
+          color: #fff !important;
+        }
+
+        .quill-dark .ql-editor.ql-blank::before {
+          color: #6b7280 !important;
+          font-style: italic !important;
+        }
+
+        .quill-dark .ql-stroke {
+          stroke: #d1d5db !important;
+        }
+
+        .quill-dark .ql-fill {
+          fill: #d1d5db !important;
+        }
+
+        .quill-dark .ql-picker-label {
+          color: #d1d5db !important;
+        }
+
+        .quill-dark .ql-picker-options {
+          background-color: #1f2937 !important;
+          border-color: #374151 !important;
+        }
+
+        .quill-dark .ql-picker-item {
+          color: #d1d5db !important;
+        }
+
+        .quill-dark .ql-picker-item:hover {
+          color: #60a5fa !important;
+        }
+
+        .quill-dark .ql-active {
+          color: #60a5fa !important;
+        }
+
+        .quill-dark .ql-active .ql-stroke {
+          stroke: #60a5fa !important;
+        }
+
+        .quill-dark .ql-active .ql-fill {
+          fill: #60a5fa !important;
+        }
+
+        /* Light Theme */
+        .ql-toolbar {
+          background-color: #f9fafb !important;
+          border-color: #d1d5db !important;
+        }
+
+        .ql-container {
+          background-color: #ffffff !important;
+          border-color: #d1d5db !important;
+        }
+
+        /* Toolbar buttons */
+        .ql-toolbar button:hover,
+        .ql-toolbar button:focus {
+          color: #2563eb !important;
+        }
+
+        .ql-toolbar button:hover .ql-stroke,
+        .ql-toolbar button:focus .ql-stroke {
+          stroke: #2563eb !important;
+        }
+
+        .ql-toolbar button:hover .ql-fill,
+        .ql-toolbar button:focus .ql-fill {
+          fill: #2563eb !important;
         }
       `}</style>
     </div>
