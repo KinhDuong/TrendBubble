@@ -1,0 +1,17 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="32" cy="32" r="32" fill="#ffffff"/>
+
+  <!-- Border circle -->
+  <circle cx="32" cy="32" r="28" fill="none" stroke="#2563eb" stroke-width="4"/>
+
+  <!-- BarChart3 icon in blue -->
+  <g transform="translate(20, 20)">
+    <!-- First bar (tallest) -->
+    <rect x="2" y="4" width="6" height="20" rx="1" fill="none" stroke="#2563eb" stroke-width="2.5"/>
+    <!-- Second bar (medium) -->
+    <rect x="10" y="10" width="6" height="14" rx="1" fill="none" stroke="#2563eb" stroke-width="2.5"/>
+    <!-- Third bar (shortest) -->
+    <rect x="18" y="14" width="6" height="10" rx="1" fill="none" stroke="#2563eb" stroke-width="2.5"/>
+  </g>
+</svg>
