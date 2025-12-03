@@ -411,7 +411,7 @@ function DynamicPage() {
           isAdmin={isAdmin}
           onLoginClick={() => {}}
           onLogout={logout}
-          title="Trending Bubble"
+          title="Top Best Charts"
         />
         <div className={`min-h-screen flex items-center justify-center ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'} px-4`}>
           <div className="text-center max-w-md">
@@ -606,7 +606,7 @@ function DynamicPage() {
         isAdmin={isAdmin}
         onLoginClick={() => {}}
         onLogout={logout}
-        title="Trending Bubble"
+        title="Top Best Charts"
 snapshotButton={null}
       />
 

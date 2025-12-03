@@ -20,7 +20,7 @@ interface Page {
   source: string;
 }
 
-export default function Header({ theme, isAdmin, onLoginClick, onLogout, title = 'Trending Bubbles', useH1 = false, snapshotButton }: HeaderProps) {
+export default function Header({ theme, isAdmin, onLoginClick, onLogout, title = 'Top Best Charts', useH1 = false, snapshotButton }: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Page[]>([]);
