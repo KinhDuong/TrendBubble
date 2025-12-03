@@ -1877,7 +1877,7 @@ function HomePage() {
 
 function App() {
   return (
-    <BrowserRouter basename="/TrendBubble">
+    <BrowserRouter>
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/trending-bubble" element={<TrendingBubble />} />
