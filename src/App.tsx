@@ -11,10 +11,11 @@ import ComparisonPanel from './components/ComparisonPanel';
 import ShareSnapshot from './components/ShareSnapshot';
 import TrendingBubble from './pages/TrendingBubble';
 import DynamicPage from './pages/DynamicPage';
+import AdminPages from './pages/AdminPages';
 import { TrendingTopic } from './types';
 import { supabase } from './lib/supabase';
 import { useAuth } from './hooks/useAuth';
-import { LogOut, Home, TrendingUp, ArrowUpDown, ArrowUp, ArrowDown, LogIn, X, BarChart3 } from 'lucide-react';
+import { LogOut, Home, TrendingUp, ArrowUpDown, ArrowUp, ArrowDown, LogIn, X, BarChart3, FileText } from 'lucide-react';
 
 type SortField = 'name' | 'category' | 'searchVolume' | 'rank' | 'pubDate' | 'createdAt';
 type SortDirection = 'asc' | 'desc';
@@ -888,6 +889,21 @@ function HomePage() {
                 >
                   <TrendingUp size={16} />
                   Trending Bubble
+                </Link>
+                <Link
+                  to="/admin/pages"
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                    location.pathname === '/admin/pages'
+                      ? theme === 'dark'
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-blue-600 text-white shadow-sm'
+                      : theme === 'dark'
+                      ? 'text-gray-400 hover:text-white hover:bg-gray-700'
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                  }`}
+                >
+                  <FileText size={16} />
+                  Pages
                 </Link>
               </nav>
             </div>
@@ -1881,6 +1897,7 @@ function App() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/trending-bubble" element={<TrendingBubble />} />
+        <Route path="/admin/pages" element={<AdminPages />} />
         <Route path="*" element={<DynamicPage />} />
       </Routes>
     </BrowserRouter>
