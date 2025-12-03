@@ -120,41 +120,12 @@ function generateContentHTML(pageData, topics) {
     contentHTML += `
       <section class="page-summary" aria-labelledby="page-summary" itemscope itemtype="https://schema.org/Article" style="max-width: 80rem; margin: 2rem auto 1.5rem; padding: 0 0.5rem;">
         <div class="summary-container" style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; padding: 1.5rem;">
-          <div class="summary-content" itemprop="articleBody" style="color: #d1d5db; line-height: 1.75; word-wrap: break-word; overflow-wrap: break-word;">
+          <div class="summary-content" itemprop="articleBody">
             ${pageData.summary}
           </div>
           <meta itemprop="author" content="Top Best Charts" />
           <meta itemprop="datePublished" content="${pageData.created_at}" />
         </div>
-        <style>
-          .page-summary h1, .page-summary h2, .page-summary h3 { color: #fff; margin-top: 1.5rem; margin-bottom: 0.75rem; font-weight: 600; }
-          .page-summary h1 { font-size: 1.5rem; }
-          .page-summary h2 { font-size: 1.25rem; }
-          .page-summary h3 { font-size: 1.125rem; }
-          .page-summary p { margin-bottom: 1rem; line-height: 1.75; font-size: 0.875rem; }
-          .page-summary a { color: #60a5fa; text-decoration: none; word-break: break-word; }
-          .page-summary a:hover { color: #93c5fd; }
-          .page-summary ul, .page-summary ol { margin-left: 1.5rem; margin-bottom: 1rem; font-size: 0.875rem; }
-          .page-summary li { margin-bottom: 0.5rem; }
-          .page-summary strong { color: #fff; font-weight: 600; }
-          .page-summary table { width: 100%; border-collapse: collapse; margin-bottom: 1rem; overflow-x: auto; display: block; font-size: 0.875rem; }
-          .page-summary th { background-color: #374151; color: #fff; padding: 0.5rem; border: 1px solid #4b5563; }
-          .page-summary td { padding: 0.5rem; border: 1px solid #4b5563; }
-          .page-summary img { max-width: 100%; height: auto; border-radius: 0.5rem; }
-          .page-summary code { background-color: #374151; color: #d1d5db; padding: 0.125rem 0.25rem; border-radius: 0.25rem; font-size: 0.75rem; word-break: break-word; }
-          .page-summary pre { background-color: #111827; padding: 1rem; border-radius: 0.5rem; overflow-x: auto; margin-bottom: 1rem; }
-          .page-summary blockquote { border-left: 4px solid #4b5563; padding-left: 1rem; color: #9ca3af; margin: 1rem 0; }
-          @media (min-width: 768px) {
-            .page-summary { padding: 0; }
-            .summary-container { padding: 1.5rem; }
-            .page-summary p { font-size: 1rem; }
-            .page-summary h1 { font-size: 2rem; }
-            .page-summary h2 { font-size: 1.5rem; }
-            .page-summary h3 { font-size: 1.25rem; }
-            .page-summary ul, .page-summary ol, .page-summary table { font-size: 1rem; }
-            .page-summary code { font-size: 0.875rem; }
-          }
-        </style>
       </section>
     `;
   }
