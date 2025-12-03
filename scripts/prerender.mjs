@@ -123,7 +123,7 @@ function generateContentHTML(pageData, topics) {
           <div class="summary-content" itemprop="articleBody" style="color: #d1d5db; line-height: 1.75; word-wrap: break-word; overflow-wrap: break-word;">
             ${pageData.summary}
           </div>
-          <meta itemprop="author" content="Google Trending Topics" />
+          <meta itemprop="author" content="Top Best Charts" />
           <meta itemprop="datePublished" content="${pageData.created_at}" />
         </div>
         <style>
