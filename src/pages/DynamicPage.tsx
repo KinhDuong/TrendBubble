@@ -126,7 +126,8 @@ function DynamicPage() {
 
   const loadPageData = async () => {
     try {
-      const fullPath = '/' + (urlPath || '');
+      let fullPath = '/' + (urlPath || '');
+      fullPath = fullPath.replace(/\/+$/, '');
       const { data, error } = await supabase
         .from('pages')
         .select('*')
