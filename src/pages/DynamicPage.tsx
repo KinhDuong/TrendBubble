@@ -729,25 +729,6 @@ snapshotButton={null}
                     />
                   </div>
 
-                  {pageData.summary && (
-                    <section
-                      className="max-w-7xl mx-auto mt-8 mb-6 px-2 md:px-0"
-                      aria-labelledby="page-summary"
-                      itemScope
-                      itemType="https://schema.org/Article"
-                    >
-                      <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-lg border p-4 md:p-6`}>
-                        <div
-                          itemProp="articleBody"
-                          className="summary-content"
-                          dangerouslySetInnerHTML={{ __html: pageData.summary }}
-                        />
-                        <meta itemProp="author" content="Top Best Charts" />
-                        <meta itemProp="datePublished" content={pageData.created_at} />
-                      </div>
-                    </section>
-                  )}
-
                   <div className={`w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-200'} border-t border-b py-6 mt-8`}>
                     <div className="max-w-7xl mx-auto px-4">
                       <h2 className={`text-xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
@@ -1155,6 +1136,24 @@ snapshotButton={null}
                 </div>
               )}
             </>
+          )}
+          {pageData.summary && (
+            <section
+              className="max-w-7xl mx-auto mt-8 mb-6 px-2 md:px-0"
+              aria-labelledby="page-summary"
+              itemScope
+              itemType="https://schema.org/Article"
+            >
+              <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-lg border p-4 md:p-6`}>
+                <div
+                  itemProp="articleBody"
+                  className="summary-content"
+                  dangerouslySetInnerHTML={{ __html: pageData.summary }}
+                />
+                <meta itemProp="author" content="Top Best Charts" />
+                <meta itemProp="datePublished" content={pageData.created_at} />
+              </div>
+            </section>
           )}
           {latestPages.length > 0 && (
         <section className="max-w-7xl mx-auto mt-8 mb-0 px-4 md:px-6" aria-labelledby="latest-pages-heading">
