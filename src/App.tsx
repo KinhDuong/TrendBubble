@@ -35,7 +35,7 @@ function HomePage() {
   const [connectionError, setConnectionError] = useState(false);
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     const savedTheme = localStorage.getItem('theme');
-    return (savedTheme === 'dark' || savedTheme === 'light') ? savedTheme : 'dark';
+    return (savedTheme === 'dark' || savedTheme === 'light') ? savedTheme : 'light';
   });
   const [nextUpdateIn, setNextUpdateIn] = useState<string>('');
   const [updateProgress, setUpdateProgress] = useState<number>(0);
