@@ -97,9 +97,16 @@ export default function PageEditor({ theme, onClose, existingPage }: PageEditorP
 
         if (error) throw error;
       } else {
+        // Get current user for new page creation
+        const { data: { user } } = await supabase.auth.getUser();
+
+        if (!user) {
+          throw new Error('You must be logged in to create a page');
+        }
+
         const { error } = await supabase
           .from('pages')
-          .insert([pageData]);
+          .insert([{ ...pageData, user_id: user.id }]);
 
         if (error) throw error;
       }
