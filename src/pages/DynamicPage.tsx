@@ -827,16 +827,26 @@ snapshotButton={null}
                             return (
                           <li
                             key={index}
-                            className={`px-4 py-2 flex items-center gap-3 transition-colors ${index < displayTopics.length - 1 ? `border-b ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}` : ''} ${theme === 'dark' ? 'hover:bg-gray-700' : 'hover:bg-gray-50'}`}
+                            className={`px-4 py-2 flex items-start md:items-center gap-3 transition-colors ${index < displayTopics.length - 1 ? `border-b ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}` : ''} ${theme === 'dark' ? 'hover:bg-gray-700' : 'hover:bg-gray-50'}`}
                             itemProp="itemListElement"
                             itemScope
                             itemType="https://schema.org/ListItem"
                           >
                             <meta itemProp="position" content={String(actualRank)} />
-                            <div className="w-10 flex items-center justify-center" aria-label={`Rank ${actualRank}`}>
-                              <div className={`text-xl font-bold ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-                                {actualRank}
+                            <div className="flex flex-col md:flex-row md:items-center gap-1 md:gap-3">
+                              <div className="w-10 flex items-center justify-center" aria-label={`Rank ${actualRank}`}>
+                                <div className={`text-xl font-bold ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                                  {actualRank}
+                                </div>
                               </div>
+                              <span className={`md:hidden px-2 py-0.5 rounded text-xs self-start ${topic.source === 'user_upload' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`}>
+                                {(() => {
+                                  const found = sources.find(s => s.value === topic.source);
+                                  if (found) return found.label;
+                                  if (topic.source) return topic.source.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+                                  return 'Trending';
+                                })()}
+                              </span>
                             </div>
                             <article className="flex-1" itemProp="item" itemScope itemType="https://schema.org/Thing">
                               <h3 className={`font-semibold text-base mb-1 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`} itemProp="name">{topic.name.replace(/"/g, '')}</h3>
@@ -844,7 +854,7 @@ snapshotButton={null}
                                 <span className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} itemProp="description">
                                   {topic.searchVolumeRaw.replace(/"/g, '')} searches
                                 </span>
-                                <span className={`px-2 py-0.5 rounded text-xs ${topic.source === 'user_upload' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`}>
+                                <span className={`hidden md:inline px-2 py-0.5 rounded text-xs ${topic.source === 'user_upload' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`}>
                                   {(() => {
                                     const found = sources.find(s => s.value === topic.source);
                                     if (found) return found.label;
@@ -869,21 +879,21 @@ snapshotButton={null}
                           })}
                         </ol>
                         {totalPages > 1 && (
-                          <div className="mt-6 flex items-center justify-center gap-2">
+                          <div className="mt-6 flex items-center justify-center gap-1 md:gap-2">
                             <button
                               onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                               disabled={currentPage === 1}
-                              className={`px-4 py-2 rounded-lg font-semibold transition-colors ${currentPage === 1 ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}
+                              className={`px-2 py-1 md:px-4 md:py-2 rounded-lg text-sm md:text-base font-semibold transition-colors ${currentPage === 1 ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}
                             >
                               Previous
                             </button>
-                            <span className="px-4 py-2 text-gray-700">
+                            <span className={`px-2 py-1 md:px-4 md:py-2 text-xs md:text-base ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
                               Page {currentPage} of {totalPages}
                             </span>
                             <button
                               onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                               disabled={currentPage === totalPages}
-                              className={`px-4 py-2 rounded-lg font-semibold transition-colors ${currentPage === totalPages ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}
+                              className={`px-2 py-1 md:px-4 md:py-2 rounded-lg text-sm md:text-base font-semibold transition-colors ${currentPage === totalPages ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}
                             >
                               Next
                             </button>
@@ -988,21 +998,21 @@ snapshotButton={null}
                         </div>
                       </div>
                       {totalPages > 1 && (
-                        <div className="mt-6 flex items-center justify-center gap-2">
+                        <div className="mt-6 flex items-center justify-center gap-1 md:gap-2">
                           <button
                             onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                             disabled={currentPage === 1}
-                            className={`px-4 py-2 rounded-lg font-semibold transition-colors ${currentPage === 1 ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}
+                            className={`px-2 py-1 md:px-4 md:py-2 rounded-lg text-sm md:text-base font-semibold transition-colors ${currentPage === 1 ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}
                           >
                             Previous
                           </button>
-                          <span className={`px-4 py-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                          <span className={`px-2 py-1 md:px-4 md:py-2 text-xs md:text-base ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
                             Page {currentPage} of {totalPages}
                           </span>
                           <button
                             onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                             disabled={currentPage === totalPages}
-                            className={`px-4 py-2 rounded-lg font-semibold transition-colors ${currentPage === totalPages ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}
+                            className={`px-2 py-1 md:px-4 md:py-2 rounded-lg text-sm md:text-base font-semibold transition-colors ${currentPage === totalPages ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}
                           >
                             Next
                           </button>
