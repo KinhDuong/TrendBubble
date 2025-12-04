@@ -986,7 +986,7 @@ snapshotButton={null}
                   </div>
                   <div className={`divide-y ${theme === 'dark' ? 'divide-gray-700' : 'divide-gray-200'}`}>
                     {getSortedTopics().map((topic, index) => (
-                      <div key={index} className={`grid grid-cols-6 gap-4 px-6 py-4 ${theme === 'dark' ? 'hover:bg-gray-750' : 'hover:bg-gray-50'} transition-colors`}>
+                      <div key={index} className={`grid grid-cols-6 gap-4 px-4 py-2 ${theme === 'dark' ? 'hover:bg-gray-750' : 'hover:bg-gray-50'} transition-colors`}>
                         <div className="font-medium">{topic.name.replace(/"/g, '')}</div>
                         <div className={`text-center ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>{topic.category || '-'}</div>
                         <div className={`text-center ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>{topic.searchVolumeRaw.replace(/"/g, '')}</div>

@@ -369,3 +369,75 @@ html {
     font-size: 0.875rem;
   }
 }
+
+/* Top Topics List Styles (for prerendered pages) */
+.topics-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.topics-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid #374151;
+}
+
+.topics-list li:last-child {
+  border-bottom: none;
+}
+
+.topics-list li:hover {
+  background-color: #374151;
+}
+
+.topics-list .rank {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #9ca3af;
+  min-width: 2.5rem;
+  text-align: center;
+}
+
+.topics-list .topic-info {
+  flex: 1;
+}
+
+.topics-list .topic-info h3 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin: 0 0 0.25rem 0;
+  color: #fff;
+}
+
+.topics-list .topic-info p {
+  font-size: 0.75rem;
+  margin: 0;
+  color: #9ca3af;
+}
+
+.topics-list .topic-info .category {
+  display: inline-block;
+  font-size: 0.625rem;
+  padding: 0.125rem 0.5rem;
+  background-color: #374151;
+  color: #9ca3af;
+  border-radius: 0.25rem;
+  margin-top: 0.25rem;
+}
+
+@media (min-width: 768px) {
+  .topics-list .rank {
+    font-size: 1.5rem;
+  }
+
+  .topics-list .topic-info h3 {
+    font-size: 1rem;
+  }
+
+  .topics-list .topic-info p {
+    font-size: 0.875rem;
+  }
+}

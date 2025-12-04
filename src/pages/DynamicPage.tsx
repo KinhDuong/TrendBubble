@@ -787,19 +787,19 @@ snapshotButton={null}
                           {displayTopics.map((topic, index) => (
                           <li
                             key={index}
-                            className={`px-6 py-4 flex items-center gap-4 ${theme === 'dark' ? 'hover:bg-gray-750' : 'hover:bg-gray-50'} transition-colors ${index < displayTopics.length - 1 ? (theme === 'dark' ? 'border-b border-gray-700' : 'border-b border-gray-200') : ''}`}
+                            className={`px-4 py-2 flex items-center gap-3 ${theme === 'dark' ? 'hover:bg-gray-750' : 'hover:bg-gray-50'} transition-colors ${index < displayTopics.length - 1 ? (theme === 'dark' ? 'border-b border-gray-700' : 'border-b border-gray-200') : ''}`}
                             itemProp="itemListElement"
                             itemScope
                             itemType="https://schema.org/ListItem"
                           >
                             <meta itemProp="position" content={String(index + 1)} />
-                            <div className={`w-12 flex items-center justify-center`} aria-label={`Rank ${index + 1}`}>
-                              <div className={`text-2xl font-bold ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                            <div className={`w-10 flex items-center justify-center`} aria-label={`Rank ${index + 1}`}>
+                              <div className={`text-xl font-bold ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
                                 {index + 1}
                               </div>
                             </div>
                             <article className="flex-1" itemProp="item" itemScope itemType="https://schema.org/Thing">
-                              <h3 className="font-semibold text-lg mb-1" itemProp="name">{topic.name.replace(/"/g, '')}</h3>
+                              <h3 className="font-semibold text-base mb-1" itemProp="name">{topic.name.replace(/"/g, '')}</h3>
                               <div className="flex flex-wrap items-center gap-3 text-sm">
                                 <span className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`} itemProp="description">
                                   {topic.searchVolumeRaw.replace(/"/g, '')} searches
@@ -854,15 +854,15 @@ snapshotButton={null}
                               return (
                                 <li
                                   key={index}
-                                  className={`px-4 py-3 flex items-center gap-3 ${theme === 'dark' ? 'hover:bg-gray-750' : 'hover:bg-gray-50'} transition-colors ${index < topGainers.length - 1 ? (theme === 'dark' ? 'border-b border-gray-700' : 'border-b border-gray-200') : ''}`}
+                                  className={`px-3 py-2 flex items-center gap-2 ${theme === 'dark' ? 'hover:bg-gray-750' : 'hover:bg-gray-50'} transition-colors ${index < topGainers.length - 1 ? (theme === 'dark' ? 'border-b border-gray-700' : 'border-b border-gray-200') : ''}`}
                                 >
-                                  <div className={`w-8 flex items-center justify-center`}>
-                                    <div className={`text-lg font-bold ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                                  <div className={`w-7 flex items-center justify-center`}>
+                                    <div className={`text-base font-bold ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
                                       {index + 1}
                                     </div>
                                   </div>
                                   <div className="flex-1">
-                                    <h4 className="font-semibold mb-1">{topic.name.replace(/"/g, '')}</h4>
+                                    <h4 className="font-semibold text-sm mb-0.5">{topic.name.replace(/"/g, '')}</h4>
                                     <div className="flex items-center gap-2 text-sm">
                                       <span className="text-green-500 font-bold">
                                         +{typeof change === 'number' ? change.toFixed(2) : change}%
@@ -892,15 +892,15 @@ snapshotButton={null}
                               return (
                                 <li
                                   key={index}
-                                  className={`px-4 py-3 flex items-center gap-3 ${theme === 'dark' ? 'hover:bg-gray-750' : 'hover:bg-gray-50'} transition-colors ${index < topLosers.length - 1 ? (theme === 'dark' ? 'border-b border-gray-700' : 'border-b border-gray-200') : ''}`}
+                                  className={`px-3 py-2 flex items-center gap-2 ${theme === 'dark' ? 'hover:bg-gray-750' : 'hover:bg-gray-50'} transition-colors ${index < topLosers.length - 1 ? (theme === 'dark' ? 'border-b border-gray-700' : 'border-b border-gray-200') : ''}`}
                                 >
-                                  <div className={`w-8 flex items-center justify-center`}>
-                                    <div className={`text-lg font-bold ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                                  <div className={`w-7 flex items-center justify-center`}>
+                                    <div className={`text-base font-bold ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
                                       {index + 1}
                                     </div>
                                   </div>
                                   <div className="flex-1">
-                                    <h4 className="font-semibold mb-1">{topic.name.replace(/"/g, '')}</h4>
+                                    <h4 className="font-semibold text-sm mb-0.5">{topic.name.replace(/"/g, '')}</h4>
                                     <div className="flex items-center gap-2 text-sm">
                                       <span className="text-red-500 font-bold">
                                         {typeof change === 'number' ? change.toFixed(2) : change}%
