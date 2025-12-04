@@ -249,9 +249,7 @@ function DynamicPage() {
         }));
 
         const sortedTopics = [...formattedTopics].sort((a, b) => {
-          const aValue = a.searchVolumeRaw ?? a.searchVolume;
-          const bValue = b.searchVolumeRaw ?? b.searchVolume;
-          return bValue - aValue;
+          return b.searchVolume - a.searchVolume;
         });
 
         setTopics(sortedTopics);
