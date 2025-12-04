@@ -57,10 +57,12 @@ function DynamicPage() {
   const [sourceFilter, setSourceFilter] = useState<string>('all');
   const [comparingTopics, setComparingTopics] = useState<Set<string>>(new Set());
   const [bubbleLayout, setBubbleLayout] = useState<BubbleLayout>('force');
-  const [showFullList, setShowFullList] = useState<boolean>(false);
+  const [currentPage, setCurrentPage] = useState<number>(1);
   const [cryptoTimeframe, setCryptoTimeframe] = useState<CryptoTimeframe>('1h');
   const bubbleChartRef = useRef<HTMLDivElement>(null);
   const [animationStyle, setAnimationStyle] = useState<AnimationStyle>('default');
+
+  const itemsPerPage = 50;
 
   const sortedTopics = useMemo(() => {
     if (pageData?.source !== 'coingecko_crypto' || !topics.length) {
@@ -123,6 +125,10 @@ function DynamicPage() {
       loadTopics();
     }
   }, [dateFilter, categoryFilter, pageData]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [dateFilter, categoryFilter, sourceFilter, searchQuery, cryptoTimeframe, topics.length]);
 
   const loadPageData = async () => {
     try {
@@ -452,11 +458,20 @@ function DynamicPage() {
     };
 
     const sortedByChange = [...topics].sort((a, b) => getCryptoChange(b) - getCryptoChange(a));
-    topGainers = sortedByChange.filter(t => getCryptoChange(t) > 0).slice(0, showFullList ? sortedByChange.length : 10);
-    topLosers = sortedByChange.filter(t => getCryptoChange(t) < 0).slice(-10).reverse();
+    const gainers = sortedByChange.filter(t => getCryptoChange(t) > 0);
+    const losers = sortedByChange.filter(t => getCryptoChange(t) < 0).reverse();
+
+    const startIndexGainers = (currentPage - 1) * itemsPerPage;
+    const endIndexGainers = startIndexGainers + itemsPerPage;
+    topGainers = gainers.slice(startIndexGainers, endIndexGainers);
+    topLosers = losers.slice(startIndexGainers, endIndexGainers);
   }
 
-  const displayTopics = showFullList ? topTopics : topTopics.slice(0, 10);
+  const totalPages = Math.ceil(topTopics.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const displayTopics = topTopics.slice(startIndex, endIndex);
+
   const topTopicNames = topTopics.slice(0, 5).map(t => t.name.replace(/"/g, '')).join(', ');
   const currentDate = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
   const lastUpdated = topics.length > 0 ? new Date(Math.max(...topics.map(t => new Date(t.pubDate || t.createdAt || Date.now()).getTime()))) : new Date();
@@ -473,9 +488,7 @@ function DynamicPage() {
   };
 
   const topicType = extractTopicType(pageData.meta_title);
-  const top10Title = showFullList
-    ? `All ${topicType || 'Trending Topics'}`
-    : `Top 10 ${topicType || 'Trending Topics'}`;
+  const topTitle = `Top ${topTopics.length} ${topicType || 'Trending Topics'}`;
 
   const enhancedTitle = `${pageData.meta_title} - ${currentDate}`;
   const enhancedDescription = topTopicNames
@@ -746,7 +759,7 @@ snapshotButton={null}
                     {!isCryptoPage && (
                       <>
                         <h2 id="top-trending-heading" className={`text-2xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                          {top10Title}
+                          {topTitle}
                         </h2>
                         {topTopicNames && (
                           <p className={`mb-4 text-sm leading-relaxed ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
@@ -759,7 +772,7 @@ snapshotButton={null}
                     {isCryptoPage && (
                       <>
                         <h2 id="top-trending-heading" className={`text-2xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                          Top 10 Gainers & Losers
+                          Top {topTopics.length} Gainers & Losers
                         </h2>
                         {topGainers.length > 0 && topLosers.length > 0 && (() => {
                           const timeframeLabel = cryptoTimeframe === '1h' ? '1-hour' : cryptoTimeframe === '24h' ? '24-hour' : cryptoTimeframe === '7d' ? '7-day' : cryptoTimeframe === '30d' ? '30-day' : '1-year';
@@ -782,7 +795,9 @@ snapshotButton={null}
                     {!isCryptoPage && (
                       <>
                         <ol className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white shadow-md border border-gray-200'} rounded-lg overflow-hidden list-none`} itemScope itemType="https://schema.org/ItemList">
-                          {displayTopics.map((topic, index) => (
+                          {displayTopics.map((topic, index) => {
+                            const actualRank = startIndex + index + 1;
+                            return (
                           <li
                             key={index}
                             className={`px-4 py-2 flex items-center gap-3 ${theme === 'dark' ? 'hover:bg-gray-750' : 'hover:bg-gray-50'} transition-colors ${index < displayTopics.length - 1 ? (theme === 'dark' ? 'border-b border-gray-700' : 'border-b border-gray-200') : ''}`}
@@ -790,10 +805,10 @@ snapshotButton={null}
                             itemScope
                             itemType="https://schema.org/ListItem"
                           >
-                            <meta itemProp="position" content={String(index + 1)} />
-                            <div className={`w-10 flex items-center justify-center`} aria-label={`Rank ${index + 1}`}>
+                            <meta itemProp="position" content={String(actualRank)} />
+                            <div className={`w-10 flex items-center justify-center`} aria-label={`Rank ${actualRank}`}>
                               <div className={`text-xl font-bold ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-                                {index + 1}
+                                {actualRank}
                               </div>
                             </div>
                             <article className="flex-1" itemProp="item" itemScope itemType="https://schema.org/Thing">
@@ -823,15 +838,27 @@ snapshotButton={null}
                               </div>
                             </article>
                           </li>
-                          ))}
+                          );
+                          })}
                         </ol>
-                        {topTopics.length > 10 && (
-                          <div className="mt-4 text-center">
+                        {totalPages > 1 && (
+                          <div className="mt-6 flex items-center justify-center gap-2">
                             <button
-                              onClick={() => setShowFullList(!showFullList)}
-                              className={`px-6 py-2 rounded-lg font-semibold transition-colors ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-600 hover:bg-blue-700 shadow-sm hover:shadow text-white'}`}
+                              onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                              disabled={currentPage === 1}
+                              className={`px-4 py-2 rounded-lg font-semibold transition-colors ${currentPage === 1 ? (theme === 'dark' ? 'bg-gray-700 text-gray-500 cursor-not-allowed' : 'bg-gray-200 text-gray-400 cursor-not-allowed') : (theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-600 hover:bg-blue-700 text-white')}`}
                             >
-                              {showFullList ? 'Show Top 10 Only' : 'See Full List'}
+                              Previous
+                            </button>
+                            <span className={`px-4 py-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                              Page {currentPage} of {totalPages}
+                            </span>
+                            <button
+                              onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                              disabled={currentPage === totalPages}
+                              className={`px-4 py-2 rounded-lg font-semibold transition-colors ${currentPage === totalPages ? (theme === 'dark' ? 'bg-gray-700 text-gray-500 cursor-not-allowed' : 'bg-gray-200 text-gray-400 cursor-not-allowed') : (theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-600 hover:bg-blue-700 text-white')}`}
+                            >
+                              Next
                             </button>
                           </div>
                         )}
@@ -839,16 +866,18 @@ snapshotButton={null}
                     )}
 
                     {isCryptoPage && (
+                      <>
                       <div className="grid md:grid-cols-2 gap-6">
                         {/* Top Gainers */}
                         <div>
                           <h3 className={`text-xl font-bold mb-3 flex items-center gap-2 ${theme === 'dark' ? 'text-green-400' : 'text-green-600'}`}>
                             <ArrowUp size={24} />
-                            Top 10 Gainers ({cryptoTimeframe.toUpperCase()})
+                            Gainers ({cryptoTimeframe.toUpperCase()})
                           </h3>
                           <ol className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white shadow-md border border-gray-200'} rounded-lg overflow-hidden list-none`}>
                             {topGainers.map((topic, index) => {
                               const change = topic.crypto_data?.[`change_${cryptoTimeframe}` as keyof typeof topic.crypto_data] || 0;
+                              const actualRank = startIndex + index + 1;
                               return (
                                 <li
                                   key={index}
@@ -856,7 +885,7 @@ snapshotButton={null}
                                 >
                                   <div className={`w-7 flex items-center justify-center`}>
                                     <div className={`text-base font-bold ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-                                      {index + 1}
+                                      {actualRank}
                                     </div>
                                   </div>
                                   <div className="flex-1">
@@ -882,11 +911,12 @@ snapshotButton={null}
                         <div>
                           <h3 className={`text-xl font-bold mb-3 flex items-center gap-2 ${theme === 'dark' ? 'text-red-400' : 'text-red-600'}`}>
                             <ArrowDown size={24} />
-                            Top 10 Losers ({cryptoTimeframe.toUpperCase()})
+                            Losers ({cryptoTimeframe.toUpperCase()})
                           </h3>
                           <ol className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white shadow-md border border-gray-200'} rounded-lg overflow-hidden list-none`}>
                             {topLosers.map((topic, index) => {
                               const change = topic.crypto_data?.[`change_${cryptoTimeframe}` as keyof typeof topic.crypto_data] || 0;
+                              const actualRank = startIndex + index + 1;
                               return (
                                 <li
                                   key={index}
@@ -894,7 +924,7 @@ snapshotButton={null}
                                 >
                                   <div className={`w-7 flex items-center justify-center`}>
                                     <div className={`text-base font-bold ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-                                      {index + 1}
+                                      {actualRank}
                                     </div>
                                   </div>
                                   <div className="flex-1">
@@ -916,6 +946,28 @@ snapshotButton={null}
                           </ol>
                         </div>
                       </div>
+                      {totalPages > 1 && (
+                        <div className="mt-6 flex items-center justify-center gap-2">
+                          <button
+                            onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                            disabled={currentPage === 1}
+                            className={`px-4 py-2 rounded-lg font-semibold transition-colors ${currentPage === 1 ? (theme === 'dark' ? 'bg-gray-700 text-gray-500 cursor-not-allowed' : 'bg-gray-200 text-gray-400 cursor-not-allowed') : (theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-600 hover:bg-blue-700 text-white')}`}
+                          >
+                            Previous
+                          </button>
+                          <span className={`px-4 py-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                            Page {currentPage} of {totalPages}
+                          </span>
+                          <button
+                            onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                            disabled={currentPage === totalPages}
+                            className={`px-4 py-2 rounded-lg font-semibold transition-colors ${currentPage === totalPages ? (theme === 'dark' ? 'bg-gray-700 text-gray-500 cursor-not-allowed' : 'bg-gray-200 text-gray-400 cursor-not-allowed') : (theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-600 hover:bg-blue-700 text-white')}`}
+                          >
+                            Next
+                          </button>
+                        </div>
+                      )}
+                      </>
                     )}
                   </section>
                 </>
