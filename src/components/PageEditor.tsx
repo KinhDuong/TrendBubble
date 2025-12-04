@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import ReactQuill from 'react-quill';
 import { supabase } from '../lib/supabase';
 import { X, Save, Plus, Code, Eye } from 'lucide-react';
+import FAQManager from './FAQManager';
 
 interface Page {
   id: string;
@@ -339,6 +340,12 @@ export default function PageEditor({ theme, onClose, existingPage }: PageEditorP
                 />
               )}
             </div>
+
+            {existingPage && (
+              <div className={`pt-6 mt-6 border-t ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
+                <FAQManager pageId={existingPage.id} theme={theme} />
+              </div>
+            )}
           </div>
         </div>
 

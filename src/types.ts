@@ -30,3 +30,14 @@ export interface TrendingTopic {
 }
 
 export type CryptoTimeframe = '1h' | '24h' | '7d' | '30d' | '1y';
+
+export interface FAQ {
+  id: string;
+  page_id: string;
+  question: string;
+  answer: string;
+  order_index: number;
+  created_at: string;
+  updated_at: string;
+  user_id?: string;
+}

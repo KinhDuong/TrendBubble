@@ -8,7 +8,7 @@ import FilterMenu, { BubbleLayout } from '../components/FilterMenu';
 import ComparisonPanel from '../components/ComparisonPanel';
 import ShareSnapshot from '../components/ShareSnapshot';
 import AnimationSelector, { AnimationStyle } from '../components/AnimationSelector';
-import { TrendingTopic, CryptoTimeframe } from '../types';
+import { TrendingTopic, CryptoTimeframe, FAQ } from '../types';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
 import { TrendingUp, ArrowUpDown, ArrowUp, ArrowDown, Search, X } from 'lucide-react';
@@ -62,6 +62,7 @@ function DynamicPage() {
   const bubbleChartRef = useRef<HTMLDivElement>(null);
   const [animationStyle, setAnimationStyle] = useState<AnimationStyle>('default');
   const [topSearchQuery, setTopSearchQuery] = useState<string>('');
+  const [faqs, setFaqs] = useState<FAQ[]>([]);
 
   const itemsPerPage = 10;
 
@@ -150,10 +151,27 @@ function DynamicPage() {
       }
 
       setPageData(data);
+      loadFAQs(data.id);
     } catch (error) {
       console.error('Error loading page data:', error);
       setPageData(null);
       setLoading(false);
+    }
+  };
+
+  const loadFAQs = async (pageId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('faqs')
+        .select('*')
+        .eq('page_id', pageId)
+        .order('order_index', { ascending: true });
+
+      if (error) throw error;
+      setFaqs(data || []);
+    } catch (error) {
+      console.error('Error loading FAQs:', error);
+      setFaqs([]);
     }
   };
 
@@ -586,38 +604,22 @@ function DynamicPage() {
           })}
         </script>
 
-        <script type="application/ld+json">
-          {JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "FAQPage",
-            "mainEntity": [
-              {
+        {faqs.length > 0 && (
+          <script type="application/ld+json">
+            {JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "FAQPage",
+              "mainEntity": faqs.map(faq => ({
                 "@type": "Question",
-                "name": `What are the top trending topics for ${sourceName}?`,
+                "name": faq.question,
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": `The top trending topics for ${sourceName} as of ${currentDate} are: ${topTopicNames}. These topics are ranked by search volume and updated in real-time.`
+                  "text": faq.answer
                 }
-              },
-              {
-                "@type": "Question",
-                "name": "How often is this trending data updated?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "Our trending topics data is updated in real-time, with the latest update at " + lastUpdated.toLocaleString('en-US', { timeZone: 'America/New_York', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true }) + " ET."
-                }
-              },
-              {
-                "@type": "Question",
-                "name": "What does search volume mean?",
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": "Search volume indicates how many times a topic has been searched. Higher search volumes indicate more popular and trending topics that are capturing public attention."
-                }
-              }
-            ]
-          })}
-        </script>
+              }))
+            })}
+          </script>
+        )}
       </Helmet>
 
       <Header
@@ -1210,7 +1212,7 @@ snapshotButton={null}
         </section>
       )}
 
-          {topics.length > 0 && (
+          {topics.length > 0 && faqs.length > 0 && (
             <section className="max-w-7xl mx-auto mt-12 mb-0 px-4 md:px-6" aria-labelledby="faq-heading">
               <h2 id="faq-heading" className={`text-xl md:text-3xl font-bold mb-6 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                 Frequently Asked Questions
@@ -1219,83 +1221,17 @@ snapshotButton={null}
                 Find answers to common questions about {pageData.meta_title.toLowerCase()} and how to use our real-time trending topics platform to discover viral content, analyze search trends, and stay ahead of what's trending online.
               </p>
               <div className="space-y-6">
-                <details className={`group ${theme === 'dark' ? 'bg-gray-800' : 'bg-white border border-gray-200'} rounded-lg`}>
-                  <summary className={`cursor-pointer px-6 py-4 font-semibold ${theme === 'dark' ? 'text-white hover:text-blue-400' : 'text-gray-900 hover:text-blue-600'} transition-colors list-none flex items-center justify-between`}>
-                    <span>What are the top trending topics for {sourceName}?</span>
-                    <span className="ml-2 text-2xl group-open:rotate-45 transition-transform">+</span>
-                  </summary>
-                  <div className={`px-6 pb-4 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                    <p>
-                      The top trending topics for {sourceName} as of {currentDate} are: <strong>{topTopicNames}</strong>.
-                      These topics are ranked by search volume and updated in real-time to reflect what people are searching for right now.
-                    </p>
-                  </div>
-                </details>
-
-                <details className={`group ${theme === 'dark' ? 'bg-gray-800' : 'bg-white border border-gray-200'} rounded-lg`}>
-                  <summary className={`cursor-pointer px-6 py-4 font-semibold ${theme === 'dark' ? 'text-white hover:text-blue-400' : 'text-gray-900 hover:text-blue-600'} transition-colors list-none flex items-center justify-between`}>
-                    <span>How often is this trending data updated?</span>
-                    <span className="ml-2 text-2xl group-open:rotate-45 transition-transform">+</span>
-                  </summary>
-                  <div className={`px-6 pb-4 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                    <p>
-                      Our trending topics data is updated in real-time. The latest update was at{' '}
-                      <time dateTime={lastUpdated.toISOString()}>
-                        {lastUpdated.toLocaleString('en-US', {
-                          timeZone: 'America/New_York',
-                          month: 'short',
-                          day: 'numeric',
-                          hour: 'numeric',
-                          minute: '2-digit',
-                          hour12: true
-                        })} ET
-                      </time>.
-                      We continuously monitor search trends to bring you the most current information about what's trending.
-                    </p>
-                  </div>
-                </details>
-
-                <details className={`group ${theme === 'dark' ? 'bg-gray-800' : 'bg-white border border-gray-200'} rounded-lg`}>
-                  <summary className={`cursor-pointer px-6 py-4 font-semibold ${theme === 'dark' ? 'text-white hover:text-blue-400' : 'text-gray-900 hover:text-blue-600'} transition-colors list-none flex items-center justify-between`}>
-                    <span>What does search volume mean?</span>
-                    <span className="ml-2 text-2xl group-open:rotate-45 transition-transform">+</span>
-                  </summary>
-                  <div className={`px-6 pb-4 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                    <p>
-                      Search volume indicates how many times a topic has been searched. Higher search volumes indicate more popular
-                      and trending topics that are capturing public attention. We track this metric to help you identify which topics
-                      are gaining momentum and becoming viral across the internet.
-                    </p>
-                  </div>
-                </details>
-
-                <details className={`group ${theme === 'dark' ? 'bg-gray-800' : 'bg-white border border-gray-200'} rounded-lg`}>
-                  <summary className={`cursor-pointer px-6 py-4 font-semibold ${theme === 'dark' ? 'text-white hover:text-blue-400' : 'text-gray-900 hover:text-blue-600'} transition-colors list-none flex items-center justify-between`}>
-                    <span>How can I use this trending data?</span>
-                    <span className="ml-2 text-2xl group-open:rotate-45 transition-transform">+</span>
-                  </summary>
-                  <div className={`px-6 pb-4 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                    <p>
-                      You can use this trending data for content creation, marketing strategies, staying informed about current events,
-                      identifying viral topics, and understanding what captures public interest. Our interactive visualization allows you
-                      to filter by category and date range to find trends most relevant to your needs.
-                    </p>
-                  </div>
-                </details>
-
-                <details className={`group ${theme === 'dark' ? 'bg-gray-800' : 'bg-white border border-gray-200'} rounded-lg`}>
-                  <summary className={`cursor-pointer px-6 py-4 font-semibold ${theme === 'dark' ? 'text-white hover:text-blue-400' : 'text-gray-900 hover:text-blue-600'} transition-colors list-none flex items-center justify-between`}>
-                    <span>Can I switch between bubble and list views?</span>
-                    <span className="ml-2 text-2xl group-open:rotate-45 transition-transform">+</span>
-                  </summary>
-                  <div className={`px-6 pb-4 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                    <p>
-                      Yes! Use the view toggle in the filter menu to switch between our interactive bubble chart visualization and
-                      a sortable list view. The bubble chart provides a visual representation of trending topics where bubble size
-                      represents search volume, while the list view offers detailed sorting and filtering capabilities.
-                    </p>
-                  </div>
-                </details>
+                {faqs.map((faq) => (
+                  <details key={faq.id} className={`group ${theme === 'dark' ? 'bg-gray-800' : 'bg-white border border-gray-200'} rounded-lg`}>
+                    <summary className={`cursor-pointer px-6 py-4 font-semibold ${theme === 'dark' ? 'text-white hover:text-blue-400' : 'text-gray-900 hover:text-blue-600'} transition-colors list-none flex items-center justify-between`}>
+                      <span>{faq.question}</span>
+                      <span className="ml-2 text-2xl group-open:rotate-45 transition-transform">+</span>
+                    </summary>
+                    <div className={`px-6 pb-4 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                      <p>{faq.answer}</p>
+                    </div>
+                  </details>
+                ))}
               </div>
             </section>
           )}
