@@ -102,7 +102,7 @@ export default function FilterMenu({
                       <option value={100}>100</option>
                       <option value={150}>150</option>
                       <option value={200}>200</option>
-                      <option value={99999}>All</option>
+                      <option value={1000}>1000</option>
                     </select>
                     <Divider />
                   </>
@@ -404,7 +404,7 @@ export default function FilterMenu({
                       <option value={100}>100</option>
                       <option value={150}>150</option>
                       <option value={200}>200</option>
-                      <option value={99999}>All</option>
+                      <option value={1000}>1000</option>
                     </select>
                   </div>
                   <Divider />
