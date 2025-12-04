@@ -692,7 +692,7 @@ snapshotButton={null}
                         })} ET
                       </time>
                       <span className={`px-2 py-1 rounded text-xs ${theme === 'dark' ? 'bg-blue-900/30 text-blue-400' : 'bg-blue-100 text-blue-700'}`}>
-                        {topics.length} trending topics
+                        {topics.length} {sourceName}
                       </span>
                     </div>
                   </header>
