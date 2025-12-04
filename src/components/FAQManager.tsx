@@ -19,6 +19,7 @@ export default function FAQManager({ pageId, theme }: FAQManagerProps) {
   const [editAnswer, setEditAnswer] = useState('');
 
   useEffect(() => {
+    console.log('FAQManager mounted with pageId:', pageId);
     if (pageId) {
       loadFAQs();
     }
@@ -173,8 +174,13 @@ export default function FAQManager({ pageId, theme }: FAQManagerProps) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <label className="block text-sm font-medium">FAQs</label>
-        <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+        <div>
+          <h3 className="text-lg font-bold mb-1">Frequently Asked Questions</h3>
+          <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+            Add FAQ items to display on this page
+          </p>
+        </div>
+        <span className={`text-xs px-3 py-1 rounded-full ${theme === 'dark' ? 'bg-blue-900/30 text-blue-400' : 'bg-blue-100 text-blue-700'}`}>
           {faqs.length} FAQ{faqs.length !== 1 ? 's' : ''}
         </span>
       </div>

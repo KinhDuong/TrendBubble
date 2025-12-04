@@ -35,6 +35,7 @@ export default function PageEditor({ theme, onClose, existingPage }: PageEditorP
 
   useEffect(() => {
     loadSources();
+    console.log('PageEditor mounted, existingPage:', existingPage);
   }, []);
 
   const loadSources = async () => {
@@ -342,7 +343,7 @@ export default function PageEditor({ theme, onClose, existingPage }: PageEditorP
             </div>
 
             {existingPage && (
-              <div className={`pt-6 mt-6 border-t ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
+              <div className={`pt-8 mt-8 border-t-2 ${theme === 'dark' ? 'border-gray-600' : 'border-gray-300'}`}>
                 <FAQManager pageId={existingPage.id} theme={theme} />
               </div>
             )}
