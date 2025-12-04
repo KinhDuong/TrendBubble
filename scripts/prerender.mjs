@@ -91,7 +91,7 @@ function generateMetaTags(pageData, topics) {
 
   const enhancedTitle = `${pageData.meta_title} - ${currentDate}`;
   const enhancedDescription = topTopics
-    ? `${pageData.meta_description} Top trending: ${topTopics}. Updated ${lastUpdated.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}.`
+    ? `${pageData.meta_description} ${topTopics}. Updated ${lastUpdated.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}.`
     : pageData.meta_description;
 
   const keywords = topics.slice(0, 10).map(t => t.name.replace(/"/g, '')).join(', ') + ', trending topics, search trends, real-time trends, trend analysis';
