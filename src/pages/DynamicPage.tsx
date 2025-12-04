@@ -698,7 +698,7 @@ snapshotButton={null}
                         }}
                         className={`px-2 py-1 rounded text-xs cursor-pointer transition-all hover:scale-105 ${theme === 'dark' ? 'bg-blue-900/30 text-blue-400 hover:bg-blue-900/50' : 'bg-blue-100 text-blue-700 hover:bg-blue-200'}`}
                       >
-                        {topics.length} {sourceName}
+                        Top {topics.length} {sourceName}
                       </button>
                     </div>
                   </header>

@@ -148,7 +148,7 @@ function generateContentHTML(pageData, topics, sourceLabel) {
             Last updated: ${formattedDate} ET
           </time>
           <span style="padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; background-color: rgba(30, 64, 175, 0.3); color: #93c5fd;">
-            ${topics.length} ${sourceLabel}
+            Top ${topics.length} ${sourceLabel}
           </span>
         </div>
       </header>
@@ -324,7 +324,7 @@ async function prerenderHomePage(baseHTML, distPath) {
               Last updated: ${formattedDate} ET
             </time>
             <span style="padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; background-color: rgba(30, 64, 175, 0.3); color: #93c5fd;">
-              ${(topics || []).length} Google Trends
+              Top ${(topics || []).length} Google Trends
             </span>
           </div>
         </header>
