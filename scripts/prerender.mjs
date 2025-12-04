@@ -110,10 +110,36 @@ function generateContentHTML(pageData, topics) {
 
   const isCryptoPage = pageData.source === 'coingecko_crypto';
 
+  const lastUpdated = topics.length > 0
+    ? new Date(Math.max(...topics.map(t => new Date(t.pub_date || t.created_at || Date.now()).getTime())))
+    : new Date();
+
+  const formattedDate = lastUpdated.toLocaleString('en-US', {
+    timeZone: 'America/New_York',
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true
+  });
+
   let contentHTML = `
+    <article class="dynamic-page-article" style="max-width: 80rem; margin: 0 auto; padding: 0 0.5rem;">
+      <header class="page-header" style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; padding: 1.5rem; margin-bottom: 2rem;">
+        <h1 style="font-size: 1.875rem; font-weight: 700; color: white; margin-bottom: 0.75rem;">${pageData.meta_title}</h1>
+        <p style="color: #d1d5db; font-size: 1rem; line-height: 1.625; margin-bottom: 1rem;">${pageData.meta_description}</p>
+        <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; font-size: 0.875rem;">
+          <time style="color: #9ca3af;">
+            Last updated: ${formattedDate} ET
+          </time>
+          <span style="padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; background-color: rgba(30, 64, 175, 0.3); color: #93c5fd;">
+            ${topics.length} trending ${pageData.source === 'coingecko_crypto' ? 'cryptocurrencies' : 'topics'}
+          </span>
+        </div>
+      </header>
+    </article>
     <div class="dynamic-page-content">
-      <h1>${pageData.meta_title}</h1>
-      <p class="page-description">${pageData.meta_description}</p>
   `;
 
   if (pageData.summary) {
@@ -259,12 +285,36 @@ async function prerenderHomePage(baseHTML, distPath) {
     .sort((a, b) => b.search_volume - a.search_volume)
     .slice(0, 10);
 
+  const lastUpdated = (topics || []).length > 0
+    ? new Date(Math.max(...(topics || []).map(t => new Date(t.pub_date || t.created_at || Date.now()).getTime())))
+    : new Date();
+
+  const formattedDate = lastUpdated.toLocaleString('en-US', {
+    timeZone: 'America/New_York',
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true
+  });
+
   let homeContentHTML = `
     <div class="home-page-content">
-      <section class="hero-section">
-        <h1>Google Trending Topics</h1>
-        <p class="hero-description">Explore trending topics in real-time with interactive bubble charts. Watch search volumes grow and shrink with live Google Trends data.</p>
-      </section>
+      <article style="max-width: 80rem; margin: 0 auto; padding: 0 0.5rem;">
+        <header class="page-header" style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; padding: 1.5rem; margin-bottom: 2rem;">
+          <h1 style="font-size: 1.875rem; font-weight: 700; color: white; margin-bottom: 0.75rem;">Google Trending Topics</h1>
+          <p style="color: #d1d5db; font-size: 1rem; line-height: 1.625; margin-bottom: 1rem;">Explore trending topics in real-time with interactive bubble charts. Watch search volumes grow and shrink with live Google Trends data.</p>
+          <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; font-size: 0.875rem;">
+            <time style="color: #9ca3af;">
+              Last updated: ${formattedDate} ET
+            </time>
+            <span style="padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; background-color: rgba(30, 64, 175, 0.3); color: #93c5fd;">
+              ${(topics || []).length} trending topics
+            </span>
+          </div>
+        </header>
+      </article>
 
       <section class="top-topics-section">
         <h2>Top 10 Trending Now</h2>
