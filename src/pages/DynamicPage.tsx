@@ -732,30 +732,31 @@ snapshotButton={null}
                   <div className="max-w-7xl mx-auto mt-8 mb-0 md:mb-8">
                     <div className="flex flex-col lg:flex-row gap-6">
                       <section className="flex-1 lg:w-[65%]" aria-labelledby="top-trending-heading">
+                        <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-md">
                     {!isCryptoPage && (
                       <>
-                        <h2 id="top-trending-heading" className={`text-xl md:text-2xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                        <h2 id="top-trending-heading" className="text-xl md:text-2xl font-bold mb-4 text-gray-900">
                           {topTitle}
                         </h2>
                         {topTopicNames && (
-                          <p className={`mb-4 text-sm leading-relaxed ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                            Currently trending: <strong className={theme === 'dark' ? 'text-white' : 'text-gray-900'}>{topTopicNames}</strong>.
+                          <p className="mb-4 text-sm leading-relaxed text-gray-700">
+                            Currently trending: <strong className="text-gray-900">{topTopicNames}</strong>.
                             Explore our interactive visualization to discover real-time search trends, analyze topic popularity, and stay updated with what's capturing attention right now.
                           </p>
                         )}
                         <div className="relative mb-4">
-                          <Search className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`} />
+                          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500" />
                           <input
                             type="text"
                             value={topSearchQuery}
                             onChange={(e) => setTopSearchQuery(e.target.value)}
                             placeholder="Search"
-                            className={`w-full pl-10 pr-10 py-2 rounded-lg border transition-colors ${theme === 'dark' ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-400 focus:border-blue-500' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-blue-500'} focus:outline-none focus:ring-2 focus:ring-blue-500/20`}
+                            className="w-full pl-10 pr-10 py-2 rounded-lg border bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-colors"
                           />
                           {topSearchQuery && (
                             <button
                               onClick={() => setTopSearchQuery('')}
-                              className={`absolute right-3 top-1/2 transform -translate-y-1/2 ${theme === 'dark' ? 'text-gray-400 hover:text-gray-300' : 'text-gray-500 hover:text-gray-700'} transition-colors`}
+                              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors"
                               aria-label="Clear search"
                             >
                               <X className="w-4 h-4" />
@@ -766,7 +767,7 @@ snapshotButton={null}
                     )}
                     {isCryptoPage && (
                       <>
-                        <h2 id="top-trending-heading" className={`text-xl md:text-2xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                        <h2 id="top-trending-heading" className="text-xl md:text-2xl font-bold mb-4 text-gray-900">
                           Top {topTopics.length} Gainers & Losers
                         </h2>
                         {topGainers.length > 0 && topLosers.length > 0 && (() => {
@@ -779,24 +780,24 @@ snapshotButton={null}
                           const loserName = topLoser?.name.replace(/"/g, '') || '';
 
                           return (
-                            <p className={`mb-4 text-sm leading-relaxed ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                              Track the biggest movers in cryptocurrency markets right now. Leading the gainers is <strong className={theme === 'dark' ? 'text-green-400' : 'text-green-600'}>{gainerName}</strong> with a {timeframeLabel} gain of <strong className={theme === 'dark' ? 'text-green-400' : 'text-green-600'}>+{gainerChange.toFixed(2)}%</strong>, while <strong className={theme === 'dark' ? 'text-red-400' : 'text-red-600'}>{loserName}</strong> leads the decline with <strong className={theme === 'dark' ? 'text-red-400' : 'text-red-600'}>{loserChange.toFixed(2)}%</strong> change. Monitor real-time cryptocurrency price movements, analyze market trends, and discover top performing digital assets. Updated every 5 minutes with live data from CoinGecko, our cryptocurrency tracker helps you identify trading opportunities and stay informed about market volatility across Bitcoin, Ethereum, and thousands of altcoins.
+                            <p className="mb-4 text-sm leading-relaxed text-gray-700">
+                              Track the biggest movers in cryptocurrency markets right now. Leading the gainers is <strong className="text-green-600">{gainerName}</strong> with a {timeframeLabel} gain of <strong className="text-green-600">+{gainerChange.toFixed(2)}%</strong>, while <strong className="text-red-600">{loserName}</strong> leads the decline with <strong className="text-red-600">{loserChange.toFixed(2)}%</strong> change. Monitor real-time cryptocurrency price movements, analyze market trends, and discover top performing digital assets. Updated every 5 minutes with live data from CoinGecko, our cryptocurrency tracker helps you identify trading opportunities and stay informed about market volatility across Bitcoin, Ethereum, and thousands of altcoins.
                             </p>
                           );
                         })()}
                         <div className="relative mb-4">
-                          <Search className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`} />
+                          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500" />
                           <input
                             type="text"
                             value={topSearchQuery}
                             onChange={(e) => setTopSearchQuery(e.target.value)}
                             placeholder="Search"
-                            className={`w-full pl-10 pr-10 py-2 rounded-lg border transition-colors ${theme === 'dark' ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-400 focus:border-blue-500' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-blue-500'} focus:outline-none focus:ring-2 focus:ring-blue-500/20`}
+                            className="w-full pl-10 pr-10 py-2 rounded-lg border bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-colors"
                           />
                           {topSearchQuery && (
                             <button
                               onClick={() => setTopSearchQuery('')}
-                              className={`absolute right-3 top-1/2 transform -translate-y-1/2 ${theme === 'dark' ? 'text-gray-400 hover:text-gray-300' : 'text-gray-500 hover:text-gray-700'} transition-colors`}
+                              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors"
                               aria-label="Clear search"
                             >
                               <X className="w-4 h-4" />
@@ -809,41 +810,41 @@ snapshotButton={null}
                     {!isCryptoPage && (
                       <>
                         {topTopics.length === 0 && topSearchQuery ? (
-                          <div className={`${theme === 'dark' ? 'bg-gray-800 text-gray-300' : 'bg-white text-gray-600 shadow-md border border-gray-200'} rounded-lg p-8 text-center`}>
+                          <div className="bg-gray-50 text-gray-600 rounded-lg p-8 text-center border border-gray-200">
                             <p className="text-lg">No topics found matching "{topSearchQuery}"</p>
                             <button
                               onClick={() => setTopSearchQuery('')}
-                              className={`mt-4 px-4 py-2 rounded-lg font-semibold transition-colors ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}
+                              className="mt-4 px-4 py-2 rounded-lg font-semibold bg-blue-600 hover:bg-blue-700 text-white transition-colors"
                             >
                               Clear Search
                             </button>
                           </div>
                         ) : (
                         <>
-                        <ol className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white shadow-md border border-gray-200'} rounded-lg overflow-hidden list-none`} itemScope itemType="https://schema.org/ItemList">
+                        <ol className="bg-gray-50 rounded-lg overflow-hidden list-none border border-gray-200" itemScope itemType="https://schema.org/ItemList">
                           {displayTopics.map((topic, index) => {
                             const actualRank = startIndex + index + 1;
                             return (
                           <li
                             key={index}
-                            className={`px-4 py-2 flex items-center gap-3 ${theme === 'dark' ? 'hover:bg-gray-750' : 'hover:bg-gray-50'} transition-colors ${index < displayTopics.length - 1 ? (theme === 'dark' ? 'border-b border-gray-700' : 'border-b border-gray-200') : ''}`}
+                            className={`px-4 py-2 flex items-center gap-3 hover:bg-gray-100 transition-colors ${index < displayTopics.length - 1 ? 'border-b border-gray-200' : ''}`}
                             itemProp="itemListElement"
                             itemScope
                             itemType="https://schema.org/ListItem"
                           >
                             <meta itemProp="position" content={String(actualRank)} />
-                            <div className={`w-10 flex items-center justify-center`} aria-label={`Rank ${actualRank}`}>
-                              <div className={`text-xl font-bold ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                            <div className="w-10 flex items-center justify-center" aria-label={`Rank ${actualRank}`}>
+                              <div className="text-xl font-bold text-gray-500">
                                 {actualRank}
                               </div>
                             </div>
                             <article className="flex-1" itemProp="item" itemScope itemType="https://schema.org/Thing">
                               <h3 className="font-semibold text-base mb-1" itemProp="name">{topic.name.replace(/"/g, '')}</h3>
                               <div className="flex flex-wrap items-center gap-3 text-sm">
-                                <span className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`} itemProp="description">
+                                <span className="text-gray-600" itemProp="description">
                                   {topic.searchVolumeRaw.replace(/"/g, '')} searches
                                 </span>
-                                <span className={`px-2 py-0.5 rounded text-xs ${topic.source === 'user_upload' ? (theme === 'dark' ? 'bg-green-900/30 text-green-400' : 'bg-green-100 text-green-700') : (theme === 'dark' ? 'bg-blue-900/30 text-blue-400' : 'bg-blue-100 text-blue-700')}`}>
+                                <span className={`px-2 py-0.5 rounded text-xs ${topic.source === 'user_upload' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`}>
                                   {(() => {
                                     const found = sources.find(s => s.value === topic.source);
                                     if (found) return found.label;
@@ -852,12 +853,12 @@ snapshotButton={null}
                                   })()}
                                 </span>
                                 {topic.category && (
-                                  <span className={`px-2 py-0.5 rounded text-xs ${theme === 'dark' ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-700'}`}>
+                                  <span className="px-2 py-0.5 rounded text-xs bg-gray-100 text-gray-700">
                                     {topic.category}
                                   </span>
                                 )}
                                 {topic.pubDate && (
-                                  <time className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`} dateTime={new Date(topic.pubDate).toISOString()}>
+                                  <time className="text-xs text-gray-400" dateTime={new Date(topic.pubDate).toISOString()}>
                                     {new Date(topic.pubDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                                   </time>
                                 )}
@@ -872,17 +873,17 @@ snapshotButton={null}
                             <button
                               onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                               disabled={currentPage === 1}
-                              className={`px-4 py-2 rounded-lg font-semibold transition-colors ${currentPage === 1 ? (theme === 'dark' ? 'bg-gray-700 text-gray-500 cursor-not-allowed' : 'bg-gray-200 text-gray-400 cursor-not-allowed') : (theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-600 hover:bg-blue-700 text-white')}`}
+                              className={`px-4 py-2 rounded-lg font-semibold transition-colors ${currentPage === 1 ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}
                             >
                               Previous
                             </button>
-                            <span className={`px-4 py-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                            <span className="px-4 py-2 text-gray-700">
                               Page {currentPage} of {totalPages}
                             </span>
                             <button
                               onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                               disabled={currentPage === totalPages}
-                              className={`px-4 py-2 rounded-lg font-semibold transition-colors ${currentPage === totalPages ? (theme === 'dark' ? 'bg-gray-700 text-gray-500 cursor-not-allowed' : 'bg-gray-200 text-gray-400 cursor-not-allowed') : (theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-600 hover:bg-blue-700 text-white')}`}
+                              className={`px-4 py-2 rounded-lg font-semibold transition-colors ${currentPage === totalPages ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}
                             >
                               Next
                             </button>
@@ -896,11 +897,11 @@ snapshotButton={null}
                     {isCryptoPage && (
                       <>
                         {topTopics.length === 0 && topSearchQuery ? (
-                          <div className={`${theme === 'dark' ? 'bg-gray-800 text-gray-300' : 'bg-white text-gray-600 shadow-md border border-gray-200'} rounded-lg p-8 text-center`}>
+                          <div className="bg-gray-50 text-gray-600 rounded-lg p-8 text-center border border-gray-200">
                             <p className="text-lg">No cryptocurrencies found matching "{topSearchQuery}"</p>
                             <button
                               onClick={() => setTopSearchQuery('')}
-                              className={`mt-4 px-4 py-2 rounded-lg font-semibold transition-colors ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}
+                              className="mt-4 px-4 py-2 rounded-lg font-semibold bg-blue-600 hover:bg-blue-700 text-white transition-colors"
                             >
                               Clear Search
                             </button>
@@ -910,21 +911,21 @@ snapshotButton={null}
                       <div className="grid md:grid-cols-2 gap-6">
                         {/* Top Gainers */}
                         <div>
-                          <h3 className={`text-xl font-bold mb-3 flex items-center gap-2 ${theme === 'dark' ? 'text-green-400' : 'text-green-600'}`}>
+                          <h3 className="text-xl font-bold mb-3 flex items-center gap-2 text-green-600">
                             <ArrowUp size={24} />
                             Gainers ({cryptoTimeframe.toUpperCase()})
                           </h3>
-                          <ol className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white shadow-md border border-gray-200'} rounded-lg overflow-hidden list-none`}>
+                          <ol className="bg-gray-50 border border-gray-200 rounded-lg overflow-hidden list-none">
                             {topGainers.map((topic, index) => {
                               const change = topic.crypto_data?.[`change_${cryptoTimeframe}` as keyof typeof topic.crypto_data] || 0;
                               const actualRank = startIndex + index + 1;
                               return (
                                 <li
                                   key={index}
-                                  className={`px-3 py-2 flex items-center gap-2 ${theme === 'dark' ? 'hover:bg-gray-750' : 'hover:bg-gray-50'} transition-colors ${index < topGainers.length - 1 ? (theme === 'dark' ? 'border-b border-gray-700' : 'border-b border-gray-200') : ''}`}
+                                  className={`px-3 py-2 flex items-center gap-2 hover:bg-gray-100 transition-colors ${index < topGainers.length - 1 ? 'border-b border-gray-200' : ''}`}
                                 >
-                                  <div className={`w-7 flex items-center justify-center`}>
-                                    <div className={`text-base font-bold ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                                  <div className="w-7 flex items-center justify-center">
+                                    <div className="text-base font-bold text-gray-500">
                                       {actualRank}
                                     </div>
                                   </div>
@@ -935,7 +936,7 @@ snapshotButton={null}
                                         +{typeof change === 'number' ? change.toFixed(2) : change}%
                                       </span>
                                       {topic.crypto_data?.formatted?.price && (
-                                        <span className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}>
+                                        <span className="text-gray-600">
                                           {topic.crypto_data.formatted.price}
                                         </span>
                                       )}
@@ -949,21 +950,21 @@ snapshotButton={null}
 
                         {/* Top Losers */}
                         <div>
-                          <h3 className={`text-xl font-bold mb-3 flex items-center gap-2 ${theme === 'dark' ? 'text-red-400' : 'text-red-600'}`}>
+                          <h3 className="text-xl font-bold mb-3 flex items-center gap-2 text-red-600">
                             <ArrowDown size={24} />
                             Losers ({cryptoTimeframe.toUpperCase()})
                           </h3>
-                          <ol className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white shadow-md border border-gray-200'} rounded-lg overflow-hidden list-none`}>
+                          <ol className="bg-gray-50 border border-gray-200 rounded-lg overflow-hidden list-none">
                             {topLosers.map((topic, index) => {
                               const change = topic.crypto_data?.[`change_${cryptoTimeframe}` as keyof typeof topic.crypto_data] || 0;
                               const actualRank = startIndex + index + 1;
                               return (
                                 <li
                                   key={index}
-                                  className={`px-3 py-2 flex items-center gap-2 ${theme === 'dark' ? 'hover:bg-gray-750' : 'hover:bg-gray-50'} transition-colors ${index < topLosers.length - 1 ? (theme === 'dark' ? 'border-b border-gray-700' : 'border-b border-gray-200') : ''}`}
+                                  className={`px-3 py-2 flex items-center gap-2 hover:bg-gray-100 transition-colors ${index < topLosers.length - 1 ? 'border-b border-gray-200' : ''}`}
                                 >
-                                  <div className={`w-7 flex items-center justify-center`}>
-                                    <div className={`text-base font-bold ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                                  <div className="w-7 flex items-center justify-center">
+                                    <div className="text-base font-bold text-gray-500">
                                       {actualRank}
                                     </div>
                                   </div>
@@ -974,7 +975,7 @@ snapshotButton={null}
                                         {typeof change === 'number' ? change.toFixed(2) : change}%
                                       </span>
                                       {topic.crypto_data?.formatted?.price && (
-                                        <span className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}>
+                                        <span className="text-gray-600">
                                           {topic.crypto_data.formatted.price}
                                         </span>
                                       )}
@@ -991,17 +992,17 @@ snapshotButton={null}
                           <button
                             onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                             disabled={currentPage === 1}
-                            className={`px-4 py-2 rounded-lg font-semibold transition-colors ${currentPage === 1 ? (theme === 'dark' ? 'bg-gray-700 text-gray-500 cursor-not-allowed' : 'bg-gray-200 text-gray-400 cursor-not-allowed') : (theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-600 hover:bg-blue-700 text-white')}`}
+                            className={`px-4 py-2 rounded-lg font-semibold transition-colors ${currentPage === 1 ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}
                           >
                             Previous
                           </button>
-                          <span className={`px-4 py-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                          <span className="px-4 py-2 text-gray-700">
                             Page {currentPage} of {totalPages}
                           </span>
                           <button
                             onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                             disabled={currentPage === totalPages}
-                            className={`px-4 py-2 rounded-lg font-semibold transition-colors ${currentPage === totalPages ? (theme === 'dark' ? 'bg-gray-700 text-gray-500 cursor-not-allowed' : 'bg-gray-200 text-gray-400 cursor-not-allowed') : (theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-600 hover:bg-blue-700 text-white')}`}
+                            className={`px-4 py-2 rounded-lg font-semibold transition-colors ${currentPage === totalPages ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}
                           >
                             Next
                           </button>
@@ -1011,6 +1012,7 @@ snapshotButton={null}
                         )}
                       </>
                     )}
+                        </div>
                       </section>
 
                       <aside className="lg:w-[35%]">
