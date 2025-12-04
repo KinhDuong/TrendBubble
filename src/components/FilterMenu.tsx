@@ -94,6 +94,7 @@ export default function FilterMenu({
                       onChange={(e) => onMaxBubblesChange(Number(e.target.value))}
                       className={`${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} border rounded px-2 md:px-3 py-1 md:py-1.5 text-xs md:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500`}
                     >
+                      <option value={10}>10</option>
                       <option value={20}>20</option>
                       <option value={40}>40</option>
                       <option value={50}>50</option>
@@ -101,6 +102,7 @@ export default function FilterMenu({
                       <option value={100}>100</option>
                       <option value={150}>150</option>
                       <option value={200}>200</option>
+                      <option value={99999}>All</option>
                     </select>
                     <Divider />
                   </>
@@ -394,6 +396,7 @@ export default function FilterMenu({
                       className={`flex-1 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} border rounded px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500`}
                       aria-label="Maximum number of bubbles to display"
                     >
+                      <option value={10}>10</option>
                       <option value={20}>20</option>
                       <option value={40}>40</option>
                       <option value={50}>50</option>
@@ -401,6 +404,7 @@ export default function FilterMenu({
                       <option value={100}>100</option>
                       <option value={150}>150</option>
                       <option value={200}>200</option>
+                      <option value={99999}>All</option>
                     </select>
                   </div>
                   <Divider />
