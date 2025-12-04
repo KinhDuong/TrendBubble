@@ -454,6 +454,53 @@ async function prerenderPages() {
   }
 
   console.log('Pre-rendering complete!');
+
+  // Generate sitemap
+  await generateSitemap(pages, distPath);
+}
+
+async function generateSitemap(pages, distPath) {
+  console.log('Generating sitemap...');
+
+  const today = new Date().toISOString().split('T')[0];
+
+  let sitemap = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>${BASE_URL}/</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>1.0</priority>
+  </url>
+`;
+
+  // Add all dynamic pages
+  for (const page of pages) {
+    const pageUrl = `${BASE_URL}${page.page_url}`;
+    const lastmod = page.updated_at
+      ? new Date(page.updated_at).toISOString().split('T')[0]
+      : new Date(page.created_at).toISOString().split('T')[0];
+
+    sitemap += `  <url>
+    <loc>${pageUrl}</loc>
+    <lastmod>${lastmod}</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+`;
+  }
+
+  sitemap += `</urlset>
+`;
+
+  // Write to dist folder
+  fs.writeFileSync(path.join(distPath, 'sitemap.xml'), sitemap);
+  console.log('✓ Generated: sitemap.xml');
+
+  // Also update the public folder for development
+  const publicPath = path.join(__dirname, '..', 'public');
+  fs.writeFileSync(path.join(publicPath, 'sitemap.xml'), sitemap);
+  console.log('✓ Updated: public/sitemap.xml');
 }
 
 prerenderPages().catch(console.error);
