@@ -665,7 +665,7 @@ snapshotButton={null}
                 <article className="max-w-7xl mx-auto mb-8">
                   <header>
                     <div className="flex items-center justify-between gap-4 mb-4">
-                      <h1 className={`text-3xl md:text-4xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                      <h1 className={`text-2xl md:text-4xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                         {pageData.meta_title}
                       </h1>
                       {viewMode === 'bubble' && topics.length > 0 && (
@@ -758,7 +758,7 @@ snapshotButton={null}
                   <section className="max-w-7xl mx-auto mt-8 mb-0 md:mb-8" aria-labelledby="top-trending-heading">
                     {!isCryptoPage && (
                       <>
-                        <h2 id="top-trending-heading" className={`text-2xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                        <h2 id="top-trending-heading" className={`text-xl md:text-2xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                           {topTitle}
                         </h2>
                         {topTopicNames && (
@@ -771,7 +771,7 @@ snapshotButton={null}
                     )}
                     {isCryptoPage && (
                       <>
-                        <h2 id="top-trending-heading" className={`text-2xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                        <h2 id="top-trending-heading" className={`text-xl md:text-2xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                           Top {topTopics.length} Gainers & Losers
                         </h2>
                         {topGainers.length > 0 && topLosers.length > 0 && (() => {
@@ -1078,7 +1078,7 @@ snapshotButton={null}
           )}
           {latestPages.length > 0 && (
         <section className="max-w-7xl mx-auto mt-8 mb-0 px-4 md:px-6" aria-labelledby="latest-pages-heading">
-          <h2 id="latest-pages-heading" className={`text-2xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+          <h2 id="latest-pages-heading" className={`text-xl md:text-2xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
             Latest
           </h2>
           <p className={`text-sm mb-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
@@ -1127,7 +1127,7 @@ snapshotButton={null}
 
           {topics.length > 0 && (
             <section className="max-w-7xl mx-auto mt-12 mb-0 px-4 md:px-6" aria-labelledby="faq-heading">
-              <h2 id="faq-heading" className={`text-2xl md:text-3xl font-bold mb-6 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+              <h2 id="faq-heading" className={`text-xl md:text-3xl font-bold mb-6 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                 Frequently Asked Questions
               </h2>
               <p className={`text-sm mb-6 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>

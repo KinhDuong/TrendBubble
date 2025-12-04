@@ -103,9 +103,9 @@ export default function Header({ theme, isAdmin, onLoginClick, onLogout, title =
             </div>
             <div className="flex items-center gap-3">
               {useH1 ? (
-                <h1 className="text-xl md:text-2xl font-bold tracking-tight text-blue-600" style={{ fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", fontWeight: 700, letterSpacing: '-0.02em' }}>{title}</h1>
+                <h1 className="text-lg md:text-2xl font-bold tracking-tight text-blue-600" style={{ fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", fontWeight: 700, letterSpacing: '-0.02em' }}>{title}</h1>
               ) : (
-                <div className="text-xl md:text-2xl font-bold tracking-tight text-blue-600" style={{ fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", fontWeight: 700, letterSpacing: '-0.02em' }}>{title}</div>
+                <div className="text-lg md:text-2xl font-bold tracking-tight text-blue-600" style={{ fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", fontWeight: 700, letterSpacing: '-0.02em' }}>{title}</div>
               )}
               {snapshotButton}
             </div>
