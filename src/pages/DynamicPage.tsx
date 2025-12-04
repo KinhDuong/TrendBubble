@@ -1014,8 +1014,8 @@ snapshotButton={null}
                       </section>
 
                       <aside className="lg:w-[35%]">
-                        <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-200'} border rounded-lg p-6 sticky top-4`}>
-                          <h2 className={`text-xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                        <div className="bg-white border border-gray-200 rounded-lg p-6 sticky top-4 shadow-md">
+                          <h2 className="text-xl font-bold mb-4 text-gray-900">
                             Featured
                           </h2>
                           {latestPages.length > 0 && (
@@ -1024,7 +1024,7 @@ snapshotButton={null}
                                 <a
                                   key={page.id}
                                   href={page.page_url}
-                                  className={`text-sm ${theme === 'dark' ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'} transition-colors hover:underline`}
+                                  className="text-sm text-blue-600 hover:text-blue-700 transition-colors hover:underline"
                                 >
                                   {page.meta_title}
                                 </a>
