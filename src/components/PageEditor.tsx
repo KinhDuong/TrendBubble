@@ -65,6 +65,34 @@ export default function PageEditor({ theme, onClose, existingPage }: PageEditorP
     }
   };
 
+  const extractContentFromFullHTML = (html: string): string => {
+    // Check if it's a full HTML document
+    if (!html.includes('<!DOCTYPE') && !html.includes('<html')) {
+      return html;
+    }
+
+    // Extract style tags from head
+    const styleRegex = /<style[^>]*>([\s\S]*?)<\/style>/gi;
+    const styles: string[] = [];
+    let match;
+    while ((match = styleRegex.exec(html)) !== null) {
+      styles.push(`<style>${match[1]}</style>`);
+    }
+
+    // Extract body content
+    const bodyMatch = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+    const bodyContent = bodyMatch ? bodyMatch[1] : html;
+
+    // Update body styles to work within a container instead of the page body
+    const updatedStyles = styles.map(style => {
+      return style
+        .replace(/body\s*{/g, '.summary-content {')
+        .replace(/body\s+/g, '.summary-content ');
+    });
+
+    return updatedStyles.join('\n') + '\n' + bodyContent;
+  };
+
   const handleSave = async () => {
     if (!pageUrl || !metaTitle || !metaDescription) {
       setError('Page URL, Title, and Description are required');
@@ -80,12 +108,15 @@ export default function PageEditor({ theme, onClose, existingPage }: PageEditorP
         formattedUrl = '/' + formattedUrl;
       }
 
+      // Process summary to extract content from full HTML documents
+      const processedSummary = summary ? extractContentFromFullHTML(summary) : null;
+
       const pageData = {
         page_url: formattedUrl,
         source,
         meta_title: metaTitle,
         meta_description: metaDescription,
-        summary: summary || null,
+        summary: processedSummary,
         template: template || 'default'
       };
 
