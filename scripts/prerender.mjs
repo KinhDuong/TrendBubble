@@ -58,6 +58,20 @@ async function fetchTopicsForPage(pageSource) {
   return data || [];
 }
 
+async function getSourceLabel(sourceValue) {
+  if (sourceValue === 'google_trends') return 'Google Trends';
+  if (sourceValue === 'user_upload') return 'My Uploads';
+  if (sourceValue === 'all') return 'All';
+
+  const { data } = await supabase
+    .from('custom_sources')
+    .select('label')
+    .eq('value', sourceValue)
+    .maybeSingle();
+
+  return data?.label || sourceValue.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+}
+
 function generateMetaTags(pageData, topics) {
   const topTopics = [...topics]
     .sort((a, b) => b.search_volume - a.search_volume)
@@ -103,7 +117,7 @@ function generateMetaTags(pageData, topics) {
   `;
 }
 
-function generateContentHTML(pageData, topics) {
+function generateContentHTML(pageData, topics, sourceLabel) {
   const topTopics = [...topics]
     .sort((a, b) => b.search_volume - a.search_volume)
     .slice(0, 10);
@@ -134,7 +148,7 @@ function generateContentHTML(pageData, topics) {
             Last updated: ${formattedDate} ET
           </time>
           <span style="padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; background-color: rgba(30, 64, 175, 0.3); color: #93c5fd;">
-            ${topics.length} trending ${pageData.source === 'coingecko_crypto' ? 'cryptocurrencies' : 'topics'}
+            ${topics.length} ${sourceLabel}
           </span>
         </div>
       </header>
@@ -310,7 +324,7 @@ async function prerenderHomePage(baseHTML, distPath) {
               Last updated: ${formattedDate} ET
             </time>
             <span style="padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; background-color: rgba(30, 64, 175, 0.3); color: #93c5fd;">
-              ${(topics || []).length} trending topics
+              ${(topics || []).length} Google Trends
             </span>
           </div>
         </header>
@@ -418,9 +432,10 @@ async function prerenderPages() {
     console.log(`Pre-rendering: ${page.page_url}`);
 
     const topics = await fetchTopicsForPage(page.source);
+    const sourceLabel = await getSourceLabel(page.source);
 
     const metaTags = generateMetaTags(page, topics);
-    const contentHTML = generateContentHTML(page, topics);
+    const contentHTML = generateContentHTML(page, topics, sourceLabel);
     const structuredData = generateStructuredData(page, topics);
 
     let html = baseHTML
