@@ -181,20 +181,6 @@ function generateContentHTML(pageData, topics, sourceLabel) {
       </section>
   `;
 
-  if (pageData.summary) {
-    contentHTML += `
-      <section class="page-summary" aria-labelledby="page-summary" itemscope itemtype="https://schema.org/Article" style="max-width: 80rem; margin: 2rem auto 1.5rem; padding: 0 0.5rem;">
-        <div class="summary-container" style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; padding: 1.5rem;">
-          <div class="summary-content" itemprop="articleBody">
-            ${pageData.summary}
-          </div>
-          <meta itemprop="author" content="Top Best Charts" />
-          <meta itemprop="datePublished" content="${pageData.created_at}" />
-        </div>
-      </section>
-    `;
-  }
-
   if (topTopics.length > 10) {
     contentHTML += `
       <section class="top-topics">
@@ -218,6 +204,20 @@ function generateContentHTML(pageData, topics, sourceLabel) {
 
     contentHTML += `
         </ol>
+      </section>
+    `;
+  }
+
+  if (pageData.summary) {
+    contentHTML += `
+      <section class="page-summary" aria-labelledby="page-summary" itemscope itemtype="https://schema.org/Article" style="max-width: 80rem; margin: 2rem auto 1.5rem; padding: 0 0.5rem;">
+        <div class="summary-container" style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; padding: 1.5rem;">
+          <div class="summary-content" itemprop="articleBody">
+            ${pageData.summary}
+          </div>
+          <meta itemprop="author" content="Top Best Charts" />
+          <meta itemprop="datePublished" content="${pageData.created_at}" />
+        </div>
       </section>
     `;
   }
