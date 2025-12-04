@@ -55,7 +55,7 @@ export default function Footer({ theme }: FooterProps) {
             </p>
           </div>
           <div className="text-center text-sm">
-            <p>{currentYear} Google Trending Topics. All rights reserved.</p>
+            <p>2026 Top Best Charts. All rights reserved.</p>
           </div>
         </div>
       </div>
