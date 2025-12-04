@@ -11,7 +11,7 @@ import AnimationSelector, { AnimationStyle } from '../components/AnimationSelect
 import { TrendingTopic, CryptoTimeframe } from '../types';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
-import { TrendingUp, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { TrendingUp, ArrowUpDown, ArrowUp, ArrowDown, Search, X } from 'lucide-react';
 
 type SortField = 'name' | 'category' | 'searchVolume' | 'rank' | 'pubDate' | 'createdAt';
 type SortDirection = 'asc' | 'desc';
@@ -61,6 +61,7 @@ function DynamicPage() {
   const [cryptoTimeframe, setCryptoTimeframe] = useState<CryptoTimeframe>('1h');
   const bubbleChartRef = useRef<HTMLDivElement>(null);
   const [animationStyle, setAnimationStyle] = useState<AnimationStyle>('default');
+  const [topSearchQuery, setTopSearchQuery] = useState<string>('');
 
   const itemsPerPage = 10;
 
@@ -128,7 +129,7 @@ function DynamicPage() {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [dateFilter, categoryFilter, sourceFilter, searchQuery, cryptoTimeframe, topics.length]);
+  }, [dateFilter, categoryFilter, sourceFilter, searchQuery, cryptoTimeframe, topics.length, topSearchQuery]);
 
   const loadPageData = async () => {
     try {
@@ -436,7 +437,14 @@ function DynamicPage() {
     );
   }
 
-  const topTopics = [...topics].sort((a, b) => b.searchVolume - a.searchVolume);
+  const topTopics = [...topics]
+    .filter(topic => {
+      if (!topSearchQuery.trim()) return true;
+      const query = topSearchQuery.toLowerCase();
+      return topic.name.toLowerCase().includes(query) ||
+             topic.category?.toLowerCase().includes(query);
+    })
+    .sort((a, b) => b.searchVolume - a.searchVolume);
 
   // For crypto pages, split into gainers and losers
   const isCryptoPage = pageData?.source === 'coingecko_crypto';
@@ -764,9 +772,30 @@ snapshotButton={null}
                   <section className="max-w-7xl mx-auto mt-8 mb-0 md:mb-8" aria-labelledby="top-trending-heading">
                     {!isCryptoPage && (
                       <>
-                        <h2 id="top-trending-heading" className={`text-xl md:text-2xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                          {topTitle}
-                        </h2>
+                        <div className="flex items-center justify-between mb-4 gap-4">
+                          <h2 id="top-trending-heading" className={`text-xl md:text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                            {topTitle}
+                          </h2>
+                          <div className="relative flex-1 max-w-md">
+                            <Search className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`} />
+                            <input
+                              type="text"
+                              value={topSearchQuery}
+                              onChange={(e) => setTopSearchQuery(e.target.value)}
+                              placeholder="Search topics..."
+                              className={`w-full pl-10 pr-10 py-2 rounded-lg border transition-colors ${theme === 'dark' ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-400 focus:border-blue-500' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-blue-500'} focus:outline-none focus:ring-2 focus:ring-blue-500/20`}
+                            />
+                            {topSearchQuery && (
+                              <button
+                                onClick={() => setTopSearchQuery('')}
+                                className={`absolute right-3 top-1/2 transform -translate-y-1/2 ${theme === 'dark' ? 'text-gray-400 hover:text-gray-300' : 'text-gray-500 hover:text-gray-700'} transition-colors`}
+                                aria-label="Clear search"
+                              >
+                                <X className="w-4 h-4" />
+                              </button>
+                            )}
+                          </div>
+                        </div>
                         {topTopicNames && (
                           <p className={`mb-4 text-sm leading-relaxed ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
                             Currently trending: <strong className={theme === 'dark' ? 'text-white' : 'text-gray-900'}>{topTopicNames}</strong>.
@@ -777,9 +806,30 @@ snapshotButton={null}
                     )}
                     {isCryptoPage && (
                       <>
-                        <h2 id="top-trending-heading" className={`text-xl md:text-2xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                          Top {topTopics.length} Gainers & Losers
-                        </h2>
+                        <div className="flex items-center justify-between mb-4 gap-4">
+                          <h2 id="top-trending-heading" className={`text-xl md:text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                            Top {topTopics.length} Gainers & Losers
+                          </h2>
+                          <div className="relative flex-1 max-w-md">
+                            <Search className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`} />
+                            <input
+                              type="text"
+                              value={topSearchQuery}
+                              onChange={(e) => setTopSearchQuery(e.target.value)}
+                              placeholder="Search cryptocurrencies..."
+                              className={`w-full pl-10 pr-10 py-2 rounded-lg border transition-colors ${theme === 'dark' ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-400 focus:border-blue-500' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-blue-500'} focus:outline-none focus:ring-2 focus:ring-blue-500/20`}
+                            />
+                            {topSearchQuery && (
+                              <button
+                                onClick={() => setTopSearchQuery('')}
+                                className={`absolute right-3 top-1/2 transform -translate-y-1/2 ${theme === 'dark' ? 'text-gray-400 hover:text-gray-300' : 'text-gray-500 hover:text-gray-700'} transition-colors`}
+                                aria-label="Clear search"
+                              >
+                                <X className="w-4 h-4" />
+                              </button>
+                            )}
+                          </div>
+                        </div>
                         {topGainers.length > 0 && topLosers.length > 0 && (() => {
                           const timeframeLabel = cryptoTimeframe === '1h' ? '1-hour' : cryptoTimeframe === '24h' ? '24-hour' : cryptoTimeframe === '7d' ? '7-day' : cryptoTimeframe === '30d' ? '30-day' : '1-year';
                           const topGainer = topGainers[0];
@@ -800,6 +850,18 @@ snapshotButton={null}
 
                     {!isCryptoPage && (
                       <>
+                        {topTopics.length === 0 && topSearchQuery ? (
+                          <div className={`${theme === 'dark' ? 'bg-gray-800 text-gray-300' : 'bg-white text-gray-600 shadow-md border border-gray-200'} rounded-lg p-8 text-center`}>
+                            <p className="text-lg">No topics found matching "{topSearchQuery}"</p>
+                            <button
+                              onClick={() => setTopSearchQuery('')}
+                              className={`mt-4 px-4 py-2 rounded-lg font-semibold transition-colors ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}
+                            >
+                              Clear Search
+                            </button>
+                          </div>
+                        ) : (
+                        <>
                         <ol className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white shadow-md border border-gray-200'} rounded-lg overflow-hidden list-none`} itemScope itemType="https://schema.org/ItemList">
                           {displayTopics.map((topic, index) => {
                             const actualRank = startIndex + index + 1;
@@ -868,11 +930,25 @@ snapshotButton={null}
                             </button>
                           </div>
                         )}
+                        </>
+                        )}
                       </>
                     )}
 
                     {isCryptoPage && (
                       <>
+                        {topTopics.length === 0 && topSearchQuery ? (
+                          <div className={`${theme === 'dark' ? 'bg-gray-800 text-gray-300' : 'bg-white text-gray-600 shadow-md border border-gray-200'} rounded-lg p-8 text-center`}>
+                            <p className="text-lg">No cryptocurrencies found matching "{topSearchQuery}"</p>
+                            <button
+                              onClick={() => setTopSearchQuery('')}
+                              className={`mt-4 px-4 py-2 rounded-lg font-semibold transition-colors ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}
+                            >
+                              Clear Search
+                            </button>
+                          </div>
+                        ) : (
+                        <>
                       <div className="grid md:grid-cols-2 gap-6">
                         {/* Top Gainers */}
                         <div>
@@ -973,6 +1049,8 @@ snapshotButton={null}
                           </button>
                         </div>
                       )}
+                        </>
+                        )}
                       </>
                     )}
                   </section>
