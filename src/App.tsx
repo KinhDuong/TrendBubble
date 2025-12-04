@@ -33,7 +33,10 @@ function HomePage() {
   const [viewMode, setViewMode] = useState<'bubble' | 'list'>('bubble');
   const [loading, setLoading] = useState(true);
   const [connectionError, setConnectionError] = useState(false);
-  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+  const [theme, setTheme] = useState<'dark' | 'light'>(() => {
+    const savedTheme = localStorage.getItem('theme');
+    return (savedTheme === 'dark' || savedTheme === 'light') ? savedTheme : 'dark';
+  });
   const [nextUpdateIn, setNextUpdateIn] = useState<string>('');
   const [updateProgress, setUpdateProgress] = useState<number>(0);
   const [nextBubbleIn, setNextBubbleIn] = useState<string>('');
@@ -142,31 +145,15 @@ function HomePage() {
     loadTopics();
   }, [dateFilter, categoryFilter, sourceFilter]);
 
-  const loadThemePreference = async () => {
-    try {
-      const { data } = await supabase
-        .from('user_preferences')
-        .select('theme')
-        .maybeSingle();
-
-      if (data?.theme) {
-        setTheme(data.theme as 'dark' | 'light');
-      }
-    } catch (error) {
-      console.error('Error loading theme preference:', error);
+  const loadThemePreference = () => {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark' || savedTheme === 'light') {
+      setTheme(savedTheme);
     }
   };
 
-  const saveThemePreference = async (newTheme: 'dark' | 'light') => {
-    try {
-      const { error } = await supabase
-        .from('user_preferences')
-        .upsert({ id: 1, theme: newTheme });
-
-      if (error) throw error;
-    } catch (error) {
-      console.error('Error saving theme preference:', error);
-    }
+  const saveThemePreference = (newTheme: 'dark' | 'light') => {
+    localStorage.setItem('theme', newTheme);
   };
 
   const handleThemeChange = (newTheme: 'dark' | 'light') => {
