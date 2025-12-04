@@ -9,7 +9,6 @@ import Header from './components/Header';
 import FilterMenu, { BubbleLayout } from './components/FilterMenu';
 import ComparisonPanel from './components/ComparisonPanel';
 import ShareSnapshot from './components/ShareSnapshot';
-import TrendingBubble from './pages/TrendingBubble';
 import DynamicPage from './pages/DynamicPage';
 import AdminPages from './pages/AdminPages';
 import { TrendingTopic } from './types';
@@ -861,21 +860,6 @@ function HomePage() {
                 >
                   <Home size={16} />
                   Table View
-                </Link>
-                <Link
-                  to="/trending-bubble"
-                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                    location.pathname === '/trending-bubble'
-                      ? theme === 'dark'
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-blue-600 text-white shadow-sm'
-                      : theme === 'dark'
-                      ? 'text-gray-400 hover:text-white hover:bg-gray-700'
-                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-                  }`}
-                >
-                  <TrendingUp size={16} />
-                  Trending Bubble
                 </Link>
                 <Link
                   to="/admin/pages"
@@ -1889,7 +1873,6 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<HomePage />} />
-        <Route path="/trending-bubble" element={<TrendingBubble />} />
         <Route path="/admin/pages" element={<AdminPages />} />
         <Route path="*" element={<DynamicPage />} />
       </Routes>
