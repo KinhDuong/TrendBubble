@@ -120,7 +120,7 @@ function generateMetaTags(pageData, topics) {
 function generateContentHTML(pageData, topics, sourceLabel) {
   const topTopics = [...topics]
     .sort((a, b) => b.search_volume - a.search_volume)
-    .slice(0, 10);
+    .slice(0, 1000);
 
   const isCryptoPage = pageData.source === 'coingecko_crypto';
 
@@ -172,7 +172,7 @@ function generateContentHTML(pageData, topics, sourceLabel) {
 
   contentHTML += `
       <section class="top-topics">
-        <h2>Top 10 ${isCryptoPage ? 'Gainers & Losers' : 'Trending Topics'}</h2>
+        <h2>Top ${topTopics.length} ${isCryptoPage ? 'Gainers & Losers' : 'Trending Topics'}</h2>
         <ol class="topics-list">
   `;
 
@@ -297,7 +297,7 @@ async function prerenderHomePage(baseHTML, distPath) {
   // Generate home page content HTML
   const topTopicsForDisplay = [...(topics || [])]
     .sort((a, b) => b.search_volume - a.search_volume)
-    .slice(0, 10);
+    .slice(0, 1000);
 
   const lastUpdated = (topics || []).length > 0
     ? new Date(Math.max(...(topics || []).map(t => new Date(t.pub_date || t.created_at || Date.now()).getTime())))
@@ -331,7 +331,7 @@ async function prerenderHomePage(baseHTML, distPath) {
       </article>
 
       <section class="top-topics-section">
-        <h2>Top 10 Trending Now</h2>
+        <h2>Top ${topTopicsForDisplay.length} Trending Now</h2>
         <ol class="topics-list">
   `;
 
