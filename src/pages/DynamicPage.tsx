@@ -772,64 +772,41 @@ snapshotButton={null}
                   <section className="max-w-7xl mx-auto mt-8 mb-0 md:mb-8" aria-labelledby="top-trending-heading">
                     {!isCryptoPage && (
                       <>
-                        <div className="flex items-center justify-between mb-4 gap-4">
-                          <h2 id="top-trending-heading" className={`text-xl md:text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                            {topTitle}
-                          </h2>
-                          <div className="relative flex-1 max-w-md">
-                            <Search className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`} />
-                            <input
-                              type="text"
-                              value={topSearchQuery}
-                              onChange={(e) => setTopSearchQuery(e.target.value)}
-                              placeholder="Search topics..."
-                              className={`w-full pl-10 pr-10 py-2 rounded-lg border transition-colors ${theme === 'dark' ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-400 focus:border-blue-500' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-blue-500'} focus:outline-none focus:ring-2 focus:ring-blue-500/20`}
-                            />
-                            {topSearchQuery && (
-                              <button
-                                onClick={() => setTopSearchQuery('')}
-                                className={`absolute right-3 top-1/2 transform -translate-y-1/2 ${theme === 'dark' ? 'text-gray-400 hover:text-gray-300' : 'text-gray-500 hover:text-gray-700'} transition-colors`}
-                                aria-label="Clear search"
-                              >
-                                <X className="w-4 h-4" />
-                              </button>
-                            )}
-                          </div>
-                        </div>
+                        <h2 id="top-trending-heading" className={`text-xl md:text-2xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                          {topTitle}
+                        </h2>
                         {topTopicNames && (
                           <p className={`mb-4 text-sm leading-relaxed ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
                             Currently trending: <strong className={theme === 'dark' ? 'text-white' : 'text-gray-900'}>{topTopicNames}</strong>.
                             Explore our interactive visualization to discover real-time search trends, analyze topic popularity, and stay updated with what's capturing attention right now.
                           </p>
                         )}
+                        <div className="relative mb-4">
+                          <Search className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`} />
+                          <input
+                            type="text"
+                            value={topSearchQuery}
+                            onChange={(e) => setTopSearchQuery(e.target.value)}
+                            placeholder="Search"
+                            className={`w-full pl-10 pr-10 py-2 rounded-lg border transition-colors ${theme === 'dark' ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-400 focus:border-blue-500' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-blue-500'} focus:outline-none focus:ring-2 focus:ring-blue-500/20`}
+                          />
+                          {topSearchQuery && (
+                            <button
+                              onClick={() => setTopSearchQuery('')}
+                              className={`absolute right-3 top-1/2 transform -translate-y-1/2 ${theme === 'dark' ? 'text-gray-400 hover:text-gray-300' : 'text-gray-500 hover:text-gray-700'} transition-colors`}
+                              aria-label="Clear search"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          )}
+                        </div>
                       </>
                     )}
                     {isCryptoPage && (
                       <>
-                        <div className="flex items-center justify-between mb-4 gap-4">
-                          <h2 id="top-trending-heading" className={`text-xl md:text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                            Top {topTopics.length} Gainers & Losers
-                          </h2>
-                          <div className="relative flex-1 max-w-md">
-                            <Search className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`} />
-                            <input
-                              type="text"
-                              value={topSearchQuery}
-                              onChange={(e) => setTopSearchQuery(e.target.value)}
-                              placeholder="Search cryptocurrencies..."
-                              className={`w-full pl-10 pr-10 py-2 rounded-lg border transition-colors ${theme === 'dark' ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-400 focus:border-blue-500' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-blue-500'} focus:outline-none focus:ring-2 focus:ring-blue-500/20`}
-                            />
-                            {topSearchQuery && (
-                              <button
-                                onClick={() => setTopSearchQuery('')}
-                                className={`absolute right-3 top-1/2 transform -translate-y-1/2 ${theme === 'dark' ? 'text-gray-400 hover:text-gray-300' : 'text-gray-500 hover:text-gray-700'} transition-colors`}
-                                aria-label="Clear search"
-                              >
-                                <X className="w-4 h-4" />
-                              </button>
-                            )}
-                          </div>
-                        </div>
+                        <h2 id="top-trending-heading" className={`text-xl md:text-2xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                          Top {topTopics.length} Gainers & Losers
+                        </h2>
                         {topGainers.length > 0 && topLosers.length > 0 && (() => {
                           const timeframeLabel = cryptoTimeframe === '1h' ? '1-hour' : cryptoTimeframe === '24h' ? '24-hour' : cryptoTimeframe === '7d' ? '7-day' : cryptoTimeframe === '30d' ? '30-day' : '1-year';
                           const topGainer = topGainers[0];
@@ -840,11 +817,30 @@ snapshotButton={null}
                           const loserName = topLoser?.name.replace(/"/g, '') || '';
 
                           return (
-                            <p className={`mb-6 text-sm leading-relaxed ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                            <p className={`mb-4 text-sm leading-relaxed ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
                               Track the biggest movers in cryptocurrency markets right now. Leading the gainers is <strong className={theme === 'dark' ? 'text-green-400' : 'text-green-600'}>{gainerName}</strong> with a {timeframeLabel} gain of <strong className={theme === 'dark' ? 'text-green-400' : 'text-green-600'}>+{gainerChange.toFixed(2)}%</strong>, while <strong className={theme === 'dark' ? 'text-red-400' : 'text-red-600'}>{loserName}</strong> leads the decline with <strong className={theme === 'dark' ? 'text-red-400' : 'text-red-600'}>{loserChange.toFixed(2)}%</strong> change. Monitor real-time cryptocurrency price movements, analyze market trends, and discover top performing digital assets. Updated every 5 minutes with live data from CoinGecko, our cryptocurrency tracker helps you identify trading opportunities and stay informed about market volatility across Bitcoin, Ethereum, and thousands of altcoins.
                             </p>
                           );
                         })()}
+                        <div className="relative mb-4">
+                          <Search className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`} />
+                          <input
+                            type="text"
+                            value={topSearchQuery}
+                            onChange={(e) => setTopSearchQuery(e.target.value)}
+                            placeholder="Search"
+                            className={`w-full pl-10 pr-10 py-2 rounded-lg border transition-colors ${theme === 'dark' ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-400 focus:border-blue-500' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-blue-500'} focus:outline-none focus:ring-2 focus:ring-blue-500/20`}
+                          />
+                          {topSearchQuery && (
+                            <button
+                              onClick={() => setTopSearchQuery('')}
+                              className={`absolute right-3 top-1/2 transform -translate-y-1/2 ${theme === 'dark' ? 'text-gray-400 hover:text-gray-300' : 'text-gray-500 hover:text-gray-700'} transition-colors`}
+                              aria-label="Clear search"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          )}
+                        </div>
                       </>
                     )}
 
