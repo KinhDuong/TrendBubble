@@ -62,7 +62,7 @@ function DynamicPage() {
   const bubbleChartRef = useRef<HTMLDivElement>(null);
   const [animationStyle, setAnimationStyle] = useState<AnimationStyle>('default');
 
-  const itemsPerPage = 50;
+  const itemsPerPage = 10;
 
   const sortedTopics = useMemo(() => {
     if (pageData?.source !== 'coingecko_crypto' || !topics.length) {
