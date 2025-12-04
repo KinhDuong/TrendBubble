@@ -496,7 +496,7 @@ function DynamicPage() {
   };
 
   const topicType = extractTopicType(pageData.meta_title);
-  const topTitle = `Top ${topTopics.length} ${topicType || 'Trending Topics'}`;
+  const topTitle = `Top ${topTopics.length} ${topicType || 'Trending Topics'} (${lastUpdated.getFullYear()})`;
 
   const enhancedTitle = `${pageData.meta_title} - ${currentDate}`;
   const enhancedDescription = topTopicNames
