@@ -48,7 +48,7 @@ async function fetchTopicsForPage(pageSource) {
 
   const { data, error } = await query
     .order('rank', { ascending: true })
-    .limit(100);
+    .limit(1000);
 
   if (error) {
     console.error('Error fetching topics:', error);
@@ -243,7 +243,7 @@ async function prerenderHomePage(baseHTML, distPath) {
     .from('trending_topics')
     .select('*')
     .order('rank', { ascending: true })
-    .limit(100);
+    .limit(1000);
 
   const { data: pages } = await supabase
     .from('pages')
