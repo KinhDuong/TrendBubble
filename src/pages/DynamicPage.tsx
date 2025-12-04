@@ -821,13 +821,13 @@ snapshotButton={null}
                           </div>
                         ) : (
                         <>
-                        <ol className="bg-gray-50 rounded-lg overflow-hidden list-none border border-gray-200" itemScope itemType="https://schema.org/ItemList">
+                        <ol className="list-none" itemScope itemType="https://schema.org/ItemList">
                           {displayTopics.map((topic, index) => {
                             const actualRank = startIndex + index + 1;
                             return (
                           <li
                             key={index}
-                            className={`px-4 py-2 flex items-center gap-3 hover:bg-gray-100 transition-colors ${index < displayTopics.length - 1 ? 'border-b border-gray-200' : ''}`}
+                            className={`px-4 py-2 flex items-center gap-3 hover:bg-gray-50 transition-colors ${index < displayTopics.length - 1 ? 'border-b border-gray-200' : ''}`}
                             itemProp="itemListElement"
                             itemScope
                             itemType="https://schema.org/ListItem"
@@ -915,14 +915,14 @@ snapshotButton={null}
                             <ArrowUp size={24} />
                             Gainers ({cryptoTimeframe.toUpperCase()})
                           </h3>
-                          <ol className="bg-gray-50 border border-gray-200 rounded-lg overflow-hidden list-none">
+                          <ol className="list-none">
                             {topGainers.map((topic, index) => {
                               const change = topic.crypto_data?.[`change_${cryptoTimeframe}` as keyof typeof topic.crypto_data] || 0;
                               const actualRank = startIndex + index + 1;
                               return (
                                 <li
                                   key={index}
-                                  className={`px-3 py-2 flex items-center gap-2 hover:bg-gray-100 transition-colors ${index < topGainers.length - 1 ? 'border-b border-gray-200' : ''}`}
+                                  className={`px-3 py-2 flex items-center gap-2 hover:bg-gray-50 transition-colors ${index < topGainers.length - 1 ? 'border-b border-gray-200' : ''}`}
                                 >
                                   <div className="w-7 flex items-center justify-center">
                                     <div className="text-base font-bold text-gray-500">
@@ -954,14 +954,14 @@ snapshotButton={null}
                             <ArrowDown size={24} />
                             Losers ({cryptoTimeframe.toUpperCase()})
                           </h3>
-                          <ol className="bg-gray-50 border border-gray-200 rounded-lg overflow-hidden list-none">
+                          <ol className="list-none">
                             {topLosers.map((topic, index) => {
                               const change = topic.crypto_data?.[`change_${cryptoTimeframe}` as keyof typeof topic.crypto_data] || 0;
                               const actualRank = startIndex + index + 1;
                               return (
                                 <li
                                   key={index}
-                                  className={`px-3 py-2 flex items-center gap-2 hover:bg-gray-100 transition-colors ${index < topLosers.length - 1 ? 'border-b border-gray-200' : ''}`}
+                                  className={`px-3 py-2 flex items-center gap-2 hover:bg-gray-50 transition-colors ${index < topLosers.length - 1 ? 'border-b border-gray-200' : ''}`}
                                 >
                                   <div className="w-7 flex items-center justify-center">
                                     <div className="text-base font-bold text-gray-500">
