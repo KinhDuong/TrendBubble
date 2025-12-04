@@ -156,27 +156,13 @@ function generateContentHTML(pageData, topics, sourceLabel) {
     <div class="dynamic-page-content">
   `;
 
-  if (pageData.summary) {
-    contentHTML += `
-      <section class="page-summary" aria-labelledby="page-summary" itemscope itemtype="https://schema.org/Article" style="max-width: 80rem; margin: 2rem auto 1.5rem; padding: 0 0.5rem;">
-        <div class="summary-container" style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; padding: 1.5rem;">
-          <div class="summary-content" itemprop="articleBody">
-            ${pageData.summary}
-          </div>
-          <meta itemprop="author" content="Top Best Charts" />
-          <meta itemprop="datePublished" content="${pageData.created_at}" />
-        </div>
-      </section>
-    `;
-  }
-
   contentHTML += `
       <section class="top-topics">
-        <h2>Top ${topTopics.length} ${isCryptoPage ? 'Gainers & Losers' : 'Trending Topics'}</h2>
+        <h2>Top 10 ${isCryptoPage ? 'Gainers & Losers' : 'Trending Topics'}</h2>
         <ol class="topics-list">
   `;
 
-  topTopics.forEach((topic, index) => {
+  topTopics.slice(0, 10).forEach((topic, index) => {
     const searchVolume = topic.search_volume_raw || topic.search_volume;
     contentHTML += `
           <li>
@@ -193,6 +179,50 @@ function generateContentHTML(pageData, topics, sourceLabel) {
   contentHTML += `
         </ol>
       </section>
+  `;
+
+  if (pageData.summary) {
+    contentHTML += `
+      <section class="page-summary" aria-labelledby="page-summary" itemscope itemtype="https://schema.org/Article" style="max-width: 80rem; margin: 2rem auto 1.5rem; padding: 0 0.5rem;">
+        <div class="summary-container" style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; padding: 1.5rem;">
+          <div class="summary-content" itemprop="articleBody">
+            ${pageData.summary}
+          </div>
+          <meta itemprop="author" content="Top Best Charts" />
+          <meta itemprop="datePublished" content="${pageData.created_at}" />
+        </div>
+      </section>
+    `;
+  }
+
+  if (topTopics.length > 10) {
+    contentHTML += `
+      <section class="top-topics">
+        <h2>Full Rankings (${topTopics.length} Total)</h2>
+        <ol class="topics-list" start="11">
+    `;
+
+    topTopics.slice(10).forEach((topic, index) => {
+      const searchVolume = topic.search_volume_raw || topic.search_volume;
+      contentHTML += `
+          <li>
+            <span class="rank">${index + 11}</span>
+            <div class="topic-info">
+              <h3>${topic.name.replace(/"/g, '')}</h3>
+              <p>${searchVolume.toString().replace(/"/g, '')} searches</p>
+              ${topic.category ? `<span class="category">${topic.category}</span>` : ''}
+            </div>
+          </li>
+      `;
+    });
+
+    contentHTML += `
+        </ol>
+      </section>
+    `;
+  }
+
+  contentHTML += `
     </div>
   `;
 
