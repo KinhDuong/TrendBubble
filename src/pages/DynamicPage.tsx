@@ -844,10 +844,10 @@ snapshotButton={null}
                                   </div>
                                 </div>
                                 <div className="flex items-center gap-3 flex-wrap flex-1">
+                                  <h3 className={`font-semibold text-base ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`} itemProp="name">{topic.name.replace(/"/g, '')}</h3>
                                   <span className={`font-bold text-base ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`} itemProp="description">
                                     {topic.searchVolumeRaw.replace(/"/g, '')}
                                   </span>
-                                  <h3 className={`font-semibold text-base ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`} itemProp="name">{topic.name.replace(/"/g, '')}</h3>
                                 </div>
                               </div>
                               <div className="flex flex-wrap items-center gap-2 text-sm pl-[52px]">
