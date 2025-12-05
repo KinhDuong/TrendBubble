@@ -79,15 +79,15 @@ function generateMetaTags(pageData, topics) {
     .map(t => t.name.replace(/"/g, ''))
     .join(', ');
 
-  const currentDate = new Date().toLocaleDateString('en-US', {
+  const lastUpdated = topics.length > 0
+    ? new Date(Math.max(...topics.map(t => new Date(t.pub_date || t.created_at || Date.now()).getTime())))
+    : new Date();
+
+  const currentDate = lastUpdated.toLocaleDateString('en-US', {
     month: 'long',
     day: 'numeric',
     year: 'numeric'
   });
-
-  const lastUpdated = topics.length > 0
-    ? new Date(Math.max(...topics.map(t => new Date(t.pub_date || t.created_at || Date.now()).getTime())))
-    : new Date();
 
   const enhancedTitle = `${pageData.meta_title} - ${currentDate}`;
   const enhancedDescription = topTopics
