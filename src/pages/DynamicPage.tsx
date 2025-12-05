@@ -598,7 +598,7 @@ function DynamicPage() {
                 "item": {
                   "@type": "Thing",
                   "name": topic.name.replace(/"/g, ''),
-                  "description": `${topic.searchVolumeRaw.replace(/"/g, '')} searches`
+                  "description": `${topic.searchVolumeRaw.replace(/"/g, '')}`
                 }
               }))
             }
@@ -845,15 +845,7 @@ snapshotButton={null}
                               <h3 className={`font-semibold text-base mb-1 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`} itemProp="name">{topic.name.replace(/"/g, '')}</h3>
                               <div className="flex flex-wrap items-center gap-2 text-sm">
                                 <span className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} itemProp="description">
-                                  {topic.searchVolumeRaw.replace(/"/g, '')} searches
-                                </span>
-                                <span className={`px-2 py-0.5 rounded text-xs ${topic.source === 'user_upload' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`}>
-                                  {(() => {
-                                    const found = sources.find(s => s.value === topic.source);
-                                    if (found) return found.label;
-                                    if (topic.source) return topic.source.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-                                    return 'Trending';
-                                  })()}
+                                  {topic.searchVolumeRaw.replace(/"/g, '')}
                                 </span>
                                 {topic.category && (
                                   <span className={`px-2 py-0.5 rounded text-xs ${theme === 'dark' ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-700'}`}>
