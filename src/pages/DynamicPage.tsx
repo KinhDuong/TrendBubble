@@ -839,13 +839,13 @@ snapshotButton={null}
                             <article className="flex-1" itemProp="item" itemScope itemType="https://schema.org/Thing">
                               <div className="flex items-center gap-3 mb-1">
                                 <div className="w-10 flex items-center justify-center flex-shrink-0" aria-label={`Rank ${actualRank}`}>
-                                  <div className={`text-xl font-bold ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                                  <div className={`text-base ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
                                     {actualRank}
                                   </div>
                                 </div>
                                 <div className="flex items-center gap-3 flex-wrap flex-1">
-                                  <h3 className={`font-semibold text-base ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`} itemProp="name">{topic.name.replace(/"/g, '')}</h3>
-                                  <span className={`font-bold text-base ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`} itemProp="description">
+                                  <h3 className={`font-bold text-base ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`} itemProp="name">{topic.name.replace(/"/g, '')}</h3>
+                                  <span className={`text-base ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`} itemProp="description">
                                     {topic.searchVolumeRaw.replace(/"/g, '')}
                                   </span>
                                 </div>
