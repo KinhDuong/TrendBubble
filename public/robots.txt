@@ -3,4 +3,4 @@ User-agent: *
 Allow: /
 
 # Sitemap
-Sitemap: https://googletrendingtopics.com/sitemap.xml
+Sitemap: https://topbestcharts.com/sitemap.xml

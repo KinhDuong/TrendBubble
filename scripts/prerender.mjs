@@ -424,29 +424,11 @@ async function prerenderHomePage(baseHTML, distPath) {
     </div>
   `;
 
-  let html = baseHTML
+  const html = baseHTML
     .replace('<title>Vite + React + TS</title>', '')
     .replace('<!-- PRERENDER_META -->', homeMetaTags)
     .replace('<!-- PRERENDER_STRUCTURED_DATA -->', homeStructuredData)
     .replace('<div id="root"></div>', `<div id="root">${homeContentHTML}</div>`);
-
-  // Ensure GitHub Pages redirect script is present
-  if (!html.includes('sessionStorage.redirect')) {
-    html = html.replace(
-      '<body>',
-      `<body>
-    <script>
-      // GitHub Pages SPA redirect handler
-      (function() {
-        var redirect = sessionStorage.redirect;
-        delete sessionStorage.redirect;
-        if (redirect && redirect != location.href) {
-          history.replaceState(null, null, redirect);
-        }
-      })();
-    </script>`
-    );
-  }
 
   fs.writeFileSync(path.join(distPath, 'index.html'), html);
   console.log('✓ Generated: /index.html');
@@ -466,7 +448,34 @@ async function prerenderPages() {
     process.exit(1);
   }
 
-  const baseHTML = fs.readFileSync(indexPath, 'utf-8');
+  let baseHTML = fs.readFileSync(indexPath, 'utf-8');
+
+  // Add scripts to baseHTML if not present
+  if (!baseHTML.includes('sessionStorage.redirect')) {
+    baseHTML = baseHTML.replace(
+      '<body>',
+      `<body>
+    <script>
+      // GitHub Pages SPA redirect handler
+      (function() {
+        var redirect = sessionStorage.redirect;
+        delete sessionStorage.redirect;
+        if (redirect && redirect != location.href) {
+          history.replaceState(null, null, redirect);
+        }
+      })();
+
+      // Remove trailing slashes to prevent duplicate URLs
+      (function() {
+        var path = window.location.pathname;
+        if (path !== '/' && path.endsWith('/')) {
+          var newUrl = window.location.origin + path.slice(0, -1) + window.location.search + window.location.hash;
+          history.replaceState(null, null, newUrl);
+        }
+      })();
+    </script>`
+    );
+  }
 
   await prerenderHomePage(baseHTML, distPath);
 
