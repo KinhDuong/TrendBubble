@@ -397,25 +397,48 @@ async function prerenderHomePage(baseHTML, distPath) {
   `;
 
   if (pages && pages.length > 0) {
+    // Featured Section
     homeContentHTML += `
-      <section class="featured-pages-section">
-        <h2>Latest Featured Topics</h2>
-        <ul class="pages-list">
+      <section class="featured-pages-section" style="max-width: 80rem; margin: 2rem auto; padding: 0 1rem;">
+        <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 1rem;">Featured</h2>
+        <div style="display: flex; flex-wrap: wrap; gap: 1rem;">
     `;
 
     pages.forEach((page) => {
       homeContentHTML += `
-          <li>
-            <a href="${page.page_url}">
-              <h3>${page.meta_title}</h3>
-              <p>${page.meta_description}</p>
-            </a>
-          </li>
+          <a href="${page.page_url}" style="text-decoration: underline; color: #60a5fa;">
+            ${page.meta_title}
+          </a>
       `;
     });
 
     homeContentHTML += `
-        </ul>
+        </div>
+      </section>
+    `;
+
+    // Latest Section
+    homeContentHTML += `
+      <section class="latest-pages-section" style="max-width: 80rem; margin: 2rem auto; padding: 0 1rem;">
+        <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem;">Latest</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem;">
+    `;
+
+    pages.forEach((page) => {
+      homeContentHTML += `
+          <article style="padding: 1rem; background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem;">
+            <h3 style="font-size: 1.125rem; font-weight: 600; color: white; margin-bottom: 0.5rem;">
+              <a href="${page.page_url}" style="text-decoration: none; color: inherit;">
+                ${page.meta_title}
+              </a>
+            </h3>
+            <p style="color: #d1d5db; font-size: 0.875rem;">${page.meta_description}</p>
+          </article>
+      `;
+    });
+
+    homeContentHTML += `
+        </div>
       </section>
     `;
   }
