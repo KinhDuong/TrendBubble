@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import ReactQuill from 'react-quill';
 import { supabase } from '../lib/supabase';
 import { X, Save, Plus, Code, Eye } from 'lucide-react';
-import FAQManager from './FAQManager';
+import 'quill/dist/quill.snow.css';
 
 interface Page {
   id: string;
@@ -12,6 +12,7 @@ interface Page {
   meta_description: string;
   summary?: string;
   template?: string;
+  faq?: string;
   created_at: string;
 }
 
@@ -27,15 +28,16 @@ export default function PageEditor({ theme, onClose, existingPage }: PageEditorP
   const [metaTitle, setMetaTitle] = useState(existingPage?.meta_title || '');
   const [metaDescription, setMetaDescription] = useState(existingPage?.meta_description || '');
   const [summary, setSummary] = useState(existingPage?.summary || '');
+  const [faq, setFaq] = useState(existingPage?.faq || '');
   const [template, setTemplate] = useState(existingPage?.template || 'default');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [sources, setSources] = useState<Array<{ value: string; label: string }>>([]);
-  const [editorMode, setEditorMode] = useState<'visual' | 'html'>('visual');
+  const [summaryEditorMode, setSummaryEditorMode] = useState<'visual' | 'html'>('visual');
+  const [faqEditorMode, setFaqEditorMode] = useState<'visual' | 'html'>('visual');
 
   useEffect(() => {
     loadSources();
-    console.log('PageEditor mounted, existingPage:', existingPage);
   }, []);
 
   const loadSources = async () => {
@@ -110,8 +112,9 @@ export default function PageEditor({ theme, onClose, existingPage }: PageEditorP
         formattedUrl = '/' + formattedUrl;
       }
 
-      // Process summary to extract content from full HTML documents
+      // Process summary and FAQ to extract content from full HTML documents
       const processedSummary = summary ? extractContentFromFullHTML(summary) : null;
+      const processedFaq = faq ? extractContentFromFullHTML(faq) : null;
 
       const pageData = {
         page_url: formattedUrl,
@@ -119,6 +122,7 @@ export default function PageEditor({ theme, onClose, existingPage }: PageEditorP
         meta_title: metaTitle,
         meta_description: metaDescription,
         summary: processedSummary,
+        faq: processedFaq,
         template: template || 'default'
       };
 
@@ -281,9 +285,9 @@ export default function PageEditor({ theme, onClose, existingPage }: PageEditorP
                 <div className="flex gap-1 bg-gray-200 dark:bg-gray-700 rounded-lg p-1">
                   <button
                     type="button"
-                    onClick={() => setEditorMode('visual')}
+                    onClick={() => setSummaryEditorMode('visual')}
                     className={`flex items-center gap-1 px-3 py-1 rounded-md text-xs font-medium transition-colors ${
-                      editorMode === 'visual'
+                      summaryEditorMode === 'visual'
                         ? theme === 'dark'
                           ? 'bg-gray-900 text-white'
                           : 'bg-white text-gray-900 shadow-sm'
@@ -297,9 +301,9 @@ export default function PageEditor({ theme, onClose, existingPage }: PageEditorP
                   </button>
                   <button
                     type="button"
-                    onClick={() => setEditorMode('html')}
+                    onClick={() => setSummaryEditorMode('html')}
                     className={`flex items-center gap-1 px-3 py-1 rounded-md text-xs font-medium transition-colors ${
-                      editorMode === 'html'
+                      summaryEditorMode === 'html'
                         ? theme === 'dark'
                           ? 'bg-gray-900 text-white'
                           : 'bg-white text-gray-900 shadow-sm'
@@ -314,7 +318,7 @@ export default function PageEditor({ theme, onClose, existingPage }: PageEditorP
                 </div>
               </div>
 
-              {editorMode === 'visual' ? (
+              {summaryEditorMode === 'visual' ? (
                 <div className={`${theme === 'dark' ? 'quill-dark' : ''}`}>
                   <ReactQuill
                     theme="snow"
@@ -342,11 +346,82 @@ export default function PageEditor({ theme, onClose, existingPage }: PageEditorP
               )}
             </div>
 
-            {existingPage && (
-              <div className={`pt-8 mt-8 border-t-2 ${theme === 'dark' ? 'border-gray-600' : 'border-gray-300'}`}>
-                <FAQManager pageId={existingPage.id} theme={theme} />
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <label className={`block text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                  FAQ (Optional)
+                </label>
+                <div className="flex gap-1">
+                  <button
+                    type="button"
+                    onClick={() => setFaqEditorMode('visual')}
+                    className={`flex items-center gap-1 px-3 py-1 rounded-md text-xs font-medium transition-colors ${
+                      faqEditorMode === 'visual'
+                        ? theme === 'dark'
+                          ? 'bg-gray-900 text-white'
+                          : 'bg-white text-gray-900 shadow-sm'
+                        : theme === 'dark'
+                        ? 'text-gray-400 hover:text-white'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    <Eye size={14} />
+                    Visual
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFaqEditorMode('html')}
+                    className={`flex items-center gap-1 px-3 py-1 rounded-md text-xs font-medium transition-colors ${
+                      faqEditorMode === 'html'
+                        ? theme === 'dark'
+                          ? 'bg-gray-900 text-white'
+                          : 'bg-white text-gray-900 shadow-sm'
+                        : theme === 'dark'
+                        ? 'text-gray-400 hover:text-white'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    <Code size={14} />
+                    HTML
+                  </button>
+                </div>
               </div>
-            )}
+
+              {faqEditorMode === 'visual' ? (
+                <div className={`${theme === 'dark' ? 'quill-dark' : ''}`}>
+                  <ReactQuill
+                    theme="snow"
+                    value={faq}
+                    onChange={setFaq}
+                    modules={{
+                      toolbar: [
+                        [{ 'header': [1, 2, 3, false] }],
+                        ['bold', 'italic', 'underline'],
+                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                        ['link'],
+                        ['clean']
+                      ]
+                    }}
+                    formats={['header', 'bold', 'italic', 'underline', 'list', 'bullet', 'link']}
+                    placeholder="Write your FAQ content here..."
+                    className={`${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-white'} rounded-lg`}
+                    style={{ height: '200px', marginBottom: '50px' }}
+                  />
+                </div>
+              ) : (
+                <textarea
+                  value={faq}
+                  onChange={(e) => setFaq(e.target.value)}
+                  placeholder="<p>Paste or write HTML here...</p>"
+                  rows={10}
+                  className={`w-full px-3 py-2 rounded-lg border font-mono text-sm ${
+                    theme === 'dark'
+                      ? 'bg-gray-900 border-gray-700 text-white'
+                      : 'bg-white border-gray-300 text-gray-900'
+                  } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                />
+              )}
+            </div>
           </div>
         </div>
 

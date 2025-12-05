@@ -19,7 +19,6 @@ export default function FAQManager({ pageId, theme }: FAQManagerProps) {
   const [editAnswer, setEditAnswer] = useState('');
 
   useEffect(() => {
-    console.log('FAQManager mounted with pageId:', pageId);
     if (pageId) {
       loadFAQs();
     }

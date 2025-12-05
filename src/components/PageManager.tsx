@@ -10,6 +10,7 @@ interface Page {
   meta_title: string;
   meta_description: string;
   summary?: string;
+  faq?: string;
   template?: string;
   created_at: string;
 }

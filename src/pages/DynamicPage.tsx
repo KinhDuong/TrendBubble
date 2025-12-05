@@ -24,6 +24,7 @@ interface PageData {
   meta_description: string;
   created_at: string;
   summary?: string;
+  faq?: string;
 }
 
 function DynamicPage() {
@@ -1160,6 +1161,19 @@ snapshotButton={null}
                 />
                 <meta itemProp="author" content="Top Best Charts" />
                 <meta itemProp="datePublished" content={pageData.created_at} />
+              </div>
+            </section>
+          )}
+          {pageData.faq && (
+            <section
+              className="max-w-7xl mx-auto mt-8 mb-6 px-2 md:px-0"
+              aria-labelledby="page-faq"
+            >
+              <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-lg border p-4 md:p-6`}>
+                <div
+                  className="summary-content"
+                  dangerouslySetInnerHTML={{ __html: pageData.faq }}
+                />
               </div>
             </section>
           )}
