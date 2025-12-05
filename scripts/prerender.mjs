@@ -117,7 +117,7 @@ function generateMetaTags(pageData, topics) {
   `;
 }
 
-function generateContentHTML(pageData, topics, sourceLabel) {
+async function generateContentHTML(pageData, topics, sourceLabel) {
   const topTopics = [...topics]
     .sort((a, b) => b.search_volume - a.search_volume)
     .slice(0, 1000);
@@ -176,6 +176,78 @@ function generateContentHTML(pageData, topics, sourceLabel) {
           <div class="summary-content" itemprop="mainEntity" itemscope itemtype="https://schema.org/Question">
             ${pageData.faq}
           </div>
+        </div>
+      </section>
+    `;
+  }
+
+  // Add topic rankings for SEO
+  const currentYear = new Date().getFullYear();
+
+  contentHTML += `
+    <section class="top-topics" aria-labelledby="top-trending-heading" itemscope itemtype="https://schema.org/ItemList" style="max-width: 80rem; margin: 2rem auto 1.5rem; padding: 0 0.5rem;">
+      <div style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; padding: 1.5rem;">
+        <h2 id="top-trending-heading" style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; color: white;">
+          Top ${topTopics.length} ${isCryptoPage ? 'Gainers & Losers' : pageData.meta_title.replace(/trending topics/i, '').trim() || 'Trending Topics'} (${currentYear})
+        </h2>
+        <ol class="topics-list" style="list-style: none; padding: 0; margin: 0;">
+  `;
+
+  topTopics.forEach((topic, index) => {
+    const searchVolume = topic.search_volume_raw || topic.search_volume;
+    const rank = index + 1;
+    contentHTML += `
+          <li style="padding: 0.75rem 1rem; border-bottom: 1px solid #374151; display: flex; align-items: flex-start; gap: 0.75rem;" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+            <meta itemprop="position" content="${rank}" />
+            <span style="color: #9ca3af; font-weight: 600; min-width: 2.5rem;">${rank}</span>
+            <div style="flex: 1;" itemprop="item" itemscope itemtype="https://schema.org/Thing">
+              <h3 style="font-size: 1rem; font-weight: 600; color: white; margin: 0 0 0.25rem 0;" itemprop="name">${topic.name.replace(/"/g, '')}</h3>
+              <p style="color: #9ca3af; font-size: 0.875rem; margin: 0;" itemprop="description">${searchVolume.toString().replace(/"/g, '')}</p>
+              ${topic.category ? `<span style="display: inline-block; margin-top: 0.25rem; padding: 0.125rem 0.5rem; background-color: #374151; color: #d1d5db; font-size: 0.75rem; border-radius: 0.25rem;">${topic.category}</span>` : ''}
+            </div>
+          </li>
+    `;
+  });
+
+  contentHTML += `
+        </ol>
+      </div>
+    </section>
+  `;
+
+  // Add Latest pages section for SEO
+  const { data: latestPages } = await supabase
+    .from('pages')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(10);
+
+  if (latestPages && latestPages.length > 0) {
+    contentHTML += `
+      <section class="latest-pages" aria-labelledby="latest-pages-heading" style="max-width: 80rem; margin: 2rem auto 1.5rem; padding: 0 0.5rem;">
+        <h2 id="latest-pages-heading" style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; color: white;">Latest</h2>
+        <p style="color: #9ca3af; font-size: 0.875rem; margin-bottom: 1rem;">
+          Explore the latest trending topics pages across different categories and sources. Stay informed with real-time updates on what's capturing attention and driving search volume across the internet.
+        </p>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;">
+    `;
+
+    latestPages.forEach(page => {
+      const pageDate = new Date(page.created_at).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
+      contentHTML += `
+          <a href="${page.page_url}" style="display: block; background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; overflow: hidden; text-decoration: none; transition: all 0.2s;">
+            <div style="padding: 1rem;">
+              <div style="color: #6b7280; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; margin-bottom: 0.5rem;">
+                ${pageDate}
+              </div>
+              <h3 style="color: white; font-size: 1.125rem; font-weight: 700; margin-bottom: 0.5rem;">${page.meta_title}</h3>
+              <p style="color: #9ca3af; font-size: 0.875rem;">${page.meta_description}</p>
+            </div>
+          </a>
+      `;
+    });
+
+    contentHTML += `
         </div>
       </section>
     `;
@@ -456,7 +528,7 @@ async function prerenderPages() {
     const sourceLabel = await getSourceLabel(page.source);
 
     const metaTags = generateMetaTags(page, topics);
-    const contentHTML = generateContentHTML(page, topics, sourceLabel);
+    const contentHTML = await generateContentHTML(page, topics, sourceLabel);
     const structuredData = generateStructuredData(page, topics);
 
     let html = baseHTML
