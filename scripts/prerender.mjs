@@ -153,60 +153,7 @@ function generateContentHTML(pageData, topics, sourceLabel) {
         </div>
       </header>
     </article>
-    <div class="dynamic-page-content">
   `;
-
-  contentHTML += `
-      <section class="top-topics">
-        <h2>Top 10 ${isCryptoPage ? 'Gainers & Losers' : 'Trending Topics'}</h2>
-        <ol class="topics-list">
-  `;
-
-  topTopics.slice(0, 10).forEach((topic, index) => {
-    const searchVolume = topic.search_volume_raw || topic.search_volume;
-    contentHTML += `
-          <li>
-            <span class="rank">${index + 1}</span>
-            <div class="topic-info">
-              <h3>${topic.name.replace(/"/g, '')}</h3>
-              <p>${searchVolume.toString().replace(/"/g, '')} searches</p>
-              ${topic.category ? `<span class="category">${topic.category}</span>` : ''}
-            </div>
-          </li>
-    `;
-  });
-
-  contentHTML += `
-        </ol>
-      </section>
-  `;
-
-  if (topTopics.length > 10) {
-    contentHTML += `
-      <section class="top-topics">
-        <h2>Full Rankings (${topTopics.length} Total)</h2>
-        <ol class="topics-list" start="11">
-    `;
-
-    topTopics.slice(10).forEach((topic, index) => {
-      const searchVolume = topic.search_volume_raw || topic.search_volume;
-      contentHTML += `
-          <li>
-            <span class="rank">${index + 11}</span>
-            <div class="topic-info">
-              <h3>${topic.name.replace(/"/g, '')}</h3>
-              <p>${searchVolume.toString().replace(/"/g, '')} searches</p>
-              ${topic.category ? `<span class="category">${topic.category}</span>` : ''}
-            </div>
-          </li>
-      `;
-    });
-
-    contentHTML += `
-        </ol>
-      </section>
-    `;
-  }
 
   if (pageData.summary) {
     contentHTML += `
