@@ -843,12 +843,14 @@ snapshotButton={null}
                                     {actualRank}
                                   </div>
                                 </div>
-                                <h3 className={`font-semibold text-base ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`} itemProp="name">{topic.name.replace(/"/g, '')}</h3>
+                                <div className="flex items-center gap-3 flex-wrap flex-1">
+                                  <span className={`font-bold text-base ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`} itemProp="description">
+                                    {topic.searchVolumeRaw.replace(/"/g, '')}
+                                  </span>
+                                  <h3 className={`font-semibold text-base ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`} itemProp="name">{topic.name.replace(/"/g, '')}</h3>
+                                </div>
                               </div>
                               <div className="flex flex-wrap items-center gap-2 text-sm pl-[52px]">
-                                <span className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} itemProp="description">
-                                  {topic.searchVolumeRaw.replace(/"/g, '')}
-                                </span>
                                 {topic.category && (
                                   <span className={`px-2 py-0.5 rounded text-xs ${theme === 'dark' ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-700'}`}>
                                     {topic.category}
