@@ -1168,10 +1168,15 @@ snapshotButton={null}
             <section
               className="max-w-7xl mx-auto mt-8 mb-6 px-2 md:px-0"
               aria-labelledby="page-faq"
+              itemScope
+              itemType="https://schema.org/FAQPage"
             >
               <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-lg border p-4 md:p-6`}>
                 <div
                   className="summary-content"
+                  itemProp="mainEntity"
+                  itemScope
+                  itemType="https://schema.org/Question"
                   dangerouslySetInnerHTML={{ __html: pageData.faq }}
                 />
               </div>
