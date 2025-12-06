@@ -92,11 +92,17 @@ function DynamicPage() {
   }, [topics, cryptoTimeframe, pageData?.source]);
 
   useEffect(() => {
-    loadPageData();
-    loadThemePreference();
-    loadCategories();
-    loadSources();
-    loadLatestPages();
+    const loadAllData = async () => {
+      setLoading(true);
+      await Promise.all([
+        loadPageData(),
+        loadThemePreference(),
+        loadCategories(),
+        loadSources(),
+        loadLatestPages()
+      ]);
+    };
+    loadAllData();
   }, [urlPath]);
 
   useEffect(() => {
@@ -152,7 +158,7 @@ function DynamicPage() {
       }
 
       setPageData(data);
-      loadFAQs(data.id);
+      await loadFAQs(data.id);
     } catch (error) {
       console.error('Error loading page data:', error);
       setPageData(null);
@@ -529,6 +535,14 @@ function DynamicPage() {
       <Helmet>
         <title>{enhancedTitle}</title>
         <meta name="description" content={enhancedDescription} />
+        <style>{`
+          main {
+            contain: layout style;
+          }
+          main > * {
+            will-change: auto;
+          }
+        `}</style>
         <meta name="keywords" content={keywords} />
         <meta name="author" content="Google Trending Topics" />
         <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
@@ -666,7 +680,7 @@ snapshotButton={null}
       />
 
       <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'} px-2 md:px-6 py-2 md:py-6 pb-0`}>
-        <main role="main" aria-label="Trending topics visualization">
+        <main role="main" aria-label="Trending topics visualization" style={{ minHeight: '80vh' }}>
           {loading && (
             <div className={`text-center py-8 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>Loading...</div>
           )}
@@ -717,7 +731,7 @@ snapshotButton={null}
               )}
               {topics.length > 0 && viewMode === 'bubble' && (
                 <>
-                  <div ref={bubbleChartRef}>
+                  <div ref={bubbleChartRef} style={{ minHeight: '500px' }}>
                     <BubbleChart
                       topics={sortedTopics}
                       maxDisplay={maxBubbles}
