@@ -106,8 +106,6 @@ function DynamicPage() {
   }, [urlPath]);
 
   useEffect(() => {
-    if (viewMode !== 'bubble') return;
-
     const bubbleInterval = setInterval(() => {
       if (oldestBubbleTime && oldestBubbleCreated && oldestBubbleLifetime) {
         const now = Date.now();
@@ -129,7 +127,7 @@ function DynamicPage() {
       }
     }, 100);
     return () => clearInterval(bubbleInterval);
-  }, [oldestBubbleTime, oldestBubbleCreated, oldestBubbleLifetime, viewMode]);
+  }, [oldestBubbleTime, oldestBubbleCreated, oldestBubbleLifetime]);
 
   useEffect(() => {
     if (pageData) {
@@ -464,61 +462,55 @@ function DynamicPage() {
     );
   }
 
-  const topTopics = useMemo(() => {
-    return [...topics]
-      .filter(topic => {
-        if (!topSearchQuery.trim()) return true;
-        const query = topSearchQuery.toLowerCase();
-        return topic.name.toLowerCase().includes(query) ||
-               topic.category?.toLowerCase().includes(query);
-      })
-      .sort((a, b) => b.searchVolume - a.searchVolume);
-  }, [topics, topSearchQuery]);
+  const topTopics = [...topics]
+    .filter(topic => {
+      if (!topSearchQuery.trim()) return true;
+      const query = topSearchQuery.toLowerCase();
+      return topic.name.toLowerCase().includes(query) ||
+             topic.category?.toLowerCase().includes(query);
+    })
+    .sort((a, b) => b.searchVolume - a.searchVolume);
 
   // For crypto pages, split into gainers and losers
   const isCryptoPage = pageData?.source === 'coingecko_crypto';
-  const { topGainers, topLosers } = useMemo(() => {
-    let gainers: TrendingTopic[] = [];
-    let losers: TrendingTopic[] = [];
+  let topGainers: TrendingTopic[] = [];
+  let topLosers: TrendingTopic[] = [];
 
-    if (isCryptoPage) {
-      const getCryptoChange = (topic: TrendingTopic): number => {
-        if (!topic.crypto_data) return 0;
-        const timeframeMap = {
-          '1h': 'change_1h',
-          '24h': 'change_24h',
-          '7d': 'change_7d',
-          '30d': 'change_30d',
-          '1y': 'change_1y',
-        };
-        const field = timeframeMap[cryptoTimeframe] as keyof typeof topic.crypto_data;
-        return topic.crypto_data[field] || 0;
+  if (isCryptoPage) {
+    const getCryptoChange = (topic: TrendingTopic): number => {
+      if (!topic.crypto_data) return 0;
+      const timeframeMap = {
+        '1h': 'change_1h',
+        '24h': 'change_24h',
+        '7d': 'change_7d',
+        '30d': 'change_30d',
+        '1y': 'change_1y',
       };
+      const field = timeframeMap[cryptoTimeframe] as keyof typeof topic.crypto_data;
+      return topic.crypto_data[field] || 0;
+    };
 
-      const sortedByChange = [...topics].sort((a, b) => getCryptoChange(b) - getCryptoChange(a));
-      const allGainers = sortedByChange.filter(t => getCryptoChange(t) > 0);
-      const allLosers = sortedByChange.filter(t => getCryptoChange(t) < 0).reverse();
+    const sortedByChange = [...topics].sort((a, b) => getCryptoChange(b) - getCryptoChange(a));
+    const gainers = sortedByChange.filter(t => getCryptoChange(t) > 0);
+    const losers = sortedByChange.filter(t => getCryptoChange(t) < 0).reverse();
 
-      const startIndexGainers = (currentPage - 1) * itemsPerPage;
-      const endIndexGainers = startIndexGainers + itemsPerPage;
-      gainers = allGainers.slice(startIndexGainers, endIndexGainers);
-      losers = allLosers.slice(startIndexGainers, endIndexGainers);
-    }
-
-    return { topGainers: gainers, topLosers: losers };
-  }, [isCryptoPage, topics, cryptoTimeframe, currentPage, itemsPerPage]);
+    const startIndexGainers = (currentPage - 1) * itemsPerPage;
+    const endIndexGainers = startIndexGainers + itemsPerPage;
+    topGainers = gainers.slice(startIndexGainers, endIndexGainers);
+    topLosers = losers.slice(startIndexGainers, endIndexGainers);
+  }
 
   const totalPages = Math.ceil(topTopics.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const displayTopics = useMemo(() => topTopics.slice(startIndex, endIndex), [topTopics, startIndex, endIndex]);
+  const displayTopics = topTopics.slice(startIndex, endIndex);
 
-  const topTopicNames = useMemo(() => topTopics.slice(0, 5).map(t => t.name.replace(/"/g, '')).join(', '), [topTopics]);
-  const currentDate = useMemo(() => new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }), []);
-  const lastUpdated = useMemo(() => topics.length > 0 ? new Date(Math.max(...topics.map(t => new Date(t.pubDate || t.createdAt || Date.now()).getTime()))) : new Date(), [topics]);
+  const topTopicNames = topTopics.slice(0, 5).map(t => t.name.replace(/"/g, '')).join(', ');
+  const currentDate = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  const lastUpdated = topics.length > 0 ? new Date(Math.max(...topics.map(t => new Date(t.pubDate || t.createdAt || Date.now()).getTime()))) : new Date();
 
-  const pageUrl = useMemo(() => typeof window !== 'undefined' ? window.location.href : `https://googletrendingtopics.com/${pageData.page_url}`, [pageData.page_url]);
-  const sourceName = useMemo(() => sources.find(s => s.value === pageData.source)?.label || 'Custom', [sources, pageData.source]);
+  const pageUrl = typeof window !== 'undefined' ? window.location.href : `https://googletrendingtopics.com/${pageData.page_url}`;
+  const sourceName = sources.find(s => s.value === pageData.source)?.label || 'Custom';
 
   const extractTopicType = (title: string) => {
     const lowerTitle = title.toLowerCase();
@@ -528,15 +520,15 @@ function DynamicPage() {
     return title;
   };
 
-  const topicType = useMemo(() => extractTopicType(pageData.meta_title), [pageData.meta_title]);
-  const topTitle = useMemo(() => `Top ${topTopics.length} ${topicType || 'Trending Topics'} (${lastUpdated.getFullYear()})`, [topTopics.length, topicType, lastUpdated]);
+  const topicType = extractTopicType(pageData.meta_title);
+  const topTitle = `Top ${topTopics.length} ${topicType || 'Trending Topics'} (${lastUpdated.getFullYear()})`;
 
-  const enhancedTitle = useMemo(() => `${pageData.meta_title} - ${currentDate}`, [pageData.meta_title, currentDate]);
-  const enhancedDescription = useMemo(() => topTopicNames
+  const enhancedTitle = `${pageData.meta_title} - ${currentDate}`;
+  const enhancedDescription = topTopicNames
     ? `${pageData.meta_description} Top trending: ${topTopicNames}. Updated ${lastUpdated.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}.`
-    : pageData.meta_description, [pageData.meta_description, topTopicNames, lastUpdated]);
+    : pageData.meta_description;
 
-  const keywords = useMemo(() => topTopics.slice(0, 10).map(t => t.name.replace(/"/g, '')).join(', ') + ', trending topics, search trends, real-time trends, trend analysis', [topTopics]);
+  const keywords = topTopics.slice(0, 10).map(t => t.name.replace(/"/g, '')).join(', ') + ', trending topics, search trends, real-time trends, trend analysis';
 
   return (
     <>
