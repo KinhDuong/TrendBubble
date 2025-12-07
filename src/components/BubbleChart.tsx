@@ -158,10 +158,12 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
     const updateCanvasSize = () => {
       const dpr = window.devicePixelRatio || 1;
       const rect = canvas.getBoundingClientRect();
+      const isMobile = window.innerWidth < 768;
+      const heightOffset = isMobile ? 80 : 150;
       canvas.width = rect.width * dpr;
-      canvas.height = (window.innerHeight - 150) * dpr;
+      canvas.height = (window.innerHeight - heightOffset) * dpr;
       canvas.style.width = rect.width + 'px';
-      canvas.style.height = (window.innerHeight - 150) + 'px';
+      canvas.style.height = (window.innerHeight - heightOffset) + 'px';
       ctx.scale(dpr, dpr);
     };
 
