@@ -241,14 +241,17 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
       const displayCount = Math.min(maxDisplay, topics.length);
       const densityFactor = Math.min(1, Math.sqrt(50 / displayCount));
 
-      const normalizedScale = (searchVolume - minVolume) / (maxSearchVolume - minVolume || 1);
+      // Apply square root to raw values first so area is proportional to volume
+      const sqrtVolume = Math.sqrt(searchVolume);
+      const sqrtMin = Math.sqrt(minVolume);
+      const sqrtMax = Math.sqrt(maxSearchVolume);
 
-      const exponentialScale = Math.pow(normalizedScale, 0.5);
+      const normalizedScale = (sqrtVolume - sqrtMin) / (sqrtMax - sqrtMin || 1);
 
       const baseMin = (isMobile ? 30 : 40) * densityFactor;
       const baseMax = (isMobile ? 80 : 120) * densityFactor;
 
-      const scaledSize = baseMin + exponentialScale * (baseMax - baseMin);
+      const scaledSize = baseMin + normalizedScale * (baseMax - baseMin);
 
       const layoutScaleFactor = layout === 'force' ? 1.0 : 0.4;
 
