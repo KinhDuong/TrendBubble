@@ -144,12 +144,30 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
     }
   };
 
-  const handleCanvasTouch = (event: TouchEvent) => {
+  const touchStartPos = useRef<{ x: number; y: number } | null>(null);
+
+  const handleCanvasTouchStart = (event: TouchEvent) => {
+    if (event.touches.length === 0) return;
+    const touch = event.touches[0];
+    touchStartPos.current = { x: touch.clientX, y: touch.clientY };
+  };
+
+  const handleCanvasTouchEnd = (event: TouchEvent) => {
     const canvas = canvasRef.current;
-    if (!canvas || event.touches.length === 0) return;
+    if (!canvas || event.changedTouches.length === 0 || !touchStartPos.current) return;
+
+    const touch = event.changedTouches[0];
+    const moveDistance = Math.sqrt(
+      Math.pow(touch.clientX - touchStartPos.current.x, 2) +
+      Math.pow(touch.clientY - touchStartPos.current.y, 2)
+    );
+
+    if (moveDistance > 10) {
+      touchStartPos.current = null;
+      return;
+    }
 
     const rect = canvas.getBoundingClientRect();
-    const touch = event.touches[0];
     const x = touch.clientX - rect.left;
     const y = touch.clientY - rect.top;
 
@@ -169,6 +187,8 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
         break;
       }
     }
+
+    touchStartPos.current = null;
   };
 
   useEffect(() => {
@@ -193,7 +213,8 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
     updateCanvasSize();
     window.addEventListener('resize', updateCanvasSize);
     canvas.addEventListener('click', handleCanvasClick);
-    canvas.addEventListener('touchstart', handleCanvasTouch);
+    canvas.addEventListener('touchstart', handleCanvasTouchStart);
+    canvas.addEventListener('touchend', handleCanvasTouchEnd);
 
     const handleMouseMove = (event: MouseEvent) => {
       const rect = canvas.getBoundingClientRect();
@@ -1250,7 +1271,8 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
     return () => {
       window.removeEventListener('resize', updateCanvasSize);
       canvas.removeEventListener('click', handleCanvasClick);
-      canvas.removeEventListener('touchstart', handleCanvasTouch);
+      canvas.removeEventListener('touchstart', handleCanvasTouchStart);
+      canvas.removeEventListener('touchend', handleCanvasTouchEnd);
       if (!isTouchDevice) {
         canvas.removeEventListener('mousemove', handleMouseMove);
       }
