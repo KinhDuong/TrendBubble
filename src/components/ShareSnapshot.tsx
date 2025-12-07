@@ -80,7 +80,8 @@ export default function ShareSnapshot({ theme, canvasRef, variant = 'floating' }
 
   const copyToClipboard = async () => {
     try {
-      await navigator.clipboard.writeText('https://googletrendingtopics.com');
+      const currentUrl = window.location.href;
+      await navigator.clipboard.writeText(currentUrl);
       alert('Link copied to clipboard!');
     } catch (error) {
       console.error('Error copying to clipboard:', error);
@@ -89,17 +90,17 @@ export default function ShareSnapshot({ theme, canvasRef, variant = 'floating' }
 
   const shareToTwitter = () => {
     const text = 'Check out these trending topics! 🔥';
-    const url = 'https://googletrendingtopics.com';
+    const url = window.location.href;
     window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank');
   };
 
   const shareToFacebook = () => {
-    const url = 'https://googletrendingtopics.com';
+    const url = window.location.href;
     window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank');
   };
 
   const shareToLinkedIn = () => {
-    const url = 'https://googletrendingtopics.com';
+    const url = window.location.href;
     window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`, '_blank');
   };
 
