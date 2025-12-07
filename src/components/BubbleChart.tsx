@@ -797,10 +797,39 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
         });
       }
 
-      // Maintain accurate bubble sizes - only apply hover effect
+      // Calculate density and apply uniform shrinking (maintains proportional accuracy)
+      const canvasDisplayWidth = canvas.width / dpr;
+      const canvasDisplayHeight = canvas.height / dpr;
+
+      let shrinkFactor = 1.0;
+
+      if (layout === 'force') {
+        const canvasArea = canvasDisplayWidth * canvasDisplayHeight;
+
+        // Calculate total bubble area
+        const totalBubbleArea = bubblesRef.current.reduce((sum, bubble) => {
+          return sum + Math.PI * bubble.baseRadius * bubble.baseRadius;
+        }, 0);
+
+        // Density ratio: how much of the canvas is covered by bubbles
+        const densityRatio = totalBubbleArea / canvasArea;
+
+        // Start shrinking when density exceeds threshold
+        const isMobile = window.innerWidth < 768;
+        const densityThreshold = isMobile ? 0.8 : 0.6;
+        const shrinkAmount = isMobile ? 0.4 : 0.4;
+
+        if (densityRatio > densityThreshold) {
+          const excessDensity = Math.min(densityRatio - densityThreshold, 0.2) / 0.2;
+          shrinkFactor = 1.0 - (excessDensity * shrinkAmount);
+        }
+      }
+
+      // Apply uniform scaling to maintain proportional accuracy
       bubblesRef.current.forEach((bubble) => {
         const hoverScale = bubble.isHovered ? 1.15 : 1.0;
-        const targetRadius = bubble.baseRadius * hoverScale;
+        // All bubbles get same shrinkFactor, maintaining their relative proportions
+        const targetRadius = bubble.baseRadius * shrinkFactor * hoverScale;
         // Smooth transition: move 10% towards target each frame
         bubble.radius += (targetRadius - bubble.radius) * 0.1;
       });
