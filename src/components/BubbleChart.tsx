@@ -159,7 +159,7 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
       const dpr = window.devicePixelRatio || 1;
       const rect = canvas.getBoundingClientRect();
       const isMobile = window.innerWidth < 768;
-      const heightOffset = isMobile ? 80 : 150;
+      const heightOffset = isMobile ? 0 : 150;
       canvas.width = rect.width * dpr;
       canvas.height = (window.innerHeight - heightOffset) * dpr;
       canvas.style.width = rect.width + 'px';
@@ -843,7 +843,7 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
 
         // Start shrinking when density exceeds threshold
         const isMobile = window.innerWidth < 768;
-        const densityThreshold = isMobile ? 0.7 : 0.6;
+        const densityThreshold = isMobile ? 0.65 : 0.6;
         const shrinkAmount = isMobile ? 0.4 : 0.4;
 
         if (densityRatio > densityThreshold) {
