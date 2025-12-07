@@ -606,9 +606,10 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
 
       const isStaticLayout = !usePhysics;
 
-      // Apply current shrink factor to new bubbles so they match existing bubble sizes
-      const currentShrinkFactor = shrinkFactorRef.current;
-      const initialRadius = isStaticLayout ? radius : (radius * currentShrinkFactor);
+      // For spawning bubbles, start from 0 for smooth animation
+      // For static layouts, start at full size
+      // The shrink factor will be applied during animation
+      const initialRadius = isStaticLayout ? radius : 0;
 
       return {
         topic,
@@ -838,8 +839,9 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
         const hoverScale = bubble.isHovered ? 1.15 : 1.0;
         // All bubbles get same shrinkFactor, maintaining their relative proportions
         const targetRadius = bubble.baseRadius * shrinkFactor * hoverScale;
-        // Smooth transition: move 10% towards target each frame
-        bubble.radius += (targetRadius - bubble.radius) * 0.1;
+        // Faster transition for spawning bubbles, slower for others
+        const transitionSpeed = bubble.isSpawning ? 0.5 : 0.1;
+        bubble.radius += (targetRadius - bubble.radius) * transitionSpeed;
       });
 
       const bubblesToAdd: Bubble[] = [];
