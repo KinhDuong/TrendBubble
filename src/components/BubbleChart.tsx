@@ -792,12 +792,16 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
 
         if (bubble.isSpawning) {
           const displayCount = Math.min(maxDisplay, topics.length);
-          let spawnSpeed = 0.05;
+          let baseSpawnSpeed = 0.05;
           if (displayCount < 30) {
-            spawnSpeed = 0.02;
+            baseSpawnSpeed = 0.02;
           } else if (displayCount <= 50) {
-            spawnSpeed = 0.035;
+            baseSpawnSpeed = 0.035;
           }
+
+          const sizeRatio = bubble.baseRadius / 100;
+          const sizeMultiplier = 1 / (1 + sizeRatio * 0.8);
+          const spawnSpeed = baseSpawnSpeed * sizeMultiplier;
 
           bubble.spawnProgress = Math.min((bubble.spawnProgress || 0) + spawnSpeed, 1);
           if (bubble.spawnProgress >= 1) {
@@ -976,15 +980,16 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
           const progress = bubble.spawnProgress || 0;
           const displayCount = Math.min(maxDisplay, topics.length);
 
+          const sizeRatio = bubble.baseRadius / 100;
+          const isLargeBubble = sizeRatio > 0.8;
+
           let easedProgress = progress;
-          if (displayCount < 30) {
-            easedProgress = progress < 0.5
-              ? 4 * progress * progress * progress
-              : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+          if (displayCount < 30 || isLargeBubble) {
+            easedProgress = 1 - Math.pow(1 - progress, 4);
           } else if (displayCount <= 50) {
-            easedProgress = progress < 0.5
-              ? 2 * progress * progress
-              : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+            easedProgress = 1 - Math.pow(1 - progress, 3);
+          } else {
+            easedProgress = 1 - Math.pow(1 - progress, 2.5);
           }
 
           switch (animationStyle) {
