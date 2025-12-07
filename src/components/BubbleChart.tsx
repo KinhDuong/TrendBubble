@@ -849,7 +849,7 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
 
       // Apply uniform scaling to maintain proportional accuracy
       bubblesRef.current.forEach((bubble) => {
-        const hoverScale = bubble.isHovered ? 1.15 : 1.0;
+        const hoverScale = bubble.isHovered ? 1.5 : 1.0;
         // All bubbles get same shrinkFactor, maintaining their relative proportions
         const targetRadius = bubble.baseRadius * shrinkFactor * hoverScale;
         // Faster transition for spawning bubbles, slower for others
