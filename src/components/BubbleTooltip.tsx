@@ -1,5 +1,6 @@
 import { TrendingTopic, CryptoTimeframe } from '../types';
 import { TrendingUp, Clock, Tag, Pin, X } from 'lucide-react';
+import { createPortal } from 'react-dom';
 
 interface BubbleTooltipProps {
   topic: TrendingTopic;
@@ -92,7 +93,7 @@ export default function BubbleTooltip({
   };
 
   if (isMobile) {
-    return (
+    return createPortal(
       <>
         <div
           className="fixed inset-0 bg-black/50 animate-in fade-in duration-200"
@@ -230,7 +231,8 @@ export default function BubbleTooltip({
             )}
           </div>
         </div>
-      </>
+      </>,
+      document.body
     );
   }
 
