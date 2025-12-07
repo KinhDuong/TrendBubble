@@ -841,7 +841,7 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
 
         // Start shrinking when density exceeds threshold
         const isMobile = window.innerWidth < 768;
-        const densityThreshold = isMobile ? 0.8 : 0.6;
+        const densityThreshold = isMobile ? 0.7 : 0.6;
         const shrinkAmount = isMobile ? 0.4 : 0.4;
 
         if (densityRatio > densityThreshold) {
