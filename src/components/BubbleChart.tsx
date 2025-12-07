@@ -132,6 +132,12 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
       const distance = Math.sqrt(dx * dx + dy * dy);
 
       if (distance <= bubble.radius) {
+        const isMobile = window.innerWidth < 768;
+        if (isMobile) {
+          const scrollY = window.scrollY || window.pageYOffset;
+          const targetScroll = Math.max(0, scrollY - 100);
+          window.scrollTo({ top: targetScroll, behavior: 'smooth' });
+        }
         setTooltipData({
           topic: bubble.topic,
           x: event.clientX,

@@ -29,10 +29,25 @@ export default function BubbleTooltip({
   const isMobile = window.innerWidth < 768;
   const tooltipWidth = 280;
   const tooltipHeight = 200;
-  const offset = 5;
+  const offset = 10;
+  const padding = 20;
 
-  const left = x + tooltipWidth + offset > window.innerWidth ? x - tooltipWidth - offset : x + offset;
-  const top = y + tooltipHeight > window.innerHeight ? y - tooltipHeight : y;
+  let left = x + offset;
+  let top = y;
+
+  if (left + tooltipWidth > window.innerWidth - padding) {
+    left = x - tooltipWidth - offset;
+  }
+  if (left < padding) {
+    left = padding;
+  }
+
+  if (top + tooltipHeight > window.innerHeight - padding) {
+    top = window.innerHeight - tooltipHeight - padding;
+  }
+  if (top < padding) {
+    top = padding;
+  }
 
   const formatDate = (dateString: string | null) => {
     if (!dateString) return 'N/A';
