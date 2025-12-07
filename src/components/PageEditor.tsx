@@ -1,8 +1,12 @@
-import { useState, useEffect } from 'react';
-import ReactQuill from 'react-quill';
+import { useState, useEffect, useRef } from 'react';
+import ReactQuill, { Quill } from 'react-quill';
 import { supabase } from '../lib/supabase';
-import { X, Save, Plus, Code, Eye } from 'lucide-react';
+import { X, Save, Plus, Code, Eye, Table } from 'lucide-react';
 import 'quill/dist/quill.snow.css';
+import QuillBetterTable from 'quill-better-table';
+import 'quill-better-table/dist/quill-better-table.css';
+
+Quill.register('modules/better-table', QuillBetterTable);
 
 interface Page {
   id: string;
@@ -35,6 +39,8 @@ export default function PageEditor({ theme, onClose, existingPage }: PageEditorP
   const [sources, setSources] = useState<Array<{ value: string; label: string }>>([]);
   const [summaryEditorMode, setSummaryEditorMode] = useState<'visual' | 'html'>('visual');
   const [faqEditorMode, setFaqEditorMode] = useState<'visual' | 'html'>('visual');
+  const summaryQuillRef = useRef<ReactQuill | null>(null);
+  const faqQuillRef = useRef<ReactQuill | null>(null);
 
   useEffect(() => {
     loadSources();
@@ -66,6 +72,16 @@ export default function PageEditor({ theme, onClose, existingPage }: PageEditorP
         { value: 'google_trends', label: 'Google Trends' },
         { value: 'user_upload', label: 'User Upload' }
       ]);
+    }
+  };
+
+  const insertTable = (editorRef: React.RefObject<ReactQuill>, rows: number = 3, cols: number = 3) => {
+    const editor = editorRef.current?.getEditor();
+    if (editor) {
+      const tableModule = editor.getModule('better-table') as { insertTable: (rows: number, cols: number) => void };
+      if (tableModule && typeof tableModule.insertTable === 'function') {
+        tableModule.insertTable(rows, cols);
+      }
     }
   };
 
@@ -168,6 +184,42 @@ export default function PageEditor({ theme, onClose, existingPage }: PageEditorP
       [{ 'color': [] }, { 'background': [] }],
       ['clean']
     ],
+    'better-table': {
+      operationMenu: {
+        items: {
+          unmergeCells: {
+            text: 'Unmerge cells'
+          },
+          insertColumnRight: {
+            text: 'Insert column right'
+          },
+          insertColumnLeft: {
+            text: 'Insert column left'
+          },
+          insertRowUp: {
+            text: 'Insert row above'
+          },
+          insertRowDown: {
+            text: 'Insert row below'
+          },
+          mergeCells: {
+            text: 'Merge cells'
+          },
+          deleteColumn: {
+            text: 'Delete column'
+          },
+          deleteRow: {
+            text: 'Delete row'
+          },
+          deleteTable: {
+            text: 'Delete table'
+          }
+        }
+      }
+    },
+    keyboard: {
+      bindings: QuillBetterTable.keyboardBindings
+    }
   };
 
   const formats = [
@@ -319,17 +371,32 @@ export default function PageEditor({ theme, onClose, existingPage }: PageEditorP
               </div>
 
               {summaryEditorMode === 'visual' ? (
-                <div className={`${theme === 'dark' ? 'quill-dark' : ''}`}>
-                  <ReactQuill
-                    theme="snow"
-                    value={summary}
-                    onChange={setSummary}
-                    modules={modules}
-                    formats={formats}
-                    placeholder="Write a detailed summary for this page..."
-                    className={`${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-white'} rounded-lg`}
-                    style={{ height: '300px', marginBottom: '50px' }}
-                  />
+                <div>
+                  <div className={`${theme === 'dark' ? 'quill-dark' : ''}`}>
+                    <ReactQuill
+                      ref={summaryQuillRef}
+                      theme="snow"
+                      value={summary}
+                      onChange={setSummary}
+                      modules={modules}
+                      formats={formats}
+                      placeholder="Write a detailed summary for this page..."
+                      className={`${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-white'} rounded-lg`}
+                      style={{ height: '300px', marginBottom: '50px' }}
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => insertTable(summaryQuillRef, 3, 3)}
+                    className={`mt-2 flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                      theme === 'dark'
+                        ? 'bg-gray-700 hover:bg-gray-600 text-white'
+                        : 'bg-gray-200 hover:bg-gray-300 text-gray-900'
+                    }`}
+                  >
+                    <Table size={16} />
+                    Insert Table (3x3)
+                  </button>
                 </div>
               ) : (
                 <textarea
@@ -388,25 +455,58 @@ export default function PageEditor({ theme, onClose, existingPage }: PageEditorP
               </div>
 
               {faqEditorMode === 'visual' ? (
-                <div className={`${theme === 'dark' ? 'quill-dark' : ''}`}>
-                  <ReactQuill
-                    theme="snow"
-                    value={faq}
-                    onChange={setFaq}
-                    modules={{
-                      toolbar: [
-                        [{ 'header': [1, 2, 3, false] }],
-                        ['bold', 'italic', 'underline'],
-                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                        ['link'],
-                        ['clean']
-                      ]
-                    }}
-                    formats={['header', 'bold', 'italic', 'underline', 'list', 'bullet', 'link']}
-                    placeholder="Write your FAQ content here..."
-                    className={`${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-white'} rounded-lg`}
-                    style={{ height: '200px', marginBottom: '50px' }}
-                  />
+                <div>
+                  <div className={`${theme === 'dark' ? 'quill-dark' : ''}`}>
+                    <ReactQuill
+                      ref={faqQuillRef}
+                      theme="snow"
+                      value={faq}
+                      onChange={setFaq}
+                      modules={{
+                        toolbar: [
+                          [{ 'header': [1, 2, 3, false] }],
+                          ['bold', 'italic', 'underline'],
+                          [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                          ['link'],
+                          ['clean']
+                        ],
+                        'better-table': {
+                          operationMenu: {
+                            items: {
+                              unmergeCells: { text: 'Unmerge cells' },
+                              insertColumnRight: { text: 'Insert column right' },
+                              insertColumnLeft: { text: 'Insert column left' },
+                              insertRowUp: { text: 'Insert row above' },
+                              insertRowDown: { text: 'Insert row below' },
+                              mergeCells: { text: 'Merge cells' },
+                              deleteColumn: { text: 'Delete column' },
+                              deleteRow: { text: 'Delete row' },
+                              deleteTable: { text: 'Delete table' }
+                            }
+                          }
+                        },
+                        keyboard: {
+                          bindings: QuillBetterTable.keyboardBindings
+                        }
+                      }}
+                      formats={['header', 'bold', 'italic', 'underline', 'list', 'bullet', 'link']}
+                      placeholder="Write your FAQ content here..."
+                      className={`${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-white'} rounded-lg`}
+                      style={{ height: '200px', marginBottom: '50px' }}
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => insertTable(faqQuillRef, 3, 3)}
+                    className={`mt-2 flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                      theme === 'dark'
+                        ? 'bg-gray-700 hover:bg-gray-600 text-white'
+                        : 'bg-gray-200 hover:bg-gray-300 text-gray-900'
+                    }`}
+                  >
+                    <Table size={16} />
+                    Insert Table (3x3)
+                  </button>
                 </div>
               ) : (
                 <textarea
@@ -543,6 +643,83 @@ export default function PageEditor({ theme, onClose, existingPage }: PageEditorP
         .ql-toolbar button:hover .ql-fill,
         .ql-toolbar button:focus .ql-fill {
           fill: #2563eb !important;
+        }
+
+        /* Table Styling */
+        .ql-editor table {
+          border-collapse: collapse;
+          width: 100%;
+          margin: 1rem 0;
+        }
+
+        .ql-editor table td,
+        .ql-editor table th {
+          border: 1px solid #d1d5db;
+          padding: 0.5rem;
+          position: relative;
+        }
+
+        .quill-dark .ql-editor table td,
+        .quill-dark .ql-editor table th {
+          border-color: #374151;
+        }
+
+        .ql-editor table th {
+          background-color: #f3f4f6;
+          font-weight: 600;
+        }
+
+        .quill-dark .ql-editor table th {
+          background-color: #1f2937;
+        }
+
+        .ql-editor .quill-better-table-wrapper {
+          overflow-x: auto;
+        }
+
+        /* Table context menu */
+        .quill-better-table .qlbt-operation-menu {
+          background: white;
+          border: 1px solid #d1d5db;
+          border-radius: 0.5rem;
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+          padding: 0.25rem;
+        }
+
+        .quill-dark .quill-better-table .qlbt-operation-menu {
+          background: #1f2937;
+          border-color: #374151;
+        }
+
+        .quill-better-table .qlbt-operation-menu-item {
+          padding: 0.5rem 0.75rem;
+          cursor: pointer;
+          border-radius: 0.25rem;
+          color: #111827;
+          font-size: 0.875rem;
+        }
+
+        .quill-dark .quill-better-table .qlbt-operation-menu-item {
+          color: #d1d5db;
+        }
+
+        .quill-better-table .qlbt-operation-menu-item:hover {
+          background-color: #f3f4f6;
+        }
+
+        .quill-dark .quill-better-table .qlbt-operation-menu-item:hover {
+          background-color: #374151;
+        }
+
+        /* Table selection */
+        .ql-editor .qlbt-selection-line {
+          background-color: #3b82f6;
+        }
+
+        .ql-editor .qlbt-col-tool,
+        .ql-editor .qlbt-row-tool {
+          background-color: #3b82f6;
+          color: white;
         }
       `}</style>
     </div>
