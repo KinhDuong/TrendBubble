@@ -3,10 +3,6 @@ import ReactQuill, { Quill } from 'react-quill';
 import { supabase } from '../lib/supabase';
 import { X, Save, Plus, Code, Eye, Table } from 'lucide-react';
 import 'quill/dist/quill.snow.css';
-import QuillBetterTable from 'quill-better-table';
-import 'quill-better-table/dist/quill-better-table.css';
-
-Quill.register('modules/better-table', QuillBetterTable);
 
 interface Page {
   id: string;
@@ -41,10 +37,26 @@ export default function PageEditor({ theme, onClose, existingPage }: PageEditorP
   const [faqEditorMode, setFaqEditorMode] = useState<'visual' | 'html'>('visual');
   const summaryQuillRef = useRef<ReactQuill | null>(null);
   const faqQuillRef = useRef<ReactQuill | null>(null);
+  const [tableModuleLoaded, setTableModuleLoaded] = useState(false);
 
   useEffect(() => {
     loadSources();
+    loadTableModule();
   }, []);
+
+  const loadTableModule = async () => {
+    try {
+      const QuillBetterTable = (await import('quill-better-table')).default;
+      await import('quill-better-table/dist/quill-better-table.css');
+
+      if (!Quill.imports['modules/better-table']) {
+        Quill.register('modules/better-table', QuillBetterTable);
+      }
+      setTableModuleLoaded(true);
+    } catch (error) {
+      console.warn('Table module not available:', error);
+    }
+  };
 
   const loadSources = async () => {
     try {
@@ -173,7 +185,50 @@ export default function PageEditor({ theme, onClose, existingPage }: PageEditorP
     }
   };
 
-  const modules = {
+  const getModules = async () => {
+    const baseModules: any = {
+      toolbar: [
+        [{ 'header': [1, 2, 3, false] }],
+        ['bold', 'italic', 'underline', 'strike'],
+        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+        [{ 'align': [] }],
+        ['link'],
+        ['blockquote', 'code-block'],
+        [{ 'color': [] }, { 'background': [] }],
+        ['clean']
+      ]
+    };
+
+    if (tableModuleLoaded) {
+      try {
+        const QuillBetterTable = (await import('quill-better-table')).default;
+        baseModules['better-table'] = {
+          operationMenu: {
+            items: {
+              unmergeCells: { text: 'Unmerge cells' },
+              insertColumnRight: { text: 'Insert column right' },
+              insertColumnLeft: { text: 'Insert column left' },
+              insertRowUp: { text: 'Insert row above' },
+              insertRowDown: { text: 'Insert row below' },
+              mergeCells: { text: 'Merge cells' },
+              deleteColumn: { text: 'Delete column' },
+              deleteRow: { text: 'Delete row' },
+              deleteTable: { text: 'Delete table' }
+            }
+          }
+        };
+        baseModules.keyboard = {
+          bindings: QuillBetterTable.keyboardBindings
+        };
+      } catch (error) {
+        console.warn('Could not configure table module:', error);
+      }
+    }
+
+    return baseModules;
+  };
+
+  const [modules, setModules] = useState<any>({
     toolbar: [
       [{ 'header': [1, 2, 3, false] }],
       ['bold', 'italic', 'underline', 'strike'],
@@ -183,44 +238,14 @@ export default function PageEditor({ theme, onClose, existingPage }: PageEditorP
       ['blockquote', 'code-block'],
       [{ 'color': [] }, { 'background': [] }],
       ['clean']
-    ],
-    'better-table': {
-      operationMenu: {
-        items: {
-          unmergeCells: {
-            text: 'Unmerge cells'
-          },
-          insertColumnRight: {
-            text: 'Insert column right'
-          },
-          insertColumnLeft: {
-            text: 'Insert column left'
-          },
-          insertRowUp: {
-            text: 'Insert row above'
-          },
-          insertRowDown: {
-            text: 'Insert row below'
-          },
-          mergeCells: {
-            text: 'Merge cells'
-          },
-          deleteColumn: {
-            text: 'Delete column'
-          },
-          deleteRow: {
-            text: 'Delete row'
-          },
-          deleteTable: {
-            text: 'Delete table'
-          }
-        }
-      }
-    },
-    keyboard: {
-      bindings: QuillBetterTable.keyboardBindings
+    ]
+  });
+
+  useEffect(() => {
+    if (tableModuleLoaded) {
+      getModules().then(setModules);
     }
-  };
+  }, [tableModuleLoaded]);
 
   const formats = [
     'header',
@@ -385,18 +410,20 @@ export default function PageEditor({ theme, onClose, existingPage }: PageEditorP
                       style={{ height: '300px', marginBottom: '50px' }}
                     />
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => insertTable(summaryQuillRef, 3, 3)}
-                    className={`mt-2 flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                      theme === 'dark'
-                        ? 'bg-gray-700 hover:bg-gray-600 text-white'
-                        : 'bg-gray-200 hover:bg-gray-300 text-gray-900'
-                    }`}
-                  >
-                    <Table size={16} />
-                    Insert Table (3x3)
-                  </button>
+                  {tableModuleLoaded && (
+                    <button
+                      type="button"
+                      onClick={() => insertTable(summaryQuillRef, 3, 3)}
+                      className={`mt-2 flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                        theme === 'dark'
+                          ? 'bg-gray-700 hover:bg-gray-600 text-white'
+                          : 'bg-gray-200 hover:bg-gray-300 text-gray-900'
+                      }`}
+                    >
+                      <Table size={16} />
+                      Insert Table (3x3)
+                    </button>
+                  )}
                 </div>
               ) : (
                 <textarea
@@ -462,51 +489,27 @@ export default function PageEditor({ theme, onClose, existingPage }: PageEditorP
                       theme="snow"
                       value={faq}
                       onChange={setFaq}
-                      modules={{
-                        toolbar: [
-                          [{ 'header': [1, 2, 3, false] }],
-                          ['bold', 'italic', 'underline'],
-                          [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                          ['link'],
-                          ['clean']
-                        ],
-                        'better-table': {
-                          operationMenu: {
-                            items: {
-                              unmergeCells: { text: 'Unmerge cells' },
-                              insertColumnRight: { text: 'Insert column right' },
-                              insertColumnLeft: { text: 'Insert column left' },
-                              insertRowUp: { text: 'Insert row above' },
-                              insertRowDown: { text: 'Insert row below' },
-                              mergeCells: { text: 'Merge cells' },
-                              deleteColumn: { text: 'Delete column' },
-                              deleteRow: { text: 'Delete row' },
-                              deleteTable: { text: 'Delete table' }
-                            }
-                          }
-                        },
-                        keyboard: {
-                          bindings: QuillBetterTable.keyboardBindings
-                        }
-                      }}
+                      modules={modules}
                       formats={['header', 'bold', 'italic', 'underline', 'list', 'bullet', 'link']}
                       placeholder="Write your FAQ content here..."
                       className={`${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-white'} rounded-lg`}
                       style={{ height: '200px', marginBottom: '50px' }}
                     />
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => insertTable(faqQuillRef, 3, 3)}
-                    className={`mt-2 flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                      theme === 'dark'
-                        ? 'bg-gray-700 hover:bg-gray-600 text-white'
-                        : 'bg-gray-200 hover:bg-gray-300 text-gray-900'
-                    }`}
-                  >
-                    <Table size={16} />
-                    Insert Table (3x3)
-                  </button>
+                  {tableModuleLoaded && (
+                    <button
+                      type="button"
+                      onClick={() => insertTable(faqQuillRef, 3, 3)}
+                      className={`mt-2 flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                        theme === 'dark'
+                          ? 'bg-gray-700 hover:bg-gray-600 text-white'
+                          : 'bg-gray-200 hover:bg-gray-300 text-gray-900'
+                      }`}
+                    >
+                      <Table size={16} />
+                      Insert Table (3x3)
+                    </button>
+                  )}
                 </div>
               ) : (
                 <textarea
