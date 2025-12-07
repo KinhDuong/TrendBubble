@@ -33,7 +33,6 @@ export default function PageEditor({ theme, onClose, existingPage }: PageEditorP
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [sources, setSources] = useState<Array<{ value: string; label: string }>>([]);
-  const [summaryEditorMode, setSummaryEditorMode] = useState<'visual' | 'html'>('visual');
   const [faqEditorMode, setFaqEditorMode] = useState<'visual' | 'html'>('visual');
 
   useEffect(() => {
@@ -69,33 +68,6 @@ export default function PageEditor({ theme, onClose, existingPage }: PageEditorP
     }
   };
 
-  const extractContentFromFullHTML = (html: string): string => {
-    // Check if it's a full HTML document
-    if (!html.includes('<!DOCTYPE') && !html.includes('<html')) {
-      return html;
-    }
-
-    // Extract style tags from head
-    const styleRegex = /<style[^>]*>([\s\S]*?)<\/style>/gi;
-    const styles: string[] = [];
-    let match;
-    while ((match = styleRegex.exec(html)) !== null) {
-      styles.push(`<style>${match[1]}</style>`);
-    }
-
-    // Extract body content
-    const bodyMatch = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
-    const bodyContent = bodyMatch ? bodyMatch[1] : html;
-
-    // Update body styles to work within a container instead of the page body
-    const updatedStyles = styles.map(style => {
-      return style
-        .replace(/body\s*{/g, '.summary-content {')
-        .replace(/body\s+/g, '.summary-content ');
-    });
-
-    return updatedStyles.join('\n') + '\n' + bodyContent;
-  };
 
   const handleSave = async () => {
     if (!pageUrl || !metaTitle || !metaDescription) {
@@ -112,17 +84,13 @@ export default function PageEditor({ theme, onClose, existingPage }: PageEditorP
         formattedUrl = '/' + formattedUrl;
       }
 
-      // Process summary and FAQ to extract content from full HTML documents
-      const processedSummary = summary ? extractContentFromFullHTML(summary) : null;
-      const processedFaq = faq ? extractContentFromFullHTML(faq) : null;
-
       const pageData = {
         page_url: formattedUrl,
         source,
         meta_title: metaTitle,
         meta_description: metaDescription,
-        summary: processedSummary,
-        faq: processedFaq,
+        summary: summary || null,
+        faq: faq || null,
         template: template || 'default'
       };
 
@@ -278,72 +246,23 @@ export default function PageEditor({ theme, onClose, existingPage }: PageEditorP
             </div>
 
             <div>
-              <div className="flex items-center justify-between mb-2">
-                <label className="block text-sm font-medium">
-                  Summary
-                </label>
-                <div className="flex gap-1 bg-gray-200 dark:bg-gray-700 rounded-lg p-1">
-                  <button
-                    type="button"
-                    onClick={() => setSummaryEditorMode('visual')}
-                    className={`flex items-center gap-1 px-3 py-1 rounded-md text-xs font-medium transition-colors ${
-                      summaryEditorMode === 'visual'
-                        ? theme === 'dark'
-                          ? 'bg-gray-900 text-white'
-                          : 'bg-white text-gray-900 shadow-sm'
-                        : theme === 'dark'
-                        ? 'text-gray-400 hover:text-white'
-                        : 'text-gray-600 hover:text-gray-900'
-                    }`}
-                  >
-                    <Eye size={14} />
-                    Visual
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setSummaryEditorMode('html')}
-                    className={`flex items-center gap-1 px-3 py-1 rounded-md text-xs font-medium transition-colors ${
-                      summaryEditorMode === 'html'
-                        ? theme === 'dark'
-                          ? 'bg-gray-900 text-white'
-                          : 'bg-white text-gray-900 shadow-sm'
-                        : theme === 'dark'
-                        ? 'text-gray-400 hover:text-white'
-                        : 'text-gray-600 hover:text-gray-900'
-                    }`}
-                  >
-                    <Code size={14} />
-                    HTML
-                  </button>
-                </div>
-              </div>
-
-              {summaryEditorMode === 'visual' ? (
-                <div className={`${theme === 'dark' ? 'quill-dark' : ''}`}>
-                  <ReactQuill
-                    theme="snow"
-                    value={summary}
-                    onChange={setSummary}
-                    modules={modules}
-                    formats={formats}
-                    placeholder="Write a detailed summary for this page..."
-                    className={`${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-white'} rounded-lg`}
-                    style={{ height: '300px', marginBottom: '50px' }}
-                  />
-                </div>
-              ) : (
-                <textarea
-                  value={summary}
-                  onChange={(e) => setSummary(e.target.value)}
-                  placeholder="<p>Paste or write HTML here...</p>"
-                  rows={15}
-                  className={`w-full px-3 py-2 rounded-lg border font-mono text-sm ${
-                    theme === 'dark'
-                      ? 'bg-gray-900 border-gray-700 text-white'
-                      : 'bg-white border-gray-300 text-gray-900'
-                  } focus:outline-none focus:ring-2 focus:ring-blue-500`}
-                />
-              )}
+              <label className="block text-sm font-medium mb-2">
+                Summary (HTML/CSS)
+              </label>
+              <textarea
+                value={summary}
+                onChange={(e) => setSummary(e.target.value)}
+                placeholder="<div><style>.my-class { color: blue; }</style><h2>Your HTML content here</h2></div>"
+                rows={15}
+                className={`w-full px-3 py-2 rounded-lg border font-mono text-sm ${
+                  theme === 'dark'
+                    ? 'bg-gray-900 border-gray-700 text-white'
+                    : 'bg-white border-gray-300 text-gray-900'
+                } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+              />
+              <p className={`text-xs mt-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                Enter raw HTML/CSS code. It will be rendered exactly as provided.
+              </p>
             </div>
 
             <div>
