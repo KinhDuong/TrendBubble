@@ -221,7 +221,11 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
       canvas.style.cursor = isOverBubble ? 'pointer' : 'default';
     };
 
-    canvas.addEventListener('mousemove', handleMouseMove);
+    // Only add mousemove listener on non-touch devices
+    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    if (!isTouchDevice) {
+      canvas.addEventListener('mousemove', handleMouseMove);
+    }
 
     const getCryptoValue = (topic: TrendingTopic): number => {
       if (!topic.crypto_data || !useCryptoColors) return topic.searchVolume;
@@ -1242,7 +1246,9 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
       window.removeEventListener('resize', updateCanvasSize);
       canvas.removeEventListener('click', handleCanvasClick);
       canvas.removeEventListener('touchstart', handleCanvasTouch);
-      canvas.removeEventListener('mousemove', handleMouseMove);
+      if (!isTouchDevice) {
+        canvas.removeEventListener('mousemove', handleMouseMove);
+      }
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }
