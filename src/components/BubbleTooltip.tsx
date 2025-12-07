@@ -95,13 +95,15 @@ export default function BubbleTooltip({
     return (
       <>
         <div
-          className="fixed inset-0 z-40 bg-black/50 animate-in fade-in duration-200"
+          className="fixed inset-0 bg-black/50 animate-in fade-in duration-200"
+          style={{ zIndex: 9998 }}
           onClick={onClose}
         />
         <div
-          className={`fixed bottom-0 left-0 right-0 z-50 ${
+          className={`fixed bottom-0 left-0 right-0 ${
             theme === 'dark' ? 'bg-gray-800' : 'bg-white'
           } rounded-t-2xl shadow-2xl p-4 pb-6 animate-in slide-in-from-bottom duration-300`}
+          style={{ zIndex: 9999 }}
         >
           <div className="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-4" />
           <button
