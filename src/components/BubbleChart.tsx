@@ -231,22 +231,38 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
     const volumes = topics.map(t => getCryptoValue(t)).sort((a, b) => b - a);
     const maxSearchVolume = volumes[0];
     const medianVolume = volumes[Math.floor(volumes.length / 2)];
-    const minVolume = volumes[volumes.length - 1];
+    const minVolume = Math.max(1, volumes[volumes.length - 1]);
 
     const volumeRange = maxSearchVolume - minVolume;
     const hasHighVariance = volumeRange > medianVolume * 2;
+
+    const rangeRatio = maxSearchVolume / Math.max(1, minVolume);
+    const useLogScale = rangeRatio > 100;
 
     const calculateBubbleSize = (searchVolume: number) => {
       const isMobile = window.innerWidth < 768;
       const displayCount = Math.min(maxDisplay, topics.length);
       const densityFactor = Math.min(1, Math.sqrt(50 / displayCount));
 
-      // Apply square root to raw values first so area is proportional to volume
-      const sqrtVolume = Math.sqrt(searchVolume);
-      const sqrtMin = Math.sqrt(minVolume);
-      const sqrtMax = Math.sqrt(maxSearchVolume);
+      let normalizedScale;
 
-      const normalizedScale = (sqrtVolume - sqrtMin) / (sqrtMax - sqrtMin || 1);
+      if (useLogScale) {
+        const safeVolume = Math.max(1, searchVolume);
+        const safeMin = Math.max(1, minVolume);
+        const safeMax = Math.max(1, maxSearchVolume);
+
+        const logVolume = Math.log10(safeVolume);
+        const logMin = Math.log10(safeMin);
+        const logMax = Math.log10(safeMax);
+
+        normalizedScale = (logVolume - logMin) / (logMax - logMin || 1);
+      } else {
+        const sqrtVolume = Math.sqrt(searchVolume);
+        const sqrtMin = Math.sqrt(minVolume);
+        const sqrtMax = Math.sqrt(maxSearchVolume);
+
+        normalizedScale = (sqrtVolume - sqrtMin) / (sqrtMax - sqrtMin || 1);
+      }
 
       const baseMin = (isMobile ? 30 : 40) * densityFactor;
       const baseMax = (isMobile ? 80 : 120) * densityFactor;
