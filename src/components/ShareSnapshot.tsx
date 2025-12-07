@@ -55,6 +55,9 @@ export default function ShareSnapshot({ theme, canvasRef, variant = 'floating' }
       const imageData = snapshot.toDataURL('image/png');
       setCapturedImage(imageData);
       setShowShareMenu(true);
+
+      // Scroll to top when modal opens
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (error) {
       console.error('Error capturing snapshot:', error);
       alert('Failed to capture snapshot. Please try again.');
@@ -142,7 +145,7 @@ export default function ShareSnapshot({ theme, canvasRef, variant = 'floating' }
       </button>
 
       {showShareMenu && capturedImage && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center z-50 p-4 pt-8 md:pt-16 overflow-y-auto">
           <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden`}>
             <div className={`${theme === 'dark' ? 'bg-gray-700 border-gray-600' : 'bg-gray-100 border-gray-200'} border-b px-6 py-4 flex justify-between items-center`}>
               <h2 className="text-xl font-bold flex items-center gap-2">
