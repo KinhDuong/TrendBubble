@@ -881,7 +881,8 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
 
       // Apply uniform scaling to maintain proportional accuracy
       bubblesRef.current.forEach((bubble) => {
-        const hoverScale = bubble.isHovered ? 1.5 : 1.0;
+        const isMobile = window.innerWidth < 768;
+        const hoverScale = (!isMobile && bubble.isHovered) ? 1.5 : 1.0;
         // All bubbles get same shrinkFactor, maintaining their relative proportions
         const targetRadius = bubble.baseRadius * shrinkFactor * hoverScale;
         // Faster transition for spawning bubbles, slower for others
@@ -1139,6 +1140,8 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
           ctx.fill();
         }
 
+        const isMobile = window.innerWidth < 768;
+
         if (bubble.isPinned) {
           ctx.beginPath();
           ctx.arc(bubble.x, bubble.y, displayRadius + 4, 0, Math.PI * 2);
@@ -1155,6 +1158,14 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
           ctx.setLineDash([5, 5]);
           ctx.stroke();
           ctx.setLineDash([]);
+        }
+
+        if (isMobile && bubble.isHovered && !bubble.isPinned && !bubble.isComparing) {
+          ctx.beginPath();
+          ctx.arc(bubble.x, bubble.y, displayRadius + 4, 0, Math.PI * 2);
+          ctx.strokeStyle = theme === 'dark' ? '#FFFFFF' : '#000000';
+          ctx.lineWidth = 3;
+          ctx.stroke();
         }
 
         if (opacity > 0.1) {
