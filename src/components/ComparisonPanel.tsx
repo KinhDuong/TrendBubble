@@ -13,11 +13,15 @@ export default function ComparisonPanel({ topics, theme, onClose, onRemoveTopic 
 
   const sortedTopics = [...topics].sort((a, b) => b.searchVolume - a.searchVolume);
   const maxVolume = Math.max(...topics.map(t => t.searchVolume));
+  const minVolume = Math.min(...topics.map(t => t.searchVolume));
   const minSize = 80;
   const maxSize = 200;
 
   const getBubbleSize = (volume: number) => {
-    const ratio = volume / maxVolume;
+    const sqrtVolume = Math.sqrt(volume);
+    const sqrtMin = Math.sqrt(minVolume);
+    const sqrtMax = Math.sqrt(maxVolume);
+    const ratio = (sqrtVolume - sqrtMin) / (sqrtMax - sqrtMin || 1);
     return minSize + (maxSize - minSize) * ratio;
   };
 
