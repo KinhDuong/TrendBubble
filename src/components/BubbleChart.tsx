@@ -54,6 +54,7 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
   const initialLoadQueueRef = useRef<number[]>([]);
   const lastSpawnTimeRef = useRef<number>(0);
   const hoveredBubbleRef = useRef<Bubble | null>(null);
+  const shrinkFactorRef = useRef<number>(1.0);
   const [tooltipData, setTooltipData] = useState<{ topic: TrendingTopic; x: number; y: number } | null>(null);
   const [pinnedTopics, setPinnedTopics] = useState<Set<string>>(new Set());
   const [internalComparingTopics, setInternalComparingTopics] = useState<Set<string>>(new Set());
@@ -605,6 +606,10 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
 
       const isStaticLayout = !usePhysics;
 
+      // Apply current shrink factor to new bubbles so they match existing bubble sizes
+      const currentShrinkFactor = shrinkFactorRef.current;
+      const initialRadius = isStaticLayout ? radius : (radius * currentShrinkFactor);
+
       return {
         topic,
         x,
@@ -613,7 +618,7 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
         layoutY: y,
         vx: usePhysics ? (Math.random() - 0.5) * 0.25 : 0,
         vy: usePhysics ? (Math.random() - 0.5) * 0.25 : 0,
-        radius: isStaticLayout ? radius : 0,
+        radius: initialRadius,
         baseRadius: radius,
         color: useCryptoColors ? getCryptoColorByGain(cryptoValue, getCryptoDisplayText(topic)) : getRandomColor(topicIndex),
         createdAt: Date.now(),
@@ -824,6 +829,9 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
           shrinkFactor = 1.0 - (excessDensity * shrinkAmount);
         }
       }
+
+      // Store shrink factor for use when creating new bubbles
+      shrinkFactorRef.current = shrinkFactor;
 
       // Apply uniform scaling to maintain proportional accuracy
       bubblesRef.current.forEach((bubble) => {
