@@ -132,10 +132,39 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
       const distance = Math.sqrt(dx * dx + dy * dy);
 
       if (distance <= bubble.radius) {
+        event.preventDefault();
+        event.stopPropagation();
         setTooltipData({
           topic: bubble.topic,
           x: event.clientX,
           y: event.clientY
+        });
+        break;
+      }
+    }
+  };
+
+  const handleCanvasTouch = (event: TouchEvent) => {
+    const canvas = canvasRef.current;
+    if (!canvas || event.touches.length === 0) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const touch = event.touches[0];
+    const x = touch.clientX - rect.left;
+    const y = touch.clientY - rect.top;
+
+    for (const bubble of bubblesRef.current) {
+      const dx = x - bubble.x;
+      const dy = y - bubble.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+
+      if (distance <= bubble.radius) {
+        event.preventDefault();
+        event.stopPropagation();
+        setTooltipData({
+          topic: bubble.topic,
+          x: touch.clientX,
+          y: touch.clientY
         });
         break;
       }
@@ -164,6 +193,7 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
     updateCanvasSize();
     window.addEventListener('resize', updateCanvasSize);
     canvas.addEventListener('click', handleCanvasClick);
+    canvas.addEventListener('touchstart', handleCanvasTouch);
 
     const handleMouseMove = (event: MouseEvent) => {
       const rect = canvas.getBoundingClientRect();
@@ -1200,6 +1230,7 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
     return () => {
       window.removeEventListener('resize', updateCanvasSize);
       canvas.removeEventListener('click', handleCanvasClick);
+      canvas.removeEventListener('touchstart', handleCanvasTouch);
       canvas.removeEventListener('mousemove', handleMouseMove);
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
