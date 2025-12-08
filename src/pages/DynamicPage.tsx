@@ -761,22 +761,55 @@ snapshotButton={null}
                 </article>
               )}
               {topics.length > 0 && viewMode === 'bubble' && (
-                <>
-                  <div ref={bubbleChartRef} style={{ minHeight: '500px' }}>
-                    <BubbleChart
-                      topics={sortedTopics}
-                      maxDisplay={maxBubbles}
-                      theme={theme}
-                      layout={bubbleLayout}
-                      onBubbleTimingUpdate={handleBubbleTimingUpdate}
-                      comparingTopics={comparingTopics}
-                      onComparingTopicsChange={setComparingTopics}
-                      useCryptoColors={pageData?.source === 'coingecko_crypto'}
-                      cryptoTimeframe={cryptoTimeframe}
-                      animationStyle={animationStyle}
-                    />
-                  </div>
-
+                <div ref={bubbleChartRef} style={{ minHeight: '500px' }}>
+                  <BubbleChart
+                    topics={sortedTopics}
+                    maxDisplay={maxBubbles}
+                    theme={theme}
+                    layout={bubbleLayout}
+                    onBubbleTimingUpdate={handleBubbleTimingUpdate}
+                    comparingTopics={comparingTopics}
+                    onComparingTopicsChange={setComparingTopics}
+                    useCryptoColors={pageData?.source === 'coingecko_crypto'}
+                    cryptoTimeframe={cryptoTimeframe}
+                    animationStyle={animationStyle}
+                  />
+                </div>
+              )}
+              {topics.length > 0 && viewMode === 'bar' && (
+                <div ref={barChartRef} className="max-w-7xl mx-auto">
+                  <BarChart
+                    topics={sortedTopics}
+                    maxDisplay={maxBubbles}
+                    theme={theme}
+                    useCryptoColors={pageData?.source === 'coingecko_crypto'}
+                    cryptoTimeframe={cryptoTimeframe}
+                  />
+                </div>
+              )}
+              {topics.length > 0 && viewMode === 'treemap' && (
+                <div ref={treemapChartRef} className="max-w-7xl mx-auto" style={{ height: 'calc(100vh - 300px)', minHeight: '500px' }}>
+                  <Treemap
+                    topics={topics}
+                    maxDisplay={maxBubbles}
+                    theme={theme}
+                    useCryptoColors={pageData?.source === 'coingecko_crypto'}
+                    cryptoTimeframe={cryptoTimeframe}
+                  />
+                </div>
+              )}
+              {topics.length > 0 && viewMode === 'donut' && (
+                <div ref={donutChartRef} className="max-w-7xl mx-auto" style={{ height: 'calc(100vh - 300px)', minHeight: '600px' }}>
+                  <DonutChart
+                    topics={sortedTopics}
+                    maxDisplay={maxBubbles}
+                    theme={theme}
+                    useCryptoColors={pageData?.source === 'coingecko_crypto'}
+                    cryptoTimeframe={cryptoTimeframe}
+                  />
+                </div>
+              )}
+              {topics.length > 0 && (viewMode === 'bubble' || viewMode === 'bar' || viewMode === 'treemap' || viewMode === 'donut') && (
                   <div className="max-w-7xl mx-auto mt-8 mb-0 md:mb-8">
                     <div className="flex flex-col lg:flex-row gap-6">
                       <section className="flex-1 lg:w-[65%]" aria-labelledby="top-trending-heading">
@@ -1082,40 +1115,6 @@ snapshotButton={null}
                       </aside>
                     </div>
                   </div>
-                </>
-              )}
-              {topics.length > 0 && viewMode === 'bar' && (
-                <div ref={barChartRef} className="max-w-7xl mx-auto">
-                  <BarChart
-                    topics={sortedTopics}
-                    maxDisplay={maxBubbles}
-                    theme={theme}
-                    useCryptoColors={pageData?.source === 'coingecko_crypto'}
-                    cryptoTimeframe={cryptoTimeframe}
-                  />
-                </div>
-              )}
-              {topics.length > 0 && viewMode === 'treemap' && (
-                <div ref={treemapChartRef} className="max-w-7xl mx-auto" style={{ height: 'calc(100vh - 300px)', minHeight: '500px' }}>
-                  <Treemap
-                    topics={topics}
-                    maxDisplay={maxBubbles}
-                    theme={theme}
-                    useCryptoColors={pageData?.source === 'coingecko_crypto'}
-                    cryptoTimeframe={cryptoTimeframe}
-                  />
-                </div>
-              )}
-              {topics.length > 0 && viewMode === 'donut' && (
-                <div ref={donutChartRef} className="max-w-7xl mx-auto" style={{ height: 'calc(100vh - 300px)', minHeight: '600px' }}>
-                  <DonutChart
-                    topics={sortedTopics}
-                    maxDisplay={maxBubbles}
-                    theme={theme}
-                    useCryptoColors={pageData?.source === 'coingecko_crypto'}
-                    cryptoTimeframe={cryptoTimeframe}
-                  />
-                </div>
               )}
               {topics.length > 0 && viewMode === 'list' && (
               <div className="max-w-7xl mx-auto">
