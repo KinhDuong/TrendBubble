@@ -79,34 +79,34 @@ export default function BarChart({
 
           return (
             <div key={index} className="relative">
-              <div className={`w-full h-12 rounded ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-200'} overflow-hidden relative`}>
-                <div
-                  className="h-full transition-all duration-500 ease-out flex items-center justify-between px-3"
-                  style={{
-                    width: `${barWidth}%`,
-                    backgroundColor: barColor,
-                    minWidth: '100px'
-                  }}
-                >
-                  <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <span className="text-base font-bold text-white flex-shrink-0">
-                      {index + 1}
-                    </span>
-                    <span className="text-sm font-bold text-white truncate">
-                      {topic.name.replace(/"/g, '')}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    {useCryptoColors && topic.crypto_data && (
-                      <span className="text-xs font-bold text-white">
-                        {getCryptoChange(topic) > 0 ? '+' : ''}{getCryptoChange(topic).toFixed(2)}%
+              <div className="flex items-center gap-3">
+                <div className={`flex-1 h-12 rounded ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-200'} overflow-hidden relative`}>
+                  <div
+                    className="h-full transition-all duration-500 ease-out flex items-center px-3"
+                    style={{
+                      width: `${barWidth}%`,
+                      backgroundColor: barColor,
+                      minWidth: '100px'
+                    }}
+                  >
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                      <span className="text-base font-bold text-white flex-shrink-0">
+                        {index + 1}
                       </span>
-                    )}
-                    <span className="text-xs font-bold text-white">
-                      {topic.searchVolumeRaw.replace(/"/g, '')}
-                    </span>
+                      <span className="text-sm font-bold text-white truncate">
+                        {topic.name.replace(/"/g, '')}
+                      </span>
+                      {useCryptoColors && topic.crypto_data && (
+                        <span className="text-xs font-bold text-white flex-shrink-0 ml-2">
+                          {getCryptoChange(topic) > 0 ? '+' : ''}{getCryptoChange(topic).toFixed(2)}%
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
+                <span className={`text-sm font-bold flex-shrink-0 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                  {topic.searchVolumeRaw.replace(/"/g, '')}
+                </span>
               </div>
               {topic.category && (
                 <div className="mt-1 ml-1">
