@@ -226,9 +226,18 @@ export default function ExplorePage() {
             {/* Category Sections */}
             {Object.entries(categoryTopics).slice(0, 4).map(([category, topics]) => (
               <div key={category} className="mb-12">
-                <h2 className={`text-xl font-bold mb-4 uppercase ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                  {category}
-                </h2>
+                {category === 'General' ? (
+                  <div className="relative mb-6">
+                    <h2 className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} inline-block px-4 py-2 relative`}>
+                      <span className="relative z-10">LATEST</span>
+                      <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-blue-600 transform -skew-x-12"></div>
+                    </h2>
+                  </div>
+                ) : (
+                  <h2 className={`text-xl font-bold mb-4 uppercase ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                    {category}
+                  </h2>
+                )}
                 <div className="space-y-4">
                   {topics.map((topic) => (
                     <Link
