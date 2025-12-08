@@ -1,3 +1,5 @@
+import { BarChart3 } from 'lucide-react';
+
 interface FooterProps {
   theme: 'dark' | 'light';
 }
@@ -9,13 +11,10 @@ export default function Footer({ theme }: FooterProps) {
     <footer className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-600 shadow-inner'} border-t`}>
       <div className="max-w-7xl mx-auto px-6 py-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div>
-            <h3 className={`text-lg font-semibold mb-3 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-              Google Trending Topics
-            </h3>
-            <p className="text-sm">
-              Track real-time trending topics on Google with interactive visualization. Bubble size represents search volume. Auto-updates hourly.
-            </p>
+          <div className="flex items-start">
+            <div className={`relative w-16 h-16 flex-shrink-0 rounded-full shadow-lg border-4 border-blue-600 overflow-hidden flex items-center justify-center ${theme === 'dark' ? 'bg-transparent' : 'bg-transparent'}`}>
+              <BarChart3 size={32} strokeWidth={4} className="text-blue-600 relative z-10" />
+            </div>
           </div>
 
           <div>
