@@ -1075,7 +1075,13 @@ snapshotButton={null}
               )}
               {topics.length > 0 && viewMode === 'treemap' && (
                 <div className="max-w-7xl mx-auto" style={{ height: 'calc(100vh - 300px)', minHeight: '500px' }}>
-                  <Treemap topics={topics} maxDisplay={maxBubbles} theme={theme} />
+                  <Treemap
+                    topics={topics}
+                    maxDisplay={maxBubbles}
+                    theme={theme}
+                    useCryptoColors={pageData?.source === 'coingecko_crypto'}
+                    cryptoTimeframe={cryptoTimeframe}
+                  />
                 </div>
               )}
               {topics.length > 0 && viewMode === 'list' && (

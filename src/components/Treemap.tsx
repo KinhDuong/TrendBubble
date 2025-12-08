@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
-import { TrendingTopic } from '../types';
+import { TrendingTopic, CryptoTimeframe } from '../types';
 
 interface TreemapProps {
   topics: TrendingTopic[];
   maxDisplay: number;
   theme: 'dark' | 'light';
+  useCryptoColors?: boolean;
+  cryptoTimeframe?: CryptoTimeframe;
 }
 
 interface TreeNode {
@@ -14,7 +16,7 @@ interface TreeNode {
   topic: TrendingTopic;
 }
 
-export default function Treemap({ topics, maxDisplay, theme }: TreemapProps) {
+export default function Treemap({ topics, maxDisplay, theme, useCryptoColors = false, cryptoTimeframe = '1h' }: TreemapProps) {
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [tooltip, setTooltip] = useState<{ topic: TrendingTopic; x: number; y: number } | null>(null);
@@ -55,6 +57,28 @@ export default function Treemap({ topics, maxDisplay, theme }: TreemapProps) {
       .attr('viewBox', `0 0 ${width} ${height}`)
       .style('font-family', 'sans-serif');
 
+    const getCryptoColor = (topic: TrendingTopic): string => {
+      if (!topic.crypto_data || !useCryptoColors) return '';
+
+      const timeframeMap = {
+        '1h': 'change_1h',
+        '24h': 'change_24h',
+        '7d': 'change_7d',
+        '30d': 'change_30d',
+        '1y': 'change_1y',
+      } as const;
+
+      const fieldName = timeframeMap[cryptoTimeframe];
+      const percentChange = topic.crypto_data[fieldName] || 0;
+
+      if (percentChange >= 5) return '#0D7C4E';
+      if (percentChange >= 2) return '#16A34A';
+      if (percentChange >= 0) return '#22C55E';
+      if (percentChange >= -2) return '#DC2626';
+      if (percentChange >= -5) return '#B91C1C';
+      return '#7F1D1D';
+    };
+
     const colors = [
       '#3B82F6', '#10B981', '#EAB308', '#EF4444',
       '#EC4899', '#14B8A6', '#F97316', '#06B6D4',
@@ -74,7 +98,14 @@ export default function Treemap({ topics, maxDisplay, theme }: TreemapProps) {
       .attr('id', (d, i) => `rect-${i}`)
       .attr('width', d => d.x1 - d.x0)
       .attr('height', d => d.y1 - d.y0)
-      .attr('fill', (d, i) => color(i))
+      .attr('fill', (d, i) => {
+        const nodeData = d.data as TreeNode;
+        if (useCryptoColors) {
+          const cryptoColor = getCryptoColor(nodeData.topic);
+          return cryptoColor || color(i);
+        }
+        return color(i);
+      })
       .attr('fill-opacity', theme === 'dark' ? 0.8 : 0.9)
       .attr('stroke', theme === 'dark' ? '#1F2937' : '#E5E7EB')
       .attr('stroke-width', 2)
@@ -202,7 +233,7 @@ export default function Treemap({ topics, maxDisplay, theme }: TreemapProps) {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
 
-  }, [topics, maxDisplay, theme]);
+  }, [topics, maxDisplay, theme, useCryptoColors, cryptoTimeframe]);
 
   return (
     <div ref={containerRef} className="w-full h-full relative">
