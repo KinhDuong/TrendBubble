@@ -1,12 +1,14 @@
-import { X, Play, Pause, Moon, Sun } from 'lucide-react';
+import { X, Play, Pause, Moon, Sun, Circle, BarChart3, List } from 'lucide-react';
 import { CryptoTimeframe } from '../types';
 
 export type BubbleLayout = 'force' | 'hierarchical' | 'grid' | 'circular' | 'timeline' | 'packed' | 'scatter' | 'importance';
 
+export type ViewMode = 'bubble' | 'bar' | 'list';
+
 interface FilterMenuProps {
   theme: 'dark' | 'light';
   loading: boolean;
-  viewMode: 'bubble' | 'list';
+  viewMode: ViewMode;
   dateFilter: 'now' | 'all' | '24h' | 'week' | 'month' | 'year';
   categoryFilter: string;
   categories: string[];
@@ -22,7 +24,7 @@ interface FilterMenuProps {
   bubbleLayout?: BubbleLayout;
   cryptoTimeframe?: CryptoTimeframe;
   showCryptoTimeframe?: boolean;
-  onViewModeChange: (mode: 'bubble' | 'list') => void;
+  onViewModeChange: (mode: ViewMode) => void;
   onDateFilterChange: (filter: 'now' | 'all' | '24h' | 'week' | 'month' | 'year') => void;
   onCategoryFilterChange: (category: string) => void;
   onSourceFilterChange?: (source: string) => void;
@@ -83,7 +85,7 @@ export default function FilterMenu({
           <div className="flex items-center justify-center">
             <div className="overflow-x-auto">
               <div className="flex items-center gap-2 md:gap-4">
-                {viewMode === 'bubble' && maxBubbles !== undefined && onMaxBubblesChange && (
+                {(viewMode === 'bubble' || viewMode === 'bar') && maxBubbles !== undefined && onMaxBubblesChange && (
                   <>
                     <label htmlFor="maxBubbles" className={`text-xs md:text-sm font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                       Max:
@@ -233,12 +235,44 @@ export default function FilterMenu({
                 </div>
                 <Divider />
                 <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => onViewModeChange(viewMode === 'bubble' ? 'list' : 'bubble')}
-                    className={`px-3 md:px-4 py-1 md:py-1.5 text-xs md:text-sm font-medium ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-600 hover:bg-blue-700'} rounded transition-colors text-white`}
-                  >
-                    {viewMode === 'bubble' ? 'List' : 'Bubble'}
-                  </button>
+                  <div className={`flex items-center gap-1 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'} rounded p-1`}>
+                    <button
+                      onClick={() => onViewModeChange('bubble')}
+                      className={`flex items-center gap-1.5 px-2 md:px-3 py-1 md:py-1.5 text-xs md:text-sm font-medium rounded transition-colors ${
+                        viewMode === 'bubble'
+                          ? 'bg-blue-600 text-white'
+                          : theme === 'dark' ? 'text-gray-300 hover:text-gray-100' : 'text-gray-600 hover:text-gray-900'
+                      }`}
+                      aria-label="Bubble Chart View"
+                    >
+                      <Circle size={14} />
+                      Bubble
+                    </button>
+                    <button
+                      onClick={() => onViewModeChange('bar')}
+                      className={`flex items-center gap-1.5 px-2 md:px-3 py-1 md:py-1.5 text-xs md:text-sm font-medium rounded transition-colors ${
+                        viewMode === 'bar'
+                          ? 'bg-blue-600 text-white'
+                          : theme === 'dark' ? 'text-gray-300 hover:text-gray-100' : 'text-gray-600 hover:text-gray-900'
+                      }`}
+                      aria-label="Bar Chart View"
+                    >
+                      <BarChart3 size={14} />
+                      Bar
+                    </button>
+                    <button
+                      onClick={() => onViewModeChange('list')}
+                      className={`flex items-center gap-1.5 px-2 md:px-3 py-1 md:py-1.5 text-xs md:text-sm font-medium rounded transition-colors ${
+                        viewMode === 'list'
+                          ? 'bg-blue-600 text-white'
+                          : theme === 'dark' ? 'text-gray-300 hover:text-gray-100' : 'text-gray-600 hover:text-gray-900'
+                      }`}
+                      aria-label="List View"
+                    >
+                      <List size={14} />
+                      List
+                    </button>
+                  </div>
                   {onPauseToggle && (
                     <button
                       onClick={onPauseToggle}
@@ -295,13 +329,44 @@ export default function FilterMenu({
         <div className="flex items-center justify-center">
           <div className="overflow-x-auto">
             <div className="flex items-center gap-3 md:gap-4">
-              <button
-                onClick={() => onViewModeChange(viewMode === 'bubble' ? 'list' : 'bubble')}
-                className={`px-4 py-1.5 text-xs font-medium ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-600 hover:bg-blue-700'} rounded transition-colors text-white whitespace-nowrap`}
-                aria-label={`Switch to ${viewMode === 'bubble' ? 'list' : 'bubble'} view`}
-              >
-                {viewMode === 'bubble' ? 'List' : 'Bubble'}
-              </button>
+              <div className={`flex items-center gap-1 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'} rounded p-1`}>
+                <button
+                  onClick={() => onViewModeChange('bubble')}
+                  className={`flex items-center gap-1.5 px-2 py-1.5 text-xs font-medium rounded transition-colors whitespace-nowrap ${
+                    viewMode === 'bubble'
+                      ? 'bg-blue-600 text-white'
+                      : theme === 'dark' ? 'text-gray-300 hover:text-gray-100' : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                  aria-label="Bubble Chart View"
+                >
+                  <Circle size={14} />
+                  Bubble
+                </button>
+                <button
+                  onClick={() => onViewModeChange('bar')}
+                  className={`flex items-center gap-1.5 px-2 py-1.5 text-xs font-medium rounded transition-colors whitespace-nowrap ${
+                    viewMode === 'bar'
+                      ? 'bg-blue-600 text-white'
+                      : theme === 'dark' ? 'text-gray-300 hover:text-gray-100' : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                  aria-label="Bar Chart View"
+                >
+                  <BarChart3 size={14} />
+                  Bar
+                </button>
+                <button
+                  onClick={() => onViewModeChange('list')}
+                  className={`flex items-center gap-1.5 px-2 py-1.5 text-xs font-medium rounded transition-colors whitespace-nowrap ${
+                    viewMode === 'list'
+                      ? 'bg-blue-600 text-white'
+                      : theme === 'dark' ? 'text-gray-300 hover:text-gray-100' : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                  aria-label="List View"
+                >
+                  <List size={14} />
+                  List
+                </button>
+              </div>
               {onRefresh && nextBubbleIn !== undefined && bubbleProgress !== undefined && (
                 <button
                   onClick={onRefresh}
@@ -383,11 +448,11 @@ export default function FilterMenu({
                 </select>
               </div>
               <Divider />
-              {viewMode === 'bubble' && maxBubbles !== undefined && onMaxBubblesChange && (
+              {(viewMode === 'bubble' || viewMode === 'bar') && maxBubbles !== undefined && onMaxBubblesChange && (
                 <>
                   <div className="flex items-center gap-2">
                     <label htmlFor="maxBubbles" className={`text-xs font-medium whitespace-nowrap ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                      Bubbles:
+                      Max:
                     </label>
                     <select
                       id="maxBubbles"

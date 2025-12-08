@@ -2,9 +2,10 @@ import { useState, useEffect, useMemo, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import BubbleChart from '../components/BubbleChart';
+import BarChart from '../components/BarChart';
 import Footer from '../components/Footer';
 import Header from '../components/Header';
-import FilterMenu, { BubbleLayout } from '../components/FilterMenu';
+import FilterMenu, { BubbleLayout, ViewMode } from '../components/FilterMenu';
 import ComparisonPanel from '../components/ComparisonPanel';
 import ShareSnapshot from '../components/ShareSnapshot';
 import AnimationSelector, { AnimationStyle } from '../components/AnimationSelector';
@@ -39,7 +40,7 @@ function DynamicPage() {
   const [dateFilter, setDateFilter] = useState<'now' | 'all' | '24h' | 'week' | 'month' | 'year'>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [categories, setCategories] = useState<string[]>([]);
-  const [viewMode, setViewMode] = useState<'bubble' | 'list'>('bubble');
+  const [viewMode, setViewMode] = useState<ViewMode>('bubble');
   const [loading, setLoading] = useState(true);
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
   const [nextBubbleIn, setNextBubbleIn] = useState<string>('');
@@ -694,13 +695,15 @@ snapshotButton={null}
                       <h1 className={`text-2xl md:text-4xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                         {pageData.meta_title}
                       </h1>
-                      {viewMode === 'bubble' && topics.length > 0 && (
+                      {(viewMode === 'bubble' || viewMode === 'bar') && topics.length > 0 && (
                         <div className="flex items-center gap-2">
-                          <AnimationSelector
-                            theme={theme}
-                            selectedAnimation={animationStyle}
-                            onAnimationChange={setAnimationStyle}
-                          />
+                          {viewMode === 'bubble' && (
+                            <AnimationSelector
+                              theme={theme}
+                              selectedAnimation={animationStyle}
+                              onAnimationChange={setAnimationStyle}
+                            />
+                          )}
                           <ShareSnapshot theme={theme} canvasRef={bubbleChartRef} variant="inline" />
                         </div>
                       )}
@@ -1055,6 +1058,19 @@ snapshotButton={null}
                     </div>
                   </div>
                 </>
+              )}
+              {topics.length > 0 && viewMode === 'bar' && (
+                <div className="max-w-7xl mx-auto">
+                  <div ref={bubbleChartRef}>
+                    <BarChart
+                      topics={sortedTopics}
+                      maxDisplay={maxBubbles}
+                      theme={theme}
+                      useCryptoColors={pageData?.source === 'coingecko_crypto'}
+                      cryptoTimeframe={cryptoTimeframe}
+                    />
+                  </div>
+                </div>
               )}
               {topics.length > 0 && viewMode === 'list' && (
               <div className="max-w-7xl mx-auto">
