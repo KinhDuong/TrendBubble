@@ -186,7 +186,7 @@ function addFillerBoxes(
     height: n.height + padding
   }));
 
-  function isSpaceOccupied(x: number, y: number, width: number, height: number): boolean {
+  function hasOverlap(x: number, y: number, width: number, height: number): boolean {
     return occupiedSpace.some(occupied => {
       return !(
         x + width <= occupied.x ||
@@ -198,28 +198,32 @@ function addFillerBoxes(
   }
 
   const fillers: TreeMapNode[] = [];
-  const minFillerSize = 20;
-  const gridSize = 10;
+  const minFillerSize = 15;
+  const gridSize = 5;
 
   for (let y = 0; y < containerHeight; y += gridSize) {
     for (let x = 0; x < containerWidth; x += gridSize) {
-      let maxWidth = containerWidth - x;
-      let maxHeight = containerHeight - y;
+      if (hasOverlap(x, y, 1, 1)) continue;
 
-      for (const occupied of occupiedSpace) {
-        if (y >= occupied.y && y < occupied.y + occupied.height) {
-          if (x < occupied.x) {
-            maxWidth = Math.min(maxWidth, occupied.x - x);
-          }
-        }
-        if (x >= occupied.x && x < occupied.x + occupied.width) {
-          if (y < occupied.y) {
-            maxHeight = Math.min(maxHeight, occupied.y - y);
-          }
-        }
+      let maxWidth = gridSize;
+      let maxHeight = gridSize;
+
+      while (x + maxWidth <= containerWidth && !hasOverlap(x, y, maxWidth + gridSize, maxHeight)) {
+        maxWidth += gridSize;
       }
 
-      if (maxWidth >= minFillerSize && maxHeight >= minFillerSize && !isSpaceOccupied(x, y, maxWidth, maxHeight)) {
+      while (y + maxHeight <= containerHeight && !hasOverlap(x, y, maxWidth, maxHeight + gridSize)) {
+        maxHeight += gridSize;
+      }
+
+      if (maxWidth >= minFillerSize && maxHeight >= minFillerSize) {
+        const filler = {
+          x: x,
+          y: y,
+          width: maxWidth,
+          height: maxHeight
+        };
+
         fillers.push({
           topic: null,
           x: x + padding / 2,
@@ -230,7 +234,7 @@ function addFillerBoxes(
           isFiller: true
         });
 
-        occupiedSpace.push({ x, y, width: maxWidth, height: maxHeight });
+        occupiedSpace.push(filler);
       }
     }
   }
