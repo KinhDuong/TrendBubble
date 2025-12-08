@@ -65,6 +65,9 @@ function DynamicPage() {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [cryptoTimeframe, setCryptoTimeframe] = useState<CryptoTimeframe>('1h');
   const bubbleChartRef = useRef<HTMLDivElement>(null);
+  const treemapChartRef = useRef<HTMLDivElement>(null);
+  const donutChartRef = useRef<HTMLDivElement>(null);
+  const barChartRef = useRef<HTMLDivElement>(null);
   const [animationStyle, setAnimationStyle] = useState<AnimationStyle>('default');
   const [topSearchQuery, setTopSearchQuery] = useState<string>('');
   const [faqs, setFaqs] = useState<FAQ[]>([]);
@@ -719,7 +722,16 @@ snapshotButton={null}
                               onAnimationChange={setAnimationStyle}
                             />
                           )}
-                          <ShareSnapshot theme={theme} canvasRef={bubbleChartRef} variant="inline" />
+                          <ShareSnapshot
+                            theme={theme}
+                            canvasRef={
+                              viewMode === 'bubble' ? bubbleChartRef :
+                              viewMode === 'treemap' ? treemapChartRef :
+                              viewMode === 'donut' ? donutChartRef :
+                              barChartRef
+                            }
+                            variant="inline"
+                          />
                         </div>
                       )}
                     </div>
@@ -1078,20 +1090,18 @@ snapshotButton={null}
                 </>
               )}
               {topics.length > 0 && viewMode === 'bar' && (
-                <div className="max-w-7xl mx-auto">
-                  <div ref={bubbleChartRef}>
-                    <BarChart
-                      topics={sortedTopics}
-                      maxDisplay={maxBubbles}
-                      theme={theme}
-                      useCryptoColors={pageData?.source === 'coingecko_crypto'}
-                      cryptoTimeframe={cryptoTimeframe}
-                    />
-                  </div>
+                <div ref={barChartRef} className="max-w-7xl mx-auto">
+                  <BarChart
+                    topics={sortedTopics}
+                    maxDisplay={maxBubbles}
+                    theme={theme}
+                    useCryptoColors={pageData?.source === 'coingecko_crypto'}
+                    cryptoTimeframe={cryptoTimeframe}
+                  />
                 </div>
               )}
               {topics.length > 0 && viewMode === 'treemap' && (
-                <div className="max-w-7xl mx-auto" style={{ height: 'calc(100vh - 300px)', minHeight: '500px' }}>
+                <div ref={treemapChartRef} className="max-w-7xl mx-auto" style={{ height: 'calc(100vh - 300px)', minHeight: '500px' }}>
                   <Treemap
                     topics={topics}
                     maxDisplay={maxBubbles}
@@ -1102,7 +1112,7 @@ snapshotButton={null}
                 </div>
               )}
               {topics.length > 0 && viewMode === 'donut' && (
-                <div className="max-w-7xl mx-auto" style={{ height: 'calc(100vh - 300px)', minHeight: '600px' }}>
+                <div ref={donutChartRef} className="max-w-7xl mx-auto" style={{ height: 'calc(100vh - 300px)', minHeight: '600px' }}>
                   <DonutChart
                     topics={sortedTopics}
                     maxDisplay={maxBubbles}
