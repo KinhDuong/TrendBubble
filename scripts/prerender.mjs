@@ -23,6 +23,77 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 const BASE_URL = process.env.VITE_BASE_URL || 'https://topbestcharts.com';
 
+function generateFooterHTML() {
+  const currentYear = new Date().getFullYear();
+  return `
+    <!-- Footer for SEO -->
+    <footer style="background-color: #1f2937; border-top: 1px solid #374151; color: #d1d5db;">
+      <div style="max-width: 80rem; margin: 0 auto; padding: 2rem 1.5rem;">
+        <div style="display: grid; grid-template-columns: 1fr; gap: 2rem;">
+          <!-- Desktop grid layout -->
+          <div style="display: grid; grid-template-columns: 1fr 2fr 1fr; gap: 2rem;">
+            <!-- Logo Column -->
+            <div style="display: flex; align-items: center; justify-content: flex-start;">
+              <div style="position: relative; width: 6rem; height: 6rem; border-radius: 9999px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); border: 4px solid #2563eb; display: flex; align-items: center; justify-content: center; background: transparent;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="12" x2="12" y1="20" y2="10"></line>
+                  <line x1="18" x2="18" y1="20" y2="4"></line>
+                  <line x1="6" x2="6" y1="20" y2="16"></line>
+                </svg>
+              </div>
+            </div>
+
+            <!-- Features Column -->
+            <div>
+              <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.75rem; color: white;">
+                Features
+              </h3>
+              <ul style="font-size: 0.875rem; list-style: none; padding: 0; margin: 0;">
+                <li style="margin-bottom: 0.5rem;">Top List – Quickly browse the highest-ranked items in a clean, easy-to-read format</li>
+                <li style="margin-bottom: 0.5rem;">Bubble Chart – Visualize data based on scale and impact</li>
+                <li style="margin-bottom: 0.5rem;">Bar Chart – Compare items side-by-side with clarity</li>
+                <li style="margin-bottom: 0.5rem;">Donut Chart – View proportional breakdowns in a modern, intuitive layout</li>
+                <li style="margin-bottom: 0.5rem;">Treemap – Explore hierarchical data with a clear visual structure</li>
+              </ul>
+            </div>
+
+            <!-- About Column -->
+            <div>
+              <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.75rem; color: white;">
+                About
+              </h3>
+              <p style="font-size: 0.875rem;">
+                We turn boring rankings into beautiful, interactive stories.
+                Every bubble, bar, and sparkline is built from the latest official data and refreshed the moment new numbers drop. No fluff, no paywalls - just the clearest and most up-to-date data. Made by data nerds, for the endlessly curious.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Disclaimer and Copyright -->
+        <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid #374151;">
+          <div style="margin-bottom: 1.5rem; padding: 1rem; border-radius: 0.5rem; background-color: rgba(17, 24, 39, 0.5); border: 1px solid #374151;">
+            <h4 style="font-size: 0.875rem; font-weight: 600; margin-bottom: 0.5rem; color: #e5e7eb;">
+              Disclaimer
+            </h4>
+            <p style="font-size: 0.75rem; line-height: 1.625; color: #9ca3af;">
+              The trending topics and data displayed on this website are for informational and visualization purposes only.
+              While we strive for accuracy, the data may not be real-time and could contain errors, inaccuracies, or delays.
+              This platform aggregates and visualizes trending information from various sources but does not guarantee the
+              completeness, reliability, or timeliness of any data presented. Users should independently verify information
+              before making any decisions based on the trends shown here. We are not responsible for any actions taken based
+              on the information displayed on this site.
+            </p>
+          </div>
+          <div style="text-align: center; font-size: 0.875rem;">
+            <p>${currentYear} Top Best Charts. All rights reserved.</p>
+          </div>
+        </div>
+      </div>
+    </footer>
+  `;
+}
+
 async function fetchPages() {
   const { data, error } = await supabase
     .from('pages')
@@ -315,6 +386,9 @@ async function generateContentHTML(pageData, topics, sourceLabel) {
   contentHTML += `
     </div>
   `;
+
+  // Add footer for SEO
+  contentHTML += generateFooterHTML();
 
   return contentHTML;
 }
@@ -609,6 +683,9 @@ async function prerenderHomePage(baseHTML, distPath) {
   homeContentHTML += `
     </div>
   `;
+
+  // Add footer for SEO
+  homeContentHTML += generateFooterHTML();
 
   const html = baseHTML
     .replace('<title>Vite + React + TS</title>', '')
