@@ -12,6 +12,7 @@ interface Page {
   summary?: string;
   faq?: string;
   template?: string;
+  display_section?: string;
   created_at: string;
 }
 
@@ -140,6 +141,9 @@ export default function PageManager({ theme }: PageManagerProps) {
                       Summary
                     </th>
                     <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${theme === 'dark' ? 'text-gray-300' : 'text-gray-500'}`}>
+                      Display
+                    </th>
+                    <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${theme === 'dark' ? 'text-gray-300' : 'text-gray-500'}`}>
                       Created
                     </th>
                     <th className={`px-6 py-3 text-right text-xs font-medium uppercase tracking-wider ${theme === 'dark' ? 'text-gray-300' : 'text-gray-500'}`}>
@@ -183,6 +187,25 @@ export default function PageManager({ theme }: PageManagerProps) {
                         ) : (
                           <span className={`px-2 py-1 text-xs rounded ${theme === 'dark' ? 'bg-gray-700 text-gray-400' : 'bg-gray-100 text-gray-500'}`}>
                             No
+                          </span>
+                        )}
+                      </td>
+                      <td className={`px-6 py-4 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                        {page.display_section ? (
+                          <span className={`px-2 py-1 text-xs rounded capitalize ${
+                            page.display_section === 'hero'
+                              ? theme === 'dark' ? 'bg-purple-900/30 text-purple-400' : 'bg-purple-100 text-purple-700'
+                              : page.display_section === 'top'
+                              ? theme === 'dark' ? 'bg-blue-900/30 text-blue-400' : 'bg-blue-100 text-blue-700'
+                              : page.display_section === 'featured'
+                              ? theme === 'dark' ? 'bg-yellow-900/30 text-yellow-400' : 'bg-yellow-100 text-yellow-700'
+                              : theme === 'dark' ? 'bg-orange-900/30 text-orange-400' : 'bg-orange-100 text-orange-700'
+                          }`}>
+                            {page.display_section}
+                          </span>
+                        ) : (
+                          <span className={`px-2 py-1 text-xs rounded ${theme === 'dark' ? 'bg-gray-700 text-gray-400' : 'bg-gray-100 text-gray-500'}`}>
+                            Latest
                           </span>
                         )}
                       </td>

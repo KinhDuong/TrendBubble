@@ -15,6 +15,7 @@ interface FeaturedPage {
   meta_title: string;
   meta_description: string;
   source: string;
+  display_section?: string;
   created_at: string;
 }
 
@@ -22,7 +23,11 @@ export default function ExplorePage() {
   const { isAdmin, logout } = useAuth();
   const [showLogin, setShowLogin] = useState(false);
   const [latestTopics, setLatestTopics] = useState<TrendingTopic[]>([]);
+  const [heroPage, setHeroPage] = useState<FeaturedPage | null>(null);
+  const [topPages, setTopPages] = useState<FeaturedPage[]>([]);
   const [featuredPages, setFeaturedPages] = useState<FeaturedPage[]>([]);
+  const [popularPages, setPopularPages] = useState<FeaturedPage[]>([]);
+  const [latestPages, setLatestPages] = useState<FeaturedPage[]>([]);
   const [categoryTopics, setCategoryTopics] = useState<Record<string, TrendingTopic[]>>({});
   const [loading, setLoading] = useState(true);
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
@@ -48,7 +53,7 @@ export default function ExplorePage() {
   const loadTopics = async () => {
     setLoading(true);
     try {
-      const [topicsResponse, pagesResponse] = await Promise.all([
+      const [topicsResponse, heroResponse, topPagesResponse, featuredResponse, popularResponse, latestResponse] = await Promise.all([
         supabase
           .from('trending_topics')
           .select('*')
@@ -57,13 +62,38 @@ export default function ExplorePage() {
         supabase
           .from('pages')
           .select('*')
+          .eq('display_section', 'hero')
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle(),
+        supabase
+          .from('pages')
+          .select('*')
+          .eq('display_section', 'top')
+          .order('created_at', { ascending: false })
+          .limit(2),
+        supabase
+          .from('pages')
+          .select('*')
+          .eq('display_section', 'featured')
+          .order('created_at', { ascending: false })
+          .limit(5),
+        supabase
+          .from('pages')
+          .select('*')
+          .eq('display_section', 'popular')
+          .order('created_at', { ascending: false })
+          .limit(5),
+        supabase
+          .from('pages')
+          .select('*')
           .neq('page_url', '/explore')
+          .is('display_section', null)
           .order('created_at', { ascending: false })
           .limit(5)
       ]);
 
       if (topicsResponse.error) throw topicsResponse.error;
-      if (pagesResponse.error) throw pagesResponse.error;
 
       if (topicsResponse.data) {
         const topics: TrendingTopic[] = topicsResponse.data.map((item: any) => ({
@@ -96,9 +126,11 @@ export default function ExplorePage() {
         setCategoryTopics(grouped);
       }
 
-      if (pagesResponse.data) {
-        setFeaturedPages(pagesResponse.data as FeaturedPage[]);
-      }
+      setHeroPage(heroResponse.data);
+      setTopPages(topPagesResponse.data || []);
+      setFeaturedPages(featuredResponse.data || []);
+      setPopularPages(popularResponse.data || []);
+      setLatestPages(latestResponse.data || []);
     } catch (error) {
       console.error('Error loading topics:', error);
     } finally {
@@ -173,58 +205,86 @@ export default function ExplorePage() {
           {/* Main Content */}
           <div className="flex-1">
             {/* Top Section */}
-            <div className="mb-12">
-              <div className="relative mb-6">
-                <h2 className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} inline-block px-4 py-2 relative`}>
-                  <span className="relative z-10">TOP</span>
-                  <div className="absolute inset-0 bg-gradient-to-r from-green-500 to-green-600 transform -skew-x-12"></div>
-                </h2>
-              </div>
+            {(heroPage || topPages.length > 0) && (
+              <div className="mb-12">
+                <div className="relative mb-6">
+                  <h2 className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} inline-block px-4 py-2 relative`}>
+                    <span className="relative z-10">TOP</span>
+                    <div className="absolute inset-0 bg-gradient-to-r from-green-500 to-green-600 transform -skew-x-12"></div>
+                  </h2>
+                </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {latestTopics.map((topic, index) => (
-                  <Link
-                    key={topic.id}
-                    to={topic.url || '#'}
-                    className={`group block rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 ${
-                      theme === 'dark' ? 'bg-gray-800' : 'bg-white'
-                    } ${index === 0 ? 'md:col-span-2' : ''}`}
-                  >
-                    <div className={`relative ${index === 0 ? 'h-80' : 'h-48'} bg-gradient-to-br from-blue-500 to-purple-600 overflow-hidden`}>
-                      <div className="absolute inset-0 bg-black bg-opacity-30 group-hover:bg-opacity-20 transition-all duration-300"></div>
-                      <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-                        <div className="flex items-center gap-2 text-sm mb-2 opacity-90">
-                          <span className="uppercase font-semibold">{topic.category}</span>
-                          <span>/</span>
-                          <span className="flex items-center gap-1">
-                            <Clock className="w-4 h-4" />
-                            {formatTimeAgo(topic.createdAt)}
-                          </span>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Hero Page */}
+                  {heroPage && (
+                    <Link
+                      to={heroPage.page_url}
+                      className={`group block rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 ${
+                        theme === 'dark' ? 'bg-gray-800' : 'bg-white'
+                      } md:col-span-2`}
+                    >
+                      <div className="relative h-80 bg-gradient-to-br from-blue-500 to-purple-600 overflow-hidden">
+                        <div className="absolute inset-0 bg-black bg-opacity-30 group-hover:bg-opacity-20 transition-all duration-300"></div>
+                        <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+                          <div className="flex items-center gap-2 text-sm mb-2 opacity-90">
+                            <span className="uppercase font-semibold">Featured</span>
+                            <span>/</span>
+                            <span className="flex items-center gap-1">
+                              <Clock className="w-4 h-4" />
+                              {formatTimeAgo(heroPage.created_at)}
+                            </span>
+                          </div>
+                          <h3 className="font-bold text-3xl group-hover:text-blue-300 transition-colors">
+                            {heroPage.meta_title}
+                          </h3>
                         </div>
-                        <h3 className={`font-bold group-hover:text-blue-300 transition-colors ${index === 0 ? 'text-3xl' : 'text-xl'}`}>
-                          {topic.name}
-                        </h3>
                       </div>
-                    </div>
-                    <div className="p-4">
-                      <div className="flex items-center justify-between">
-                        <span className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                          Search Volume: {formatNumber(topic.searchVolume)}
-                        </span>
-                        <span className={`text-xs px-2 py-1 rounded ${
-                          theme === 'dark' ? 'bg-gray-700 text-gray-300' : 'bg-gray-200 text-gray-700'
-                        }`}>
-                          {topic.source}
-                        </span>
+                      <div className="p-4">
+                        <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} line-clamp-2`}>
+                          {heroPage.meta_description}
+                        </p>
                       </div>
-                    </div>
-                  </Link>
-                ))}
+                    </Link>
+                  )}
+
+                  {/* Top Pages */}
+                  {topPages.map((page) => (
+                    <Link
+                      key={page.id}
+                      to={page.page_url}
+                      className={`group block rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 ${
+                        theme === 'dark' ? 'bg-gray-800' : 'bg-white'
+                      }`}
+                    >
+                      <div className="relative h-48 bg-gradient-to-br from-green-500 to-teal-600 overflow-hidden">
+                        <div className="absolute inset-0 bg-black bg-opacity-30 group-hover:bg-opacity-20 transition-all duration-300"></div>
+                        <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+                          <div className="flex items-center gap-2 text-sm mb-2 opacity-90">
+                            <span className="uppercase font-semibold">Top</span>
+                            <span>/</span>
+                            <span className="flex items-center gap-1">
+                              <Clock className="w-4 h-4" />
+                              {formatTimeAgo(page.created_at)}
+                            </span>
+                          </div>
+                          <h3 className="font-bold text-xl group-hover:text-blue-300 transition-colors">
+                            {page.meta_title}
+                          </h3>
+                        </div>
+                      </div>
+                      <div className="p-4">
+                        <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} line-clamp-2`}>
+                          {page.meta_description}
+                        </p>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Latest Pages Section */}
-            {featuredPages.length > 0 && (
+            {latestPages.length > 0 && (
               <div className="mb-12">
                 <div className="relative mb-6">
                   <h2 className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} inline-block px-4 py-2 relative`}>
@@ -233,7 +293,7 @@ export default function ExplorePage() {
                   </h2>
                 </div>
                 <div className="space-y-4">
-                  {featuredPages.map((page) => (
+                  {latestPages.map((page) => (
                     <Link
                       key={page.id}
                       to={page.page_url}
@@ -317,59 +377,116 @@ export default function ExplorePage() {
           </div>
 
           {/* Sidebar */}
-          <div className="lg:w-80">
-            {/* Popular Section */}
-            <div className={`sticky top-4 rounded-lg p-6 ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} shadow-lg`}>
-              <div className="relative mb-6">
-                <h2 className={`text-xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} inline-block px-3 py-1 relative`}>
-                  <span className="relative z-10">POPULAR</span>
-                  <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-orange-500 transform -skew-x-12"></div>
-                </h2>
-              </div>
+          <div className="lg:w-80 space-y-6">
+            {/* Featured Section */}
+            {featuredPages.length > 0 && (
+              <div className={`sticky top-4 rounded-lg p-6 ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} shadow-lg`}>
+                <div className="relative mb-6">
+                  <h2 className={`text-xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} inline-block px-3 py-1 relative`}>
+                    <span className="relative z-10">FEATURED</span>
+                    <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-orange-500 transform -skew-x-12"></div>
+                  </h2>
+                </div>
 
-              <div className="space-y-6">
-                {featuredPages.map((page, index) => (
-                  <Link
-                    key={page.id}
-                    to={page.page_url}
-                    className="block group"
-                  >
-                    <div className="flex gap-3">
-                      <div className={`flex-shrink-0 w-16 h-16 rounded-lg bg-gradient-to-br ${
-                        index === 0 ? 'from-yellow-400 to-orange-500' :
-                        index === 1 ? 'from-blue-400 to-cyan-500' :
-                        index === 2 ? 'from-green-400 to-teal-500' :
-                        index === 3 ? 'from-pink-400 to-rose-500' :
-                        'from-orange-400 to-red-500'
-                      } flex items-center justify-center`}>
-                        <span className="text-white font-bold text-xl">{index + 1}</span>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 text-xs mb-1">
-                          <span className={`uppercase font-semibold ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`}>
-                            Featured
-                          </span>
-                          <span className={theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}>/</span>
-                          <span className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}>
-                            {formatTimeAgo(page.created_at)}
-                          </span>
+                <div className="space-y-6">
+                  {featuredPages.map((page, index) => (
+                    <Link
+                      key={page.id}
+                      to={page.page_url}
+                      className="block group"
+                    >
+                      <div className="flex gap-3">
+                        <div className={`flex-shrink-0 w-16 h-16 rounded-lg bg-gradient-to-br ${
+                          index === 0 ? 'from-yellow-400 to-orange-500' :
+                          index === 1 ? 'from-blue-400 to-cyan-500' :
+                          index === 2 ? 'from-green-400 to-teal-500' :
+                          index === 3 ? 'from-pink-400 to-rose-500' :
+                          'from-orange-400 to-red-500'
+                        } flex items-center justify-center`}>
+                          <span className="text-white font-bold text-xl">{index + 1}</span>
                         </div>
-                        <h3 className={`font-semibold group-hover:text-blue-600 transition-colors line-clamp-2 ${
-                          theme === 'dark' ? 'text-white' : 'text-gray-900'
-                        }`}>
-                          {page.meta_title}
-                        </h3>
-                        {page.meta_description && (
-                          <p className={`text-xs mt-1 line-clamp-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                            {page.meta_description}
-                          </p>
-                        )}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 text-xs mb-1">
+                            <span className={`uppercase font-semibold ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`}>
+                              Featured
+                            </span>
+                            <span className={theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}>/</span>
+                            <span className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}>
+                              {formatTimeAgo(page.created_at)}
+                            </span>
+                          </div>
+                          <h3 className={`font-semibold group-hover:text-blue-600 transition-colors line-clamp-2 ${
+                            theme === 'dark' ? 'text-white' : 'text-gray-900'
+                          }`}>
+                            {page.meta_title}
+                          </h3>
+                          {page.meta_description && (
+                            <p className={`text-xs mt-1 line-clamp-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                              {page.meta_description}
+                            </p>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  </Link>
-                ))}
+                    </Link>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
+
+            {/* Popular Section */}
+            {popularPages.length > 0 && (
+              <div className={`rounded-lg p-6 ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} shadow-lg`}>
+                <div className="relative mb-6">
+                  <h2 className={`text-xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} inline-block px-3 py-1 relative`}>
+                    <span className="relative z-10">POPULAR</span>
+                    <div className="absolute inset-0 bg-gradient-to-r from-pink-400 to-red-500 transform -skew-x-12"></div>
+                  </h2>
+                </div>
+
+                <div className="space-y-6">
+                  {popularPages.map((page, index) => (
+                    <Link
+                      key={page.id}
+                      to={page.page_url}
+                      className="block group"
+                    >
+                      <div className="flex gap-3">
+                        <div className={`flex-shrink-0 w-16 h-16 rounded-lg bg-gradient-to-br ${
+                          index === 0 ? 'from-pink-400 to-rose-500' :
+                          index === 1 ? 'from-red-400 to-orange-500' :
+                          index === 2 ? 'from-purple-400 to-pink-500' :
+                          index === 3 ? 'from-orange-400 to-yellow-500' :
+                          'from-rose-400 to-pink-500'
+                        } flex items-center justify-center`}>
+                          <span className="text-white font-bold text-xl">{index + 1}</span>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 text-xs mb-1">
+                            <span className={`uppercase font-semibold ${theme === 'dark' ? 'text-pink-400' : 'text-pink-600'}`}>
+                              Popular
+                            </span>
+                            <span className={theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}>/</span>
+                            <span className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}>
+                              {formatTimeAgo(page.created_at)}
+                            </span>
+                          </div>
+                          <h3 className={`font-semibold group-hover:text-pink-600 transition-colors line-clamp-2 ${
+                            theme === 'dark' ? 'text-white' : 'text-gray-900'
+                          }`}>
+                            {page.meta_title}
+                          </h3>
+                          {page.meta_description && (
+                            <p className={`text-xs mt-1 line-clamp-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                              {page.meta_description}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </main>

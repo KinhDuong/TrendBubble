@@ -13,6 +13,7 @@ interface Page {
   intro_text?: string;
   summary?: string;
   template?: string;
+  display_section?: string;
   faq?: string;
   created_at: string;
 }
@@ -32,6 +33,7 @@ export default function PageEditor({ theme, onClose, existingPage }: PageEditorP
   const [summary, setSummary] = useState(existingPage?.summary || '');
   const [faq, setFaq] = useState(existingPage?.faq || '');
   const [template, setTemplate] = useState(existingPage?.template || 'default');
+  const [displaySection, setDisplaySection] = useState(existingPage?.display_section || '');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [sources, setSources] = useState<Array<{ value: string; label: string }>>([]);
@@ -95,7 +97,8 @@ export default function PageEditor({ theme, onClose, existingPage }: PageEditorP
         intro_text: introText || null,
         summary: summary || null,
         faq: faq || null,
-        template: template || 'default'
+        template: template || 'default',
+        display_section: displaySection || null
       };
 
       if (existingPage) {
@@ -327,6 +330,26 @@ export default function PageEditor({ theme, onClose, existingPage }: PageEditorP
                 <option value="crypto">Crypto</option>
                 <option value="trending">Trending</option>
               </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                Display Section on Explore Page
+              </label>
+              <select
+                value={displaySection}
+                onChange={(e) => setDisplaySection(e.target.value)}
+                className={`w-full px-3 py-2 rounded-lg border ${theme === 'dark' ? 'bg-gray-900 border-gray-700 text-white' : 'bg-white border-gray-300 text-gray-900'} focus:outline-none focus:ring-2 focus:ring-blue-500`}
+              >
+                <option value="">None (Latest only)</option>
+                <option value="hero">Hero (Large box in TOP section)</option>
+                <option value="top">Top (Box under hero)</option>
+                <option value="featured">Featured (Sidebar)</option>
+                <option value="popular">Popular (Sidebar)</option>
+              </select>
+              <p className={`text-xs mt-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                Choose where this page appears on the Explore page
+              </p>
             </div>
 
             <div>
