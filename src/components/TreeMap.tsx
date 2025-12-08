@@ -45,16 +45,21 @@ const categoryColors: { [key: string]: string } = {
   'Environment': '#2D6A4F',
 };
 
-function getColorForCategory(category: string, index: number): string {
+function getColorForCategory(category: string, topicIndex: number): string {
   if (categoryColors[category]) {
     return categoryColors[category];
   }
-  const hue = (index * 137.5) % 360;
-  return `hsl(${hue}, 65%, 60%)`;
+  let hash = 0;
+  for (let i = 0; i < category.length; i++) {
+    hash = category.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const hue = Math.abs(hash % 360);
+  const lightness = 50 + (topicIndex % 3) * 5;
+  return `hsl(${hue}, 70%, ${lightness}%)`;
 }
 
 function squarify(
-  items: { topic: TrendingTopic; value: number; category: string }[],
+  items: { topic: TrendingTopic; value: number; category: string; index: number }[],
   rect: Rect
 ): TreeMapNode[] {
   if (items.length === 0) return [];
@@ -72,9 +77,8 @@ function squarify(
     const ratio = rowValue / totalValue;
 
     let offset = 0;
-    const categoryIndex = row.length > 0 ? items.findIndex(i => i === row[0]) : 0;
 
-    row.forEach((item, idx) => {
+    row.forEach((item) => {
       const itemRatio = item.value / rowValue;
 
       let x, y, width, height;
@@ -98,7 +102,7 @@ function squarify(
         y,
         width,
         height,
-        color: getColorForCategory(item.category, categoryIndex + idx),
+        color: getColorForCategory(item.category, item.index),
         category: item.category
       });
     });
@@ -162,52 +166,27 @@ export default function TreeMap({ topics, maxDisplay = 50, theme }: TreeMapProps
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   useEffect(() => {
-    const displayTopics = topics.slice(0, maxDisplay);
-
-    const groupedByCategory = displayTopics.reduce((acc, topic) => {
-      const category = topic.category || 'Other';
-      if (!acc[category]) acc[category] = [];
-      acc[category].push(topic);
-      return acc;
-    }, {} as { [key: string]: TrendingTopic[] });
-
-    const categoryGroups = Object.entries(groupedByCategory)
-      .sort((a, b) => {
-        const sumA = a[1].reduce((sum, t) => sum + t.searchVolume, 0);
-        const sumB = b[1].reduce((sum, t) => sum + t.searchVolume, 0);
-        return sumB - sumA;
-      });
+    const displayTopics = topics.slice(0, maxDisplay).sort((a, b) => b.searchVolume - a.searchVolume);
 
     const containerWidth = 1200;
     const containerHeight = 800;
-    const totalValue = displayTopics.reduce((sum, t) => sum + t.searchVolume, 0);
 
-    let allNodes: TreeMapNode[] = [];
-    let currentY = 0;
+    const items = displayTopics.map((topic, index) => ({
+      topic,
+      value: topic.searchVolume,
+      category: topic.category || 'Other',
+      index
+    }));
 
-    categoryGroups.forEach(([category, categoryTopics]) => {
-      const categoryValue = categoryTopics.reduce((sum, t) => sum + t.searchVolume, 0);
-      const categoryHeight = (categoryValue / totalValue) * containerHeight;
+    const rect = {
+      x: 0,
+      y: 0,
+      width: containerWidth,
+      height: containerHeight
+    };
 
-      const items = categoryTopics.map(topic => ({
-        topic,
-        value: topic.searchVolume,
-        category
-      }));
-
-      const rect = {
-        x: 0,
-        y: currentY,
-        width: containerWidth,
-        height: categoryHeight
-      };
-
-      const categoryNodes = squarify(items, rect);
-      allNodes = [...allNodes, ...categoryNodes];
-      currentY += categoryHeight;
-    });
-
-    setNodes(allNodes);
+    const calculatedNodes = squarify(items, rect);
+    setNodes(calculatedNodes);
   }, [topics, maxDisplay, theme]);
 
   return (
