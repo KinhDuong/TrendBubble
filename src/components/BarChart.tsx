@@ -79,50 +79,37 @@ export default function BarChart({
 
           return (
             <div key={index} className="relative">
-              <div className="flex items-center gap-3 mb-1">
-                <span className={`text-sm font-semibold w-8 text-right ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                  {index + 1}
-                </span>
-                <div className="flex-1">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className={`text-sm font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+              <div className={`w-full h-12 rounded ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-200'} overflow-hidden relative`}>
+                <div
+                  className="h-full transition-all duration-500 ease-out flex items-center justify-between px-3"
+                  style={{
+                    width: `${barWidth}%`,
+                    backgroundColor: barColor,
+                    minWidth: '100px'
+                  }}
+                >
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <span className="text-base font-bold text-white flex-shrink-0">
+                      {index + 1}
+                    </span>
+                    <span className="text-sm font-bold text-white truncate">
                       {topic.name.replace(/"/g, '')}
                     </span>
-                    <div className="flex items-center gap-2">
-                      {useCryptoColors && topic.crypto_data && (
-                        <span className={`text-xs font-bold ${
-                          getCryptoChange(topic) > 0 ? 'text-green-600' :
-                          getCryptoChange(topic) < 0 ? 'text-red-600' :
-                          'text-gray-500'
-                        }`}>
-                          {getCryptoChange(topic) > 0 ? '+' : ''}{getCryptoChange(topic).toFixed(2)}%
-                        </span>
-                      )}
-                      <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                        {topic.searchVolumeRaw.replace(/"/g, '')}
-                      </span>
-                    </div>
                   </div>
-                  <div className={`w-full h-8 rounded ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-200'} overflow-hidden relative`}>
-                    <div
-                      className="h-full transition-all duration-500 ease-out flex items-center px-2"
-                      style={{
-                        width: `${barWidth}%`,
-                        backgroundColor: barColor,
-                        minWidth: '20px'
-                      }}
-                    >
-                      {barWidth > 15 && (
-                        <span className="text-xs font-medium text-white truncate">
-                          {topic.name.replace(/"/g, '')}
-                        </span>
-                      )}
-                    </div>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    {useCryptoColors && topic.crypto_data && (
+                      <span className="text-xs font-bold text-white">
+                        {getCryptoChange(topic) > 0 ? '+' : ''}{getCryptoChange(topic).toFixed(2)}%
+                      </span>
+                    )}
+                    <span className="text-xs font-bold text-white">
+                      {topic.searchVolumeRaw.replace(/"/g, '')}
+                    </span>
                   </div>
                 </div>
               </div>
               {topic.category && (
-                <div className="ml-11">
+                <div className="mt-1 ml-1">
                   <span className={`inline-block text-xs px-2 py-0.5 rounded ${theme === 'dark' ? 'bg-gray-800 text-gray-400' : 'bg-gray-200 text-gray-600'}`}>
                     {topic.category}
                   </span>
