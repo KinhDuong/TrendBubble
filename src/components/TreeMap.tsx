@@ -26,7 +26,8 @@ function createTreeMap(
   if (topics.length === 0) return [];
 
   const nodes: TreeMapNode[] = [];
-  const padding = 2;
+  const padding = 3;
+  const gap = 4;
 
   function squarify(
     items: TrendingTopic[],
@@ -61,44 +62,45 @@ function createTreeMap(
 
     let bestRow: TrendingTopic[] = [];
     let bestWorst = Infinity;
+    let bestLength = 0;
 
     for (let i = 1; i <= items.length; i++) {
       const row = items.slice(0, i);
       const rowTotal = row.reduce((sum, t) => sum + t.searchVolume, 0);
       const rowRatio = rowTotal / total;
 
-      const primaryDim = isHorizontal ? w * rowRatio : h * rowRatio;
-      const secondaryDim = isHorizontal ? h : w;
+      const length = isHorizontal ? w * rowRatio : h * rowRatio;
+      const breadth = isHorizontal ? h : w;
 
       const worstRatio = Math.max(
         ...row.map(item => {
           const itemRatio = item.searchVolume / rowTotal;
-          const itemSecondary = itemRatio * secondaryDim;
-          return Math.max(primaryDim / itemSecondary, itemSecondary / primaryDim);
+          const itemBreadth = itemRatio * breadth;
+          return Math.max(length / itemBreadth, itemBreadth / length);
         })
       );
 
       if (worstRatio < bestWorst) {
         bestWorst = worstRatio;
         bestRow = row;
+        bestLength = length;
       } else {
         break;
       }
     }
 
-    if (bestRow.length === 0) bestRow = [items[0]];
-
-    const rowTotal = bestRow.reduce((sum, t) => sum + t.searchVolume, 0);
-    const rowRatio = rowTotal / total;
+    if (bestRow.length === 0) {
+      bestRow = [items[0]];
+      const rowRatio = items[0].searchVolume / total;
+      bestLength = isHorizontal ? w * rowRatio : h * rowRatio;
+    }
 
     if (isHorizontal) {
-      const rowWidth = w * rowRatio;
-      layoutRow(bestRow, x, y, rowWidth, h, false, startIndex);
-      squarify(items.slice(bestRow.length), x + rowWidth, y, w - rowWidth, h, startIndex + bestRow.length);
+      layoutRow(bestRow, x, y, bestLength, h, false, startIndex);
+      squarify(items.slice(bestRow.length), x + bestLength + gap, y, w - bestLength - gap, h, startIndex + bestRow.length);
     } else {
-      const rowHeight = h * rowRatio;
-      layoutRow(bestRow, x, y, w, rowHeight, true, startIndex);
-      squarify(items.slice(bestRow.length), x, y + rowHeight, w, h - rowHeight, startIndex + bestRow.length);
+      layoutRow(bestRow, x, y, w, bestLength, true, startIndex);
+      squarify(items.slice(bestRow.length), x, y + bestLength + gap, w, h - bestLength - gap, startIndex + bestRow.length);
     }
   }
 
@@ -124,22 +126,24 @@ function createTreeMap(
 
       if (isVertical) {
         const itemHeight = h * ratio;
+        const actualHeight = i < items.length - 1 ? itemHeight - gap : itemHeight;
         nodes.push({
           topic: item,
           x: x + padding,
           y: offset + padding,
           width: Math.max(0, w - padding * 2),
-          height: Math.max(0, itemHeight - padding * 2),
+          height: Math.max(0, actualHeight - padding * 2),
           color
         });
         offset += itemHeight;
       } else {
         const itemWidth = w * ratio;
+        const actualWidth = i < items.length - 1 ? itemWidth - gap : itemWidth;
         nodes.push({
           topic: item,
           x: offset + padding,
           y: y + padding,
-          width: Math.max(0, itemWidth - padding * 2),
+          width: Math.max(0, actualWidth - padding * 2),
           height: Math.max(0, h - padding * 2),
           color
         });
