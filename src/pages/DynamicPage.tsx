@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import BubbleChart from '../components/BubbleChart';
 import BarChart from '../components/BarChart';
+import TreeMap from '../components/TreeMap';
 import Footer from '../components/Footer';
 import Header from '../components/Header';
 import FilterMenu, { BubbleLayout, ViewMode } from '../components/FilterMenu';
@@ -695,7 +696,7 @@ snapshotButton={null}
                       <h1 className={`text-2xl md:text-4xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                         {pageData.meta_title}
                       </h1>
-                      {(viewMode === 'bubble' || viewMode === 'bar') && topics.length > 0 && (
+                      {(viewMode === 'bubble' || viewMode === 'bar' || viewMode === 'treemap') && topics.length > 0 && (
                         <div className="flex items-center gap-2">
                           {viewMode === 'bubble' && (
                             <AnimationSelector
@@ -1068,6 +1069,17 @@ snapshotButton={null}
                       theme={theme}
                       useCryptoColors={pageData?.source === 'coingecko_crypto'}
                       cryptoTimeframe={cryptoTimeframe}
+                    />
+                  </div>
+                </div>
+              )}
+              {topics.length > 0 && viewMode === 'treemap' && (
+                <div className="max-w-7xl mx-auto">
+                  <div ref={bubbleChartRef}>
+                    <TreeMap
+                      topics={sortedTopics}
+                      maxDisplay={maxBubbles}
+                      theme={theme}
                     />
                   </div>
                 </div>
