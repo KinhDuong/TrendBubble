@@ -291,6 +291,38 @@ export default function TreeMap({ topics, maxDisplay = 50, theme }: TreeMapProps
             const fontSize = Math.min(node.width, node.height) / 8;
             const showText = fontSize > 8 && node.topic;
 
+            let wrappedLines: string[] = [];
+            if (showText && node.topic) {
+              const text = node.topic.name.replace(/"/g, '');
+              const avgCharWidth = fontSize * 0.6;
+              const maxCharsPerLine = Math.floor(node.width / avgCharWidth);
+
+              const words = text.split(' ');
+              let currentLine = '';
+
+              words.forEach(word => {
+                if ((currentLine + ' ' + word).trim().length <= maxCharsPerLine) {
+                  currentLine = currentLine ? currentLine + ' ' + word : word;
+                } else {
+                  if (currentLine) wrappedLines.push(currentLine);
+                  currentLine = word;
+                }
+              });
+
+              if (currentLine) wrappedLines.push(currentLine);
+
+              const maxLines = Math.floor(node.height / (fontSize * 1.2)) - 1;
+              if (wrappedLines.length > maxLines) {
+                wrappedLines = wrappedLines.slice(0, maxLines);
+                if (wrappedLines.length > 0) {
+                  const lastLine = wrappedLines[wrappedLines.length - 1];
+                  if (lastLine.length > 3) {
+                    wrappedLines[wrappedLines.length - 1] = lastLine.substring(0, lastLine.length - 3) + '...';
+                  }
+                }
+              }
+            }
+
             return (
               <g key={index}>
                 <rect
@@ -306,11 +338,10 @@ export default function TreeMap({ topics, maxDisplay = 50, theme }: TreeMapProps
                   onMouseEnter={() => setHoveredIndex(index)}
                   onMouseLeave={() => setHoveredIndex(null)}
                 />
-                {showText && node.topic && (
+                {showText && node.topic && wrappedLines.length > 0 && (
                   <>
                     <text
                       x={node.x + node.width / 2}
-                      y={node.y + node.height / 2 - fontSize / 2}
                       textAnchor="middle"
                       fill="white"
                       fontSize={fontSize}
@@ -321,13 +352,19 @@ export default function TreeMap({ topics, maxDisplay = 50, theme }: TreeMapProps
                         filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.3))'
                       }}
                     >
-                      {node.topic.name.replace(/"/g, '').length > 20
-                        ? node.topic.name.replace(/"/g, '').substring(0, 20) + '...'
-                        : node.topic.name.replace(/"/g, '')}
+                      {wrappedLines.map((line, i) => (
+                        <tspan
+                          key={i}
+                          x={node.x + node.width / 2}
+                          y={node.y + node.height / 2 - (wrappedLines.length * fontSize * 1.2) / 2 + i * fontSize * 1.2 + fontSize * 0.8}
+                        >
+                          {line}
+                        </tspan>
+                      ))}
                     </text>
                     <text
                       x={node.x + node.width / 2}
-                      y={node.y + node.height / 2 + fontSize}
+                      y={node.y + node.height / 2 + (wrappedLines.length * fontSize * 1.2) / 2 + fontSize * 0.9}
                       textAnchor="middle"
                       fill="white"
                       fontSize={fontSize * 0.7}
