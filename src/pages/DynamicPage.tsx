@@ -761,9 +761,12 @@ snapshotButton={null}
                           {topTitle}
                         </h2>
                         {(pageData.intro_text || topTopicNames) && (
-                          <p className={`mb-4 text-sm leading-relaxed ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                            {pageData.intro_text || 'Explore our interactive visualization to discover real-time search trends, analyze topic popularity, and stay updated with what\'s capturing attention right now.'}
-                          </p>
+                          <div
+                            className={`mb-4 text-sm leading-relaxed ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}
+                            dangerouslySetInnerHTML={{
+                              __html: pageData.intro_text || 'Explore our interactive visualization to discover real-time search trends, analyze topic popularity, and stay updated with what\'s capturing attention right now.'
+                            }}
+                          />
                         )}
                         <div className="relative mb-4">
                           <Search className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`} />

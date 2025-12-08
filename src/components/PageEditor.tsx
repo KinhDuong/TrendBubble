@@ -35,6 +35,7 @@ export default function PageEditor({ theme, onClose, existingPage }: PageEditorP
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [sources, setSources] = useState<Array<{ value: string; label: string }>>([]);
+  const [introEditorMode, setIntroEditorMode] = useState<'visual' | 'html'>('visual');
   const [faqEditorMode, setFaqEditorMode] = useState<'visual' | 'html'>('visual');
 
   useEffect(() => {
@@ -234,16 +235,80 @@ export default function PageEditor({ theme, onClose, existingPage }: PageEditorP
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">
-                Intro Text
-              </label>
-              <textarea
-                value={introText}
-                onChange={(e) => setIntroText(e.target.value)}
-                placeholder="Custom introduction text to display above the ranking list"
-                rows={3}
-                className={`w-full px-3 py-2 rounded-lg border ${theme === 'dark' ? 'bg-gray-900 border-gray-700 text-white' : 'bg-white border-gray-300 text-gray-900'} focus:outline-none focus:ring-2 focus:ring-blue-500`}
-              />
+              <div className="flex items-center justify-between mb-2">
+                <label className={`block text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                  Intro Text
+                </label>
+                <div className="flex gap-1">
+                  <button
+                    type="button"
+                    onClick={() => setIntroEditorMode('visual')}
+                    className={`flex items-center gap-1 px-3 py-1 rounded-md text-xs font-medium transition-colors ${
+                      introEditorMode === 'visual'
+                        ? theme === 'dark'
+                          ? 'bg-gray-900 text-white'
+                          : 'bg-white text-gray-900 shadow-sm'
+                        : theme === 'dark'
+                        ? 'text-gray-400 hover:text-white'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    <Eye size={14} />
+                    Visual
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIntroEditorMode('html')}
+                    className={`flex items-center gap-1 px-3 py-1 rounded-md text-xs font-medium transition-colors ${
+                      introEditorMode === 'html'
+                        ? theme === 'dark'
+                          ? 'bg-gray-900 text-white'
+                          : 'bg-white text-gray-900 shadow-sm'
+                        : theme === 'dark'
+                        ? 'text-gray-400 hover:text-white'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    <Code size={14} />
+                    HTML
+                  </button>
+                </div>
+              </div>
+
+              {introEditorMode === 'visual' ? (
+                <div className={`${theme === 'dark' ? 'quill-dark' : ''}`}>
+                  <ReactQuill
+                    theme="snow"
+                    value={introText}
+                    onChange={setIntroText}
+                    modules={{
+                      toolbar: [
+                        [{ 'header': [1, 2, 3, false] }],
+                        ['bold', 'italic', 'underline'],
+                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                        ['link'],
+                        ['clean']
+                      ]
+                    }}
+                    formats={['header', 'bold', 'italic', 'underline', 'list', 'bullet', 'link']}
+                    placeholder="Custom introduction text to display above the ranking list"
+                    className={`${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-white'} rounded-lg`}
+                    style={{ height: '150px', marginBottom: '50px' }}
+                  />
+                </div>
+              ) : (
+                <textarea
+                  value={introText}
+                  onChange={(e) => setIntroText(e.target.value)}
+                  placeholder="<p>Custom introduction text to display above the ranking list</p>"
+                  rows={6}
+                  className={`w-full px-3 py-2 rounded-lg border font-mono text-sm ${
+                    theme === 'dark'
+                      ? 'bg-gray-900 border-gray-700 text-white'
+                      : 'bg-white border-gray-300 text-gray-900'
+                  } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                />
+              )}
               <p className={`text-xs mt-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
                 Optional text to display in the full ranking section
               </p>
