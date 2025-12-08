@@ -18,6 +18,7 @@ export interface CryptoData {
 }
 
 export interface TrendingTopic {
+  id?: string;
   name: string;
   searchVolume: number;
   searchVolumeRaw: string;

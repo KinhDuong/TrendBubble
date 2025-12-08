@@ -48,7 +48,18 @@ export default function ExplorePage() {
       if (error) throw error;
 
       if (data) {
-        const topics = data as TrendingTopic[];
+        const topics: TrendingTopic[] = data.map((item: any) => ({
+          id: item.id,
+          name: item.name,
+          searchVolume: item.search_volume || 0,
+          searchVolumeRaw: item.search_volume_raw || '',
+          url: item.url,
+          createdAt: item.created_at || item.pub_date,
+          pubDate: item.pub_date,
+          category: item.category || 'General',
+          source: item.source || 'Unknown',
+          crypto_data: item.crypto_data,
+        }));
 
         // Latest topics (most recent)
         setLatestTopics(topics.slice(0, 4));
@@ -77,7 +88,9 @@ export default function ExplorePage() {
     }
   };
 
-  const formatTimeAgo = (date: string) => {
+  const formatTimeAgo = (date?: string) => {
+    if (!date) return 'Recently';
+
     const now = new Date();
     const created = new Date(date);
     const diffMs = now.getTime() - created.getTime();
