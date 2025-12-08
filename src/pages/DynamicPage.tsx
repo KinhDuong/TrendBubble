@@ -44,7 +44,10 @@ function DynamicPage() {
   const [categories, setCategories] = useState<string[]>([]);
   const [viewMode, setViewMode] = useState<ViewMode>('bubble');
   const [loading, setLoading] = useState(true);
-  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+  const [theme, setTheme] = useState<'dark' | 'light'>(() => {
+    const savedTheme = localStorage.getItem('theme');
+    return (savedTheme === 'dark' || savedTheme === 'light') ? savedTheme : 'light';
+  });
   const [nextBubbleIn, setNextBubbleIn] = useState<string>('');
   const [bubbleProgress, setBubbleProgress] = useState<number>(0);
   const [oldestBubbleTime, setOldestBubbleTime] = useState<number | null>(null);
@@ -210,7 +213,9 @@ function DynamicPage() {
         .maybeSingle();
 
       if (data?.theme) {
-        setTheme(data.theme as 'dark' | 'light');
+        const dbTheme = data.theme as 'dark' | 'light';
+        setTheme(dbTheme);
+        localStorage.setItem('theme', dbTheme);
       }
     } catch (error) {
       console.error('Error loading theme preference:', error);
@@ -218,6 +223,7 @@ function DynamicPage() {
   };
 
   const saveThemePreference = async (newTheme: 'dark' | 'light') => {
+    localStorage.setItem('theme', newTheme);
     try {
       const { error } = await supabase
         .from('user_preferences')
