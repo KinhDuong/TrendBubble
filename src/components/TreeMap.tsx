@@ -64,101 +64,100 @@ function squarify(
 ): TreeMapNode[] {
   if (items.length === 0) return [];
 
-  const nodes: TreeMapNode[] = [];
   const totalValue = items.reduce((sum, item) => sum + item.value, 0);
+  if (totalValue === 0) return [];
+
+  function normalize(items: typeof items): typeof items {
+    return items.map(item => ({ ...item, value: item.value / totalValue }));
+  }
 
   function layoutRow(
     row: typeof items,
-    rect: Rect,
-    vertical: boolean
-  ): { nodes: TreeMapNode[]; remaining: Rect } {
-    const rowNodes: TreeMapNode[] = [];
-    const rowValue = row.reduce((sum, item) => sum + item.value, 0);
-    const ratio = rowValue / totalValue;
+    rowWidth: number,
+    rect: Rect
+  ): { nodes: TreeMapNode[]; newRect: Rect } {
+    const nodes: TreeMapNode[] = [];
+    const rowSum = row.reduce((sum, item) => sum + item.value, 0);
 
     let offset = 0;
+    row.forEach(item => {
+      const boxHeight = (item.value / rowSum) * rect.height;
 
-    row.forEach((item) => {
-      const itemRatio = item.value / rowValue;
-
-      let x, y, width, height;
-      if (vertical) {
-        width = rect.width;
-        height = rect.height * ratio * itemRatio;
-        x = rect.x;
-        y = rect.y + offset;
-        offset += height;
-      } else {
-        width = rect.width * ratio * itemRatio;
-        height = rect.height;
-        x = rect.x + offset;
-        y = rect.y;
-        offset += width;
-      }
-
-      rowNodes.push({
+      nodes.push({
         topic: item.topic,
-        x,
-        y,
-        width,
-        height,
+        x: rect.x,
+        y: rect.y + offset,
+        width: rowWidth,
+        height: boxHeight,
         color: getColorForCategory(item.category, item.index),
         category: item.category
       });
+
+      offset += boxHeight;
     });
 
-    const remaining = vertical
-      ? { x: rect.x, y: rect.y + rect.height * ratio, width: rect.width, height: rect.height * (1 - ratio) }
-      : { x: rect.x + rect.width * ratio, y: rect.y, width: rect.width * (1 - ratio), height: rect.height };
+    const newRect = {
+      x: rect.x + rowWidth,
+      y: rect.y,
+      width: rect.width - rowWidth,
+      height: rect.height
+    };
 
-    return { nodes: rowNodes, remaining };
+    return { nodes, newRect };
   }
 
-  function worstAspectRatio(row: typeof items, length: number): number {
+  function worst(row: typeof items, width: number): number {
     if (row.length === 0) return Infinity;
 
     const sum = row.reduce((s, item) => s + item.value, 0);
-    const maxVal = Math.max(...row.map(item => item.value));
-    const minVal = Math.min(...row.map(item => item.value));
-
-    const lengthSq = length * length;
-    const sumSq = sum * sum;
+    const rowMax = Math.max(...row.map(item => item.value));
+    const rowMin = Math.min(...row.map(item => item.value));
 
     return Math.max(
-      (lengthSq * maxVal) / sumSq,
-      sumSq / (lengthSq * minVal)
+      (width * width * rowMax) / (sum * sum),
+      (sum * sum) / (width * width * rowMin)
     );
   }
 
-  function squarifyRecursive(
-    items: typeof items,
-    rect: Rect,
-    row: typeof items = []
+  function squarifyImpl(
+    children: typeof items,
+    row: typeof items,
+    rect: Rect
   ): TreeMapNode[] {
-    if (items.length === 0) {
+    if (children.length === 0) {
       if (row.length === 0) return [];
-      const vertical = rect.width >= rect.height;
-      const { nodes } = layoutRow(row, rect, vertical);
+      const rowWidth = row.reduce((s, item) => s + item.value, 0) / rect.height;
+      const { nodes } = layoutRow(row, rowWidth, rect);
       return nodes;
     }
 
-    const item = items[0];
-    const vertical = rect.width >= rect.height;
-    const length = vertical ? rect.width : rect.height;
+    const child = children[0];
+    const remaining = children.slice(1);
 
-    const newRow = [...row, item];
-    const currentWorst = worstAspectRatio(row, length);
-    const newWorst = worstAspectRatio(newRow, length);
+    const width = row.reduce((s, item) => s + item.value, 0) / rect.height;
 
-    if (row.length === 0 || newWorst <= currentWorst) {
-      return squarifyRecursive(items.slice(1), rect, newRow);
+    if (row.length === 0) {
+      return squarifyImpl(remaining, [child], rect);
+    }
+
+    const newRow = [...row, child];
+    const newWidth = newRow.reduce((s, item) => s + item.value, 0) / rect.height;
+
+    if (worst(row, width) >= worst(newRow, newWidth)) {
+      return squarifyImpl(remaining, newRow, rect);
     } else {
-      const { nodes, remaining } = layoutRow(row, rect, vertical);
-      return [...nodes, ...squarifyRecursive(items, remaining, [])];
+      const { nodes, newRect } = layoutRow(row, width, rect);
+      return [...nodes, ...squarifyImpl(children, [], newRect)];
     }
   }
 
-  return squarifyRecursive(items, rect);
+  const normalizedItems = normalize(items);
+  const scaledItems = normalizedItems.map(item => ({
+    ...item,
+    value: item.value * (rect.width * rect.height)
+  }));
+
+  return squarifyImpl(scaledItems, [], rect);
 }
 
 export default function TreeMap({ topics, maxDisplay = 50, theme }: TreeMapProps) {
@@ -168,8 +167,8 @@ export default function TreeMap({ topics, maxDisplay = 50, theme }: TreeMapProps
   useEffect(() => {
     const displayTopics = topics.slice(0, maxDisplay).sort((a, b) => b.searchVolume - a.searchVolume);
 
-    const containerWidth = 1200;
-    const containerHeight = 800;
+    const containerWidth = 1000;
+    const containerHeight = 1000;
 
     const items = displayTopics.map((topic, index) => ({
       topic,
@@ -191,11 +190,11 @@ export default function TreeMap({ topics, maxDisplay = 50, theme }: TreeMapProps
 
   return (
     <div className={`w-full ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'} rounded-lg overflow-hidden`}>
-      <div className="relative w-full" style={{ paddingBottom: '66.67%' }}>
+      <div className="relative w-full" style={{ paddingBottom: '100%' }}>
         <svg
-          viewBox="0 0 1200 800"
+          viewBox="0 0 1000 1000"
           className="absolute inset-0 w-full h-full"
-          style={{ maxHeight: '800px' }}
+          style={{ maxHeight: '1000px' }}
         >
           {nodes.map((node, index) => {
             const isHovered = hoveredIndex === index;
