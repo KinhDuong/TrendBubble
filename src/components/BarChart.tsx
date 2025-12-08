@@ -78,80 +78,79 @@ export default function BarChart({
           const barColor = getBarColor(topic, index);
 
           return (
-            <div key={index} className="relative">
-              {/* Mobile: Stack layout */}
+            <div key={index}>
+              {/* Mobile: Compact layout */}
               <div className="md:hidden">
-                <div className={`h-10 rounded ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-200'} overflow-hidden relative`}>
-                  <div
-                    className="h-full transition-all duration-500 ease-out flex items-center px-2"
-                    style={{
-                      width: `${Math.max(barWidth, 30)}%`,
-                      backgroundColor: barColor
-                    }}
-                  >
-                    <div className="flex items-center gap-2 flex-1 min-w-0">
-                      <span className="text-xs font-bold text-white flex-shrink-0">
-                        {index + 1}
-                      </span>
-                      <span className="text-xs font-semibold text-white truncate">
-                        {topic.name.replace(/"/g, '')}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between mt-1 px-1">
-                  <span className={`text-xs font-semibold ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                    {topic.searchVolumeRaw.replace(/"/g, '')}
+                <div className="flex items-center gap-2">
+                  <span className={`text-xs font-bold flex-shrink-0 w-4 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                    {index + 1}
                   </span>
-                  {useCryptoColors && topic.crypto_data && (
-                    <span className={`text-xs font-bold ${getCryptoChange(topic) > 0 ? 'text-green-500' : getCryptoChange(topic) < 0 ? 'text-red-500' : 'text-gray-500'}`}>
-                      {getCryptoChange(topic) > 0 ? '+' : ''}{getCryptoChange(topic).toFixed(2)}%
-                    </span>
-                  )}
-                  {topic.category && (
-                    <span className={`text-xs px-1.5 py-0.5 rounded ${theme === 'dark' ? 'bg-gray-800 text-gray-400' : 'bg-gray-200 text-gray-600'}`}>
-                      {topic.category}
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              {/* Desktop: Original horizontal layout */}
-              <div className="hidden md:block">
-                <div className="flex items-center gap-3">
-                  <div className={`flex-1 h-12 rounded ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-200'} overflow-hidden relative`}>
+                  <span className={`text-xs font-medium truncate flex-shrink min-w-0 ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'}`} style={{ maxWidth: '100px' }}>
+                    {topic.name.replace(/"/g, '')}
+                  </span>
+                  <div className={`flex-1 h-8 rounded ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-200'} overflow-hidden relative`}>
                     <div
-                      className="h-full transition-all duration-500 ease-out flex items-center px-3"
+                      className="h-full transition-all duration-500 ease-out"
                       style={{
                         width: `${barWidth}%`,
-                        backgroundColor: barColor,
-                        minWidth: '100px'
+                        backgroundColor: barColor
                       }}
-                    >
-                      <div className="flex items-center gap-3 flex-1 min-w-0">
-                        <span className="text-base font-bold text-white flex-shrink-0">
-                          {index + 1}
-                        </span>
-                        <span className="text-sm font-bold text-white truncate">
-                          {topic.name.replace(/"/g, '')}
-                        </span>
-                        {useCryptoColors && topic.crypto_data && (
-                          <span className="text-xs font-bold text-white flex-shrink-0 ml-2">
-                            {getCryptoChange(topic) > 0 ? '+' : ''}{getCryptoChange(topic).toFixed(2)}%
-                          </span>
-                        )}
-                      </div>
-                    </div>
+                    />
                   </div>
-                  <span className={`text-sm font-bold flex-shrink-0 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                  <span className={`text-xs font-bold flex-shrink-0 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
                     {topic.searchVolumeRaw.replace(/"/g, '')}
                   </span>
                 </div>
-                {topic.category && (
-                  <div className="mt-1 ml-1">
-                    <span className={`inline-block text-xs px-2 py-0.5 rounded ${theme === 'dark' ? 'bg-gray-800 text-gray-400' : 'bg-gray-200 text-gray-600'}`}>
-                      {topic.category}
-                    </span>
+                {(topic.category || (useCryptoColors && topic.crypto_data)) && (
+                  <div className="flex items-center gap-2 mt-1 ml-6">
+                    {topic.category && (
+                      <span className={`text-xs px-1.5 py-0.5 rounded ${theme === 'dark' ? 'bg-gray-800 text-gray-400' : 'bg-gray-200 text-gray-600'}`}>
+                        {topic.category}
+                      </span>
+                    )}
+                    {useCryptoColors && topic.crypto_data && (
+                      <span className={`text-xs font-bold ${getCryptoChange(topic) > 0 ? 'text-green-500' : getCryptoChange(topic) < 0 ? 'text-red-500' : 'text-gray-500'}`}>
+                        {getCryptoChange(topic) > 0 ? '+' : ''}{getCryptoChange(topic).toFixed(2)}%
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Desktop: Clean horizontal layout */}
+              <div className="hidden md:block">
+                <div className="flex items-center gap-3">
+                  <span className={`text-sm font-bold flex-shrink-0 w-6 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                    {index + 1}
+                  </span>
+                  <span className={`text-sm font-medium truncate flex-shrink min-w-0 ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'}`} style={{ minWidth: '150px', maxWidth: '200px' }}>
+                    {topic.name.replace(/"/g, '')}
+                  </span>
+                  <div className={`flex-1 h-10 rounded ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-200'} overflow-hidden relative`}>
+                    <div
+                      className="h-full transition-all duration-500 ease-out"
+                      style={{
+                        width: `${barWidth}%`,
+                        backgroundColor: barColor
+                      }}
+                    />
+                  </div>
+                  <span className={`text-sm font-bold flex-shrink-0 min-w-[80px] text-right ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                    {topic.searchVolumeRaw.replace(/"/g, '')}
+                  </span>
+                </div>
+                {(topic.category || (useCryptoColors && topic.crypto_data)) && (
+                  <div className="flex items-center gap-2 mt-1 ml-[226px]">
+                    {topic.category && (
+                      <span className={`text-xs px-2 py-0.5 rounded ${theme === 'dark' ? 'bg-gray-800 text-gray-400' : 'bg-gray-200 text-gray-600'}`}>
+                        {topic.category}
+                      </span>
+                    )}
+                    {useCryptoColors && topic.crypto_data && (
+                      <span className={`text-xs font-bold ${getCryptoChange(topic) > 0 ? 'text-green-500' : getCryptoChange(topic) < 0 ? 'text-red-500' : 'text-gray-500'}`}>
+                        {getCryptoChange(topic) > 0 ? '+' : ''}{getCryptoChange(topic).toFixed(2)}%
+                      </span>
+                    )}
                   </div>
                 )}
               </div>
