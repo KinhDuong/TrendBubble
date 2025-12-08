@@ -23,10 +23,11 @@ export default function Footer({ theme }: FooterProps) {
               Features
             </h3>
             <ul className="text-sm space-y-2">
-              <li>Interactive bubble chart visualization</li>
-              <li>Hourly automatic updates</li>
-              <li>Category and date filtering</li>
-              <li>List and bubble view modes</li>
+              <li>Top List – Quickly browse the highest-ranked items in a clean, easy-to-read format</li>
+              <li>Bubble Chart – Visualize data based on scale and impact</li>
+              <li>Bar Chart – Compare items side-by-side with clarity</li>
+              <li>Donut Chart – View proportional breakdowns in a modern, intuitive layout</li>
+              <li>Treemap – Explore hierarchical data with a clear visual structure</li>
             </ul>
           </div>
 
