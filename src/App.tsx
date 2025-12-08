@@ -1884,7 +1884,7 @@ function HomePage() {
               <>
                 <div className="max-w-7xl mx-auto" style={{ height: 'calc(100vh - 300px)', minHeight: '600px' }}>
                   <DonutChart
-                    topics={sortedTopics}
+                    topics={topics}
                     maxDisplay={maxBubbles}
                     theme={theme}
                     useCryptoColors={sourceFilter === 'coingecko_crypto'}
