@@ -80,7 +80,7 @@ export default function ExplorePage() {
         }));
 
         // Latest topics (most recent)
-        setLatestTopics(topics.slice(0, 4));
+        setLatestTopics(topics.slice(0, 3));
 
         // Group by category
         const grouped: Record<string, TrendingTopic[]> = {};
