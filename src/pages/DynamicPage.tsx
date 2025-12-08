@@ -142,6 +142,19 @@ function DynamicPage() {
     setCurrentPage(1);
   }, [dateFilter, categoryFilter, sourceFilter, searchQuery, cryptoTimeframe, topics.length, topSearchQuery]);
 
+  // Handle hash navigation
+  useEffect(() => {
+    if (!loading && window.location.hash) {
+      const hash = window.location.hash.substring(1);
+      const element = document.getElementById(hash);
+      if (element) {
+        setTimeout(() => {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100);
+      }
+    }
+  }, [loading, urlPath]);
+
   const loadPageData = async () => {
     try {
       let fullPath = '/' + (urlPath || '');
