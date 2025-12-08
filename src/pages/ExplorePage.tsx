@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { Clock, TrendingUp } from 'lucide-react';
+import { Clock } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { TrendingTopic } from '../types';
 import { useAuth } from '../hooks/useAuth';
@@ -9,11 +9,20 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import Login from '../components/Login';
 
+interface FeaturedPage {
+  id: string;
+  page_url: string;
+  meta_title: string;
+  meta_description: string;
+  source: string;
+  created_at: string;
+}
+
 export default function ExplorePage() {
   const { isAdmin, logout } = useAuth();
   const [showLogin, setShowLogin] = useState(false);
   const [latestTopics, setLatestTopics] = useState<TrendingTopic[]>([]);
-  const [popularTopics, setPopularTopics] = useState<TrendingTopic[]>([]);
+  const [featuredPages, setFeaturedPages] = useState<FeaturedPage[]>([]);
   const [categoryTopics, setCategoryTopics] = useState<Record<string, TrendingTopic[]>>({});
   const [loading, setLoading] = useState(true);
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
@@ -39,16 +48,25 @@ export default function ExplorePage() {
   const loadTopics = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('trending_topics')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(100);
+      const [topicsResponse, pagesResponse] = await Promise.all([
+        supabase
+          .from('trending_topics')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(100),
+        supabase
+          .from('pages')
+          .select('*')
+          .neq('page_url', '/explore')
+          .order('created_at', { ascending: false })
+          .limit(5)
+      ]);
 
-      if (error) throw error;
+      if (topicsResponse.error) throw topicsResponse.error;
+      if (pagesResponse.error) throw pagesResponse.error;
 
-      if (data) {
-        const topics: TrendingTopic[] = data.map((item: any) => ({
+      if (topicsResponse.data) {
+        const topics: TrendingTopic[] = topicsResponse.data.map((item: any) => ({
           id: item.id,
           name: item.name,
           searchVolume: item.search_volume || 0,
@@ -64,10 +82,6 @@ export default function ExplorePage() {
         // Latest topics (most recent)
         setLatestTopics(topics.slice(0, 4));
 
-        // Popular topics (highest search volume)
-        const sortedByVolume = [...topics].sort((a, b) => b.searchVolume - a.searchVolume);
-        setPopularTopics(sortedByVolume.slice(0, 5));
-
         // Group by category
         const grouped: Record<string, TrendingTopic[]> = {};
         topics.forEach(topic => {
@@ -80,6 +94,10 @@ export default function ExplorePage() {
           }
         });
         setCategoryTopics(grouped);
+      }
+
+      if (pagesResponse.data) {
+        setFeaturedPages(pagesResponse.data as FeaturedPage[]);
       }
     } catch (error) {
       console.error('Error loading topics:', error);
@@ -265,43 +283,42 @@ export default function ExplorePage() {
               </div>
 
               <div className="space-y-6">
-                {popularTopics.map((topic, index) => (
+                {featuredPages.map((page, index) => (
                   <Link
-                    key={topic.id}
-                    to={topic.url || '#'}
+                    key={page.id}
+                    to={page.page_url}
                     className="block group"
                   >
                     <div className="flex gap-3">
                       <div className={`flex-shrink-0 w-16 h-16 rounded-lg bg-gradient-to-br ${
                         index === 0 ? 'from-yellow-400 to-orange-500' :
-                        index === 1 ? 'from-blue-400 to-indigo-500' :
+                        index === 1 ? 'from-blue-400 to-cyan-500' :
                         index === 2 ? 'from-green-400 to-teal-500' :
                         index === 3 ? 'from-pink-400 to-rose-500' :
-                        'from-purple-400 to-violet-500'
+                        'from-orange-400 to-red-500'
                       } flex items-center justify-center`}>
                         <span className="text-white font-bold text-xl">{index + 1}</span>
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 text-xs mb-1">
                           <span className={`uppercase font-semibold ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`}>
-                            {topic.category}
+                            Featured
                           </span>
                           <span className={theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}>/</span>
                           <span className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}>
-                            {formatTimeAgo(topic.createdAt)}
+                            {formatTimeAgo(page.created_at)}
                           </span>
                         </div>
                         <h3 className={`font-semibold group-hover:text-blue-600 transition-colors line-clamp-2 ${
                           theme === 'dark' ? 'text-white' : 'text-gray-900'
                         }`}>
-                          {topic.name}
+                          {page.meta_title}
                         </h3>
-                        <div className="flex items-center gap-1 mt-1">
-                          <TrendingUp className="w-3 h-3 text-green-500" />
-                          <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                            {formatNumber(topic.searchVolume)}
-                          </span>
-                        </div>
+                        {page.meta_description && (
+                          <p className={`text-xs mt-1 line-clamp-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                            {page.meta_description}
+                          </p>
+                        )}
                       </div>
                     </div>
                   </Link>
