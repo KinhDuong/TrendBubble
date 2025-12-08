@@ -172,11 +172,11 @@ export default function ExplorePage() {
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Main Content */}
           <div className="flex-1">
-            {/* Latest Section */}
+            {/* Top Section */}
             <div className="mb-12">
               <div className="relative mb-6">
                 <h2 className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} inline-block px-4 py-2 relative`}>
-                  <span className="relative z-10">LATEST</span>
+                  <span className="relative z-10">TOP</span>
                   <div className="absolute inset-0 bg-gradient-to-r from-green-500 to-green-600 transform -skew-x-12"></div>
                 </h2>
               </div>
