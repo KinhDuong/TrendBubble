@@ -903,11 +903,6 @@ snapshotButton={null}
                                     {topic.category}
                                   </span>
                                 )}
-                                {topic.pubDate && (
-                                  <time className="text-xs text-gray-400" dateTime={new Date(topic.pubDate).toISOString()}>
-                                    {new Date(topic.pubDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                                  </time>
-                                )}
                               </div>
                             </article>
                           </li>
