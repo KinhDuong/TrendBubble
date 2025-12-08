@@ -103,11 +103,8 @@ function generateMetaTags(pageData, topics) {
   const enhancedTitle = `${pageData.meta_title} - ${currentDate}`;
 
   let enhancedDescription = pageData.meta_description;
-  if (pageData.intro_text) {
-    enhancedDescription = `${pageData.intro_text} `;
-  }
   if (topTopics) {
-    enhancedDescription += `Top trending: ${topTopics}. Updated ${lastUpdated.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}.`;
+    enhancedDescription += ` Top trending: ${topTopics}. Updated ${lastUpdated.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}.`;
   }
 
   const keywords = topics.slice(0, 10).map(t => t.name.replace(/"/g, '')).join(', ') + ', trending topics, search trends, real-time trends, trend analysis';
@@ -343,9 +340,7 @@ function generateStructuredData(pageData, topics) {
   const currentYear = new Date().getFullYear();
   const rankingTitle = `Top ${topTopics.length} ${topicType || 'Trending Topics'} (${currentYear})`;
 
-  const description = pageData.intro_text
-    ? `${pageData.meta_description} ${pageData.intro_text}`
-    : pageData.meta_description;
+  const description = pageData.meta_description;
 
   const webPageSchema = {
     "@context": "https://schema.org",
