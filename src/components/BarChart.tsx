@@ -18,6 +18,7 @@ export default function BarChart({
 }: BarChartProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+  const [animate, setAnimate] = useState(false);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -35,6 +36,14 @@ export default function BarChart({
     window.addEventListener('resize', updateDimensions);
     return () => window.removeEventListener('resize', updateDimensions);
   }, []);
+
+  useEffect(() => {
+    setAnimate(false);
+    const timer = setTimeout(() => {
+      setAnimate(true);
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [topics]);
 
   const displayTopics = topics.slice(0, maxDisplay);
   const maxValue = Math.max(...displayTopics.map(t => t.searchVolume));
@@ -90,9 +99,9 @@ export default function BarChart({
                   </span>
                   <div className={`flex-1 h-8 rounded ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-200'} overflow-hidden relative`}>
                     <div
-                      className="h-full transition-all duration-500 ease-out"
+                      className="h-full transition-all duration-1000 ease-out"
                       style={{
-                        width: `${barWidth}%`,
+                        width: animate ? `${barWidth}%` : '0%',
                         backgroundColor: barColor
                       }}
                     />
@@ -128,9 +137,9 @@ export default function BarChart({
                   </span>
                   <div className={`flex-1 h-10 rounded ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-200'} overflow-hidden relative`}>
                     <div
-                      className="h-full transition-all duration-500 ease-out"
+                      className="h-full transition-all duration-1000 ease-out"
                       style={{
-                        width: `${barWidth}%`,
+                        width: animate ? `${barWidth}%` : '0%',
                         backgroundColor: barColor
                       }}
                     />
