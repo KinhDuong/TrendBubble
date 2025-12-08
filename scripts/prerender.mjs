@@ -155,8 +155,42 @@ async function generateContentHTML(pageData, topics, sourceLabel) {
   });
 
   let contentHTML = `
+    <!-- Header Navigation for SEO -->
+    <header style="background-color: #111827; border-bottom: 1px solid #374151; padding: 0.5rem 1rem;">
+      <nav aria-label="Main navigation" style="max-width: 80rem; margin: 0 auto; display: flex; align-items: center; justify-content: space-between;">
+        <a href="/" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none;">
+          <span style="color: #2563eb; font-size: 1.5rem; font-weight: 700;">Top Best Charts</span>
+        </a>
+        <ul style="display: flex; gap: 1.5rem; list-style: none; margin: 0; padding: 0;">
+          <li><a href="/" style="color: #d1d5db; text-decoration: none;">Home</a></li>
+          <li><a href="/" style="color: #d1d5db; text-decoration: none;">Explore Topics</a></li>
+          <li><a href="mailto:contact@example.com" style="color: #d1d5db; text-decoration: none;">Contact</a></li>
+          <li><a href="#about" style="color: #d1d5db; text-decoration: none;">About</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <!-- Filter Menu for SEO -->
+    <nav aria-label="Content filters" style="background-color: #1f2937; padding: 0.75rem 1rem; border-bottom: 1px solid #374151;">
+      <div style="max-width: 80rem; margin: 0 auto;">
+        <div style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; font-size: 0.875rem; color: #d1d5db;">
+          <span>View Modes:</span>
+          <a href="?view=bubble" style="color: #93c5fd; text-decoration: none;">Bubble Chart</a>
+          <a href="?view=bar" style="color: #93c5fd; text-decoration: none;">Bar Chart</a>
+          <a href="?view=list" style="color: #93c5fd; text-decoration: none;">List View</a>
+          <span style="margin-left: 1rem;">Filters:</span>
+          <a href="?date=now" style="color: #93c5fd; text-decoration: none;">Trending Now</a>
+          <a href="?date=24h" style="color: #93c5fd; text-decoration: none;">24 Hours</a>
+          <a href="?date=week" style="color: #93c5fd; text-decoration: none;">Week</a>
+          <a href="?date=month" style="color: #93c5fd; text-decoration: none;">Month</a>
+          <a href="?date=year" style="color: #93c5fd; text-decoration: none;">Year</a>
+          <a href="?date=all" style="color: #93c5fd; text-decoration: none;">All Time</a>
+        </div>
+      </div>
+    </nav>
+
     <article class="dynamic-page-article" style="max-width: 80rem; margin: 0 auto; padding: 0 0.5rem;">
-      <header class="page-header" style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; padding: 1.5rem; margin-bottom: 2rem;">
+      <header class="page-header" style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; padding: 1.5rem; margin-bottom: 2rem; margin-top: 2rem;">
         <h1 style="font-size: 1.875rem; font-weight: 700; color: white; margin-bottom: 0.75rem;">${pageData.meta_title}</h1>
         <p style="color: #d1d5db; font-size: 1rem; line-height: 1.625; margin-bottom: 1rem;">${pageData.meta_description}</p>
         <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; font-size: 0.875rem;">
@@ -338,7 +372,26 @@ function generateStructuredData(pageData, topics) {
     }
   };
 
-  return `<script type="application/ld+json">${JSON.stringify(webPageSchema)}</script>`;
+  const navigationSchema = {
+    "@context": "https://schema.org",
+    "@type": "SiteNavigationElement",
+    "name": "Main Navigation",
+    "hasPart": [
+      {
+        "@type": "WebPage",
+        "name": "Home",
+        "url": `${BASE_URL}/`
+      },
+      {
+        "@type": "WebPage",
+        "name": "Explore Topics",
+        "url": `${BASE_URL}/`
+      }
+    ]
+  };
+
+  return `<script type="application/ld+json">${JSON.stringify(webPageSchema)}</script>
+<script type="application/ld+json">${JSON.stringify(navigationSchema)}</script>`;
 }
 
 async function prerenderHomePage(baseHTML, distPath) {
@@ -386,7 +439,8 @@ async function prerenderHomePage(baseHTML, distPath) {
     <meta name="twitter:description" content="Explore trending topics in real-time with interactive bubble charts. Watch search volumes grow and shrink with live Google Trends data. Updated hourly." />
   `;
 
-  const homeStructuredData = `<script type="application/ld+json">{
+  const homeStructuredData = `
+  <script type="application/ld+json">{
     "@context": "https://schema.org",
     "@type": "WebSite",
     "name": "Google Trending Topics",
@@ -397,6 +451,23 @@ async function prerenderHomePage(baseHTML, distPath) {
       "target": "${BASE_URL}/?q={search_term_string}",
       "query-input": "required name=search_term_string"
     }
+  }</script>
+  <script type="application/ld+json">{
+    "@context": "https://schema.org",
+    "@type": "SiteNavigationElement",
+    "name": "Main Navigation",
+    "hasPart": [
+      {
+        "@type": "WebPage",
+        "name": "Home",
+        "url": "${BASE_URL}/"
+      },
+      {
+        "@type": "WebPage",
+        "name": "Explore Topics",
+        "url": "${BASE_URL}/"
+      }
+    ]
   }</script>`;
 
   // Generate home page content HTML
@@ -420,8 +491,42 @@ async function prerenderHomePage(baseHTML, distPath) {
 
   let homeContentHTML = `
     <div class="home-page-content">
+      <!-- Header Navigation for SEO -->
+      <header style="background-color: #111827; border-bottom: 1px solid #374151; padding: 0.5rem 1rem;">
+        <nav aria-label="Main navigation" style="max-width: 80rem; margin: 0 auto; display: flex; align-items: center; justify-content: space-between;">
+          <a href="/" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none;">
+            <span style="color: #2563eb; font-size: 1.5rem; font-weight: 700;">Top Best Charts</span>
+          </a>
+          <ul style="display: flex; gap: 1.5rem; list-style: none; margin: 0; padding: 0;">
+            <li><a href="/" style="color: #d1d5db; text-decoration: none;">Home</a></li>
+            <li><a href="/" style="color: #d1d5db; text-decoration: none;">Explore Topics</a></li>
+            <li><a href="mailto:contact@example.com" style="color: #d1d5db; text-decoration: none;">Contact</a></li>
+            <li><a href="#about" style="color: #d1d5db; text-decoration: none;">About</a></li>
+          </ul>
+        </nav>
+      </header>
+
+      <!-- Filter Menu for SEO -->
+      <nav aria-label="Content filters" style="background-color: #1f2937; padding: 0.75rem 1rem; border-bottom: 1px solid #374151;">
+        <div style="max-width: 80rem; margin: 0 auto;">
+          <div style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; font-size: 0.875rem; color: #d1d5db;">
+            <span>View Modes:</span>
+            <a href="?view=bubble" style="color: #93c5fd; text-decoration: none;">Bubble Chart</a>
+            <a href="?view=bar" style="color: #93c5fd; text-decoration: none;">Bar Chart</a>
+            <a href="?view=list" style="color: #93c5fd; text-decoration: none;">List View</a>
+            <span style="margin-left: 1rem;">Filters:</span>
+            <a href="?date=now" style="color: #93c5fd; text-decoration: none;">Trending Now</a>
+            <a href="?date=24h" style="color: #93c5fd; text-decoration: none;">24 Hours</a>
+            <a href="?date=week" style="color: #93c5fd; text-decoration: none;">Week</a>
+            <a href="?date=month" style="color: #93c5fd; text-decoration: none;">Month</a>
+            <a href="?date=year" style="color: #93c5fd; text-decoration: none;">Year</a>
+            <a href="?date=all" style="color: #93c5fd; text-decoration: none;">All Time</a>
+          </div>
+        </div>
+      </nav>
+
       <article style="max-width: 80rem; margin: 0 auto; padding: 0 0.5rem;">
-        <header class="page-header" style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; padding: 1.5rem; margin-bottom: 2rem;">
+        <header class="page-header" style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; padding: 1.5rem; margin-bottom: 2rem; margin-top: 2rem;">
           <h1 style="font-size: 1.875rem; font-weight: 700; color: white; margin-bottom: 0.75rem;">Google Trending Topics</h1>
           <p style="color: #d1d5db; font-size: 1rem; line-height: 1.625; margin-bottom: 1rem;">Explore trending topics in real-time with interactive bubble charts. Watch search volumes grow and shrink with live Google Trends data.</p>
           <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; font-size: 0.875rem;">
