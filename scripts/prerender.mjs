@@ -387,9 +387,6 @@ async function generateContentHTML(pageData, topics, sourceLabel) {
     </div>
   `;
 
-  // Add footer for SEO
-  contentHTML += generateFooterHTML();
-
   return contentHTML;
 }
 
@@ -683,9 +680,6 @@ async function prerenderHomePage(baseHTML, distPath) {
   homeContentHTML += `
     </div>
   `;
-
-  // Add footer for SEO
-  homeContentHTML += generateFooterHTML();
 
   const html = baseHTML
     .replace('<title>Vite + React + TS</title>', '')
