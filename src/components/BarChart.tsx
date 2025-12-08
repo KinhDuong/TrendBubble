@@ -91,9 +91,6 @@ export default function BarChart({
               {/* Mobile: Compact layout */}
               <div className="md:hidden">
                 <div className="flex items-center gap-2">
-                  <span className={`text-xs font-bold flex-shrink-0 w-5 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                    {index + 1}
-                  </span>
                   <span className={`text-xs font-medium truncate overflow-hidden flex-shrink-0 w-20 ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'}`}>
                     {topic.name.replace(/"/g, '')}
                   </span>
@@ -110,18 +107,11 @@ export default function BarChart({
                     {topic.searchVolumeRaw.replace(/"/g, '')}
                   </span>
                 </div>
-                {(topic.category || (useCryptoColors && topic.crypto_data)) && (
-                  <div className="flex items-center gap-2 mt-1 ml-6">
-                    {topic.category && (
-                      <span className={`text-xs px-1.5 py-0.5 rounded ${theme === 'dark' ? 'bg-gray-800 text-gray-400' : 'bg-gray-200 text-gray-600'}`}>
-                        {topic.category}
-                      </span>
-                    )}
-                    {useCryptoColors && topic.crypto_data && (
-                      <span className={`text-xs font-bold ${getCryptoChange(topic) > 0 ? 'text-green-500' : getCryptoChange(topic) < 0 ? 'text-red-500' : 'text-gray-500'}`}>
-                        {getCryptoChange(topic) > 0 ? '+' : ''}{getCryptoChange(topic).toFixed(2)}%
-                      </span>
-                    )}
+                {useCryptoColors && topic.crypto_data && (
+                  <div className="flex items-center gap-2 mt-1 ml-2">
+                    <span className={`text-xs font-bold ${getCryptoChange(topic) > 0 ? 'text-green-500' : getCryptoChange(topic) < 0 ? 'text-red-500' : 'text-gray-500'}`}>
+                      {getCryptoChange(topic) > 0 ? '+' : ''}{getCryptoChange(topic).toFixed(2)}%
+                    </span>
                   </div>
                 )}
               </div>
@@ -129,9 +119,6 @@ export default function BarChart({
               {/* Desktop: Clean horizontal layout with fixed columns */}
               <div className="hidden md:block">
                 <div className="flex items-center gap-4">
-                  <span className={`text-sm font-bold flex-shrink-0 w-8 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                    {index + 1}
-                  </span>
                   <span className={`text-sm font-medium truncate overflow-hidden flex-shrink-0 w-48 ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'}`}>
                     {topic.name.replace(/"/g, '')}
                   </span>
@@ -148,18 +135,11 @@ export default function BarChart({
                     {topic.searchVolumeRaw.replace(/"/g, '')}
                   </span>
                 </div>
-                {(topic.category || (useCryptoColors && topic.crypto_data)) && (
-                  <div className="flex items-center gap-2 mt-1 ml-[14rem]">
-                    {topic.category && (
-                      <span className={`text-xs px-2 py-0.5 rounded ${theme === 'dark' ? 'bg-gray-800 text-gray-400' : 'bg-gray-200 text-gray-600'}`}>
-                        {topic.category}
-                      </span>
-                    )}
-                    {useCryptoColors && topic.crypto_data && (
-                      <span className={`text-xs font-bold ${getCryptoChange(topic) > 0 ? 'text-green-500' : getCryptoChange(topic) < 0 ? 'text-red-500' : 'text-gray-500'}`}>
-                        {getCryptoChange(topic) > 0 ? '+' : ''}{getCryptoChange(topic).toFixed(2)}%
-                      </span>
-                    )}
+                {useCryptoColors && topic.crypto_data && (
+                  <div className="flex items-center gap-2 mt-1 ml-[12rem]">
+                    <span className={`text-xs font-bold ${getCryptoChange(topic) > 0 ? 'text-green-500' : getCryptoChange(topic) < 0 ? 'text-red-500' : 'text-gray-500'}`}>
+                      {getCryptoChange(topic) > 0 ? '+' : ''}{getCryptoChange(topic).toFixed(2)}%
+                    </span>
                   </div>
                 )}
               </div>
