@@ -115,6 +115,10 @@ function DynamicPage() {
   }, [urlPath]);
 
   useEffect(() => {
+    document.documentElement.style.backgroundColor = theme === 'dark' ? '#111827' : '#f1f3f4';
+  }, [theme]);
+
+  useEffect(() => {
     const bubbleInterval = setInterval(() => {
       if (oldestBubbleTime && oldestBubbleCreated && oldestBubbleLifetime) {
         const now = Date.now();
@@ -207,6 +211,7 @@ function DynamicPage() {
   const handleThemeChange = (newTheme: 'dark' | 'light') => {
     setTheme(newTheme);
     localStorage.setItem('theme', newTheme);
+    document.documentElement.style.backgroundColor = newTheme === 'dark' ? '#111827' : '#f1f3f4';
   };
 
   const handleBubbleTimingUpdate = (nextPopTime: number | null, createdTime?: number, lifetime?: number) => {
