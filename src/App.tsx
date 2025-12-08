@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-do
 import { Helmet } from 'react-helmet-async';
 import BubbleChart from './components/BubbleChart';
 import BarChart from './components/BarChart';
+import Treemap from './components/Treemap';
 import FileUpload from './components/FileUpload';
 import Login from './components/Login';
 import Footer from './components/Footer';
@@ -30,7 +31,7 @@ function HomePage() {
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [sourceFilter, setSourceFilter] = useState<string>('google_trends');
   const [categories, setCategories] = useState<string[]>([]);
-  const [viewMode, setViewMode] = useState<'bubble' | 'bar' | 'list'>('bubble');
+  const [viewMode, setViewMode] = useState<'bubble' | 'bar' | 'list' | 'treemap'>('bubble');
   const [loading, setLoading] = useState(true);
   const [connectionError, setConnectionError] = useState(false);
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
@@ -1702,6 +1703,93 @@ function HomePage() {
               <>
                 <div className="max-w-7xl mx-auto">
                   <BarChart topics={topics} maxDisplay={maxBubbles} theme={theme} />
+                </div>
+
+                {/* Featured Pages Section - Full Width */}
+                <div className={`w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-200'} border-t border-b py-6 mt-8`}>
+                  <div className="max-w-7xl mx-auto px-4">
+                    <h2 className={`text-xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                      Featured
+                    </h2>
+                    {latestPages.length > 0 && (
+                      <div className="flex flex-wrap gap-x-4 gap-y-2">
+                        {latestPages.map((page) => (
+                          <a
+                            key={page.id}
+                            href={page.page_url}
+                            className={`text-sm ${theme === 'dark' ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'} transition-colors hover:underline`}
+                          >
+                            {page.meta_title}
+                          </a>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <section className="max-w-7xl mx-auto mt-8 mb-0 md:mb-8" aria-labelledby="top-trending-heading">
+                  <h2 id="top-trending-heading" className={`text-2xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                    {showFullTop10 ? 'All Trending Topics' : 'Top 10 Trending Topics Today'}
+                  </h2>
+                  <p className={`mb-4 text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                    {showFullTop10 ? 'Complete list of all trending topics ranked by search volume' : 'Discover the most popular trending topics ranked by search volume'}
+                  </p>
+                  <ol className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white shadow-md border border-gray-200'} rounded-lg overflow-hidden list-none`} itemScope itemType="https://schema.org/ItemList">
+                    {[...topics]
+                      .sort((a, b) => b.searchVolume - a.searchVolume)
+                      .slice(0, showFullTop10 ? undefined : 10)
+                      .map((topic, index) => (
+                        <li
+                          key={index}
+                          className={`px-6 py-4 flex items-center gap-4 ${theme === 'dark' ? 'hover:bg-gray-750' : 'hover:bg-gray-50'} transition-colors ${index < (showFullTop10 ? topics.length - 1 : 9) ? (theme === 'dark' ? 'border-b border-gray-700' : 'border-b border-gray-200') : ''}`}
+                          itemProp="itemListElement"
+                          itemScope
+                          itemType="https://schema.org/ListItem"
+                        >
+                          <meta itemProp="position" content={String(index + 1)} />
+                          <div className={`w-12 flex items-center justify-center`} aria-label={`Rank ${index + 1}`}>
+                            <div className={`text-2xl font-bold ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                              {index + 1}
+                            </div>
+                          </div>
+                          <article className="flex-1" itemProp="item" itemScope itemType="https://schema.org/Thing">
+                            <h3 className="font-semibold text-lg mb-1" itemProp="name">{topic.name.replace(/"/g, '')}</h3>
+                            <div className="flex flex-wrap items-center gap-3 text-sm">
+                              <span className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`} itemProp="description">
+                                {topic.searchVolumeRaw.replace(/"/g, '')}
+                              </span>
+                              {topic.category && (
+                                <span className={`px-2 py-0.5 rounded text-xs ${theme === 'dark' ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-700'}`}>
+                                  {topic.category}
+                                </span>
+                              )}
+                              {topic.pubDate && (
+                                <time className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`} dateTime={new Date(topic.pubDate).toISOString()}>
+                                  {new Date(topic.pubDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                </time>
+                              )}
+                            </div>
+                          </article>
+                        </li>
+                      ))}
+                  </ol>
+                  {topics.length > 10 && (
+                    <div className="mt-4 text-center">
+                      <button
+                        onClick={() => setShowFullTop10(!showFullTop10)}
+                        className={`px-6 py-2 rounded-lg font-semibold transition-colors ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-600 hover:bg-blue-700 shadow-sm hover:shadow text-white'}`}
+                      >
+                        {showFullTop10 ? 'Show Top 10 Only' : 'See Full List'}
+                      </button>
+                    </div>
+                  )}
+                </section>
+              </>
+            )}
+            {topics.length > 0 && viewMode === 'treemap' && (
+              <>
+                <div className="max-w-7xl mx-auto" style={{ height: 'calc(100vh - 300px)', minHeight: '500px' }}>
+                  <Treemap topics={topics} maxDisplay={maxBubbles} theme={theme} />
                 </div>
 
                 {/* Featured Pages Section - Full Width */}
