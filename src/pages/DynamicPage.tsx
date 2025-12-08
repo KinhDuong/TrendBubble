@@ -762,7 +762,7 @@ snapshotButton={null}
                         </h2>
                         {(pageData.intro_text || topTopicNames) && (
                           <div
-                            className={`mb-4 text-sm leading-relaxed ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}
+                            className={`mb-4 text-sm leading-relaxed rich-text-content ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}
                             dangerouslySetInnerHTML={{
                               __html: pageData.intro_text || 'Explore our interactive visualization to discover real-time search trends, analyze topic popularity, and stay updated with what\'s capturing attention right now.'
                             }}
