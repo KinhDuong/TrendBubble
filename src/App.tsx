@@ -89,6 +89,8 @@ function HomePage() {
   const [comparingTopics, setComparingTopics] = useState<Set<string>>(new Set());
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
   const bubbleChartRef = useRef<HTMLDivElement>(null);
+  const treemapChartRef = useRef<HTMLDivElement>(null);
+  const donutChartRef = useRef<HTMLDivElement>(null);
   const newSummaryRef = useRef<HTMLDivElement>(null);
   const editSummaryRef = useRef<HTMLDivElement>(null);
 
@@ -1536,6 +1538,12 @@ function HomePage() {
                     {viewMode === 'bubble' && topics.length > 0 && (
                       <ShareSnapshot theme={theme} canvasRef={bubbleChartRef} variant="inline" />
                     )}
+                    {viewMode === 'treemap' && topics.length > 0 && (
+                      <ShareSnapshot theme={theme} canvasRef={treemapChartRef} variant="inline" />
+                    )}
+                    {viewMode === 'donut' && topics.length > 0 && (
+                      <ShareSnapshot theme={theme} canvasRef={donutChartRef} variant="inline" />
+                    )}
                   </div>
                   <div className={`flex flex-wrap items-center gap-3 mb-4 text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
                     <time dateTime={lastUpdated.toISOString()}>
@@ -1789,7 +1797,7 @@ function HomePage() {
             )}
             {topics.length > 0 && viewMode === 'treemap' && (
               <>
-                <div className="max-w-7xl mx-auto" style={{ height: 'calc(100vh - 300px)', minHeight: '500px' }}>
+                <div ref={treemapChartRef} className="max-w-7xl mx-auto" style={{ height: 'calc(100vh - 300px)', minHeight: '500px' }}>
                   <Treemap
                     topics={topics}
                     maxDisplay={maxBubbles}
@@ -1882,7 +1890,7 @@ function HomePage() {
             )}
             {topics.length > 0 && viewMode === 'donut' && (
               <>
-                <div className="max-w-7xl mx-auto" style={{ height: 'calc(100vh - 300px)', minHeight: '600px' }}>
+                <div ref={donutChartRef} className="max-w-7xl mx-auto" style={{ height: 'calc(100vh - 300px)', minHeight: '600px' }}>
                   <DonutChart
                     topics={topics}
                     maxDisplay={maxBubbles}
