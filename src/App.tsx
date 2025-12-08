@@ -2122,7 +2122,7 @@ function HomePage() {
           });
         }}
       />
-      <Footer theme={theme} />
+      <Footer key={`footer-${theme}`} theme={theme} />
     </>
   );
 }

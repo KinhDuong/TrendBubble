@@ -6,19 +6,20 @@ interface FooterProps {
 
 export default function Footer({ theme }: FooterProps) {
   const currentYear = new Date().getFullYear();
+  const isDark = theme === 'dark';
 
   return (
-    <footer className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-600 shadow-inner'} border-t`}>
+    <footer className={`border-t ${isDark ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-600 shadow-inner'}`}>
       <div className="max-w-7xl mx-auto px-6 py-8">
         <div className="grid grid-cols-1 md:grid-cols-[1fr_2fr_1fr] gap-8">
           <div className="flex items-center justify-center md:justify-start">
-            <div className={`relative w-24 h-24 flex-shrink-0 rounded-full shadow-lg border-4 border-blue-600 overflow-hidden flex items-center justify-center ${theme === 'dark' ? 'bg-transparent' : 'bg-transparent'}`}>
+            <div className="relative w-24 h-24 flex-shrink-0 rounded-full shadow-lg border-4 border-blue-600 overflow-hidden flex items-center justify-center bg-transparent">
               <BarChart3 size={48} strokeWidth={4} className="text-blue-600 relative z-10" />
             </div>
           </div>
 
           <div>
-            <h3 className={`text-lg font-semibold mb-3 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+            <h3 className={`text-lg font-semibold mb-3 ${isDark ? 'text-white' : 'text-gray-900'}`}>
               Features
             </h3>
             <ul className="text-sm space-y-2">
@@ -31,7 +32,7 @@ export default function Footer({ theme }: FooterProps) {
           </div>
 
           <div>
-            <h3 className={`text-lg font-semibold mb-3 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+            <h3 className={`text-lg font-semibold mb-3 ${isDark ? 'text-white' : 'text-gray-900'}`}>
               About
             </h3>
             <p className="text-sm">
@@ -41,12 +42,12 @@ export default function Footer({ theme }: FooterProps) {
           </div>
         </div>
 
-        <div className={`mt-8 pt-6 border-t ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
-          <div className={`mb-6 p-4 rounded-lg ${theme === 'dark' ? 'bg-gray-900/50 border border-gray-700' : 'bg-gray-50 border border-gray-200'}`}>
-            <h4 className={`text-sm font-semibold mb-2 ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'}`}>
+        <div className={`mt-8 pt-6 border-t ${isDark ? 'border-gray-700' : 'border-gray-200'}`}>
+          <div className={`mb-6 p-4 rounded-lg ${isDark ? 'bg-gray-900/50 border border-gray-700' : 'bg-gray-50 border border-gray-200'}`}>
+            <h4 className={`text-sm font-semibold mb-2 ${isDark ? 'text-gray-200' : 'text-gray-800'}`}>
               Disclaimer
             </h4>
-            <p className={`text-xs leading-relaxed ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+            <p className={`text-xs leading-relaxed ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
               The trending topics and data displayed on this website are for informational and visualization purposes only.
               While we strive for accuracy, the data may not be real-time and could contain errors, inaccuracies, or delays.
               This platform aggregates and visualizes trending information from various sources but does not guarantee the
@@ -55,7 +56,7 @@ export default function Footer({ theme }: FooterProps) {
               on the information displayed on this site.
             </p>
           </div>
-          <div className={`text-center text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+          <div className={`text-center text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
             <p>2026 Top Best Charts. All rights reserved.</p>
           </div>
         </div>

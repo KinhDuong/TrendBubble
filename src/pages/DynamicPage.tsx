@@ -457,7 +457,7 @@ function DynamicPage() {
             </a>
           </div>
         </div>
-        <Footer theme={theme} />
+        <Footer key={`footer-${theme}`} theme={theme} />
       </>
     );
   }
@@ -1323,7 +1323,7 @@ snapshotButton={null}
         }}
       />
 
-      <Footer theme={theme} />
+      <Footer key={`footer-${theme}`} theme={theme} />
     </>
   );
 }
