@@ -106,7 +106,6 @@ function DynamicPage() {
       setLoading(true);
       await Promise.all([
         loadPageData(),
-        loadThemePreference(),
         loadCategories(),
         loadSources(),
         loadLatestPages()
@@ -205,39 +204,9 @@ function DynamicPage() {
     }
   };
 
-  const loadThemePreference = async () => {
-    try {
-      const { data } = await supabase
-        .from('user_preferences')
-        .select('theme')
-        .maybeSingle();
-
-      if (data?.theme) {
-        const dbTheme = data.theme as 'dark' | 'light';
-        setTheme(dbTheme);
-        localStorage.setItem('theme', dbTheme);
-      }
-    } catch (error) {
-      console.error('Error loading theme preference:', error);
-    }
-  };
-
-  const saveThemePreference = async (newTheme: 'dark' | 'light') => {
-    localStorage.setItem('theme', newTheme);
-    try {
-      const { error } = await supabase
-        .from('user_preferences')
-        .upsert({ id: 1, theme: newTheme });
-
-      if (error) throw error;
-    } catch (error) {
-      console.error('Error saving theme preference:', error);
-    }
-  };
-
   const handleThemeChange = (newTheme: 'dark' | 'light') => {
     setTheme(newTheme);
-    saveThemePreference(newTheme);
+    localStorage.setItem('theme', newTheme);
   };
 
   const handleBubbleTimingUpdate = (nextPopTime: number | null, createdTime?: number, lifetime?: number) => {
