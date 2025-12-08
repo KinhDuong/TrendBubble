@@ -8,238 +8,146 @@ interface TreeMapProps {
 }
 
 interface TreeMapNode {
-  topic: TrendingTopic | null;
+  topic: TrendingTopic;
   x: number;
   y: number;
   width: number;
   height: number;
   color: string;
-  isFiller?: boolean;
 }
 
-interface Rect {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-}
-
-function squarify(
+function createTreeMap(
   topics: TrendingTopic[],
-  rect: Rect,
-  padding: number,
+  width: number,
+  height: number,
   theme: 'dark' | 'light',
   maxDisplay: number
 ): TreeMapNode[] {
   if (topics.length === 0) return [];
 
-  const totalValue = topics.reduce((sum, t) => sum + t.searchVolume, 0);
   const nodes: TreeMapNode[] = [];
+  const totalValue = topics.reduce((sum, t) => sum + t.searchVolume, 0);
 
-  function layoutRow(
-    row: TrendingTopic[],
-    rect: Rect,
-    vertical: boolean,
+  function squarify(
+    items: TrendingTopic[],
+    x: number,
+    y: number,
+    w: number,
+    h: number,
     startIndex: number
   ) {
-    const rowValue = row.reduce((sum, t) => sum + t.searchVolume, 0);
-    let offset = vertical ? rect.x : rect.y;
+    if (items.length === 0) return;
 
-    row.forEach((topic, i) => {
-      const ratio = topic.searchVolume / rowValue;
-      const index = startIndex + i;
-      const hue = (index * 360) / maxDisplay;
-      const color = theme === 'dark'
-        ? `hsl(${hue}, 70%, 60%)`
-        : `hsl(${hue}, 70%, 50%)`;
-
-      if (vertical) {
-        const width = ratio * rect.width;
-        nodes.push({
-          topic,
-          x: offset + padding / 2,
-          y: rect.y + padding / 2,
-          width: width - padding,
-          height: rect.height - padding,
-          color
-        });
-        offset += width;
-      } else {
-        const height = ratio * rect.height;
-        nodes.push({
-          topic,
-          x: rect.x + padding / 2,
-          y: offset + padding / 2,
-          width: rect.width - padding,
-          height: height - padding,
-          color
-        });
-        offset += height;
-      }
-    });
-  }
-
-  function squarifyRecursive(
-    remaining: TrendingTopic[],
-    rect: Rect,
-    startIndex: number
-  ) {
-    if (remaining.length === 0) return;
-    if (remaining.length === 1) {
-      const topic = remaining[0];
+    if (items.length === 1) {
+      const item = items[0];
       const hue = (startIndex * 360) / maxDisplay;
       const color = theme === 'dark'
         ? `hsl(${hue}, 70%, 60%)`
         : `hsl(${hue}, 70%, 50%)`;
 
       nodes.push({
-        topic,
-        x: rect.x + padding / 2,
-        y: rect.y + padding / 2,
-        width: rect.width - padding,
-        height: rect.height - padding,
+        topic: item,
+        x: x + 1,
+        y: y + 1,
+        width: w - 2,
+        height: h - 2,
         color
       });
       return;
     }
 
-    const vertical = rect.width >= rect.height;
-    const total = remaining.reduce((sum, t) => sum + t.searchVolume, 0);
+    const isHorizontal = w >= h;
+    const total = items.reduce((sum, t) => sum + t.searchVolume, 0);
 
-    let bestRow: TrendingTopic[] = [];
-    let bestAspectRatio = Infinity;
+    let bestSplit = 1;
+    let bestRatio = Infinity;
 
-    for (let i = 1; i <= remaining.length; i++) {
-      const row = remaining.slice(0, i);
-      const rowValue = row.reduce((sum, t) => sum + t.searchVolume, 0);
-      const rowRatio = rowValue / total;
+    for (let i = 1; i < items.length; i++) {
+      const firstGroup = items.slice(0, i);
+      const firstTotal = firstGroup.reduce((sum, t) => sum + t.searchVolume, 0);
+      const ratio = firstTotal / total;
 
-      const rowDimension = vertical ? rect.width * rowRatio : rect.height * rowRatio;
-      const otherDimension = vertical ? rect.height : rect.width;
+      const dim1 = isHorizontal ? w * ratio : h * ratio;
+      const dim2 = isHorizontal ? h : w;
 
       let maxAspect = 0;
-      row.forEach((topic) => {
-        const itemRatio = topic.searchVolume / rowValue;
-        const itemPrimary = itemRatio * otherDimension;
-        const aspect = Math.max(
-          rowDimension / itemPrimary,
-          itemPrimary / rowDimension
-        );
+      firstGroup.forEach(item => {
+        const itemRatio = item.searchVolume / firstTotal;
+        const itemDim = itemRatio * dim2;
+        const aspect = Math.max(dim1 / itemDim, itemDim / dim1);
         maxAspect = Math.max(maxAspect, aspect);
       });
 
-      if (maxAspect < bestAspectRatio) {
-        bestAspectRatio = maxAspect;
-        bestRow = row;
-      } else {
-        break;
+      if (maxAspect < bestRatio) {
+        bestRatio = maxAspect;
+        bestSplit = i;
       }
     }
 
-    if (bestRow.length === 0) bestRow = [remaining[0]];
+    const firstGroup = items.slice(0, bestSplit);
+    const secondGroup = items.slice(bestSplit);
+    const firstTotal = firstGroup.reduce((sum, t) => sum + t.searchVolume, 0);
+    const ratio = firstTotal / total;
 
-    const rowValue = bestRow.reduce((sum, t) => sum + t.searchVolume, 0);
-    const rowRatio = rowValue / total;
-
-    layoutRow(bestRow, rect, vertical, startIndex);
-
-    const nextRect: Rect = vertical
-      ? {
-          x: rect.x + rect.width * rowRatio,
-          y: rect.y,
-          width: rect.width * (1 - rowRatio),
-          height: rect.height
-        }
-      : {
-          x: rect.x,
-          y: rect.y + rect.height * rowRatio,
-          width: rect.width,
-          height: rect.height * (1 - rowRatio)
-        };
-
-    squarifyRecursive(
-      remaining.slice(bestRow.length),
-      nextRect,
-      startIndex + bestRow.length
-    );
+    if (isHorizontal) {
+      const splitX = x + w * ratio;
+      layoutRow(firstGroup, x, y, w * ratio, h, false, startIndex);
+      squarify(secondGroup, splitX, y, w * (1 - ratio), h, startIndex + bestSplit);
+    } else {
+      const splitY = y + h * ratio;
+      layoutRow(firstGroup, x, y, w, h * ratio, true, startIndex);
+      squarify(secondGroup, x, splitY, w, h * (1 - ratio), startIndex + bestSplit);
+    }
   }
 
-  squarifyRecursive(topics, rect, 0);
-  return nodes;
-}
+  function layoutRow(
+    items: TrendingTopic[],
+    x: number,
+    y: number,
+    w: number,
+    h: number,
+    isVertical: boolean,
+    startIndex: number
+  ) {
+    const total = items.reduce((sum, t) => sum + t.searchVolume, 0);
+    let offset = isVertical ? y : x;
 
-function addFillerBoxes(
-  nodes: TreeMapNode[],
-  containerWidth: number,
-  containerHeight: number,
-  padding: number,
-  theme: 'dark' | 'light'
-): TreeMapNode[] {
-  const fillerColor = theme === 'dark'
-    ? 'hsl(220, 10%, 25%)'
-    : 'hsl(220, 10%, 85%)';
+    items.forEach((item, i) => {
+      const ratio = item.searchVolume / total;
+      const index = startIndex + i;
+      const hue = (index * 360) / maxDisplay;
+      const color = theme === 'dark'
+        ? `hsl(${hue}, 70%, 60%)`
+        : `hsl(${hue}, 70%, 50%)`;
 
-  const occupiedSpace: { x: number; y: number; width: number; height: number }[] = nodes.map(n => ({
-    x: n.x - padding / 2,
-    y: n.y - padding / 2,
-    width: n.width + padding,
-    height: n.height + padding
-  }));
-
-  function hasOverlap(x: number, y: number, width: number, height: number): boolean {
-    return occupiedSpace.some(occupied => {
-      return !(
-        x + width <= occupied.x ||
-        x >= occupied.x + occupied.width ||
-        y + height <= occupied.y ||
-        y >= occupied.y + occupied.height
-      );
+      if (isVertical) {
+        const itemHeight = h * ratio;
+        nodes.push({
+          topic: item,
+          x: x + 1,
+          y: offset + 1,
+          width: w - 2,
+          height: itemHeight - 2,
+          color
+        });
+        offset += itemHeight;
+      } else {
+        const itemWidth = w * ratio;
+        nodes.push({
+          topic: item,
+          x: offset + 1,
+          y: y + 1,
+          width: itemWidth - 2,
+          height: h - 2,
+          color
+        });
+        offset += itemWidth;
+      }
     });
   }
 
-  const fillers: TreeMapNode[] = [];
-  const minFillerSize = 15;
-  const gridSize = 5;
-
-  for (let y = 0; y < containerHeight; y += gridSize) {
-    for (let x = 0; x < containerWidth; x += gridSize) {
-      if (hasOverlap(x, y, 1, 1)) continue;
-
-      let maxWidth = gridSize;
-      let maxHeight = gridSize;
-
-      while (x + maxWidth <= containerWidth && !hasOverlap(x, y, maxWidth + gridSize, maxHeight)) {
-        maxWidth += gridSize;
-      }
-
-      while (y + maxHeight <= containerHeight && !hasOverlap(x, y, maxWidth, maxHeight + gridSize)) {
-        maxHeight += gridSize;
-      }
-
-      if (maxWidth >= minFillerSize && maxHeight >= minFillerSize) {
-        const filler = {
-          x: x,
-          y: y,
-          width: maxWidth,
-          height: maxHeight
-        };
-
-        fillers.push({
-          topic: null,
-          x: x + padding / 2,
-          y: y + padding / 2,
-          width: maxWidth - padding,
-          height: maxHeight - padding,
-          color: fillerColor,
-          isFiller: true
-        });
-
-        occupiedSpace.push(filler);
-      }
-    }
-  }
-
-  return [...nodes, ...fillers];
+  squarify(topics, 0, 0, width, height, 0);
+  return nodes;
 }
 
 export default function TreeMap({ topics, maxDisplay = 50, theme }: TreeMapProps) {
@@ -248,22 +156,11 @@ export default function TreeMap({ topics, maxDisplay = 50, theme }: TreeMapProps
 
   useEffect(() => {
     const displayTopics = topics.slice(0, maxDisplay);
-
     const containerWidth = 1200;
     const containerHeight = 800;
-    const padding = 3;
 
-    const rect: Rect = {
-      x: 0,
-      y: 0,
-      width: containerWidth,
-      height: containerHeight
-    };
-
-    const treeMapNodes = squarify(displayTopics, rect, padding, theme, maxDisplay);
-    const withFillers = addFillerBoxes(treeMapNodes, containerWidth, containerHeight, padding, theme);
-
-    setNodes(withFillers);
+    const treeMapNodes = createTreeMap(displayTopics, containerWidth, containerHeight, theme, maxDisplay);
+    setNodes(treeMapNodes);
   }, [topics, maxDisplay, theme]);
 
   return (
@@ -275,28 +172,12 @@ export default function TreeMap({ topics, maxDisplay = 50, theme }: TreeMapProps
           style={{ maxHeight: '800px' }}
         >
           {nodes.map((node, index) => {
-            if (node.isFiller) {
-              return (
-                <rect
-                  key={`filler-${index}`}
-                  x={node.x}
-                  y={node.y}
-                  width={node.width}
-                  height={node.height}
-                  fill={node.color}
-                  opacity={0.3}
-                  stroke={theme === 'dark' ? '#1f2937' : '#e5e7eb'}
-                  strokeWidth="1"
-                />
-              );
-            }
-
             const isHovered = hoveredIndex === index;
             const fontSize = Math.min(node.width, node.height) / 8;
-            const showText = fontSize > 8 && node.topic;
+            const showText = fontSize > 8;
 
             let wrappedLines: string[] = [];
-            if (showText && node.topic) {
+            if (showText) {
               const text = node.topic.name.replace(/"/g, '');
               const avgCharWidth = fontSize * 0.6;
               const maxCharsPerLine = Math.floor(node.width / avgCharWidth);
@@ -316,7 +197,7 @@ export default function TreeMap({ topics, maxDisplay = 50, theme }: TreeMapProps
               if (currentLine) wrappedLines.push(currentLine);
 
               const maxLines = Math.floor(node.height / (fontSize * 1.2)) - 1;
-              if (wrappedLines.length > maxLines) {
+              if (wrappedLines.length > maxLines && maxLines > 0) {
                 wrappedLines = wrappedLines.slice(0, maxLines);
                 if (wrappedLines.length > 0) {
                   const lastLine = wrappedLines[wrappedLines.length - 1];
@@ -342,7 +223,7 @@ export default function TreeMap({ topics, maxDisplay = 50, theme }: TreeMapProps
                   onMouseEnter={() => setHoveredIndex(index)}
                   onMouseLeave={() => setHoveredIndex(null)}
                 />
-                {showText && node.topic && wrappedLines.length > 0 && (
+                {showText && wrappedLines.length > 0 && (
                   <>
                     <text
                       x={node.x + node.width / 2}
@@ -389,23 +270,23 @@ export default function TreeMap({ topics, maxDisplay = 50, theme }: TreeMapProps
         </svg>
       </div>
 
-      {hoveredIndex !== null && nodes[hoveredIndex] && nodes[hoveredIndex].topic && (
+      {hoveredIndex !== null && nodes[hoveredIndex] && (
         <div className={`mt-4 p-4 rounded-lg ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border`}>
           <h3 className={`font-semibold text-lg mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-            {nodes[hoveredIndex].topic!.name.replace(/"/g, '')}
+            {nodes[hoveredIndex].topic.name.replace(/"/g, '')}
           </h3>
           <div className="flex flex-wrap items-center gap-3 text-sm">
             <span className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-              Search Volume: {nodes[hoveredIndex].topic!.searchVolumeRaw.replace(/"/g, '')}
+              Search Volume: {nodes[hoveredIndex].topic.searchVolumeRaw.replace(/"/g, '')}
             </span>
-            {nodes[hoveredIndex].topic!.category && (
+            {nodes[hoveredIndex].topic.category && (
               <span className={`px-2 py-0.5 rounded text-xs ${theme === 'dark' ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-700'}`}>
-                {nodes[hoveredIndex].topic!.category}
+                {nodes[hoveredIndex].topic.category}
               </span>
             )}
-            {nodes[hoveredIndex].topic!.pubDate && (
+            {nodes[hoveredIndex].topic.pubDate && (
               <span className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
-                {new Date(nodes[hoveredIndex].topic!.pubDate).toLocaleDateString('en-US', {
+                {new Date(nodes[hoveredIndex].topic.pubDate).toLocaleDateString('en-US', {
                   month: 'short',
                   day: 'numeric',
                   year: 'numeric'
