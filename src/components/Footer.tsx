@@ -55,7 +55,7 @@ export default function Footer({ theme }: FooterProps) {
               on the information displayed on this site.
             </p>
           </div>
-          <div className="text-center text-sm">
+          <div className={`text-center text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
             <p>2026 Top Best Charts. All rights reserved.</p>
           </div>
         </div>
