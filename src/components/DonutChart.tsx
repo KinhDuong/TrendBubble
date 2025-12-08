@@ -108,9 +108,11 @@ export default function DonutChart({
     const radius = Math.min(dimensions.width, dimensions.height) / 2 - (isMobile ? 40 : 60);
     const innerRadius = radius * 0.6;
 
+    const centerY = isMobile ? dimensions.height * 0.4 : dimensions.height / 2;
+
     const g = svg
       .append('g')
-      .attr('transform', `translate(${dimensions.width / 2}, ${dimensions.height / 2})`);
+      .attr('transform', `translate(${dimensions.width / 2}, ${centerY})`);
 
     const pie = d3.pie<number>()
       .value(d => d)
