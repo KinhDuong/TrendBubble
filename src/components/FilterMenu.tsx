@@ -1,9 +1,9 @@
-import { X, Play, Pause, Moon, Sun, Circle, BarChart3, List, LayoutGrid } from 'lucide-react';
+import { X, Play, Pause, Moon, Sun, Circle, BarChart3, List, LayoutGrid, PieChart } from 'lucide-react';
 import { CryptoTimeframe } from '../types';
 
 export type BubbleLayout = 'force' | 'hierarchical' | 'grid' | 'circular' | 'timeline' | 'packed' | 'scatter' | 'importance';
 
-export type ViewMode = 'bubble' | 'bar' | 'list' | 'treemap';
+export type ViewMode = 'bubble' | 'bar' | 'list' | 'treemap' | 'donut';
 
 interface FilterMenuProps {
   theme: 'dark' | 'light';
@@ -85,7 +85,7 @@ export default function FilterMenu({
           <div className="flex items-center justify-center">
             <div className="overflow-x-auto">
               <div className="flex items-center gap-2 md:gap-4">
-                {(viewMode === 'bubble' || viewMode === 'bar' || viewMode === 'treemap') && maxBubbles !== undefined && onMaxBubblesChange && (
+                {(viewMode === 'bubble' || viewMode === 'bar' || viewMode === 'treemap' || viewMode === 'donut') && maxBubbles !== undefined && onMaxBubblesChange && (
                   <>
                     <label htmlFor="maxBubbles" className={`text-xs md:text-sm font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                       Max:
@@ -284,6 +284,18 @@ export default function FilterMenu({
                       <LayoutGrid size={14} />
                       Tree
                     </button>
+                    <button
+                      onClick={() => onViewModeChange('donut')}
+                      className={`flex items-center gap-1.5 px-2 md:px-3 py-1 md:py-1.5 text-xs md:text-sm font-medium rounded transition-colors ${
+                        viewMode === 'donut'
+                          ? 'bg-blue-600 text-white'
+                          : theme === 'dark' ? 'text-gray-300 hover:text-gray-100' : 'text-gray-600 hover:text-gray-900'
+                      }`}
+                      aria-label="Donut Chart View"
+                    >
+                      <PieChart size={14} />
+                      Donut
+                    </button>
                   </div>
                   {onPauseToggle && (
                     <button
@@ -390,6 +402,18 @@ export default function FilterMenu({
                   <LayoutGrid size={14} />
                   Tree
                 </button>
+                <button
+                  onClick={() => onViewModeChange('donut')}
+                  className={`flex items-center gap-1.5 px-2 py-1.5 text-xs font-medium rounded transition-colors whitespace-nowrap ${
+                    viewMode === 'donut'
+                      ? 'bg-blue-600 text-white'
+                      : theme === 'dark' ? 'text-gray-300 hover:text-gray-100' : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                  aria-label="Donut Chart View"
+                >
+                  <PieChart size={14} />
+                  Donut
+                </button>
               </div>
               {onRefresh && nextBubbleIn !== undefined && bubbleProgress !== undefined && (
                 <button
@@ -472,7 +496,7 @@ export default function FilterMenu({
                 </select>
               </div>
               <Divider />
-              {(viewMode === 'bubble' || viewMode === 'bar' || viewMode === 'treemap') && maxBubbles !== undefined && onMaxBubblesChange && (
+              {(viewMode === 'bubble' || viewMode === 'bar' || viewMode === 'treemap' || viewMode === 'donut') && maxBubbles !== undefined && onMaxBubblesChange && (
                 <>
                   <div className="flex items-center gap-2">
                     <label htmlFor="maxBubbles" className={`text-xs font-medium whitespace-nowrap ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>

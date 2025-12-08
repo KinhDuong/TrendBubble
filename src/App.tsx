@@ -4,6 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import BubbleChart from './components/BubbleChart';
 import BarChart from './components/BarChart';
 import Treemap from './components/Treemap';
+import DonutChart from './components/DonutChart';
 import FileUpload from './components/FileUpload';
 import Login from './components/Login';
 import Footer from './components/Footer';
@@ -1873,6 +1874,89 @@ function HomePage() {
                         className={`px-6 py-2 rounded-lg font-semibold transition-colors ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-600 hover:bg-blue-700 shadow-sm hover:shadow text-white'}`}
                       >
                         {showFullTop10 ? 'Show Top 10 Only' : 'See Full List'}
+                      </button>
+                    </div>
+                  )}
+                </section>
+              </>
+            )}
+            {topics.length > 0 && viewMode === 'donut' && (
+              <>
+                <div className="max-w-7xl mx-auto" style={{ height: 'calc(100vh - 300px)', minHeight: '600px' }}>
+                  <DonutChart
+                    topics={sortedTopics}
+                    maxDisplay={maxBubbles}
+                    theme={theme}
+                    useCryptoColors={sourceFilter === 'coingecko_crypto'}
+                    cryptoTimeframe="24h"
+                  />
+                </div>
+
+                {/* Featured Pages Section - Full Width */}
+                <div className={`w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-200'} border-t border-b py-6 mt-8`}>
+                  <div className="max-w-7xl mx-auto px-4">
+                    <h2 className={`text-xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                      Featured
+                    </h2>
+                    {latestPages.length > 0 && (
+                      <div className="flex flex-wrap gap-x-4 gap-y-2">
+                        {latestPages.map((page) => (
+                          <a
+                            key={page.id}
+                            href={page.page_url}
+                            className={`text-sm ${theme === 'dark' ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'} transition-colors hover:underline`}
+                          >
+                            {page.meta_title}
+                          </a>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <section className="max-w-7xl mx-auto mt-8 mb-0 md:mb-8" aria-labelledby="top-trending-heading">
+                  <h2 id="top-trending-heading" className={`text-2xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                    {showFullTop10 ? 'All Trending Topics' : 'Top 10 Trending Topics Today'}
+                  </h2>
+                  <p className={`mb-4 text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                    {showFullTop10 ? 'Complete list of all trending topics ranked by search volume' : 'Discover the most popular trending topics ranked by search volume'}
+                  </p>
+                  <ol className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white shadow-md border border-gray-200'} rounded-lg overflow-hidden list-none`} itemScope itemType="https://schema.org/ItemList">
+                    {[...topics]
+                      .sort((a, b) => b.searchVolume - a.searchVolume)
+                      .slice(0, showFullTop10 ? undefined : 10)
+                      .map((topic, index) => (
+                        <li
+                          key={index}
+                          className={`px-6 py-4 flex items-center gap-4 ${theme === 'dark' ? 'hover:bg-gray-750' : 'hover:bg-gray-50'} transition-colors ${index < (showFullTop10 ? topics.length - 1 : 9) ? (theme === 'dark' ? 'border-b border-gray-700' : 'border-b border-gray-200') : ''}`}
+                          itemProp="itemListElement"
+                          itemScope
+                          itemType="https://schema.org/ListItem"
+                        >
+                          <meta itemProp="position" content={String(index + 1)} />
+                          <div className={`w-12 flex items-center justify-center`} aria-label={`Rank ${index + 1}`}>
+                            <div className={`text-2xl font-bold ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                              {index + 1}
+                            </div>
+                          </div>
+                          <article className="flex-1" itemProp="item" itemScope itemType="https://schema.org/Thing">
+                            <h3 itemProp="name" className={`text-lg font-semibold ${theme === 'dark' ? 'text-gray-200' : 'text-gray-900'}`}>
+                              {topic.name.replace(/"/g, '')}
+                            </h3>
+                          </article>
+                          <div className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                            {topic.searchVolumeRaw}
+                          </div>
+                        </li>
+                      ))}
+                  </ol>
+                  {!showFullTop10 && topics.length > 10 && (
+                    <div className="mt-4 text-center">
+                      <button
+                        onClick={() => setShowFullTop10(true)}
+                        className={`px-6 py-2 ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-600 hover:bg-blue-700'} text-white rounded-lg transition-colors font-medium`}
+                      >
+                        Show All {topics.length} Topics
                       </button>
                     </div>
                   )}
