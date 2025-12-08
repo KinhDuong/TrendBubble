@@ -121,6 +121,13 @@ function HomePage() {
   }, []);
 
   useEffect(() => {
+    const prerenderFooter = document.getElementById('prerender-footer');
+    if (prerenderFooter) {
+      prerenderFooter.remove();
+    }
+  }, []);
+
+  useEffect(() => {
     const bubbleInterval = setInterval(() => {
       if (oldestBubbleTime && oldestBubbleCreated && oldestBubbleLifetime) {
         const now = Date.now();

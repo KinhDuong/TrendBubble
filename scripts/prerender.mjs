@@ -685,7 +685,7 @@ async function prerenderHomePage(baseHTML, distPath) {
     .replace('<title>Vite + React + TS</title>', '')
     .replace('<!-- PRERENDER_META -->', homeMetaTags)
     .replace('<!-- PRERENDER_STRUCTURED_DATA -->', homeStructuredData)
-    .replace('<div id="root"></div>', `<div id="root">${homeContentHTML}</div>`);
+    .replace('<div id="root"></div>', `<div id="root">${homeContentHTML}</div><div id="prerender-footer">${generateFooterHTML()}</div>`);
 
   fs.writeFileSync(path.join(distPath, 'index.html'), html);
   console.log('✓ Generated: /index.html');
@@ -750,7 +750,7 @@ async function prerenderPages() {
       .replace('<title>Vite + React + TS</title>', '')
       .replace('<!-- PRERENDER_META -->', metaTags)
       .replace('<!-- PRERENDER_STRUCTURED_DATA -->', structuredData)
-      .replace('<div id="root"></div>', `<div id="root">${contentHTML}</div>`);
+      .replace('<div id="root"></div>', `<div id="root">${contentHTML}</div><div id="prerender-footer">${generateFooterHTML()}</div>`);
 
     const pagePath = page.page_url.replace(/^\//, '');
     const outputDir = path.join(distPath, pagePath);

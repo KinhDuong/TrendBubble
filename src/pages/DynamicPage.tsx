@@ -115,6 +115,13 @@ function DynamicPage() {
   }, [urlPath]);
 
   useEffect(() => {
+    const prerenderFooter = document.getElementById('prerender-footer');
+    if (prerenderFooter) {
+      prerenderFooter.remove();
+    }
+  }, []);
+
+  useEffect(() => {
     document.documentElement.style.backgroundColor = theme === 'dark' ? '#111827' : '#f1f3f4';
   }, [theme]);
 
