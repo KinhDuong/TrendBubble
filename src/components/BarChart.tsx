@@ -82,10 +82,10 @@ export default function BarChart({
               {/* Mobile: Compact layout */}
               <div className="md:hidden">
                 <div className="flex items-center gap-2">
-                  <span className={`text-xs font-bold flex-shrink-0 w-4 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                  <span className={`text-xs font-bold flex-shrink-0 w-5 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
                     {index + 1}
                   </span>
-                  <span className={`text-xs font-medium truncate flex-shrink min-w-0 ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'}`} style={{ maxWidth: '100px' }}>
+                  <span className={`text-xs font-medium truncate overflow-hidden flex-shrink-0 w-20 ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'}`}>
                     {topic.name.replace(/"/g, '')}
                   </span>
                   <div className={`flex-1 h-8 rounded ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-200'} overflow-hidden relative`}>
@@ -97,7 +97,7 @@ export default function BarChart({
                       }}
                     />
                   </div>
-                  <span className={`text-xs font-bold flex-shrink-0 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                  <span className={`text-xs font-bold flex-shrink-0 w-16 text-right ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
                     {topic.searchVolumeRaw.replace(/"/g, '')}
                   </span>
                 </div>
@@ -117,13 +117,13 @@ export default function BarChart({
                 )}
               </div>
 
-              {/* Desktop: Clean horizontal layout */}
+              {/* Desktop: Clean horizontal layout with fixed columns */}
               <div className="hidden md:block">
-                <div className="flex items-center gap-3">
-                  <span className={`text-sm font-bold flex-shrink-0 w-6 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                <div className="flex items-center gap-4">
+                  <span className={`text-sm font-bold flex-shrink-0 w-8 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
                     {index + 1}
                   </span>
-                  <span className={`text-sm font-medium truncate flex-shrink min-w-0 ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'}`} style={{ minWidth: '150px', maxWidth: '200px' }}>
+                  <span className={`text-sm font-medium truncate overflow-hidden flex-shrink-0 w-48 ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'}`}>
                     {topic.name.replace(/"/g, '')}
                   </span>
                   <div className={`flex-1 h-10 rounded ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-200'} overflow-hidden relative`}>
@@ -135,12 +135,12 @@ export default function BarChart({
                       }}
                     />
                   </div>
-                  <span className={`text-sm font-bold flex-shrink-0 min-w-[80px] text-right ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                  <span className={`text-sm font-bold flex-shrink-0 w-24 text-right ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
                     {topic.searchVolumeRaw.replace(/"/g, '')}
                   </span>
                 </div>
                 {(topic.category || (useCryptoColors && topic.crypto_data)) && (
-                  <div className="flex items-center gap-2 mt-1 ml-[226px]">
+                  <div className="flex items-center gap-2 mt-1 ml-[14rem]">
                     {topic.category && (
                       <span className={`text-xs px-2 py-0.5 rounded ${theme === 'dark' ? 'bg-gray-800 text-gray-400' : 'bg-gray-200 text-gray-600'}`}>
                         {topic.category}
