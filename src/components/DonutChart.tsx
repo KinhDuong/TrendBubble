@@ -200,19 +200,19 @@ export default function DonutChart({
     <div
       ref={containerRef}
       className={`w-full h-full ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'} rounded-lg p-4`}
-      style={{ minHeight: '600px' }}
+      style={{ minHeight: '800px' }}
     >
       <div className="flex flex-col md:flex-row gap-4 h-full">
-        <div className="flex-1 min-h-[400px]">
+        <div className="flex-1 min-h-[600px]">
           <svg
             ref={svgRef}
             width="100%"
             height="100%"
-            style={{ minHeight: '400px' }}
+            style={{ minHeight: '600px' }}
           />
         </div>
 
-        <div className="w-full md:w-64 overflow-y-auto max-h-[500px] pr-2">
+        <div className="w-full md:w-64 overflow-y-auto max-h-[700px] pr-2">
           <div className="space-y-2">
             {displayTopics.map((topic, index) => (
               <div
