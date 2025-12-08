@@ -105,7 +105,7 @@ export default function DonutChart({
     svg.selectAll('*').remove();
 
     const isMobile = dimensions.width < 768;
-    const radius = Math.min(dimensions.width, dimensions.height) / 2 - (isMobile ? 40 : 60);
+    const radius = (Math.min(dimensions.width, dimensions.height) / 2 - (isMobile ? 20 : 30)) * 1.3;
     const innerRadius = radius * 0.6;
 
     const g = svg
