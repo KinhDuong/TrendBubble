@@ -36,7 +36,8 @@ export default function Footer({ theme }: FooterProps) {
               About
             </h3>
             <p className="text-sm">
-              Track what the world is searching for in real-time. Data sourced from Google Trends and updated hourly to keep you informed of the latest trending topics.
+              We turn boring rankings into beautiful, interactive stories.
+              Every bubble, bar, and sparkline is built from the latest official data and refreshed the moment new numbers drop. No fluff, no paywalls - just the clearest and most up-to-date data. Made by data nerds, for the endlessly curious.
             </p>
           </div>
         </div>
