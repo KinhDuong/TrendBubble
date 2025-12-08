@@ -14,6 +14,7 @@ import ComparisonPanel from './components/ComparisonPanel';
 import ShareSnapshot from './components/ShareSnapshot';
 import DynamicPage from './pages/DynamicPage';
 import AdminPages from './pages/AdminPages';
+import ExplorePage from './pages/ExplorePage';
 import { TrendingTopic } from './types';
 import { supabase } from './lib/supabase';
 import { useAuth } from './hooks/useAuth';
@@ -2139,6 +2140,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<HomePage />} />
+        <Route path="/explore" element={<ExplorePage />} />
         <Route path="/admin/pages" element={<AdminPages />} />
         <Route path="*" element={<DynamicPage />} />
       </Routes>
