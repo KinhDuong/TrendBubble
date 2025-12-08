@@ -105,7 +105,7 @@ export default function DonutChart({
     svg.selectAll('*').remove();
 
     const isMobile = dimensions.width < 768;
-    const radius = (Math.min(dimensions.width, dimensions.height) / 2 - (isMobile ? 20 : 30)) * 1.3;
+    const radius = Math.min(dimensions.width, dimensions.height) / 2 - (isMobile ? 40 : 60);
     const innerRadius = radius * 0.6;
 
     const g = svg
@@ -200,19 +200,19 @@ export default function DonutChart({
     <div
       ref={containerRef}
       className={`w-full h-full ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'} rounded-lg p-4`}
-      style={{ minHeight: '800px' }}
+      style={{ minHeight: '600px' }}
     >
       <div className="flex flex-col md:flex-row gap-4 h-full">
-        <div className="flex-1 min-h-[600px]">
+        <div className="flex-1 min-h-[400px]">
           <svg
             ref={svgRef}
             width="100%"
             height="100%"
-            style={{ minHeight: '600px' }}
+            style={{ minHeight: '400px' }}
           />
         </div>
 
-        <div className="w-full md:w-64 overflow-y-auto max-h-[700px] pr-2">
+        <div className="w-full md:w-64 overflow-y-auto max-h-[500px] pr-2">
           <div className="space-y-2">
             {displayTopics.map((topic, index) => (
               <div
