@@ -22,6 +22,7 @@ interface PageData {
   source: string;
   meta_title: string;
   meta_description: string;
+  intro_text?: string;
   created_at: string;
   summary?: string;
   faq?: string;
@@ -755,10 +756,9 @@ snapshotButton={null}
                         <h2 id="top-trending-heading" className={`text-xl md:text-2xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                           {topTitle}
                         </h2>
-                        {topTopicNames && (
+                        {(pageData.intro_text || topTopicNames) && (
                           <p className={`mb-4 text-sm leading-relaxed ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                            Currently trending: <strong className={theme === 'dark' ? 'text-white' : 'text-gray-900'}>{topTopicNames}</strong>.
-                            Explore our interactive visualization to discover real-time search trends, analyze topic popularity, and stay updated with what's capturing attention right now.
+                            {pageData.intro_text || 'Explore our interactive visualization to discover real-time search trends, analyze topic popularity, and stay updated with what\'s capturing attention right now.'}
                           </p>
                         )}
                         <div className="relative mb-4">

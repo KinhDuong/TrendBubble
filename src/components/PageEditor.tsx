@@ -10,6 +10,7 @@ interface Page {
   source: string;
   meta_title: string;
   meta_description: string;
+  intro_text?: string;
   summary?: string;
   template?: string;
   faq?: string;
@@ -27,6 +28,7 @@ export default function PageEditor({ theme, onClose, existingPage }: PageEditorP
   const [source, setSource] = useState(existingPage?.source || 'google_trends');
   const [metaTitle, setMetaTitle] = useState(existingPage?.meta_title || '');
   const [metaDescription, setMetaDescription] = useState(existingPage?.meta_description || '');
+  const [introText, setIntroText] = useState(existingPage?.intro_text || '');
   const [summary, setSummary] = useState(existingPage?.summary || '');
   const [faq, setFaq] = useState(existingPage?.faq || '');
   const [template, setTemplate] = useState(existingPage?.template || 'default');
@@ -89,6 +91,7 @@ export default function PageEditor({ theme, onClose, existingPage }: PageEditorP
         source,
         meta_title: metaTitle,
         meta_description: metaDescription,
+        intro_text: introText || null,
         summary: summary || null,
         faq: faq || null,
         template: template || 'default'
@@ -228,6 +231,22 @@ export default function PageEditor({ theme, onClose, existingPage }: PageEditorP
                 rows={3}
                 className={`w-full px-3 py-2 rounded-lg border ${theme === 'dark' ? 'bg-gray-900 border-gray-700 text-white' : 'bg-white border-gray-300 text-gray-900'} focus:outline-none focus:ring-2 focus:ring-blue-500`}
               />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                Intro Text
+              </label>
+              <textarea
+                value={introText}
+                onChange={(e) => setIntroText(e.target.value)}
+                placeholder="Custom introduction text to display above the ranking list"
+                rows={3}
+                className={`w-full px-3 py-2 rounded-lg border ${theme === 'dark' ? 'bg-gray-900 border-gray-700 text-white' : 'bg-white border-gray-300 text-gray-900'} focus:outline-none focus:ring-2 focus:ring-blue-500`}
+              />
+              <p className={`text-xs mt-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                Optional text to display in the full ranking section
+              </p>
             </div>
 
             <div>
