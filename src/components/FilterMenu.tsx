@@ -1,9 +1,9 @@
-import { X, Play, Pause, Moon, Sun, Circle, BarChart3, List } from 'lucide-react';
+import { X, Play, Pause, Moon, Sun, Circle, BarChart3, List, Grid3x3 } from 'lucide-react';
 import { CryptoTimeframe } from '../types';
 
 export type BubbleLayout = 'force' | 'hierarchical' | 'grid' | 'circular' | 'timeline' | 'packed' | 'scatter' | 'importance';
 
-export type ViewMode = 'bubble' | 'bar' | 'list';
+export type ViewMode = 'bubble' | 'bar' | 'treemap' | 'list';
 
 interface FilterMenuProps {
   theme: 'dark' | 'light';
@@ -85,7 +85,7 @@ export default function FilterMenu({
           <div className="flex items-center justify-center">
             <div className="overflow-x-auto">
               <div className="flex items-center gap-2 md:gap-4">
-                {(viewMode === 'bubble' || viewMode === 'bar') && maxBubbles !== undefined && onMaxBubblesChange && (
+                {(viewMode === 'bubble' || viewMode === 'bar' || viewMode === 'treemap') && maxBubbles !== undefined && onMaxBubblesChange && (
                   <>
                     <label htmlFor="maxBubbles" className={`text-xs md:text-sm font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                       Max:
@@ -261,6 +261,18 @@ export default function FilterMenu({
                       Bar
                     </button>
                     <button
+                      onClick={() => onViewModeChange('treemap')}
+                      className={`flex items-center gap-1.5 px-2 md:px-3 py-1 md:py-1.5 text-xs md:text-sm font-medium rounded transition-colors ${
+                        viewMode === 'treemap'
+                          ? 'bg-blue-600 text-white'
+                          : theme === 'dark' ? 'text-gray-300 hover:text-gray-100' : 'text-gray-600 hover:text-gray-900'
+                      }`}
+                      aria-label="Tree Map View"
+                    >
+                      <Grid3x3 size={14} />
+                      Tree
+                    </button>
+                    <button
                       onClick={() => onViewModeChange('list')}
                       className={`flex items-center gap-1.5 px-2 md:px-3 py-1 md:py-1.5 text-xs md:text-sm font-medium rounded transition-colors ${
                         viewMode === 'list'
@@ -353,6 +365,18 @@ export default function FilterMenu({
                 >
                   <BarChart3 size={14} />
                   Bar
+                </button>
+                <button
+                  onClick={() => onViewModeChange('treemap')}
+                  className={`flex items-center gap-1.5 px-2 py-1.5 text-xs font-medium rounded transition-colors whitespace-nowrap ${
+                    viewMode === 'treemap'
+                      ? 'bg-blue-600 text-white'
+                      : theme === 'dark' ? 'text-gray-300 hover:text-gray-100' : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                  aria-label="Tree Map View"
+                >
+                  <Grid3x3 size={14} />
+                  Tree
                 </button>
                 <button
                   onClick={() => onViewModeChange('list')}
@@ -448,7 +472,7 @@ export default function FilterMenu({
                 </select>
               </div>
               <Divider />
-              {(viewMode === 'bubble' || viewMode === 'bar') && maxBubbles !== undefined && onMaxBubblesChange && (
+              {(viewMode === 'bubble' || viewMode === 'bar' || viewMode === 'treemap') && maxBubbles !== undefined && onMaxBubblesChange && (
                 <>
                   <div className="flex items-center gap-2">
                     <label htmlFor="maxBubbles" className={`text-xs font-medium whitespace-nowrap ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
