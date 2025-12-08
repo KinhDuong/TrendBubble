@@ -89,10 +89,26 @@ function generateMetaTags(pageData, topics) {
     year: 'numeric'
   });
 
+  const currentYear = new Date().getFullYear();
+  const extractTopicType = (title) => {
+    const lowerTitle = title.toLowerCase();
+    if (lowerTitle.includes('trending topics')) {
+      return title.replace(/trending topics/i, '').trim();
+    }
+    return title;
+  };
+  const topicType = extractTopicType(pageData.meta_title);
+  const rankingTitle = `Top ${topics.length} ${topicType || 'Trending Topics'} (${currentYear})`;
+
   const enhancedTitle = `${pageData.meta_title} - ${currentDate}`;
-  const enhancedDescription = topTopics
-    ? `${pageData.meta_description} ${topTopics}. Updated ${lastUpdated.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}.`
-    : pageData.meta_description;
+
+  let enhancedDescription = pageData.meta_description;
+  if (pageData.intro_text) {
+    enhancedDescription = `${pageData.intro_text} `;
+  }
+  if (topTopics) {
+    enhancedDescription += `Top trending: ${topTopics}. Updated ${lastUpdated.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}.`;
+  }
 
   const keywords = topics.slice(0, 10).map(t => t.name.replace(/"/g, '')).join(', ') + ', trending topics, search trends, real-time trends, trend analysis';
 
@@ -184,12 +200,24 @@ async function generateContentHTML(pageData, topics, sourceLabel) {
   // Add topic rankings for SEO
   const currentYear = new Date().getFullYear();
 
+  const extractTopicType = (title) => {
+    const lowerTitle = title.toLowerCase();
+    if (lowerTitle.includes('trending topics')) {
+      return title.replace(/trending topics/i, '').trim();
+    }
+    return title;
+  };
+
+  const topicType = extractTopicType(pageData.meta_title);
+  const rankingTitle = `Top ${topTopics.length} ${topicType || 'Trending Topics'} (${currentYear})`;
+
   contentHTML += `
     <section class="top-topics" aria-labelledby="top-trending-heading" itemscope itemtype="https://schema.org/ItemList" style="max-width: 80rem; margin: 2rem auto 1.5rem; padding: 0 0.5rem;">
       <div style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; padding: 1.5rem;">
         <h2 id="top-trending-heading" style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; color: white;">
-          Top ${topTopics.length} ${isCryptoPage ? 'Gainers & Losers' : pageData.meta_title.replace(/trending topics/i, '').trim() || 'Trending Topics'} (${currentYear})
+          ${rankingTitle}
         </h2>
+        ${pageData.intro_text ? `<p style="color: #d1d5db; font-size: 0.875rem; line-height: 1.625; margin-bottom: 1rem;">${pageData.intro_text}</p>` : ''}
         <ol class="topics-list" style="list-style: none; padding: 0; margin: 0;">
   `;
 
@@ -269,20 +297,36 @@ function generateStructuredData(pageData, topics) {
   const pageUrl = `${BASE_URL}${pageData.page_url}`;
   const topTopics = [...topics].sort((a, b) => b.search_volume - a.search_volume);
 
+  const extractTopicType = (title) => {
+    const lowerTitle = title.toLowerCase();
+    if (lowerTitle.includes('trending topics')) {
+      return title.replace(/trending topics/i, '').trim();
+    }
+    return title;
+  };
+
+  const topicType = extractTopicType(pageData.meta_title);
+  const currentYear = new Date().getFullYear();
+  const rankingTitle = `Top ${topTopics.length} ${topicType || 'Trending Topics'} (${currentYear})`;
+
+  const description = pageData.intro_text
+    ? `${pageData.meta_description} ${pageData.intro_text}`
+    : pageData.meta_description;
+
   const webPageSchema = {
     "@context": "https://schema.org",
     "@type": "WebPage",
     "name": `${pageData.meta_title} - ${currentDate}`,
-    "description": pageData.meta_description,
+    "description": description,
     "url": pageUrl,
     "datePublished": pageData.created_at,
     "dateModified": new Date().toISOString(),
     "mainEntity": {
       "@type": "ItemList",
-      "name": "Top Trending Topics",
-      "description": "Current trending topics ranked by search volume",
+      "name": rankingTitle,
+      "description": pageData.intro_text || "Current trending topics ranked by search volume",
       "numberOfItems": topTopics.length,
-      "itemListElement": topTopics.slice(0, 10).map((topic, index) => ({
+      "itemListElement": topTopics.slice(0, 100).map((topic, index) => ({
         "@type": "ListItem",
         "position": index + 1,
         "item": {
