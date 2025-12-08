@@ -30,11 +30,39 @@ export default function Treemap({ topics, maxDisplay, theme, useCryptoColors = f
 
     const displayTopics = topics.slice(0, maxDisplay);
 
+    const getCryptoValue = (topic: TrendingTopic): number => {
+      if (!topic.crypto_data || !useCryptoColors) return topic.searchVolume;
+
+      const timeframeMap = {
+        '1h': topic.crypto_data.change_1h,
+        '24h': topic.crypto_data.change_24h,
+        '7d': topic.crypto_data.change_7d,
+        '30d': topic.crypto_data.change_30d,
+        '1y': topic.crypto_data.change_1y,
+      } as const;
+
+      return Math.abs(timeframeMap[cryptoTimeframe] || 0);
+    };
+
+    const getCryptoDisplayText = (topic: TrendingTopic): string => {
+      if (!topic.crypto_data || !useCryptoColors) return topic.searchVolumeRaw;
+
+      const timeframeMap = {
+        '1h': topic.crypto_data.formatted.change_1h,
+        '24h': topic.crypto_data.formatted.change_24h,
+        '7d': topic.crypto_data.formatted.change_7d,
+        '30d': topic.crypto_data.formatted.change_30d,
+        '1y': topic.crypto_data.formatted.change_1y,
+      } as const;
+
+      return timeframeMap[cryptoTimeframe] || topic.searchVolumeRaw;
+    };
+
     const hierarchyData = {
       name: 'root',
       children: displayTopics.map(topic => ({
         name: topic.name,
-        value: topic.searchVolume,
+        value: getCryptoValue(topic),
         topic: topic
       }))
     };
@@ -217,7 +245,7 @@ export default function Treemap({ topics, maxDisplay, theme, useCryptoColors = f
 
         if (width < 30 || height < 40) return '';
 
-        return nodeData.topic.searchVolumeRaw.replace(/"/g, '');
+        return getCryptoDisplayText(nodeData.topic).replace(/"/g, '');
       });
 
     const handleResize = () => {

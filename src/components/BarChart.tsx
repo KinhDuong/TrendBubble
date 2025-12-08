@@ -46,7 +46,34 @@ export default function BarChart({
   }, [topics]);
 
   const displayTopics = topics.slice(0, maxDisplay);
-  const maxValue = Math.max(...displayTopics.map(t => t.searchVolume));
+
+  const getCryptoValue = (topic: TrendingTopic): number => {
+    if (!topic.crypto_data || !useCryptoColors) return topic.searchVolume;
+
+    const timeframeMap = {
+      '1h': topic.crypto_data.change_1h,
+      '24h': topic.crypto_data.change_24h,
+      '7d': topic.crypto_data.change_7d,
+      '30d': topic.crypto_data.change_30d,
+      '1y': topic.crypto_data.change_1y,
+    };
+
+    return Math.abs(timeframeMap[cryptoTimeframe] || 0);
+  };
+
+  const getCryptoDisplayText = (topic: TrendingTopic): string => {
+    if (!topic.crypto_data || !useCryptoColors) return topic.searchVolumeRaw;
+
+    const timeframeMap = {
+      '1h': topic.crypto_data.formatted.change_1h,
+      '24h': topic.crypto_data.formatted.change_24h,
+      '7d': topic.crypto_data.formatted.change_7d,
+      '30d': topic.crypto_data.formatted.change_30d,
+      '1y': topic.crypto_data.formatted.change_1y,
+    };
+
+    return timeframeMap[cryptoTimeframe] || topic.searchVolumeRaw;
+  };
 
   const getCryptoChange = (topic: TrendingTopic): number => {
     if (!topic.crypto_data) return 0;
@@ -60,6 +87,8 @@ export default function BarChart({
     const field = timeframeMap[cryptoTimeframe] as keyof typeof topic.crypto_data;
     return topic.crypto_data[field] || 0;
   };
+
+  const maxValue = Math.max(...displayTopics.map(t => getCryptoValue(t)));
 
   const getBarColor = (topic: TrendingTopic, index: number) => {
     if (useCryptoColors && topic.crypto_data) {
@@ -83,8 +112,9 @@ export default function BarChart({
     >
       <div className="space-y-2 md:space-y-3">
         {displayTopics.map((topic, index) => {
-          const barWidth = (topic.searchVolume / maxValue) * 100;
+          const barWidth = (getCryptoValue(topic) / maxValue) * 100;
           const barColor = getBarColor(topic, index);
+          const displayText = getCryptoDisplayText(topic);
 
           return (
             <div key={index}>
@@ -104,16 +134,9 @@ export default function BarChart({
                     />
                   </div>
                   <span className={`text-xs font-bold flex-shrink-0 w-16 text-right ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                    {topic.searchVolumeRaw.replace(/"/g, '')}
+                    {displayText.replace(/"/g, '')}
                   </span>
                 </div>
-                {useCryptoColors && topic.crypto_data && (
-                  <div className="flex items-center gap-2 mt-1 ml-2">
-                    <span className={`text-xs font-bold ${getCryptoChange(topic) > 0 ? 'text-green-500' : getCryptoChange(topic) < 0 ? 'text-red-500' : 'text-gray-500'}`}>
-                      {getCryptoChange(topic) > 0 ? '+' : ''}{getCryptoChange(topic).toFixed(2)}%
-                    </span>
-                  </div>
-                )}
               </div>
 
               {/* Desktop: Clean horizontal layout with fixed columns */}
@@ -132,16 +155,9 @@ export default function BarChart({
                     />
                   </div>
                   <span className={`text-sm font-bold flex-shrink-0 w-24 text-right ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                    {topic.searchVolumeRaw.replace(/"/g, '')}
+                    {displayText.replace(/"/g, '')}
                   </span>
                 </div>
-                {useCryptoColors && topic.crypto_data && (
-                  <div className="flex items-center gap-2 mt-1 ml-[12rem]">
-                    <span className={`text-xs font-bold ${getCryptoChange(topic) > 0 ? 'text-green-500' : getCryptoChange(topic) < 0 ? 'text-red-500' : 'text-gray-500'}`}>
-                      {getCryptoChange(topic) > 0 ? '+' : ''}{getCryptoChange(topic).toFixed(2)}%
-                    </span>
-                  </div>
-                )}
               </div>
             </div>
           );
