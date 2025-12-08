@@ -14,6 +14,147 @@ interface TreeMapNode {
   width: number;
   height: number;
   color: string;
+  category: string;
+}
+
+interface Rect {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+const categoryColors: { [key: string]: string } = {
+  'Technology': '#FF6B6B',
+  'Business': '#4ECDC4',
+  'Entertainment': '#95E1D3',
+  'Sports': '#F38181',
+  'Politics': '#AA96DA',
+  'Science': '#FCBAD3',
+  'Health': '#FFFFD2',
+  'Education': '#A8D8EA',
+  'Travel': '#AA96DA',
+  'Food': '#FFA07A',
+  'Fashion': '#FFB6C1',
+  'Gaming': '#98D8C8',
+  'Music': '#F7DC6F',
+  'Art': '#BB8FCE',
+  'Finance': '#85C1E2',
+  'Real Estate': '#F8B739',
+  'Automotive': '#52B788',
+  'Environment': '#2D6A4F',
+};
+
+function getColorForCategory(category: string, index: number): string {
+  if (categoryColors[category]) {
+    return categoryColors[category];
+  }
+  const hue = (index * 137.5) % 360;
+  return `hsl(${hue}, 65%, 60%)`;
+}
+
+function squarify(
+  items: { topic: TrendingTopic; value: number; category: string }[],
+  rect: Rect
+): TreeMapNode[] {
+  if (items.length === 0) return [];
+
+  const nodes: TreeMapNode[] = [];
+  const totalValue = items.reduce((sum, item) => sum + item.value, 0);
+
+  function layoutRow(
+    row: typeof items,
+    rect: Rect,
+    vertical: boolean
+  ): { nodes: TreeMapNode[]; remaining: Rect } {
+    const rowNodes: TreeMapNode[] = [];
+    const rowValue = row.reduce((sum, item) => sum + item.value, 0);
+    const ratio = rowValue / totalValue;
+
+    let offset = 0;
+    const categoryIndex = row.length > 0 ? items.findIndex(i => i === row[0]) : 0;
+
+    row.forEach((item, idx) => {
+      const itemRatio = item.value / rowValue;
+
+      let x, y, width, height;
+      if (vertical) {
+        width = rect.width;
+        height = rect.height * ratio * itemRatio;
+        x = rect.x;
+        y = rect.y + offset;
+        offset += height;
+      } else {
+        width = rect.width * ratio * itemRatio;
+        height = rect.height;
+        x = rect.x + offset;
+        y = rect.y;
+        offset += width;
+      }
+
+      rowNodes.push({
+        topic: item.topic,
+        x,
+        y,
+        width,
+        height,
+        color: getColorForCategory(item.category, categoryIndex + idx),
+        category: item.category
+      });
+    });
+
+    const remaining = vertical
+      ? { x: rect.x, y: rect.y + rect.height * ratio, width: rect.width, height: rect.height * (1 - ratio) }
+      : { x: rect.x + rect.width * ratio, y: rect.y, width: rect.width * (1 - ratio), height: rect.height };
+
+    return { nodes: rowNodes, remaining };
+  }
+
+  function worstAspectRatio(row: typeof items, length: number): number {
+    if (row.length === 0) return Infinity;
+
+    const sum = row.reduce((s, item) => s + item.value, 0);
+    const maxVal = Math.max(...row.map(item => item.value));
+    const minVal = Math.min(...row.map(item => item.value));
+
+    const lengthSq = length * length;
+    const sumSq = sum * sum;
+
+    return Math.max(
+      (lengthSq * maxVal) / sumSq,
+      sumSq / (lengthSq * minVal)
+    );
+  }
+
+  function squarifyRecursive(
+    items: typeof items,
+    rect: Rect,
+    row: typeof items = []
+  ): TreeMapNode[] {
+    if (items.length === 0) {
+      if (row.length === 0) return [];
+      const vertical = rect.width >= rect.height;
+      const { nodes } = layoutRow(row, rect, vertical);
+      return nodes;
+    }
+
+    const item = items[0];
+    const vertical = rect.width >= rect.height;
+    const length = vertical ? rect.width : rect.height;
+
+    const newRow = [...row, item];
+    const currentWorst = worstAspectRatio(row, length);
+    const newWorst = worstAspectRatio(newRow, length);
+
+    if (row.length === 0 || newWorst <= currentWorst) {
+      return squarifyRecursive(items.slice(1), rect, newRow);
+    } else {
+      const { nodes, remaining } = layoutRow(row, rect, vertical);
+      return [...nodes, ...squarifyRecursive(items, remaining, [])];
+    }
+  }
+
+  return squarifyRecursive(items, rect);
 }
 
 export default function TreeMap({ topics, maxDisplay = 50, theme }: TreeMapProps) {
@@ -22,61 +163,55 @@ export default function TreeMap({ topics, maxDisplay = 50, theme }: TreeMapProps
 
   useEffect(() => {
     const displayTopics = topics.slice(0, maxDisplay);
-    const totalValue = displayTopics.reduce((sum, t) => sum + t.searchVolume, 0);
+
+    const groupedByCategory = displayTopics.reduce((acc, topic) => {
+      const category = topic.category || 'Other';
+      if (!acc[category]) acc[category] = [];
+      acc[category].push(topic);
+      return acc;
+    }, {} as { [key: string]: TrendingTopic[] });
+
+    const categoryGroups = Object.entries(groupedByCategory)
+      .sort((a, b) => {
+        const sumA = a[1].reduce((sum, t) => sum + t.searchVolume, 0);
+        const sumB = b[1].reduce((sum, t) => sum + t.searchVolume, 0);
+        return sumB - sumA;
+      });
 
     const containerWidth = 1200;
     const containerHeight = 800;
+    const totalValue = displayTopics.reduce((sum, t) => sum + t.searchVolume, 0);
 
-    const calculatedNodes: TreeMapNode[] = [];
-    let currentX = 0;
+    let allNodes: TreeMapNode[] = [];
     let currentY = 0;
-    let rowHeight = 0;
-    let rowWidth = 0;
-    const padding = 2;
 
-    displayTopics.forEach((topic, index) => {
-      const area = (topic.searchVolume / totalValue) * (containerWidth * containerHeight);
-      const aspectRatio = containerWidth / containerHeight;
+    categoryGroups.forEach(([category, categoryTopics]) => {
+      const categoryValue = categoryTopics.reduce((sum, t) => sum + t.searchVolume, 0);
+      const categoryHeight = (categoryValue / totalValue) * containerHeight;
 
-      let width = Math.sqrt(area * aspectRatio);
-      let height = area / width;
-
-      if (currentX + width > containerWidth) {
-        currentX = 0;
-        currentY += rowHeight + padding;
-        rowHeight = 0;
-        rowWidth = 0;
-      }
-
-      if (currentY + height > containerHeight) {
-        height = containerHeight - currentY;
-        width = area / height;
-      }
-
-      const hue = (index * 360) / maxDisplay;
-      const color = theme === 'dark'
-        ? `hsl(${hue}, 70%, 60%)`
-        : `hsl(${hue}, 70%, 50%)`;
-
-      calculatedNodes.push({
+      const items = categoryTopics.map(topic => ({
         topic,
-        x: currentX,
-        y: currentY,
-        width: width - padding,
-        height: height - padding,
-        color
-      });
+        value: topic.searchVolume,
+        category
+      }));
 
-      currentX += width;
-      rowWidth += width;
-      rowHeight = Math.max(rowHeight, height);
+      const rect = {
+        x: 0,
+        y: currentY,
+        width: containerWidth,
+        height: categoryHeight
+      };
+
+      const categoryNodes = squarify(items, rect);
+      allNodes = [...allNodes, ...categoryNodes];
+      currentY += categoryHeight;
     });
 
-    setNodes(calculatedNodes);
+    setNodes(allNodes);
   }, [topics, maxDisplay, theme]);
 
   return (
-    <div className={`w-full ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'} rounded-lg p-4`}>
+    <div className={`w-full ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'} rounded-lg overflow-hidden`}>
       <div className="relative w-full" style={{ paddingBottom: '66.67%' }}>
         <svg
           viewBox="0 0 1200 800"
@@ -85,8 +220,20 @@ export default function TreeMap({ topics, maxDisplay = 50, theme }: TreeMapProps
         >
           {nodes.map((node, index) => {
             const isHovered = hoveredIndex === index;
-            const fontSize = Math.min(node.width, node.height) / 8;
-            const showText = fontSize > 8;
+            const minDimension = Math.min(node.width, node.height);
+            const baseFontSize = minDimension / 10;
+            const fontSize = Math.max(10, Math.min(baseFontSize, 24));
+            const showText = minDimension > 40;
+            const showValue = minDimension > 60;
+
+            const maxChars = Math.floor(node.width / (fontSize * 0.6));
+            let displayName = node.topic.name.replace(/"/g, '');
+            if (displayName.length > maxChars) {
+              displayName = displayName.substring(0, maxChars - 3) + '...';
+            }
+
+            const textColor = theme === 'dark' ? '#ffffff' : '#000000';
+            const strokeColor = theme === 'dark' ? '#1f2937' : '#ffffff';
 
             return (
               <g key={index}>
@@ -96,9 +243,9 @@ export default function TreeMap({ topics, maxDisplay = 50, theme }: TreeMapProps
                   width={node.width}
                   height={node.height}
                   fill={node.color}
-                  opacity={isHovered ? 1 : 0.85}
-                  stroke={theme === 'dark' ? '#1f2937' : '#e5e7eb'}
-                  strokeWidth="1"
+                  opacity={isHovered ? 0.9 : 0.8}
+                  stroke={strokeColor}
+                  strokeWidth="2"
                   className="transition-opacity duration-200 cursor-pointer"
                   onMouseEnter={() => setHoveredIndex(index)}
                   onMouseLeave={() => setHoveredIndex(null)}
@@ -107,36 +254,34 @@ export default function TreeMap({ topics, maxDisplay = 50, theme }: TreeMapProps
                   <>
                     <text
                       x={node.x + node.width / 2}
-                      y={node.y + node.height / 2 - fontSize / 2}
+                      y={node.y + node.height / 2 + (showValue ? -fontSize / 3 : fontSize / 3)}
                       textAnchor="middle"
-                      fill="white"
+                      fill={textColor}
                       fontSize={fontSize}
-                      fontWeight="600"
+                      fontWeight="700"
                       className="pointer-events-none select-none"
                       style={{
-                        textShadow: '0 1px 2px rgba(0,0,0,0.3)',
-                        filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.3))'
+                        textShadow: '0 1px 3px rgba(0,0,0,0.5)',
                       }}
                     >
-                      {node.topic.name.replace(/"/g, '').length > 20
-                        ? node.topic.name.replace(/"/g, '').substring(0, 20) + '...'
-                        : node.topic.name.replace(/"/g, '')}
+                      {displayName}
                     </text>
-                    <text
-                      x={node.x + node.width / 2}
-                      y={node.y + node.height / 2 + fontSize}
-                      textAnchor="middle"
-                      fill="white"
-                      fontSize={fontSize * 0.7}
-                      fontWeight="500"
-                      className="pointer-events-none select-none"
-                      style={{
-                        textShadow: '0 1px 2px rgba(0,0,0,0.3)',
-                        filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.3))'
-                      }}
-                    >
-                      {node.topic.searchVolumeRaw.replace(/"/g, '')}
-                    </text>
+                    {showValue && (
+                      <text
+                        x={node.x + node.width / 2}
+                        y={node.y + node.height / 2 + fontSize * 0.8}
+                        textAnchor="middle"
+                        fill={textColor}
+                        fontSize={fontSize * 0.7}
+                        fontWeight="600"
+                        className="pointer-events-none select-none"
+                        style={{
+                          textShadow: '0 1px 3px rgba(0,0,0,0.5)',
+                        }}
+                      >
+                        {node.topic.searchVolumeRaw.replace(/"/g, '')}
+                      </text>
+                    )}
                   </>
                 )}
               </g>
@@ -146,7 +291,7 @@ export default function TreeMap({ topics, maxDisplay = 50, theme }: TreeMapProps
       </div>
 
       {hoveredIndex !== null && nodes[hoveredIndex] && (
-        <div className={`mt-4 p-4 rounded-lg ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border`}>
+        <div className={`mt-4 mx-4 mb-4 p-4 rounded-lg ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border`}>
           <h3 className={`font-semibold text-lg mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
             {nodes[hoveredIndex].topic.name.replace(/"/g, '')}
           </h3>
