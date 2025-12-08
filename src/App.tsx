@@ -85,6 +85,7 @@ function HomePage() {
   const [showFullTop10, setShowFullTop10] = useState<boolean>(false);
   const [comparingTopics, setComparingTopics] = useState<Set<string>>(new Set());
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
+  const [animateBars, setAnimateBars] = useState(false);
   const bubbleChartRef = useRef<HTMLDivElement>(null);
   const newSummaryRef = useRef<HTMLDivElement>(null);
   const editSummaryRef = useRef<HTMLDivElement>(null);
@@ -143,6 +144,16 @@ function HomePage() {
   useEffect(() => {
     loadTopics();
   }, [dateFilter, categoryFilter, sourceFilter]);
+
+  useEffect(() => {
+    if (viewMode === 'list') {
+      setAnimateBars(false);
+      const timer = setTimeout(() => {
+        setAnimateBars(true);
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [topics, viewMode]);
 
   const loadThemePreference = () => {
     const savedTheme = localStorage.getItem('theme');
@@ -1697,103 +1708,71 @@ function HomePage() {
                 </section>
               </>
             )}
-            {topics.length > 0 && viewMode === 'list' && (
+{topics.length > 0 && viewMode === 'list' && (() => {
+              const sortedTopics = getSortedTopics();
+              const maxValue = Math.max(...sortedTopics.map(t => t.searchVolume));
+
+              return (
               <div className="max-w-7xl mx-auto">
                 <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200 shadow-md'} rounded-lg border overflow-hidden`}>
-                  <div className={`hidden md:grid grid-cols-5 gap-4 px-6 py-4 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200'} font-semibold text-sm`}>
-                    <button
-                      onClick={() => handleSort('name')}
-                      className={`flex items-center gap-1 hover:${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'} transition-colors`}
-                    >
-                      Topic <SortIcon field="name" />
-                    </button>
-                    <button
-                      onClick={() => handleSort('searchVolume')}
-                      className={`flex items-center justify-center gap-1 hover:${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'} transition-colors`}
-                    >
-                      Search Volume <SortIcon field="searchVolume" />
-                    </button>
-                    <button
-                      onClick={() => handleSort('rank')}
-                      className={`flex items-center justify-center gap-1 hover:${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'} transition-colors`}
-                    >
-                      Rank <SortIcon field="rank" />
-                    </button>
-                    <div className="text-center">Source</div>
-                    <button
-                      onClick={() => handleSort('pubDate')}
-                      className={`flex items-center justify-center gap-1 hover:${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'} transition-colors`}
-                    >
-                      Started (ET) <SortIcon field="pubDate" />
-                    </button>
+                  <div className={`px-6 py-4 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200'}`}>
+                    <div className="flex items-center gap-4">
+                      <button
+                        onClick={() => handleSort('rank')}
+                        className={`flex items-center gap-1 hover:${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'} transition-colors font-semibold text-sm flex-shrink-0 w-8`}
+                      >
+                        # <SortIcon field="rank" />
+                      </button>
+                      <button
+                        onClick={() => handleSort('name')}
+                        className={`flex items-center gap-1 hover:${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'} transition-colors font-semibold text-sm flex-shrink-0 w-48`}
+                      >
+                        Topic <SortIcon field="name" />
+                      </button>
+                      <button
+                        onClick={() => handleSort('searchVolume')}
+                        className={`flex items-center gap-1 hover:${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'} transition-colors font-semibold text-sm flex-1`}
+                      >
+                        Search Volume <SortIcon field="searchVolume" />
+                      </button>
+                      <span className={`font-semibold text-sm flex-shrink-0 w-24 text-right`}>
+                        Volume
+                      </span>
+                    </div>
                   </div>
                   <div className={`divide-y ${theme === 'dark' ? 'divide-gray-700' : 'divide-gray-200'}`}>
-                    {getSortedTopics().map((topic, index) => (
-                      <div key={index} className={`${theme === 'dark' ? 'hover:bg-gray-750' : 'hover:bg-gray-50'} transition-colors`}>
-                        <div className="hidden md:grid grid-cols-5 gap-4 px-6 py-4">
-                          <div className="font-medium">{topic.name.replace(/"/g, '')}</div>
-                          <div className={`text-center ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>{topic.searchVolumeRaw.replace(/"/g, '')}</div>
-                          <div className={`text-center ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>#{index + 1}</div>
-                          <div className={`text-center text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-                            <span className={`px-2 py-1 rounded text-xs ${topic.source === 'user_upload' ? (theme === 'dark' ? 'bg-green-900/30 text-green-400' : 'bg-green-100 text-green-700') : (theme === 'dark' ? 'bg-blue-900/30 text-blue-400' : 'bg-blue-100 text-blue-700')}`}>
-                              {(() => {
-                                const found = sources.find(s => s.value === topic.source);
-                                if (found) return found.label;
-                                if (topic.source) return topic.source.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-                                return '-';
-                              })()}
-                            </span>
+                    {sortedTopics.map((topic, index) => {
+                      const barWidth = (topic.searchVolume / maxValue) * 100;
+                      const barColor = '#3b82f6';
+
+                      return (
+                      <div key={index} className={`${theme === 'dark' ? 'hover:bg-gray-750' : 'hover:bg-gray-50'} transition-colors px-6 py-4`}>
+                        <div className="flex items-center gap-4">
+                          <span className={`text-sm font-bold flex-shrink-0 w-8 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                            {index + 1}
+                          </span>
+                          <span className={`text-sm font-medium truncate overflow-hidden flex-shrink-0 w-48 ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'}`}>
+                            {topic.name.replace(/"/g, '')}
+                          </span>
+                          <div className={`flex-1 h-10 rounded ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'} overflow-hidden relative`}>
+                            <div
+                              className="h-full transition-all duration-1000 ease-out"
+                              style={{
+                                width: animateBars ? `${barWidth}%` : '0%',
+                                backgroundColor: barColor
+                              }}
+                            />
                           </div>
-                          <div className={`text-center text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-                            {(topic.pubDate || topic.createdAt) ? new Date(topic.pubDate || topic.createdAt).toLocaleString('en-US', {
-                              timeZone: 'America/New_York',
-                              month: 'short',
-                              day: 'numeric',
-                              hour: 'numeric',
-                              minute: '2-digit',
-                              hour12: true
-                            }) : '-'}
-                          </div>
-                        </div>
-                        <div className="md:hidden px-4 py-3 space-y-2">
-                          <div className="flex items-start justify-between gap-2">
-                            <div className="font-medium text-base flex-1">{topic.name.replace(/"/g, '')}</div>
-                            <div className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'} font-mono`}>#{index + 1}</div>
-                          </div>
-                          <div className="flex flex-wrap gap-2 text-xs">
-                            <span className={`px-2 py-1 rounded ${theme === 'dark' ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-700'}`}>
-                              {topic.searchVolumeRaw.replace(/"/g, '')}
-                            </span>
-                            <span className={`px-2 py-1 rounded ${topic.source === 'user_upload' ? (theme === 'dark' ? 'bg-green-900/30 text-green-400' : 'bg-green-100 text-green-700') : (theme === 'dark' ? 'bg-blue-900/30 text-blue-400' : 'bg-blue-100 text-blue-700')}`}>
-                              {(() => {
-                                const found = sources.find(s => s.value === topic.source);
-                                if (found) return found.label;
-                                if (topic.source) return topic.source.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-                                return '-';
-                              })()}
-                            </span>
-                          </div>
-                          <div className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-                            {(topic.pubDate || topic.createdAt) && (
-                              <div>
-                                <span className="font-medium">Started:</span> {new Date(topic.pubDate || topic.createdAt).toLocaleString('en-US', {
-                                  timeZone: 'America/New_York',
-                                  month: 'short',
-                                  day: 'numeric',
-                                  hour: 'numeric',
-                                  minute: '2-digit',
-                                  hour12: true
-                                })}
-                              </div>
-                            )}
-                          </div>
+                          <span className={`text-sm font-bold flex-shrink-0 w-24 text-right ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                            {topic.searchVolumeRaw.replace(/"/g, '')}
+                          </span>
                         </div>
                       </div>
-                    ))}
+                    )})}
                   </div>
                 </div>
               </div>
-            )}
+            );})()}
           </>
         )}
         {latestPages.length > 0 && (
