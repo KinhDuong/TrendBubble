@@ -460,6 +460,288 @@ function generateStructuredData(pageData, topics) {
 <script type="application/ld+json">${JSON.stringify(navigationSchema)}</script>`;
 }
 
+async function prerenderExplorePage(baseHTML, distPath) {
+  console.log('Pre-rendering: /explore');
+
+  const { data: heroPage } = await supabase
+    .from('pages')
+    .select('*')
+    .eq('display_section', 'hero')
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  const { data: topPages } = await supabase
+    .from('pages')
+    .select('*')
+    .eq('display_section', 'top')
+    .order('created_at', { ascending: false })
+    .limit(2);
+
+  const { data: featuredPages } = await supabase
+    .from('pages')
+    .select('*')
+    .eq('display_section', 'featured')
+    .order('created_at', { ascending: false })
+    .limit(5);
+
+  const { data: popularPages } = await supabase
+    .from('pages')
+    .select('*')
+    .eq('display_section', 'popular')
+    .order('created_at', { ascending: false })
+    .limit(5);
+
+  const { data: latestPages } = await supabase
+    .from('pages')
+    .select('*')
+    .neq('page_url', '/explore')
+    .order('created_at', { ascending: false })
+    .limit(5);
+
+  const { data: topics } = await supabase
+    .from('trending_topics')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(100);
+
+  const exploreMetaTags = `
+    <title>Explore Topics - Top Best Charts</title>
+    <meta name="description" content="Discover the latest trending topics and popular data visualizations across all categories" />
+    <meta name="keywords" content="trending topics, data visualization, charts, explore topics, rankings" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <link rel="canonical" href="${BASE_URL}/explore" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="${BASE_URL}/explore" />
+    <meta property="og:title" content="Explore Topics - Top Best Charts" />
+    <meta property="og:description" content="Discover the latest trending topics and popular data visualizations across all categories" />
+    <meta property="og:site_name" content="Top Best Charts" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Explore Topics - Top Best Charts" />
+    <meta name="twitter:description" content="Discover the latest trending topics and popular data visualizations across all categories" />
+  `;
+
+  let exploreContentHTML = `
+    <div class="explore-page-content">
+      <header style="background-color: #111827; border-bottom: 1px solid #374151; padding: 0.5rem 1rem;">
+        <nav aria-label="Main navigation" style="max-width: 80rem; margin: 0 auto; display: flex; align-items: center; justify-content: space-between;">
+          <a href="/" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none;">
+            <span style="color: #2563eb; font-size: 1.5rem; font-weight: 700;">Top Best Charts</span>
+          </a>
+          <ul style="display: flex; gap: 1.5rem; list-style: none; margin: 0; padding: 0;">
+            <li><a href="/" style="color: #d1d5db; text-decoration: none;">Home</a></li>
+            <li><a href="/explore" style="color: #d1d5db; text-decoration: none;">Explore Topics</a></li>
+          </ul>
+        </nav>
+      </header>
+
+      <main style="max-width: 80rem; margin: 2rem auto; padding: 0 1rem;">
+        <h1 style="font-size: 2rem; font-weight: 700; color: white; margin-bottom: 2rem;">Explore Topics</h1>
+  `;
+
+  // Hero and Top Pages Section
+  if (heroPage || (topPages && topPages.length > 0)) {
+    exploreContentHTML += `<section style="margin-bottom: 3rem;">`;
+
+    if (heroPage) {
+      exploreContentHTML += `
+        <article style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; padding: 2rem; margin-bottom: 1.5rem;">
+          <span style="color: #60a5fa; font-size: 0.875rem; font-weight: 600; text-transform: uppercase;">Featured</span>
+          <h2 style="font-size: 1.5rem; font-weight: 700; color: white; margin: 0.5rem 0;">
+            <a href="${heroPage.page_url}" style="text-decoration: none; color: inherit;">${heroPage.meta_title}</a>
+          </h2>
+          <p style="color: #d1d5db; font-size: 0.875rem;">${heroPage.meta_description}</p>
+        </article>
+      `;
+    }
+
+    if (topPages && topPages.length > 0) {
+      exploreContentHTML += `<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem;">`;
+      topPages.forEach(page => {
+        exploreContentHTML += `
+          <article style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; padding: 1.5rem;">
+            <span style="color: #34d399; font-size: 0.875rem; font-weight: 600; text-transform: uppercase;">Top</span>
+            <h3 style="font-size: 1.25rem; font-weight: 700; color: white; margin: 0.5rem 0;">
+              <a href="${page.page_url}" style="text-decoration: none; color: inherit;">${page.meta_title}</a>
+            </h3>
+            <p style="color: #d1d5db; font-size: 0.875rem;">${page.meta_description}</p>
+          </article>
+        `;
+      });
+      exploreContentHTML += `</div>`;
+    }
+    exploreContentHTML += `</section>`;
+  }
+
+  // Latest Pages Section
+  if (latestPages && latestPages.length > 0) {
+    exploreContentHTML += `
+      <section style="margin-bottom: 3rem;">
+        <h2 style="font-size: 1.5rem; font-weight: 700; color: white; margin-bottom: 1rem;">LATEST</h2>
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
+    `;
+    latestPages.forEach(page => {
+      const pageDate = new Date(page.created_at).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
+      exploreContentHTML += `
+        <article style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; padding: 1rem; display: flex; gap: 1rem;">
+          <div style="flex: 1;">
+            <span style="color: #60a5fa; font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">Page / ${pageDate}</span>
+            <h3 style="font-size: 1.125rem; font-weight: 700; color: white; margin: 0.5rem 0;">
+              <a href="${page.page_url}" style="text-decoration: none; color: inherit;">${page.meta_title}</a>
+            </h3>
+            ${page.meta_description ? `<p style="color: #d1d5db; font-size: 0.875rem;">${page.meta_description}</p>` : ''}
+          </div>
+        </article>
+      `;
+    });
+    exploreContentHTML += `</div></section>`;
+  }
+
+  // What Is Top Best Charts Section
+  exploreContentHTML += `
+    <section style="margin-bottom: 3rem;">
+      <div style="text-align: center; margin-bottom: 2rem;">
+        <h2 style="font-size: 2rem; font-weight: 700; color: white; margin-bottom: 1rem;">What Is Top Best Charts?</h2>
+        <p style="font-size: 1.125rem; color: #d1d5db; margin-bottom: 1rem;">Your Ultimate Data Visualization Hub</p>
+        <p style="color: #9ca3af; max-width: 60rem; margin: 0 auto;">
+          Top Best Chart helps you explore the world's top-ranked items quickly and visually. From rankings to insights,
+          our platform makes data easy to understand and engaging for everyone.
+        </p>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
+        <div style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.75rem; padding: 1.5rem;">
+          <h3 style="font-size: 1.25rem; font-weight: 700; color: white; margin-bottom: 0.75rem;">Top List Rankings</h3>
+          <p style="color: #9ca3af; font-size: 0.875rem;">Browse the most popular items ranked by popularity, trends, and user engagement. Stay updated with what's trending now.</p>
+        </div>
+        <div style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.75rem; padding: 1.5rem;">
+          <h3 style="font-size: 1.25rem; font-weight: 700; color: white; margin-bottom: 0.75rem;">Bubble Chart Analysis</h3>
+          <p style="color: #9ca3af; font-size: 0.875rem;">Analyze trends with interactive bubble charts that reveal relationships between data points at a glance.</p>
+        </div>
+        <div style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.75rem; padding: 1.5rem;">
+          <h3 style="font-size: 1.25rem; font-weight: 700; color: white; margin-bottom: 0.75rem;">Bar Chart Comparisons</h3>
+          <p style="color: #9ca3af; font-size: 0.875rem;">Compare values side-by-side with clear bar charts that make differences and patterns easy to spot.</p>
+        </div>
+        <div style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.75rem; padding: 1.5rem;">
+          <h3 style="font-size: 1.25rem; font-weight: 700; color: white; margin-bottom: 0.75rem;">Donut Chart Proportions</h3>
+          <p style="color: #9ca3af; font-size: 0.875rem;">Explore proportions and distributions with elegant donut charts that highlight key segments.</p>
+        </div>
+        <div style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.75rem; padding: 1.5rem;">
+          <h3 style="font-size: 1.25rem; font-weight: 700; color: white; margin-bottom: 0.75rem;">Treemap Layout</h3>
+          <p style="color: #9ca3af; font-size: 0.875rem;">Understand hierarchical data with structured treemap layouts showing relationships and impact clearly.</p>
+        </div>
+        <div style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.75rem; padding: 1.5rem;">
+          <h3 style="font-size: 1.25rem; font-weight: 700; color: white; margin-bottom: 0.75rem;">For Everyone</h3>
+          <p style="color: #9ca3af; font-size: 0.875rem;">Perfect for researchers, marketers, and enthusiasts. Your go-to destination for fast, intuitive, and visually stunning data exploration.</p>
+        </div>
+      </div>
+    </section>
+  `;
+
+  // Category Topics Section
+  if (topics && topics.length > 0) {
+    const categoryTopics = {};
+    topics.forEach(topic => {
+      const category = topic.category || 'General';
+      if (!categoryTopics[category]) {
+        categoryTopics[category] = [];
+      }
+      if (categoryTopics[category].length < 3) {
+        categoryTopics[category].push(topic);
+      }
+    });
+
+    const categories = Object.entries(categoryTopics).slice(0, 3);
+    categories.forEach(([category, categoryTopicsList]) => {
+      exploreContentHTML += `
+        <section style="margin-bottom: 3rem;">
+          <h2 style="font-size: 1.5rem; font-weight: 700; color: white; margin-bottom: 1rem; text-transform: uppercase;">${category}</h2>
+          <div style="display: flex; flex-direction: column; gap: 1rem;">
+      `;
+      categoryTopicsList.forEach(topic => {
+        const searchVolume = topic.search_volume_raw || topic.search_volume;
+        exploreContentHTML += `
+          <article style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; padding: 1rem;">
+            <div style="display: flex; gap: 1rem; align-items: flex-start;">
+              <div style="flex: 1;">
+                <span style="color: #60a5fa; font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">${category}</span>
+                <h3 style="font-size: 1.125rem; font-weight: 700; color: white; margin: 0.5rem 0;">${topic.name.replace(/"/g, '')}</h3>
+                <p style="color: #9ca3af; font-size: 0.875rem;">${searchVolume.toString().replace(/"/g, '')} searches</p>
+                ${topic.source ? `<span style="padding: 0.25rem 0.5rem; background-color: #374151; color: #d1d5db; font-size: 0.75rem; border-radius: 0.25rem; display: inline-block; margin-top: 0.25rem;">${topic.source}</span>` : ''}
+              </div>
+            </div>
+          </article>
+        `;
+      });
+      exploreContentHTML += `</div></section>`;
+    });
+  }
+
+  // Sidebar Sections (Featured and Popular)
+  if ((featuredPages && featuredPages.length > 0) || (popularPages && popularPages.length > 0)) {
+    exploreContentHTML += `<aside style="margin-top: 3rem;">`;
+
+    if (featuredPages && featuredPages.length > 0) {
+      exploreContentHTML += `
+        <section style="margin-bottom: 2rem;">
+          <h2 style="font-size: 1.25rem; font-weight: 700; color: white; margin-bottom: 1rem;">FEATURED</h2>
+          <div style="display: flex; flex-direction: column; gap: 1rem;">
+      `;
+      featuredPages.forEach((page, index) => {
+        exploreContentHTML += `
+          <article style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; padding: 1rem;">
+            <span style="color: #60a5fa; font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">Featured #${index + 1}</span>
+            <h3 style="font-size: 1rem; font-weight: 600; color: white; margin: 0.5rem 0;">
+              <a href="${page.page_url}" style="text-decoration: none; color: inherit;">${page.meta_title}</a>
+            </h3>
+            ${page.meta_description ? `<p style="color: #9ca3af; font-size: 0.875rem;">${page.meta_description}</p>` : ''}
+          </article>
+        `;
+      });
+      exploreContentHTML += `</div></section>`;
+    }
+
+    if (popularPages && popularPages.length > 0) {
+      exploreContentHTML += `
+        <section style="margin-bottom: 2rem;">
+          <h2 style="font-size: 1.25rem; font-weight: 700; color: white; margin-bottom: 1rem;">POPULAR</h2>
+          <div style="display: flex; flex-direction: column; gap: 1rem;">
+      `;
+      popularPages.forEach((page, index) => {
+        exploreContentHTML += `
+          <article style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; padding: 1rem;">
+            <span style="color: #ec4899; font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">Popular #${index + 1}</span>
+            <h3 style="font-size: 1rem; font-weight: 600; color: white; margin: 0.5rem 0;">
+              <a href="${page.page_url}" style="text-decoration: none; color: inherit;">${page.meta_title}</a>
+            </h3>
+            ${page.meta_description ? `<p style="color: #9ca3af; font-size: 0.875rem;">${page.meta_description}</p>` : ''}
+          </article>
+        `;
+      });
+      exploreContentHTML += `</div></section>`;
+    }
+
+    exploreContentHTML += `</aside>`;
+  }
+
+  exploreContentHTML += `
+      </main>
+    </div>
+  `;
+
+  const html = baseHTML
+    .replace('<title>Vite + React + TS</title>', '')
+    .replace('<!-- PRERENDER_META -->', exploreMetaTags)
+    .replace('<!-- PRERENDER_STRUCTURED_DATA -->', '')
+    .replace('<div id="root"></div>', `<div id="root">${exploreContentHTML}</div><div id="prerender-footer">${generateFooterHTML()}</div>`);
+
+  const outputDir = path.join(distPath, 'explore');
+  fs.mkdirSync(outputDir, { recursive: true });
+  fs.writeFileSync(path.join(outputDir, 'index.html'), html);
+  console.log('✓ Generated: /tmp/cc-agent/60247285/project/dist/explore/index.html');
+}
+
 async function prerenderHomePage(baseHTML, distPath) {
   console.log('Pre-rendering home page...');
 
@@ -735,8 +1017,14 @@ async function prerenderPages() {
   }
 
   await prerenderHomePage(baseHTML, distPath);
+  await prerenderExplorePage(baseHTML, distPath);
 
   for (const page of pages) {
+    // Skip explore page as it's handled separately
+    if (page.page_url === '/explore') {
+      continue;
+    }
+
     console.log(`Pre-rendering: ${page.page_url}`);
 
     const topics = await fetchTopicsForPage(page.source);
