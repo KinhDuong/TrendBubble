@@ -2139,9 +2139,9 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Navigate to="/trending-now" replace />} />
+        <Route path="/" element={<ExplorePage />} />
+        <Route path="/explore" element={<Navigate to="/" replace />} />
         <Route path="/trending-now" element={<HomePage />} />
-        <Route path="/explore" element={<ExplorePage />} />
         <Route path="/admin/pages" element={<AdminPages />} />
         <Route path="*" element={<DynamicPage />} />
       </Routes>

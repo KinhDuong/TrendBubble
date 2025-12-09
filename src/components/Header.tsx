@@ -95,7 +95,7 @@ export default function Header({ theme, isAdmin, onLoginClick, onLogout, title =
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
           {/* Logo and Title - Hide on mobile when search is expanded */}
           <a
-            href="/trending-now"
+            href="/"
             className={`flex items-center gap-3 hover:opacity-80 transition-opacity ${isSearchExpanded ? 'hidden md:flex' : 'flex'}`}
           >
             <div className={`relative w-12 h-12 flex-shrink-0 rounded-full shadow-lg border-4 border-blue-600 overflow-hidden flex items-center justify-center ${theme === 'dark' ? 'bg-transparent' : 'bg-transparent'}`}>
@@ -194,20 +194,20 @@ export default function Header({ theme, isAdmin, onLoginClick, onLogout, title =
                 <div className={`absolute top-full right-0 mt-2 w-64 ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border rounded-lg shadow-lg z-50`}>
                   <nav className="py-2">
                     <a
-                      href="/trending-now"
+                      href="/"
                       className={`flex items-center gap-3 px-6 py-3 ${theme === 'dark' ? 'text-gray-300 hover:bg-gray-700 hover:text-white' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'} transition-colors`}
                       onClick={() => setIsMenuOpen(false)}
                     >
                       <Home size={20} />
-                      <span>Trending Now</span>
+                      <span>Home</span>
                     </a>
                     <a
-                      href="/explore"
+                      href="/trending-now"
                       className={`flex items-center gap-3 px-6 py-3 ${theme === 'dark' ? 'text-gray-300 hover:bg-gray-700 hover:text-white' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'} transition-colors`}
                       onClick={() => setIsMenuOpen(false)}
                     >
                       <Compass size={20} />
-                      <span>Explore Topics</span>
+                      <span>Trending Now</span>
                     </a>
                     <a
                       href="mailto:contact@example.com"
