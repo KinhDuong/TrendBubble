@@ -1525,7 +1525,54 @@ function HomePage() {
 
         <main role="main" aria-label="Trending topics visualization">
         {loading && (
-          <div className={`text-center py-8 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>Loading 50 bubbles...</div>
+          <div className="max-w-7xl mx-auto mb-8 animate-pulse">
+            {/* Header Skeleton */}
+            <div className="mb-4">
+              <div className={`h-8 md:h-10 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'} rounded w-3/4 mb-4`}></div>
+              <div className="flex gap-3 mb-4">
+                <div className={`h-6 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'} rounded w-48`}></div>
+                <div className={`h-6 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'} rounded w-32`}></div>
+              </div>
+            </div>
+
+            {/* Chart Skeleton */}
+            <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'} rounded-lg mb-8`} style={{ height: '600px', minHeight: '600px' }}>
+              <div className="flex items-center justify-center h-full">
+                <div className="text-center">
+                  <div className={`inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid ${theme === 'dark' ? 'border-gray-600 border-t-blue-500' : 'border-gray-300 border-t-blue-600'}`}></div>
+                  <p className={`mt-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>Loading trending topics...</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Featured Section Skeleton */}
+            <div className={`w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-200'} border-t border-b py-6 mb-8`}>
+              <div className="max-w-7xl mx-auto px-4">
+                <div className={`h-6 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'} rounded w-32 mb-4`}></div>
+                <div className="flex flex-wrap gap-4">
+                  {[1, 2, 3, 4].map((i) => (
+                    <div key={i} className={`h-5 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'} rounded w-48`}></div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Top 10 List Skeleton */}
+            <div className="max-w-7xl mx-auto">
+              <div className={`h-8 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'} rounded w-64 mb-4`}></div>
+              <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white shadow-md border border-gray-200'} rounded-lg overflow-hidden`}>
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
+                  <div key={i} className={`px-6 py-4 flex items-center gap-4 ${i < 10 ? (theme === 'dark' ? 'border-b border-gray-700' : 'border-b border-gray-200') : ''}`}>
+                    <div className={`w-12 h-6 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'} rounded`}></div>
+                    <div className="flex-1">
+                      <div className={`h-5 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'} rounded w-3/4 mb-2`}></div>
+                      <div className={`h-4 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'} rounded w-1/2`}></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
         )}
         {!loading && (
           <>
