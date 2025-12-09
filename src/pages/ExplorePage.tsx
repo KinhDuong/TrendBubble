@@ -275,118 +275,6 @@ export default function ExplorePage() {
               </div>
             )}
 
-            {/* What Is Top Best Charts Section */}
-            <div className="mb-12">
-              <div className="text-center mb-8">
-                <div className="inline-flex items-center gap-2 mb-4">
-                  <Sparkles className={`w-8 h-8 ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`} />
-                  <h2 className={`text-3xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                    What Is Top Best Charts?
-                  </h2>
-                  <Sparkles className={`w-8 h-8 ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`} />
-                </div>
-                <p className={`text-lg max-w-3xl mx-auto ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                  Your Ultimate Data Visualization Hub
-                </p>
-                <p className={`mt-4 max-w-4xl mx-auto ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                  Top Best Chart helps you explore the world's top-ranked items quickly and visually. From rankings to insights,
-                  our platform makes data easy to understand and engaging for everyone.
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {/* Top List Card */}
-                <div className={`group p-6 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 ${
-                  theme === 'dark' ? 'bg-gradient-to-br from-gray-800 to-gray-900' : 'bg-gradient-to-br from-white to-gray-50'
-                }`}>
-                  <div className="flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 mb-4 group-hover:scale-110 transition-transform duration-300">
-                    <TrendingUp className="w-8 h-8 text-white" />
-                  </div>
-                  <h3 className={`text-xl font-bold mb-3 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                    Top List Rankings
-                  </h3>
-                  <p className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                    Browse the most popular items ranked by popularity, trends, and user engagement. Stay updated with what's trending now.
-                  </p>
-                </div>
-
-                {/* Bubble Chart Card */}
-                <div className={`group p-6 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 ${
-                  theme === 'dark' ? 'bg-gradient-to-br from-gray-800 to-gray-900' : 'bg-gradient-to-br from-white to-gray-50'
-                }`}>
-                  <div className="flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-cyan-500 to-teal-600 mb-4 group-hover:scale-110 transition-transform duration-300">
-                    <Circle className="w-8 h-8 text-white" />
-                  </div>
-                  <h3 className={`text-xl font-bold mb-3 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                    Bubble Chart Analysis
-                  </h3>
-                  <p className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                    Analyze trends with interactive bubble charts that reveal relationships between data points at a glance.
-                  </p>
-                </div>
-
-                {/* Bar Chart Card */}
-                <div className={`group p-6 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 ${
-                  theme === 'dark' ? 'bg-gradient-to-br from-gray-800 to-gray-900' : 'bg-gradient-to-br from-white to-gray-50'
-                }`}>
-                  <div className="flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 mb-4 group-hover:scale-110 transition-transform duration-300">
-                    <BarChart3 className="w-8 h-8 text-white" />
-                  </div>
-                  <h3 className={`text-xl font-bold mb-3 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                    Bar Chart Comparisons
-                  </h3>
-                  <p className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                    Compare values side-by-side with clear bar charts that make differences and patterns easy to spot.
-                  </p>
-                </div>
-
-                {/* Donut Chart Card */}
-                <div className={`group p-6 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 ${
-                  theme === 'dark' ? 'bg-gradient-to-br from-gray-800 to-gray-900' : 'bg-gradient-to-br from-white to-gray-50'
-                }`}>
-                  <div className="flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-orange-500 to-red-600 mb-4 group-hover:scale-110 transition-transform duration-300">
-                    <PieChart className="w-8 h-8 text-white" />
-                  </div>
-                  <h3 className={`text-xl font-bold mb-3 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                    Donut Chart Proportions
-                  </h3>
-                  <p className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                    Explore proportions and distributions with elegant donut charts that highlight key segments.
-                  </p>
-                </div>
-
-                {/* Treemap Card */}
-                <div className={`group p-6 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 ${
-                  theme === 'dark' ? 'bg-gradient-to-br from-gray-800 to-gray-900' : 'bg-gradient-to-br from-white to-gray-50'
-                }`}>
-                  <div className="flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-pink-500 to-rose-600 mb-4 group-hover:scale-110 transition-transform duration-300">
-                    <Grid3x3 className="w-8 h-8 text-white" />
-                  </div>
-                  <h3 className={`text-xl font-bold mb-3 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                    Treemap Layout
-                  </h3>
-                  <p className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                    Understand hierarchical data with structured treemap layouts showing relationships and impact clearly.
-                  </p>
-                </div>
-
-                {/* Who It's For Card */}
-                <div className={`group p-6 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 ${
-                  theme === 'dark' ? 'bg-gradient-to-br from-gray-800 to-gray-900' : 'bg-gradient-to-br from-white to-gray-50'
-                }`}>
-                  <div className="flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-violet-500 to-blue-600 mb-4 group-hover:scale-110 transition-transform duration-300">
-                    <Sparkles className="w-8 h-8 text-white" />
-                  </div>
-                  <h3 className={`text-xl font-bold mb-3 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                    For Everyone
-                  </h3>
-                  <p className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                    Perfect for researchers, marketers, and enthusiasts. Your go-to destination for fast, intuitive, and visually stunning data exploration.
-                  </p>
-                </div>
-              </div>
-            </div>
-
             {/* Latest Pages Section */}
             {latestPages.length > 0 && (
               <div className="mb-12">
@@ -433,49 +321,165 @@ export default function ExplorePage() {
             )}
 
             {/* Category Sections */}
-            {Object.entries(categoryTopics).slice(0, 3).map(([category, topics]) => (
-              <div key={category} className="mb-12">
-                <h2 className={`text-xl font-bold mb-4 uppercase ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                  {category}
-                </h2>
-                <div className="space-y-4">
-                  {topics.map((topic) => (
-                    <Link
-                      key={topic.id}
-                      to={topic.url || '#'}
-                      className={`flex gap-4 p-4 rounded-lg hover:shadow-lg transition-all duration-300 ${
-                        theme === 'dark' ? 'bg-gray-800 hover:bg-gray-750' : 'bg-white hover:bg-gray-50'
-                      }`}
-                    >
-                      <div className="flex-shrink-0 w-32 h-24 bg-gradient-to-br from-pink-400 to-purple-500 rounded-lg"></div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 text-xs mb-2">
-                          <span className={`uppercase font-semibold ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`}>
-                            {category}
-                          </span>
-                          <span className={theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}>/</span>
-                          <span className={`flex items-center gap-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                            <Clock className="w-3 h-3" />
-                            {formatTimeAgo(topic.createdAt)}
-                          </span>
+            {Object.entries(categoryTopics).slice(0, 3).map(([category, topics], index) => (
+              <div key={category}>
+                <div className="mb-12">
+                  <h2 className={`text-xl font-bold mb-4 uppercase ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                    {category}
+                  </h2>
+                  <div className="space-y-4">
+                    {topics.map((topic) => (
+                      <Link
+                        key={topic.id}
+                        to={topic.url || '#'}
+                        className={`flex gap-4 p-4 rounded-lg hover:shadow-lg transition-all duration-300 ${
+                          theme === 'dark' ? 'bg-gray-800 hover:bg-gray-750' : 'bg-white hover:bg-gray-50'
+                        }`}
+                      >
+                        <div className="flex-shrink-0 w-32 h-24 bg-gradient-to-br from-pink-400 to-purple-500 rounded-lg"></div>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 text-xs mb-2">
+                            <span className={`uppercase font-semibold ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`}>
+                              {category}
+                            </span>
+                            <span className={theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}>/</span>
+                            <span className={`flex items-center gap-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                              <Clock className="w-3 h-3" />
+                              {formatTimeAgo(topic.createdAt)}
+                            </span>
+                          </div>
+                          <h3 className={`font-bold text-lg mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                            {topic.name}
+                          </h3>
+                          <div className="flex items-center gap-4 text-sm">
+                            <span className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}>
+                              {formatNumber(topic.searchVolume)} searches
+                            </span>
+                            <span className={`px-2 py-0.5 rounded text-xs ${
+                              theme === 'dark' ? 'bg-gray-700 text-gray-300' : 'bg-gray-200 text-gray-700'
+                            }`}>
+                              {topic.source}
+                            </span>
+                          </div>
                         </div>
-                        <h3 className={`font-bold text-lg mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                          {topic.name}
-                        </h3>
-                        <div className="flex items-center gap-4 text-sm">
-                          <span className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}>
-                            {formatNumber(topic.searchVolume)} searches
-                          </span>
-                          <span className={`px-2 py-0.5 rounded text-xs ${
-                            theme === 'dark' ? 'bg-gray-700 text-gray-300' : 'bg-gray-200 text-gray-700'
-                          }`}>
-                            {topic.source}
-                          </span>
-                        </div>
-                      </div>
-                    </Link>
-                  ))}
+                      </Link>
+                    ))}
+                  </div>
                 </div>
+
+                {/* What Is Top Best Charts Section - After General */}
+                {category === 'General' && (
+                  <div className="mb-12">
+                    <div className="text-center mb-8">
+                      <div className="inline-flex items-center gap-2 mb-4">
+                        <Sparkles className={`w-8 h-8 ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`} />
+                        <h2 className={`text-3xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                          What Is Top Best Charts?
+                        </h2>
+                        <Sparkles className={`w-8 h-8 ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`} />
+                      </div>
+                      <p className={`text-lg max-w-3xl mx-auto ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                        Your Ultimate Data Visualization Hub
+                      </p>
+                      <p className={`mt-4 max-w-4xl mx-auto ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                        Top Best Chart helps you explore the world's top-ranked items quickly and visually. From rankings to insights,
+                        our platform makes data easy to understand and engaging for everyone.
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {/* Top List Card */}
+                      <div className={`group p-6 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 ${
+                        theme === 'dark' ? 'bg-gradient-to-br from-gray-800 to-gray-900' : 'bg-gradient-to-br from-white to-gray-50'
+                      }`}>
+                        <div className="flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 mb-4 group-hover:scale-110 transition-transform duration-300">
+                          <TrendingUp className="w-8 h-8 text-white" />
+                        </div>
+                        <h3 className={`text-xl font-bold mb-3 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                          Top List Rankings
+                        </h3>
+                        <p className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                          Browse the most popular items ranked by popularity, trends, and user engagement. Stay updated with what's trending now.
+                        </p>
+                      </div>
+
+                      {/* Bubble Chart Card */}
+                      <div className={`group p-6 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 ${
+                        theme === 'dark' ? 'bg-gradient-to-br from-gray-800 to-gray-900' : 'bg-gradient-to-br from-white to-gray-50'
+                      }`}>
+                        <div className="flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-cyan-500 to-teal-600 mb-4 group-hover:scale-110 transition-transform duration-300">
+                          <Circle className="w-8 h-8 text-white" />
+                        </div>
+                        <h3 className={`text-xl font-bold mb-3 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                          Bubble Chart Analysis
+                        </h3>
+                        <p className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                          Analyze trends with interactive bubble charts that reveal relationships between data points at a glance.
+                        </p>
+                      </div>
+
+                      {/* Bar Chart Card */}
+                      <div className={`group p-6 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 ${
+                        theme === 'dark' ? 'bg-gradient-to-br from-gray-800 to-gray-900' : 'bg-gradient-to-br from-white to-gray-50'
+                      }`}>
+                        <div className="flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 mb-4 group-hover:scale-110 transition-transform duration-300">
+                          <BarChart3 className="w-8 h-8 text-white" />
+                        </div>
+                        <h3 className={`text-xl font-bold mb-3 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                          Bar Chart Comparisons
+                        </h3>
+                        <p className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                          Compare values side-by-side with clear bar charts that make differences and patterns easy to spot.
+                        </p>
+                      </div>
+
+                      {/* Donut Chart Card */}
+                      <div className={`group p-6 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 ${
+                        theme === 'dark' ? 'bg-gradient-to-br from-gray-800 to-gray-900' : 'bg-gradient-to-br from-white to-gray-50'
+                      }`}>
+                        <div className="flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-orange-500 to-red-600 mb-4 group-hover:scale-110 transition-transform duration-300">
+                          <PieChart className="w-8 h-8 text-white" />
+                        </div>
+                        <h3 className={`text-xl font-bold mb-3 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                          Donut Chart Proportions
+                        </h3>
+                        <p className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                          Explore proportions and distributions with elegant donut charts that highlight key segments.
+                        </p>
+                      </div>
+
+                      {/* Treemap Card */}
+                      <div className={`group p-6 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 ${
+                        theme === 'dark' ? 'bg-gradient-to-br from-gray-800 to-gray-900' : 'bg-gradient-to-br from-white to-gray-50'
+                      }`}>
+                        <div className="flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-pink-500 to-rose-600 mb-4 group-hover:scale-110 transition-transform duration-300">
+                          <Grid3x3 className="w-8 h-8 text-white" />
+                        </div>
+                        <h3 className={`text-xl font-bold mb-3 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                          Treemap Layout
+                        </h3>
+                        <p className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                          Understand hierarchical data with structured treemap layouts showing relationships and impact clearly.
+                        </p>
+                      </div>
+
+                      {/* Who It's For Card */}
+                      <div className={`group p-6 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 ${
+                        theme === 'dark' ? 'bg-gradient-to-br from-gray-800 to-gray-900' : 'bg-gradient-to-br from-white to-gray-50'
+                      }`}>
+                        <div className="flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-violet-500 to-blue-600 mb-4 group-hover:scale-110 transition-transform duration-300">
+                          <Sparkles className="w-8 h-8 text-white" />
+                        </div>
+                        <h3 className={`text-xl font-bold mb-3 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                          For Everyone
+                        </h3>
+                        <p className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                          Perfect for researchers, marketers, and enthusiasts. Your go-to destination for fast, intuitive, and visually stunning data exploration.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
           </div>
