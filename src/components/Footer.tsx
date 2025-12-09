@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { BarChart3 } from 'lucide-react';
 
 interface FooterProps {
@@ -35,10 +36,16 @@ export default function Footer({ theme }: FooterProps) {
             <h3 className={`text-lg font-semibold mb-3 ${isDark ? 'text-white' : 'text-gray-900'}`}>
               About
             </h3>
-            <p className="text-sm">
+            <p className="text-sm mb-3">
               We turn boring rankings into beautiful, interactive stories.
               Every bubble, bar, and sparkline is built from the latest official data and refreshed the moment new numbers drop. No fluff, no paywalls - just the clearest and most up-to-date data. Made by data nerds, for the endlessly curious.
             </p>
+            <Link
+              to="/about"
+              className={`text-sm font-medium hover:underline ${isDark ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'}`}
+            >
+              Learn more about us →
+            </Link>
           </div>
         </div>
 

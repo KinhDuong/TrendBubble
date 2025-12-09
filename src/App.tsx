@@ -15,6 +15,7 @@ import ShareSnapshot from './components/ShareSnapshot';
 import DynamicPage from './pages/DynamicPage';
 import AdminPages from './pages/AdminPages';
 import ExplorePage from './pages/ExplorePage';
+import AboutPage from './pages/AboutPage';
 import { TrendingTopic } from './types';
 import { supabase } from './lib/supabase';
 import { useAuth } from './hooks/useAuth';
@@ -2189,6 +2190,7 @@ function App() {
         <Route path="/" element={<ExplorePage />} />
         <Route path="/explore" element={<Navigate to="/" replace />} />
         <Route path="/trending-now" element={<HomePage />} />
+        <Route path="/about" element={<AboutPage />} />
         <Route path="/admin/pages" element={<AdminPages />} />
         <Route path="*" element={<DynamicPage />} />
       </Routes>
