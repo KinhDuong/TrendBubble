@@ -44,7 +44,7 @@ export default function AboutPage() {
         <article className={`rounded-xl shadow-xl overflow-hidden ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}>
           <div className="px-8 py-12">
             <h1 className={`text-4xl md:text-5xl font-bold mb-6 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-              About Us – Top Best Chart
+              About
             </h1>
 
             <div className={`prose prose-lg max-w-none ${theme === 'dark' ? 'prose-invert' : ''}`}>
