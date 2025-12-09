@@ -88,7 +88,6 @@ export default function ExplorePage() {
           .from('pages')
           .select('*')
           .neq('page_url', '/explore')
-          .is('display_section', null)
           .order('created_at', { ascending: false })
           .limit(5)
       ]);
