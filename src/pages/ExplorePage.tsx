@@ -87,8 +87,7 @@ export default function ExplorePage() {
         supabase
           .from('pages')
           .select('*')
-          .neq('page_url', '/explore')
-          .is('display_section', null)
+          .eq('display_section', 'latest')
           .order('created_at', { ascending: false })
           .limit(5)
       ]);
