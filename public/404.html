@@ -48,17 +48,16 @@
     }
   </style>
   <script>
-    // GitHub Pages SPA redirect - only for browsers with sessionStorage
-    // This does NOT use meta refresh, so Google won't see it as a redirect
+    // GitHub Pages SPA redirect
     (function() {
       // Store the attempted URL for the SPA to handle
       if (typeof sessionStorage !== 'undefined') {
-        sessionStorage.redirect = location.href;
-        // Use history.replaceState instead of redirect to avoid redirect errors
         var path = location.pathname.slice(1);
+        var query = location.search;
         if (path) {
-          history.replaceState(null, null, '/#/' + path + location.search);
-          location.replace('/#/' + path + location.search);
+          sessionStorage.redirect = location.origin + '/' + path + query;
+          // Redirect to root - the main app will handle routing
+          location.replace('/' + (query ? '?redirect=' + encodeURIComponent(path + query) : ''));
         }
       }
     })();

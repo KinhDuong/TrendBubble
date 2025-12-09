@@ -6,9 +6,12 @@ import './index.css';
 
 // Handle GitHub Pages SPA redirect
 const redirect = sessionStorage.redirect;
-delete sessionStorage.redirect;
-if (redirect && redirect !== location.href) {
-  history.replaceState(null, '', redirect);
+if (redirect) {
+  delete sessionStorage.redirect;
+  if (redirect !== location.href) {
+    const url = new URL(redirect);
+    history.replaceState(null, '', url.pathname + url.search + url.hash);
+  }
 }
 
 createRoot(document.getElementById('root')!).render(
