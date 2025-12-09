@@ -504,25 +504,22 @@ async function prerenderExplorePage(baseHTML, distPath) {
     .order('created_at', { ascending: false })
     .limit(100);
 
-  const topTopics = topics?.slice(0, 10).map(t => t.name).join(', ') || 'live search trends, viral topics, and popular searches';
-  const currentDate = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-
   const exploreMetaTags = `
-    <title>Google Trending Topics Today - Real-Time Search Trends & Analytics</title>
-    <meta name="description" content="Discover today's trending topics on Google: ${topTopics}. Updated in real-time with interactive visualizations. ${currentDate}" />
-    <meta name="keywords" content="trending topics, google trends, data visualization, charts, explore topics, rankings, top charts, real-time trends" />
+    <title>Top Best Charts - Explore Trending Topics and Data Visualizations</title>
+    <meta name="description" content="Discover the latest trending topics and popular data visualizations across all categories. Explore rankings, charts, and real-time data insights." />
+    <meta name="keywords" content="trending topics, data visualization, charts, explore topics, rankings, top charts, best charts" />
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
     <link rel="canonical" href="${BASE_URL}/" />
 
     <meta property="og:type" content="website" />
     <meta property="og:url" content="${BASE_URL}/" />
-    <meta property="og:title" content="Google Trending Topics Today - Real-Time Search Trends" />
-    <meta property="og:description" content="Live trending topics: ${topTopics}. Interactive bubble chart visualization updated hourly." />
+    <meta property="og:title" content="Top Best Charts - Explore Trending Topics and Data Visualizations" />
+    <meta property="og:description" content="Discover the latest trending topics and popular data visualizations across all categories" />
     <meta property="og:site_name" content="Top Best Charts" />
 
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Google Trending Topics Today - Real-Time Search Trends" />
-    <meta name="twitter:description" content="Live trending topics: ${topTopics}. Interactive bubble chart visualization updated hourly." />
+    <meta name="twitter:title" content="Top Best Charts - Explore Trending Topics and Data Visualizations" />
+    <meta name="twitter:description" content="Discover the latest trending topics and popular data visualizations across all categories" />
   `;
 
   let exploreContentHTML = `
