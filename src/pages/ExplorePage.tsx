@@ -174,12 +174,45 @@ export default function ExplorePage() {
           onLogout={logout}
           useH1={true}
         />
-        <div className="flex items-center justify-center h-96">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto"></div>
-            <p className={`mt-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>Loading topics...</p>
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex flex-col lg:flex-row gap-8 animate-pulse">
+            <div className="flex-1">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+                <div className={`rounded-lg ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-200'} md:col-span-2`} style={{ height: '320px' }}></div>
+                <div className={`rounded-lg ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-200'}`} style={{ height: '240px' }}></div>
+                <div className={`rounded-lg ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-200'}`} style={{ height: '240px' }}></div>
+              </div>
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="space-y-4 mb-8">
+                  <div className={`h-8 ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-200'} rounded w-48`}></div>
+                  {[1, 2, 3].map((j) => (
+                    <div key={j} className={`flex gap-4 p-4 rounded-lg ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}>
+                      <div className={`flex-shrink-0 w-32 h-24 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'} rounded-lg`}></div>
+                      <div className="flex-1 space-y-2">
+                        <div className={`h-4 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'} rounded w-3/4`}></div>
+                        <div className={`h-4 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'} rounded w-1/2`}></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
+            <div className="lg:w-80 space-y-6">
+              <div className={`rounded-lg p-6 ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}>
+                <div className={`h-6 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'} rounded w-32 mb-6`}></div>
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="flex gap-3 mb-6">
+                    <div className={`flex-shrink-0 w-16 h-16 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'} rounded-lg`}></div>
+                    <div className="flex-1 space-y-2">
+                      <div className={`h-4 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'} rounded w-full`}></div>
+                      <div className={`h-3 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'} rounded w-2/3`}></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
-        </div>
+        </main>
         <Footer theme={theme} />
         {showLogin && <Login onClose={() => setShowLogin(false)} theme={theme} />}
       </div>
