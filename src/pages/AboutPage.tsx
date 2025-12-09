@@ -53,7 +53,7 @@ export default function AboutPage() {
               </p>
 
               <p className={`text-lg leading-relaxed mb-8 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                Our platform features a variety of tools to help you visualize and analyze data effectively:
+                Top Best Charts features a variety of tools to help you visualize and analyze data effectively:
               </p>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 my-10">
