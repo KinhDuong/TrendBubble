@@ -119,6 +119,10 @@ function DynamicPage() {
     if (prerenderFooter) {
       prerenderFooter.remove();
     }
+
+    // Remove prerendered meta tags to prevent duplicates with React Helmet
+    const prerenderedTags = document.head.querySelectorAll('[data-prerendered]');
+    prerenderedTags.forEach(tag => tag.remove());
   }, []);
 
   useEffect(() => {

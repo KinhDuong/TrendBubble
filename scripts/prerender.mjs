@@ -184,20 +184,20 @@ function generateMetaTags(pageData, topics) {
 
   return `
     <title>${enhancedTitle}</title>
-    <meta name="description" content="${enhancedDescription}" />
-    <meta name="keywords" content="${keywords}" />
+    <meta name="description" content="${enhancedDescription}" data-prerendered />
+    <meta name="keywords" content="${keywords}" data-prerendered />
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
     <link rel="canonical" href="${pageUrl}" />
 
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="${pageUrl}" />
-    <meta property="og:title" content="${enhancedTitle}" />
-    <meta property="og:description" content="${enhancedDescription}" />
-    <meta property="og:site_name" content="Google Trending Topics" />
+    <meta property="og:type" content="website" data-prerendered />
+    <meta property="og:url" content="${pageUrl}" data-prerendered />
+    <meta property="og:title" content="${enhancedTitle}" data-prerendered />
+    <meta property="og:description" content="${enhancedDescription}" data-prerendered />
+    <meta property="og:site_name" content="Google Trending Topics" data-prerendered />
 
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="${enhancedTitle}" />
-    <meta name="twitter:description" content="${enhancedDescription}" />
+    <meta name="twitter:card" content="summary_large_image" data-prerendered />
+    <meta name="twitter:title" content="${enhancedTitle}" data-prerendered />
+    <meta name="twitter:description" content="${enhancedDescription}" data-prerendered />
   `;
 }
 
@@ -506,20 +506,20 @@ async function prerenderExplorePage(baseHTML, distPath) {
 
   const exploreMetaTags = `
     <title>Top Best Charts - Explore Trending Topics and Data Visualizations</title>
-    <meta name="description" content="Discover the latest trending topics and popular data visualizations across all categories. Explore rankings, charts, and real-time data insights." />
-    <meta name="keywords" content="trending topics, data visualization, charts, explore topics, rankings, top charts, best charts" />
+    <meta name="description" content="Discover the latest trending topics and popular data visualizations across all categories. Explore rankings, charts, and real-time data insights." data-prerendered />
+    <meta name="keywords" content="trending topics, data visualization, charts, explore topics, rankings, top charts, best charts" data-prerendered />
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
     <link rel="canonical" href="${BASE_URL}/" />
 
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="${BASE_URL}/" />
-    <meta property="og:title" content="Top Best Charts - Explore Trending Topics and Data Visualizations" />
-    <meta property="og:description" content="Discover the latest trending topics and popular data visualizations across all categories" />
-    <meta property="og:site_name" content="Top Best Charts" />
+    <meta property="og:type" content="website" data-prerendered />
+    <meta property="og:url" content="${BASE_URL}/" data-prerendered />
+    <meta property="og:title" content="Top Best Charts - Explore Trending Topics and Data Visualizations" data-prerendered />
+    <meta property="og:description" content="Discover the latest trending topics and popular data visualizations across all categories" data-prerendered />
+    <meta property="og:site_name" content="Top Best Charts" data-prerendered />
 
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Top Best Charts - Explore Trending Topics and Data Visualizations" />
-    <meta name="twitter:description" content="Discover the latest trending topics and popular data visualizations across all categories" />
+    <meta name="twitter:card" content="summary_large_image" data-prerendered />
+    <meta name="twitter:title" content="Top Best Charts - Explore Trending Topics and Data Visualizations" data-prerendered />
+    <meta name="twitter:description" content="Discover the latest trending topics and popular data visualizations across all categories" data-prerendered />
   `;
 
   let exploreContentHTML = `
@@ -768,20 +768,20 @@ async function prerenderTrendingNowPage(baseHTML, distPath) {
 
   const homeMetaTags = `
     <title>Trending Now - Google Trending Topics Real-Time Visualization | ${currentDate}</title>
-    <meta name="description" content="Explore trending topics in real-time with interactive bubble charts. Watch search volumes grow and shrink with live Google Trends data. Top trending now: ${topTopics}. Updated hourly." />
-    <meta name="keywords" content="google trends, trending topics, search trends, real-time trends, bubble chart, trend visualization, search volume, trending now, ${topTopics}" />
+    <meta name="description" content="Explore trending topics in real-time with interactive bubble charts. Watch search volumes grow and shrink with live Google Trends data. Top trending now: ${topTopics}. Updated hourly." data-prerendered />
+    <meta name="keywords" content="google trends, trending topics, search trends, real-time trends, bubble chart, trend visualization, search volume, trending now, ${topTopics}" data-prerendered />
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
     <link rel="canonical" href="${BASE_URL}/trending-now" />
 
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="${BASE_URL}/trending-now" />
-    <meta property="og:title" content="Trending Now - Google Trending Topics Real-Time Visualization" />
-    <meta property="og:description" content="Explore trending topics in real-time with interactive bubble charts. Watch search volumes grow and shrink with live Google Trends data. Updated hourly." />
-    <meta property="og:site_name" content="Top Best Charts" />
+    <meta property="og:type" content="website" data-prerendered />
+    <meta property="og:url" content="${BASE_URL}/trending-now" data-prerendered />
+    <meta property="og:title" content="Trending Now - Google Trending Topics Real-Time Visualization" data-prerendered />
+    <meta property="og:description" content="Explore trending topics in real-time with interactive bubble charts. Watch search volumes grow and shrink with live Google Trends data. Updated hourly." data-prerendered />
+    <meta property="og:site_name" content="Top Best Charts" data-prerendered />
 
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Trending Now - Google Trending Topics Real-Time Visualization" />
-    <meta name="twitter:description" content="Explore trending topics in real-time with interactive bubble charts. Watch search volumes grow and shrink with live Google Trends data. Updated hourly." />
+    <meta name="twitter:card" content="summary_large_image" data-prerendered />
+    <meta name="twitter:title" content="Trending Now - Google Trending Topics Real-Time Visualization" data-prerendered />
+    <meta name="twitter:description" content="Explore trending topics in real-time with interactive bubble charts. Watch search volumes grow and shrink with live Google Trends data. Updated hourly." data-prerendered />
   `;
 
   const homeStructuredData = `
@@ -976,20 +976,20 @@ async function prerenderAboutPage(baseHTML, distPath) {
 
   const aboutMetaTags = `
     <title>About Us - Top Best Chart</title>
-    <meta name="description" content="Learn about Top Best Chart, our mission to make data easy to understand, engaging, and visually stunning through interactive charts and rankings." />
-    <meta name="keywords" content="about top best chart, data visualization, interactive charts, rankings, about us" />
+    <meta name="description" content="Learn about Top Best Chart, our mission to make data easy to understand, engaging, and visually stunning through interactive charts and rankings." data-prerendered />
+    <meta name="keywords" content="about top best chart, data visualization, interactive charts, rankings, about us" data-prerendered />
     <meta name="robots" content="index, follow" />
     <link rel="canonical" href="${BASE_URL}/about" />
 
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="${BASE_URL}/about" />
-    <meta property="og:title" content="About Us - Top Best Chart" />
-    <meta property="og:description" content="Learn about Top Best Chart, our mission to make data easy to understand, engaging, and visually stunning through interactive charts and rankings." />
-    <meta property="og:site_name" content="Top Best Charts" />
+    <meta property="og:type" content="website" data-prerendered />
+    <meta property="og:url" content="${BASE_URL}/about" data-prerendered />
+    <meta property="og:title" content="About Us - Top Best Chart" data-prerendered />
+    <meta property="og:description" content="Learn about Top Best Chart, our mission to make data easy to understand, engaging, and visually stunning through interactive charts and rankings." data-prerendered />
+    <meta property="og:site_name" content="Top Best Charts" data-prerendered />
 
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="About Us - Top Best Chart" />
-    <meta name="twitter:description" content="Learn about Top Best Chart, our mission to make data easy to understand, engaging, and visually stunning through interactive charts and rankings." />
+    <meta name="twitter:card" content="summary_large_image" data-prerendered />
+    <meta name="twitter:title" content="About Us - Top Best Chart" data-prerendered />
+    <meta name="twitter:description" content="Learn about Top Best Chart, our mission to make data easy to understand, engaging, and visually stunning through interactive charts and rankings." data-prerendered />
   `;
 
   const aboutContentHTML = `
