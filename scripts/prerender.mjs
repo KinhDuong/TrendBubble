@@ -232,6 +232,7 @@ async function generateContentHTML(pageData, topics, sourceLabel) {
         <ul style="display: flex; gap: 1.5rem; list-style: none; margin: 0; padding: 0;">
           <li><a href="/" style="color: #d1d5db; text-decoration: none;">Home</a></li>
           <li><a href="/trending-now" style="color: #d1d5db; text-decoration: none;">Trending Now</a></li>
+          <li><a href="/about" style="color: #d1d5db; text-decoration: none;">About</a></li>
         </ul>
       </nav>
     </header>
@@ -531,6 +532,7 @@ async function prerenderExplorePage(baseHTML, distPath) {
           <ul style="display: flex; gap: 1.5rem; list-style: none; margin: 0; padding: 0;">
             <li><a href="/" style="color: #d1d5db; text-decoration: none;">Home</a></li>
             <li><a href="/trending-now" style="color: #d1d5db; text-decoration: none;">Trending Now</a></li>
+            <li><a href="/about" style="color: #d1d5db; text-decoration: none;">About</a></li>
           </ul>
         </nav>
       </header>
@@ -843,6 +845,7 @@ async function prerenderTrendingNowPage(baseHTML, distPath) {
           <ul style="display: flex; gap: 1.5rem; list-style: none; margin: 0; padding: 0;">
             <li><a href="/" style="color: #d1d5db; text-decoration: none;">Home</a></li>
             <li><a href="/trending-now" style="color: #d1d5db; text-decoration: none;">Trending Now</a></li>
+            <li><a href="/about" style="color: #d1d5db; text-decoration: none;">About</a></li>
           </ul>
         </nav>
       </header>
@@ -968,6 +971,139 @@ async function prerenderTrendingNowPage(baseHTML, distPath) {
   console.log('✓ Generated: /trending-now/index.html');
 }
 
+async function prerenderAboutPage(baseHTML, distPath) {
+  console.log('Pre-rendering: /about');
+
+  const aboutMetaTags = `
+    <title>About Us - Top Best Chart</title>
+    <meta name="description" content="Learn about Top Best Chart, our mission to make data easy to understand, engaging, and visually stunning through interactive charts and rankings." />
+    <meta name="keywords" content="about top best chart, data visualization, interactive charts, rankings, about us" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="${BASE_URL}/about" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="${BASE_URL}/about" />
+    <meta property="og:title" content="About Us - Top Best Chart" />
+    <meta property="og:description" content="Learn about Top Best Chart, our mission to make data easy to understand, engaging, and visually stunning through interactive charts and rankings." />
+    <meta property="og:site_name" content="Top Best Charts" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="About Us - Top Best Chart" />
+    <meta name="twitter:description" content="Learn about Top Best Chart, our mission to make data easy to understand, engaging, and visually stunning through interactive charts and rankings." />
+  `;
+
+  const aboutContentHTML = `
+    <div class="about-page-content">
+      <header style="background-color: #111827; border-bottom: 1px solid #374151; padding: 0.5rem 1rem;">
+        <nav aria-label="Main navigation" style="max-width: 80rem; margin: 0 auto; display: flex; align-items: center; justify-content: space-between;">
+          <a href="/" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none;">
+            <span style="color: #2563eb; font-size: 1.5rem; font-weight: 700;">Top Best Charts</span>
+          </a>
+          <ul style="display: flex; gap: 1.5rem; list-style: none; margin: 0; padding: 0;">
+            <li><a href="/" style="color: #d1d5db; text-decoration: none;">Home</a></li>
+            <li><a href="/trending-now" style="color: #d1d5db; text-decoration: none;">Trending Now</a></li>
+            <li><a href="/about" style="color: #d1d5db; text-decoration: none;">About</a></li>
+          </ul>
+        </nav>
+      </header>
+
+      <main style="max-width: 80rem; margin: 2rem auto; padding: 0 1rem;">
+        <article style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; padding: 2rem;">
+          <h1 style="font-size: 2.5rem; font-weight: 700; color: white; margin-bottom: 1.5rem;">About Us – Top Best Chart</h1>
+
+          <p style="font-size: 1.125rem; line-height: 1.75; color: #d1d5db; margin-bottom: 2rem;">
+            At Top Best Chart, our mission is simple: to make data easy to understand, engaging, and visually stunning. We transform complex rankings and statistics into interactive charts and lists that anyone can explore, whether you're a researcher, marketer, student, or simply curious.
+          </p>
+
+          <h2 style="font-size: 1.875rem; font-weight: 700; color: white; margin: 2rem 0 1.5rem;">Our Platform Features</h2>
+
+          <p style="font-size: 1.125rem; line-height: 1.75; color: #d1d5db; margin-bottom: 2rem;">
+            Our platform features a variety of tools to help you visualize and analyze data effectively:
+          </p>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin: 2rem 0;">
+            <div style="background-color: #374151; border-radius: 0.5rem; padding: 1.5rem;">
+              <h3 style="font-size: 1.25rem; font-weight: 700; color: white; margin-bottom: 0.75rem;">Top List</h3>
+              <p style="color: #d1d5db;">Quickly browse the highest-ranked items in a clean, easy-to-read format.</p>
+            </div>
+            <div style="background-color: #374151; border-radius: 0.5rem; padding: 1.5rem;">
+              <h3 style="font-size: 1.25rem; font-weight: 700; color: white; margin-bottom: 0.75rem;">Bubble Chart</h3>
+              <p style="color: #d1d5db;">Visualize trends and impact at a glance using scalable bubbles.</p>
+            </div>
+            <div style="background-color: #374151; border-radius: 0.5rem; padding: 1.5rem;">
+              <h3 style="font-size: 1.25rem; font-weight: 700; color: white; margin-bottom: 0.75rem;">Bar Chart</h3>
+              <p style="color: #d1d5db;">Compare items side-by-side with clarity and precision.</p>
+            </div>
+            <div style="background-color: #374151; border-radius: 0.5rem; padding: 1.5rem;">
+              <h3 style="font-size: 1.25rem; font-weight: 700; color: white; margin-bottom: 0.75rem;">Donut Chart</h3>
+              <p style="color: #d1d5db;">See proportional breakdowns in a modern, intuitive layout.</p>
+            </div>
+            <div style="background-color: #374151; border-radius: 0.5rem; padding: 1.5rem;">
+              <h3 style="font-size: 1.25rem; font-weight: 700; color: white; margin-bottom: 0.75rem;">Treemap</h3>
+              <p style="color: #d1d5db;">Explore hierarchical data with a clear and structured visual hierarchy.</p>
+            </div>
+          </div>
+
+          <p style="font-size: 1.125rem; line-height: 1.75; color: #d1d5db; margin: 2rem 0;">
+            We believe that data should tell a story, not overwhelm you. That's why Top Best Chart combines simplicity, interactivity, and accuracy to help you discover patterns, trends, and insights across a wide range of topics.
+          </p>
+
+          <p style="font-size: 1.125rem; line-height: 1.75; color: #d1d5db; margin: 2rem 0;">
+            Whether you're tracking the most popular dog breeds, analyzing top salaries, or comparing products and trends, Top Best Chart turns raw numbers into actionable insights that are easy to understand and share.
+          </p>
+
+          <h2 style="font-size: 1.875rem; font-weight: 700; color: white; margin: 2rem 0 1.5rem;">Our Vision</h2>
+
+          <p style="font-size: 1.125rem; line-height: 1.75; color: #d1d5db; margin-bottom: 2rem;">
+            Our vision is to be the go-to hub for anyone seeking the most popular, top-performing, or trend-setting items in the world, presented in a way that's both informative and visually engaging.
+          </p>
+
+          <h2 style="font-size: 1.875rem; font-weight: 700; color: white; margin: 2rem 0 1.5rem;">Our Commitment</h2>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin: 2rem 0;">
+            <div style="background-color: #374151; border-radius: 0.5rem; padding: 1.5rem; text-align: center;">
+              <h3 style="font-size: 1.25rem; font-weight: 700; color: white; margin-bottom: 0.75rem;">Accuracy & Reliability</h3>
+              <p style="color: #d1d5db;">All data sources are carefully verified for accuracy and reliability.</p>
+            </div>
+            <div style="background-color: #374151; border-radius: 0.5rem; padding: 1.5rem; text-align: center;">
+              <h3 style="font-size: 1.25rem; font-weight: 700; color: white; margin-bottom: 0.75rem;">User-Friendly Design</h3>
+              <p style="color: #d1d5db;">Clear, interactive, and mobile-friendly design for everyone.</p>
+            </div>
+            <div style="background-color: #374151; border-radius: 0.5rem; padding: 1.5rem; text-align: center;">
+              <h3 style="font-size: 1.25rem; font-weight: 700; color: white; margin-bottom: 0.75rem;">Instant Insights</h3>
+              <p style="color: #d1d5db;">Helping our users make sense of the numbers in seconds.</p>
+            </div>
+          </div>
+
+          <p style="font-size: 1.125rem; line-height: 1.75; color: #d1d5db; margin: 2rem 0;">
+            Join us in exploring the world's top charts, uncovering trends, and making data fun, intuitive, and meaningful.
+          </p>
+
+          <div style="background: linear-gradient(to right, #1e3a8a, #0f766e); border-radius: 0.5rem; padding: 2rem; text-align: center; margin-top: 3rem;">
+            <p style="font-size: 1.5rem; font-weight: 700; color: white; margin-bottom: 0.5rem;">
+              Discover. Compare. Visualize.
+            </p>
+            <p style="font-size: 1.25rem; color: #93c5fd;">
+              That's Top Best Chart.
+            </p>
+          </div>
+        </article>
+      </main>
+    </div>
+  `;
+
+  const html = baseHTML
+    .replace('<title>Vite + React + TS</title>', '')
+    .replace('<!-- PRERENDER_META -->', aboutMetaTags)
+    .replace('<!-- PRERENDER_STRUCTURED_DATA -->', '')
+    .replace('<div id="root"></div>', `<div id="root">${aboutContentHTML}</div><div id="prerender-footer">${generateFooterHTML()}</div>`);
+
+  const outputDir = path.join(distPath, 'about');
+  fs.mkdirSync(outputDir, { recursive: true });
+  fs.writeFileSync(path.join(outputDir, 'index.html'), html);
+  console.log('✓ Generated: /about/index.html');
+}
+
 async function prerenderPages() {
   console.log('Starting pre-rendering process...');
 
@@ -1013,6 +1149,7 @@ async function prerenderPages() {
 
   await prerenderExplorePage(baseHTML, distPath);
   await prerenderTrendingNowPage(baseHTML, distPath);
+  await prerenderAboutPage(baseHTML, distPath);
 
   // Create redirect from /explore to /
   const exploreRedirectHTML = `<!DOCTYPE html>
@@ -1087,6 +1224,12 @@ async function generateSitemap(pages, distPath) {
     <lastmod>${today}</lastmod>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>${BASE_URL}/about</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
   </url>
 `;
 
