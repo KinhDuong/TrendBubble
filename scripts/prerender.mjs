@@ -1018,7 +1018,7 @@ async function prerenderAboutPage(baseHTML, distPath) {
           <h2 style="font-size: 1.875rem; font-weight: 700; color: white; margin: 2rem 0 1.5rem;">Our Platform Features</h2>
 
           <p style="font-size: 1.125rem; line-height: 1.75; color: #d1d5db; margin-bottom: 2rem;">
-            Top Best Charts features a variety of tools to help you visualize and analyze data effectively:
+            Our platform features a variety of tools to help you visualize and analyze data effectively:
           </p>
 
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin: 2rem 0;">
