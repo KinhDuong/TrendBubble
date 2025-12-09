@@ -207,13 +207,6 @@ export default function ExplorePage() {
             {/* Top Section */}
             {(heroPage || topPages.length > 0) && (
               <div className="mb-12">
-                <div className="relative mb-6">
-                  <h2 className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} inline-block px-4 py-2 relative`}>
-                    <span className="relative z-10">TOP</span>
-                    <div className="absolute inset-0 bg-gradient-to-r from-green-500 to-green-600 transform -skew-x-12"></div>
-                  </h2>
-                </div>
-
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Hero Page */}
                   {heroPage && (
