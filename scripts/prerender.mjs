@@ -183,7 +183,6 @@ function generateMetaTags(pageData, topics) {
   const pageUrl = `${BASE_URL}${pageData.page_url}`;
 
   return `
-    <title>${enhancedTitle}</title>
     <meta name="description" content="${enhancedDescription}" />
     <meta name="keywords" content="${keywords}" />
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
@@ -505,7 +504,6 @@ async function prerenderExplorePage(baseHTML, distPath) {
     .limit(100);
 
   const exploreMetaTags = `
-    <title>Top Best Charts - Explore Trending Topics and Data Visualizations</title>
     <meta name="description" content="Discover the latest trending topics and popular data visualizations across all categories. Explore rankings, charts, and real-time data insights." />
     <meta name="keywords" content="trending topics, data visualization, charts, explore topics, rankings, top charts, best charts" />
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
@@ -730,7 +728,6 @@ async function prerenderExplorePage(baseHTML, distPath) {
   `;
 
   const html = baseHTML
-    .replace('<title>Vite + React + TS</title>', '')
     .replace('<!-- PRERENDER_META -->', exploreMetaTags)
     .replace('<!-- PRERENDER_STRUCTURED_DATA -->', '')
     .replace('<div id="root"></div>', `<div id="root">${exploreContentHTML}</div><div id="prerender-footer">${generateFooterHTML()}</div>`);
@@ -767,7 +764,6 @@ async function prerenderTrendingNowPage(baseHTML, distPath) {
   });
 
   const homeMetaTags = `
-    <title>Trending Now - Google Trending Topics Real-Time Visualization | ${currentDate}</title>
     <meta name="description" content="Explore trending topics in real-time with interactive bubble charts. Watch search volumes grow and shrink with live Google Trends data. Top trending now: ${topTopics}. Updated hourly." />
     <meta name="keywords" content="google trends, trending topics, search trends, real-time trends, bubble chart, trend visualization, search volume, trending now, ${topTopics}" />
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
@@ -960,7 +956,6 @@ async function prerenderTrendingNowPage(baseHTML, distPath) {
   `;
 
   const html = baseHTML
-    .replace('<title>Vite + React + TS</title>', '')
     .replace('<!-- PRERENDER_META -->', homeMetaTags)
     .replace('<!-- PRERENDER_STRUCTURED_DATA -->', homeStructuredData)
     .replace('<div id="root"></div>', `<div id="root">${homeContentHTML}</div><div id="prerender-footer">${generateFooterHTML()}</div>`);
@@ -975,7 +970,6 @@ async function prerenderAboutPage(baseHTML, distPath) {
   console.log('Pre-rendering: /about');
 
   const aboutMetaTags = `
-    <title>About Us - Top Best Chart</title>
     <meta name="description" content="Learn about Top Best Chart, our mission to make data easy to understand, engaging, and visually stunning through interactive charts and rankings." />
     <meta name="keywords" content="about top best chart, data visualization, interactive charts, rankings, about us" />
     <meta name="robots" content="index, follow" />
@@ -1093,7 +1087,6 @@ async function prerenderAboutPage(baseHTML, distPath) {
   `;
 
   const html = baseHTML
-    .replace('<title>Vite + React + TS</title>', '')
     .replace('<!-- PRERENDER_META -->', aboutMetaTags)
     .replace('<!-- PRERENDER_STRUCTURED_DATA -->', '')
     .replace('<div id="root"></div>', `<div id="root">${aboutContentHTML}</div><div id="prerender-footer">${generateFooterHTML()}</div>`);
@@ -1186,7 +1179,6 @@ async function prerenderPages() {
     const structuredData = generateStructuredData(page, topics);
 
     let html = baseHTML
-      .replace('<title>Vite + React + TS</title>', '')
       .replace('<!-- PRERENDER_META -->', metaTags)
       .replace('<!-- PRERENDER_STRUCTURED_DATA -->', structuredData)
       .replace('<div id="root"></div>', `<div id="root">${contentHTML}</div><div id="prerender-footer">${generateFooterHTML()}</div>`);
