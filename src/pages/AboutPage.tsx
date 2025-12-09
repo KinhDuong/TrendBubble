@@ -52,10 +52,6 @@ export default function AboutPage() {
                 At Top Best Chart, our mission is simple: to make data easy to understand, engaging, and visually stunning. We transform complex rankings and statistics into interactive charts and lists that anyone can explore, whether you're a researcher, marketer, student, or simply curious.
               </p>
 
-              <h2 className={`text-2xl font-bold mt-12 mb-6 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                Our Platform Features
-              </h2>
-
               <p className={`text-lg leading-relaxed mb-8 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
                 Our platform features a variety of tools to help you visualize and analyze data effectively:
               </p>
