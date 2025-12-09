@@ -223,7 +223,7 @@ export default function ExplorePage() {
     <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-100'}`}>
       <Helmet>
         <title>Explore Topics - Top Best Charts</title>
-        <meta name="description" content="Discover the latest trending topics and popular data visualizations across all categories" />
+        <meta name="description" content="Top Best Chart makes exploring rankings simple. Visualize data with Bubble, Bar, Donut, and Treemap charts, see trends at a glance, and uncover insights from the world's top lists" />
       </Helmet>
 
       <Header
