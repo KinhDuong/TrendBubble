@@ -526,7 +526,7 @@ async function prerenderExplorePage(baseHTML, distPath) {
       <header style="background-color: #111827; border-bottom: 1px solid #374151; padding: 0.5rem 1rem;">
         <nav aria-label="Main navigation" style="max-width: 80rem; margin: 0 auto; display: flex; align-items: center; justify-content: space-between;">
           <a href="/" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none;">
-            <span style="color: #2563eb; font-size: 1.5rem; font-weight: 700;">Top Best Charts</span>
+            <h1 style="color: #2563eb; font-size: 1.5rem; font-weight: 700; margin: 0;">Top Best Charts</h1>
           </a>
           <ul style="display: flex; gap: 1.5rem; list-style: none; margin: 0; padding: 0;">
             <li><a href="/" style="color: #d1d5db; text-decoration: none;">Home</a></li>
@@ -536,7 +536,6 @@ async function prerenderExplorePage(baseHTML, distPath) {
       </header>
 
       <main style="max-width: 80rem; margin: 2rem auto; padding: 0 1rem;">
-        <h1 style="font-size: 2rem; font-weight: 700; color: white; margin-bottom: 2rem;">Explore Topics</h1>
   `;
 
   // Hero and Top Pages Section

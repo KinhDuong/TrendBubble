@@ -172,6 +172,7 @@ export default function ExplorePage() {
           isAdmin={isAdmin}
           onLoginClick={() => setShowLogin(true)}
           onLogout={logout}
+          useH1={true}
         />
         <div className="flex items-center justify-center h-96">
           <div className="text-center">
@@ -197,6 +198,7 @@ export default function ExplorePage() {
         isAdmin={isAdmin}
         onLoginClick={() => setShowLogin(true)}
         onLogout={logout}
+        useH1={true}
       />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
