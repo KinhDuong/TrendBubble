@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import BubbleChart from './components/BubbleChart';
 import BarChart from './components/BarChart';
@@ -2139,7 +2139,8 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<HomePage />} />
+        <Route path="/" element={<Navigate to="/trending-now" replace />} />
+        <Route path="/trending-now" element={<HomePage />} />
         <Route path="/explore" element={<ExplorePage />} />
         <Route path="/admin/pages" element={<AdminPages />} />
         <Route path="*" element={<DynamicPage />} />

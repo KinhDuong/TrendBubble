@@ -226,14 +226,12 @@ async function generateContentHTML(pageData, topics, sourceLabel) {
     <!-- Header Navigation for SEO -->
     <header style="background-color: #111827; border-bottom: 1px solid #374151; padding: 0.5rem 1rem;">
       <nav aria-label="Main navigation" style="max-width: 80rem; margin: 0 auto; display: flex; align-items: center; justify-content: space-between;">
-        <a href="/" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none;">
+        <a href="/trending-now" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none;">
           <span style="color: #2563eb; font-size: 1.5rem; font-weight: 700;">Top Best Charts</span>
         </a>
         <ul style="display: flex; gap: 1.5rem; list-style: none; margin: 0; padding: 0;">
-          <li><a href="/" style="color: #d1d5db; text-decoration: none;">Home</a></li>
-          <li><a href="/" style="color: #d1d5db; text-decoration: none;">Explore Topics</a></li>
-          <li><a href="mailto:contact@example.com" style="color: #d1d5db; text-decoration: none;">Contact</a></li>
-          <li><a href="#about" style="color: #d1d5db; text-decoration: none;">About</a></li>
+          <li><a href="/trending-now" style="color: #d1d5db; text-decoration: none;">Trending Now</a></li>
+          <li><a href="/explore" style="color: #d1d5db; text-decoration: none;">Explore Topics</a></li>
         </ul>
       </nav>
     </header>
@@ -445,13 +443,13 @@ function generateStructuredData(pageData, topics) {
     "hasPart": [
       {
         "@type": "WebPage",
-        "name": "Home",
-        "url": `${BASE_URL}/`
+        "name": "Trending Now",
+        "url": `${BASE_URL}/trending-now`
       },
       {
         "@type": "WebPage",
         "name": "Explore Topics",
-        "url": `${BASE_URL}/`
+        "url": `${BASE_URL}/explore`
       }
     ]
   };
@@ -527,11 +525,11 @@ async function prerenderExplorePage(baseHTML, distPath) {
     <div class="explore-page-content">
       <header style="background-color: #111827; border-bottom: 1px solid #374151; padding: 0.5rem 1rem;">
         <nav aria-label="Main navigation" style="max-width: 80rem; margin: 0 auto; display: flex; align-items: center; justify-content: space-between;">
-          <a href="/" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none;">
+          <a href="/trending-now" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none;">
             <span style="color: #2563eb; font-size: 1.5rem; font-weight: 700;">Top Best Charts</span>
           </a>
           <ul style="display: flex; gap: 1.5rem; list-style: none; margin: 0; padding: 0;">
-            <li><a href="/" style="color: #d1d5db; text-decoration: none;">Home</a></li>
+            <li><a href="/trending-now" style="color: #d1d5db; text-decoration: none;">Trending Now</a></li>
             <li><a href="/explore" style="color: #d1d5db; text-decoration: none;">Explore Topics</a></li>
           </ul>
         </nav>
@@ -742,8 +740,8 @@ async function prerenderExplorePage(baseHTML, distPath) {
   console.log('✓ Generated: /tmp/cc-agent/60247285/project/dist/explore/index.html');
 }
 
-async function prerenderHomePage(baseHTML, distPath) {
-  console.log('Pre-rendering home page...');
+async function prerenderTrendingNowPage(baseHTML, distPath) {
+  console.log('Pre-rendering: /trending-now');
 
   const { data: topics } = await supabase
     .from('trending_topics')
@@ -770,33 +768,33 @@ async function prerenderHomePage(baseHTML, distPath) {
   });
 
   const homeMetaTags = `
-    <title>Google Trending Topics - Real-Time Bubble Chart Visualization | ${currentDate}</title>
+    <title>Trending Now - Google Trending Topics Real-Time Visualization | ${currentDate}</title>
     <meta name="description" content="Explore trending topics in real-time with interactive bubble charts. Watch search volumes grow and shrink with live Google Trends data. Top trending now: ${topTopics}. Updated hourly." />
     <meta name="keywords" content="google trends, trending topics, search trends, real-time trends, bubble chart, trend visualization, search volume, trending now, ${topTopics}" />
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
-    <link rel="canonical" href="${BASE_URL}/" />
+    <link rel="canonical" href="${BASE_URL}/trending-now" />
 
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="${BASE_URL}/" />
-    <meta property="og:title" content="Google Trending Topics - Real-Time Bubble Chart Visualization" />
+    <meta property="og:url" content="${BASE_URL}/trending-now" />
+    <meta property="og:title" content="Trending Now - Google Trending Topics Real-Time Visualization" />
     <meta property="og:description" content="Explore trending topics in real-time with interactive bubble charts. Watch search volumes grow and shrink with live Google Trends data. Updated hourly." />
-    <meta property="og:site_name" content="Google Trending Topics" />
+    <meta property="og:site_name" content="Top Best Charts" />
 
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Google Trending Topics - Real-Time Bubble Chart Visualization" />
+    <meta name="twitter:title" content="Trending Now - Google Trending Topics Real-Time Visualization" />
     <meta name="twitter:description" content="Explore trending topics in real-time with interactive bubble charts. Watch search volumes grow and shrink with live Google Trends data. Updated hourly." />
   `;
 
   const homeStructuredData = `
   <script type="application/ld+json">{
     "@context": "https://schema.org",
-    "@type": "WebSite",
-    "name": "Google Trending Topics",
+    "@type": "WebPage",
+    "name": "Trending Now - Google Trending Topics",
     "description": "Real-time trending topics visualization with interactive bubble charts",
-    "url": "${BASE_URL}/",
+    "url": "${BASE_URL}/trending-now",
     "potentialAction": {
       "@type": "SearchAction",
-      "target": "${BASE_URL}/?q={search_term_string}",
+      "target": "${BASE_URL}/trending-now?q={search_term_string}",
       "query-input": "required name=search_term_string"
     }
   }</script>
@@ -807,13 +805,13 @@ async function prerenderHomePage(baseHTML, distPath) {
     "hasPart": [
       {
         "@type": "WebPage",
-        "name": "Home",
-        "url": "${BASE_URL}/"
+        "name": "Trending Now",
+        "url": "${BASE_URL}/trending-now"
       },
       {
         "@type": "WebPage",
         "name": "Explore Topics",
-        "url": "${BASE_URL}/"
+        "url": "${BASE_URL}/explore"
       }
     ]
   }</script>`;
@@ -838,18 +836,16 @@ async function prerenderHomePage(baseHTML, distPath) {
   });
 
   let homeContentHTML = `
-    <div class="home-page-content">
+    <div class="trending-now-page-content">
       <!-- Header Navigation for SEO -->
       <header style="background-color: #111827; border-bottom: 1px solid #374151; padding: 0.5rem 1rem;">
         <nav aria-label="Main navigation" style="max-width: 80rem; margin: 0 auto; display: flex; align-items: center; justify-content: space-between;">
-          <a href="/" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none;">
+          <a href="/trending-now" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none;">
             <span style="color: #2563eb; font-size: 1.5rem; font-weight: 700;">Top Best Charts</span>
           </a>
           <ul style="display: flex; gap: 1.5rem; list-style: none; margin: 0; padding: 0;">
-            <li><a href="/" style="color: #d1d5db; text-decoration: none;">Home</a></li>
-            <li><a href="/" style="color: #d1d5db; text-decoration: none;">Explore Topics</a></li>
-            <li><a href="mailto:contact@example.com" style="color: #d1d5db; text-decoration: none;">Contact</a></li>
-            <li><a href="#about" style="color: #d1d5db; text-decoration: none;">About</a></li>
+            <li><a href="/trending-now" style="color: #d1d5db; text-decoration: none;">Trending Now</a></li>
+            <li><a href="/explore" style="color: #d1d5db; text-decoration: none;">Explore Topics</a></li>
           </ul>
         </nav>
       </header>
@@ -875,7 +871,7 @@ async function prerenderHomePage(baseHTML, distPath) {
 
       <article style="max-width: 80rem; margin: 0 auto; padding: 0 0.5rem;">
         <header class="page-header" style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; padding: 1.5rem; margin-bottom: 2rem; margin-top: 2rem;">
-          <h1 style="font-size: 1.875rem; font-weight: 700; color: white; margin-bottom: 0.75rem;">Google Trending Topics</h1>
+          <h1 style="font-size: 1.875rem; font-weight: 700; color: white; margin-bottom: 0.75rem;">Trending Now</h1>
           <p style="color: #d1d5db; font-size: 1rem; line-height: 1.625; margin-bottom: 1rem;">Explore trending topics in real-time with interactive bubble charts. Watch search volumes grow and shrink with live Google Trends data.</p>
           <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; font-size: 0.875rem;">
             <time style="color: #9ca3af;">
@@ -969,8 +965,10 @@ async function prerenderHomePage(baseHTML, distPath) {
     .replace('<!-- PRERENDER_STRUCTURED_DATA -->', homeStructuredData)
     .replace('<div id="root"></div>', `<div id="root">${homeContentHTML}</div><div id="prerender-footer">${generateFooterHTML()}</div>`);
 
-  fs.writeFileSync(path.join(distPath, 'index.html'), html);
-  console.log('✓ Generated: /index.html');
+  const outputDir = path.join(distPath, 'trending-now');
+  fs.mkdirSync(outputDir, { recursive: true });
+  fs.writeFileSync(path.join(outputDir, 'index.html'), html);
+  console.log('✓ Generated: /trending-now/index.html');
 }
 
 async function prerenderPages() {
@@ -1016,8 +1014,25 @@ async function prerenderPages() {
     );
   }
 
-  await prerenderHomePage(baseHTML, distPath);
+  await prerenderTrendingNowPage(baseHTML, distPath);
   await prerenderExplorePage(baseHTML, distPath);
+
+  // Create redirect from / to /trending-now
+  const redirectHTML = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="refresh" content="0; url=/trending-now">
+  <link rel="canonical" href="${BASE_URL}/trending-now" />
+  <script>window.location.href = "/trending-now";</script>
+  <title>Redirecting to Trending Now...</title>
+</head>
+<body>
+  <p>Redirecting to <a href="/trending-now">Trending Now</a>...</p>
+</body>
+</html>`;
+  fs.writeFileSync(path.join(distPath, 'index.html'), redirectHTML);
+  console.log('✓ Generated: /index.html (redirect to /trending-now)');
 
   for (const page of pages) {
     // Skip explore page as it's handled separately
@@ -1063,10 +1078,16 @@ async function generateSitemap(pages, distPath) {
   let sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>${BASE_URL}/</loc>
+    <loc>${BASE_URL}/trending-now</loc>
     <lastmod>${today}</lastmod>
     <changefreq>hourly</changefreq>
     <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>${BASE_URL}/explore</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
   </url>
 `;
 
