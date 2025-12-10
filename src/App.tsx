@@ -14,6 +14,7 @@ import ComparisonPanel from './components/ComparisonPanel';
 import ShareSnapshot from './components/ShareSnapshot';
 import DynamicPage from './pages/DynamicPage';
 import AdminPages from './pages/AdminPages';
+import AdminData from './pages/AdminData';
 import ExplorePage from './pages/ExplorePage';
 import AboutPage from './pages/AboutPage';
 import { TrendingTopic } from './types';
@@ -2192,6 +2193,7 @@ function App() {
         <Route path="/trending-now" element={<HomePage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/admin/pages" element={<AdminPages />} />
+        <Route path="/admin/data" element={<AdminData />} />
         <Route path="*" element={<DynamicPage />} />
       </Routes>
     </BrowserRouter>
