@@ -5,6 +5,7 @@ import { supabase } from '../lib/supabase';
 interface DataFiltersProps {
   theme: 'dark' | 'light';
   onFilterChange: (filters: FilterState) => void;
+  initialFilters?: Partial<FilterState>;
 }
 
 export interface FilterState {
@@ -15,15 +16,15 @@ export interface FilterState {
   dateTo: string;
 }
 
-export default function DataFilters({ theme, onFilterChange }: DataFiltersProps) {
+export default function DataFilters({ theme, onFilterChange, initialFilters }: DataFiltersProps) {
   const [filters, setFilters] = useState<FilterState>({
-    search: '',
-    source: '',
-    category: '',
-    dateFrom: '',
-    dateTo: '',
+    search: initialFilters?.search || '',
+    source: initialFilters?.source || '',
+    category: initialFilters?.category || '',
+    dateFrom: initialFilters?.dateFrom || '',
+    dateTo: initialFilters?.dateTo || '',
   });
-  const [showFilters, setShowFilters] = useState(false);
+  const [showFilters, setShowFilters] = useState(!!initialFilters?.source);
   const [sources, setSources] = useState<string[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
 

@@ -20,11 +20,12 @@ interface TrendingTopic {
 
 interface DataManagerProps {
   theme: 'dark' | 'light';
+  initialSource?: string;
 }
 
 const PAGE_SIZE = 50;
 
-export default function DataManager({ theme }: DataManagerProps) {
+export default function DataManager({ theme, initialSource }: DataManagerProps) {
   const [data, setData] = useState<TrendingTopic[]>([]);
   const [loading, setLoading] = useState(true);
   const [showEditor, setShowEditor] = useState(false);
@@ -32,7 +33,7 @@ export default function DataManager({ theme }: DataManagerProps) {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [filters, setFilters] = useState<FilterState>({
     search: '',
-    source: '',
+    source: initialSource || '',
     category: '',
     dateFrom: '',
     dateTo: '',
@@ -87,7 +88,8 @@ export default function DataManager({ theme }: DataManagerProps) {
   };
 
   const handleCreate = () => {
-    setEditingData(undefined);
+    const newData = filters.source ? { source: filters.source } : undefined;
+    setEditingData(newData as any);
     setShowEditor(true);
   };
 
@@ -260,7 +262,11 @@ export default function DataManager({ theme }: DataManagerProps) {
           </div>
         </div>
 
-        <DataFilters theme={theme} onFilterChange={handleFilterChange} />
+        <DataFilters
+          theme={theme}
+          onFilterChange={handleFilterChange}
+          initialFilters={initialSource ? { source: initialSource } : undefined}
+        />
 
         {data.length === 0 ? (
           <div className={`text-center py-12 ${theme === 'dark' ? 'bg-gray-800 text-gray-400' : 'bg-white text-gray-600'} rounded-lg border ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>

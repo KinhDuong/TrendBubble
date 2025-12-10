@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { Plus, Edit, Trash2, ExternalLink } from 'lucide-react';
+import { Plus, Edit, Trash2, ExternalLink, Database } from 'lucide-react';
 import PageEditor from './PageEditor';
 
 interface Page {
@@ -214,6 +215,13 @@ export default function PageManager({ theme }: PageManagerProps) {
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-2">
+                          <Link
+                            to={`/admin/data?source=${encodeURIComponent(page.source)}`}
+                            className={`p-2 rounded-lg transition-colors ${theme === 'dark' ? 'hover:bg-gray-700 text-gray-300' : 'hover:bg-gray-100 text-gray-600'}`}
+                            title="View data for this source"
+                          >
+                            <Database size={16} />
+                          </Link>
                           <button
                             onClick={() => handleEdit(page)}
                             className={`p-2 rounded-lg transition-colors ${theme === 'dark' ? 'hover:bg-gray-700 text-gray-300' : 'hover:bg-gray-100 text-gray-600'}`}

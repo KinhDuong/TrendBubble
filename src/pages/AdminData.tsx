@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import DataManager from '../components/DataManager';
@@ -9,6 +9,7 @@ import Login from '../components/Login';
 export default function AdminData() {
   const { isAdmin, logout } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     const savedTheme = localStorage.getItem('theme');
     return (savedTheme === 'dark' || savedTheme === 'light') ? savedTheme : 'dark';
@@ -53,7 +54,7 @@ export default function AdminData() {
       />
 
       <div className={`max-w-7xl mx-auto px-4 py-8`}>
-        <DataManager theme={theme} />
+        <DataManager theme={theme} initialSource={searchParams.get('source') || undefined} />
       </div>
 
       <Footer theme={theme} />

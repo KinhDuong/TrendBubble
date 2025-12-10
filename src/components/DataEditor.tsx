@@ -41,7 +41,16 @@ export default function DataEditor({ theme, onClose, existingData }: DataEditorP
   useEffect(() => {
     loadSourcesAndCategories();
     if (existingData) {
-      setFormData(existingData);
+      setFormData({
+        name: existingData.name || '',
+        search_volume: existingData.search_volume || 0,
+        search_volume_raw: existingData.search_volume_raw || '0',
+        rank: existingData.rank || 0,
+        url: existingData.url || '',
+        pub_date: existingData.pub_date || new Date().toISOString(),
+        category: existingData.category || '',
+        source: existingData.source || '',
+      });
     }
   }, [existingData]);
 
