@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { Plus, Edit, Trash2, ExternalLink, ChevronLeft, ChevronRight, Download, Upload } from 'lucide-react';
+import { Plus, Edit, Trash2, ExternalLink, ChevronLeft, ChevronRight, Download, Upload, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import DataEditor from './DataEditor';
 import DataFilters, { FilterState } from './DataFilters';
 
@@ -25,6 +25,9 @@ interface DataManagerProps {
 
 const PAGE_SIZE = 50;
 
+type SortColumn = 'name' | 'search_volume' | 'rank' | 'pub_date' | 'created_at';
+type SortDirection = 'asc' | 'desc';
+
 export default function DataManager({ theme, initialSource }: DataManagerProps) {
   const [data, setData] = useState<TrendingTopic[]>([]);
   const [loading, setLoading] = useState(true);
@@ -41,10 +44,12 @@ export default function DataManager({ theme, initialSource }: DataManagerProps) 
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
+  const [sortColumn, setSortColumn] = useState<SortColumn>('created_at');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
 
   useEffect(() => {
     loadData();
-  }, [filters, currentPage]);
+  }, [filters, currentPage, sortColumn, sortDirection]);
 
   const loadData = async () => {
     setLoading(true);
@@ -73,7 +78,7 @@ export default function DataManager({ theme, initialSource }: DataManagerProps) 
       const to = from + PAGE_SIZE - 1;
 
       const { data: items, error, count } = await query
-        .order('created_at', { ascending: false })
+        .order(sortColumn, { ascending: sortDirection === 'asc' })
         .range(from, to);
 
       if (error) throw error;
@@ -154,6 +159,23 @@ export default function DataManager({ theme, initialSource }: DataManagerProps) 
   const handleFilterChange = (newFilters: FilterState) => {
     setFilters(newFilters);
     setCurrentPage(1);
+  };
+
+  const handleSort = (column: SortColumn) => {
+    if (sortColumn === column) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortColumn(column);
+      setSortDirection('desc');
+    }
+    setCurrentPage(1);
+  };
+
+  const SortIcon = ({ column }: { column: SortColumn }) => {
+    if (sortColumn !== column) {
+      return <ArrowUpDown size={14} className="opacity-40" />;
+    }
+    return sortDirection === 'asc' ? <ArrowUp size={14} /> : <ArrowDown size={14} />;
   };
 
   const toggleSelectAll = () => {
@@ -294,8 +316,14 @@ export default function DataManager({ theme, initialSource }: DataManagerProps) 
                           className="rounded"
                         />
                       </th>
-                      <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${theme === 'dark' ? 'text-gray-300' : 'text-gray-500'}`}>
-                        Name
+                      <th
+                        className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer select-none ${theme === 'dark' ? 'text-gray-300 hover:text-white' : 'text-gray-500 hover:text-gray-900'}`}
+                        onClick={() => handleSort('name')}
+                      >
+                        <div className="flex items-center gap-2">
+                          Name
+                          <SortIcon column="name" />
+                        </div>
                       </th>
                       <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${theme === 'dark' ? 'text-gray-300' : 'text-gray-500'}`}>
                         Source
@@ -303,14 +331,32 @@ export default function DataManager({ theme, initialSource }: DataManagerProps) 
                       <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${theme === 'dark' ? 'text-gray-300' : 'text-gray-500'}`}>
                         Category
                       </th>
-                      <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${theme === 'dark' ? 'text-gray-300' : 'text-gray-500'}`}>
-                        Volume
+                      <th
+                        className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer select-none ${theme === 'dark' ? 'text-gray-300 hover:text-white' : 'text-gray-500 hover:text-gray-900'}`}
+                        onClick={() => handleSort('search_volume')}
+                      >
+                        <div className="flex items-center gap-2">
+                          Volume
+                          <SortIcon column="search_volume" />
+                        </div>
                       </th>
-                      <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${theme === 'dark' ? 'text-gray-300' : 'text-gray-500'}`}>
-                        Rank
+                      <th
+                        className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer select-none ${theme === 'dark' ? 'text-gray-300 hover:text-white' : 'text-gray-500 hover:text-gray-900'}`}
+                        onClick={() => handleSort('rank')}
+                      >
+                        <div className="flex items-center gap-2">
+                          Rank
+                          <SortIcon column="rank" />
+                        </div>
                       </th>
-                      <th className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${theme === 'dark' ? 'text-gray-300' : 'text-gray-500'}`}>
-                        Date
+                      <th
+                        className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider cursor-pointer select-none ${theme === 'dark' ? 'text-gray-300 hover:text-white' : 'text-gray-500 hover:text-gray-900'}`}
+                        onClick={() => handleSort('pub_date')}
+                      >
+                        <div className="flex items-center gap-2">
+                          Date
+                          <SortIcon column="pub_date" />
+                        </div>
                       </th>
                       <th className={`px-6 py-3 text-right text-xs font-medium uppercase tracking-wider ${theme === 'dark' ? 'text-gray-300' : 'text-gray-500'}`}>
                         Actions
