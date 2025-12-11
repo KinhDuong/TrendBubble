@@ -1237,13 +1237,13 @@ async function generateSitemap(pages, distPath) {
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>${BASE_URL}/trending-now</loc>
+    <loc>${BASE_URL}/trending-now/</loc>
     <lastmod>${today}</lastmod>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>${BASE_URL}/about</loc>
+    <loc>${BASE_URL}/about/</loc>
     <lastmod>${today}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -1252,7 +1252,8 @@ async function generateSitemap(pages, distPath) {
 
   // Add all dynamic pages
   for (const page of pages) {
-    const pageUrl = `${BASE_URL}${page.page_url}`;
+    // Add trailing slash to match GitHub Pages directory structure
+    const pageUrl = `${BASE_URL}${page.page_url}/`;
     const lastmod = page.updated_at
       ? new Date(page.updated_at).toISOString().split('T')[0]
       : new Date(page.created_at).toISOString().split('T')[0];
