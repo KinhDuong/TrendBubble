@@ -180,7 +180,7 @@ function generateMetaTags(pageData, topics) {
 
   const keywords = topics.slice(0, 10).map(t => t.name.replace(/"/g, '')).join(', ') + ', trending topics, search trends, real-time trends, trend analysis';
 
-  const pageUrl = `${BASE_URL}${pageData.page_url}`;
+  const pageUrl = `${BASE_URL}${pageData.page_url}/`;
 
   return `
     <title>${enhancedTitle}</title>
@@ -395,7 +395,7 @@ function generateStructuredData(pageData, topics) {
     day: 'numeric',
     year: 'numeric'
   });
-  const pageUrl = `${BASE_URL}${pageData.page_url}`;
+  const pageUrl = `${BASE_URL}${pageData.page_url}/`;
   const topTopics = [...topics].sort((a, b) => b.search_volume - a.search_volume);
 
   const extractTopicType = (title) => {
@@ -467,7 +467,7 @@ function generateStructuredData(pageData, topics) {
       {
         "@type": "WebPage",
         "name": "Trending Now",
-        "url": `${BASE_URL}/trending-now`
+        "url": `${BASE_URL}/trending-now/`
       }
     ]
   };
@@ -788,10 +788,10 @@ async function prerenderTrendingNowPage(baseHTML, distPath) {
     <meta name="description" content="Explore trending topics in real-time with interactive bubble charts. Watch search volumes grow and shrink with live Google Trends data. Top trending now: ${topTopics}. Updated hourly." data-prerendered />
     <meta name="keywords" content="google trends, trending topics, search trends, real-time trends, bubble chart, trend visualization, search volume, trending now, ${topTopics}" data-prerendered />
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
-    <link rel="canonical" href="${BASE_URL}/trending-now" />
+    <link rel="canonical" href="${BASE_URL}/trending-now/" />
 
     <meta property="og:type" content="website" data-prerendered />
-    <meta property="og:url" content="${BASE_URL}/trending-now" data-prerendered />
+    <meta property="og:url" content="${BASE_URL}/trending-now/" data-prerendered />
     <meta property="og:title" content="Trending Now - Google Trending Topics Real-Time Visualization" data-prerendered />
     <meta property="og:description" content="Explore trending topics in real-time with interactive bubble charts. Watch search volumes grow and shrink with live Google Trends data. Updated hourly." data-prerendered />
     <meta property="og:site_name" content="Top Best Charts" data-prerendered />
@@ -807,10 +807,10 @@ async function prerenderTrendingNowPage(baseHTML, distPath) {
     "@type": "WebPage",
     "name": "Trending Now - Google Trending Topics",
     "description": "Real-time trending topics visualization with interactive bubble charts",
-    "url": "${BASE_URL}/trending-now",
+    "url": "${BASE_URL}/trending-now/",
     "potentialAction": {
       "@type": "SearchAction",
-      "target": "${BASE_URL}/trending-now?q={search_term_string}",
+      "target": "${BASE_URL}/trending-now/?q={search_term_string}",
       "query-input": "required name=search_term_string"
     }
   }</script>
@@ -827,7 +827,7 @@ async function prerenderTrendingNowPage(baseHTML, distPath) {
       {
         "@type": "WebPage",
         "name": "Trending Now",
-        "url": "${BASE_URL}/trending-now"
+        "url": "${BASE_URL}/trending-now/"
       }
     ]
   }</script>`;
@@ -996,10 +996,10 @@ async function prerenderAboutPage(baseHTML, distPath) {
     <meta name="description" content="Learn about Top Best Chart, our mission to make data easy to understand, engaging, and visually stunning through interactive charts and rankings." data-prerendered />
     <meta name="keywords" content="about top best chart, data visualization, interactive charts, rankings, about us" data-prerendered />
     <meta name="robots" content="index, follow" />
-    <link rel="canonical" href="${BASE_URL}/about" />
+    <link rel="canonical" href="${BASE_URL}/about/" />
 
     <meta property="og:type" content="website" data-prerendered />
-    <meta property="og:url" content="${BASE_URL}/about" data-prerendered />
+    <meta property="og:url" content="${BASE_URL}/about/" data-prerendered />
     <meta property="og:title" content="About Us - Top Best Chart" data-prerendered />
     <meta property="og:description" content="Learn about Top Best Chart, our mission to make data easy to understand, engaging, and visually stunning through interactive charts and rankings." data-prerendered />
     <meta property="og:site_name" content="Top Best Charts" data-prerendered />

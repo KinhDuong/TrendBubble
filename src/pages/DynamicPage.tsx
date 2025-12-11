@@ -521,7 +521,9 @@ function DynamicPage() {
   const lastUpdated = topics.length > 0 ? new Date(Math.max(...topics.map(t => new Date(t.pubDate || t.createdAt || Date.now()).getTime()))) : new Date();
 
   const baseUrl = import.meta.env.VITE_BASE_URL || 'https://topbestcharts.com';
-  const pageUrl = typeof window !== 'undefined' ? window.location.href : `${baseUrl}${pageData.page_url}`;
+  const pageUrl = typeof window !== 'undefined'
+    ? window.location.href.replace(/\/$/, '') + '/'
+    : `${baseUrl}${pageData.page_url}/`;
   const sourceName = sources.find(s => s.value === pageData.source)?.label || 'Custom';
 
   const extractTopicType = (title: string) => {
