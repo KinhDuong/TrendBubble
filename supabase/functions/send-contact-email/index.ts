@@ -56,49 +56,12 @@ Deno.serve(async (req: Request) => {
       throw new Error('Failed to store contact submission');
     }
 
-    // Format email content
-    const emailSubject = `New Contact Form Submission from ${formData.name}`;
-    const emailBody = `
-New Contact Form Submission
-
-Name: ${formData.name}
-Email: ${formData.email}
-Phone: ${formData.phone || 'Not provided'}
-
-Message:
-${formData.message}
-
----
-Submitted from Top Best Charts Contact Form
-Timestamp: ${new Date().toISOString()}
-    `;
-
-    // Send email using Resend API
-    // Note: You'll need to set up Resend and add RESEND_API_KEY to your secrets
-    const resendApiKey = Deno.env.get('RESEND_API_KEY');
-    
-    if (resendApiKey) {
-      const emailResponse = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${resendApiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          from: 'contact@topbestcharts.com',
-          to: 'Kinh@phenu.com',
-          subject: emailSubject,
-          text: emailBody,
-        }),
-      });
-
-      if (!emailResponse.ok) {
-        console.error('Failed to send email via Resend');
-        // Don't fail the request if email fails, as we've already saved to DB
-      }
-    } else {
-      console.warn('RESEND_API_KEY not configured. Email notification not sent.');
-    }
+    console.log('Contact form submission received:', {
+      name: formData.name,
+      email: formData.email,
+      phone: formData.phone || 'Not provided',
+      timestamp: new Date().toISOString()
+    });
 
     return new Response(
       JSON.stringify({ 
