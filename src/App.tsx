@@ -2136,19 +2136,19 @@ function HomePage() {
                   className={`group block ${theme === 'dark' ? 'bg-gray-800 hover:bg-gray-750' : 'bg-white hover:bg-gray-50 border border-gray-200'} rounded-lg overflow-hidden shadow-md transition-all hover:shadow-lg h-full`}
                 >
                   <div className="flex flex-row h-full min-h-[180px]">
-                    <div className={`w-2/5 ${theme === 'dark' ? 'bg-gradient-to-br from-blue-900 to-blue-800' : 'bg-gradient-to-br from-blue-100 to-blue-50'} flex items-center justify-center p-4`}>
+                    <div className={`w-1/4 md:w-2/5 ${theme === 'dark' ? 'bg-gradient-to-br from-blue-900 to-blue-800' : 'bg-gradient-to-br from-blue-100 to-blue-50'} flex items-center justify-center p-2 md:p-4`}>
                       <div className="text-center">
-                        <div className={`text-4xl font-bold ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'} mb-2`}>
+                        <div className={`text-2xl md:text-4xl font-bold ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'} mb-1 md:mb-2`}>
                           {sourceInfo ? sourceInfo.label.substring(0, 2).toUpperCase() : page.source.substring(0, 2).toUpperCase()}
                         </div>
                         {sourceInfo && (
-                          <div className={`text-xs font-medium ${theme === 'dark' ? 'text-blue-300' : 'text-blue-700'}`}>
+                          <div className={`text-xs font-medium ${theme === 'dark' ? 'text-blue-300' : 'text-blue-700'} hidden md:block`}>
                             {sourceInfo.label}
                           </div>
                         )}
                       </div>
                     </div>
-                    <div className="w-3/5 p-4 flex flex-col">
+                    <div className="w-3/4 md:w-3/5 p-4 flex flex-col">
                       <div className={`text-xs font-semibold uppercase tracking-wide mb-2 ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
                         {sourceInfo ? sourceInfo.label : page.source} <span className="mx-1">|</span> {new Date(page.created_at).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}
                       </div>
