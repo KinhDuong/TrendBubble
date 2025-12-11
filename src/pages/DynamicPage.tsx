@@ -520,7 +520,8 @@ function DynamicPage() {
   const currentDate = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
   const lastUpdated = topics.length > 0 ? new Date(Math.max(...topics.map(t => new Date(t.pubDate || t.createdAt || Date.now()).getTime()))) : new Date();
 
-  const pageUrl = typeof window !== 'undefined' ? window.location.href : `${import.meta.env.VITE_BASE_URL}${pageData.page_url}`;
+  const baseUrl = import.meta.env.VITE_BASE_URL || 'https://topbestcharts.com';
+  const pageUrl = typeof window !== 'undefined' ? window.location.href : `${baseUrl}${pageData.page_url}`;
   const sourceName = sources.find(s => s.value === pageData.source)?.label || 'Custom';
 
   const extractTopicType = (title: string) => {
@@ -593,7 +594,7 @@ function DynamicPage() {
             "publisher": {
               "@type": "Organization",
               "name": "Top Best Charts",
-              "url": import.meta.env.VITE_BASE_URL
+              "url": baseUrl
             },
             "breadcrumb": {
               "@type": "BreadcrumbList",
@@ -602,7 +603,7 @@ function DynamicPage() {
                   "@type": "ListItem",
                   "position": 1,
                   "name": "Home",
-                  "item": import.meta.env.VITE_BASE_URL
+                  "item": baseUrl
                 },
                 {
                   "@type": "ListItem",

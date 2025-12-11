@@ -420,6 +420,23 @@ function generateStructuredData(pageData, topics) {
     "url": pageUrl,
     "datePublished": pageData.created_at,
     "dateModified": new Date().toISOString(),
+    "breadcrumb": {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": BASE_URL
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": pageData.meta_title,
+          "item": pageUrl
+        }
+      ]
+    },
     "mainEntity": {
       "@type": "ItemList",
       "name": rankingTitle,
