@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Send, Mail, Phone, User, MessageSquare, CheckCircle } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
@@ -9,7 +9,10 @@ import Login from '../components/Login';
 export default function ContactPage() {
   const { isAdmin, logout } = useAuth();
   const [showLogin, setShowLogin] = useState(false);
-  const theme = 'light';
+  const [theme, setTheme] = useState<'dark' | 'light'>(() => {
+    const savedTheme = localStorage.getItem('theme');
+    return (savedTheme === 'dark' || savedTheme === 'light') ? savedTheme : 'light';
+  });
 
   const [formData, setFormData] = useState({
     name: '',
@@ -21,6 +24,17 @@ export default function ContactPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const prerenderFooter = document.getElementById('prerender-footer');
+    if (prerenderFooter) {
+      prerenderFooter.remove();
+    }
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.style.backgroundColor = theme === 'dark' ? '#111827' : '#f1f3f4';
+  }, [theme]);
 
   const validateForm = () => {
     const newErrors: { [key: string]: string } = {};
@@ -92,7 +106,7 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-100'}`}>
       <Helmet>
         <title>Contact Us - Top Best Charts</title>
         <meta name="description" content="Get in touch with Top Best Charts. Send us your questions, feedback, or suggestions." />
@@ -109,42 +123,42 @@ export default function ContactPage() {
       <main className="container mx-auto px-4 py-16 max-w-4xl">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-5xl font-bold text-gray-900 mb-4">
+          <h1 className={`text-5xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
             Get in Touch
           </h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <p className={`text-xl max-w-2xl mx-auto ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
             Have a question or feedback? We'd love to hear from you. Send us a message and we'll respond as soon as possible.
           </p>
         </div>
 
         <div className="grid md:grid-cols-2 gap-8 mb-12">
           {/* Contact Info Cards */}
-          <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-200">
+          <div className={`rounded-2xl shadow-xl p-8 border ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
             <div className="flex items-start space-x-4">
-              <div className="bg-blue-100 p-3 rounded-xl">
-                <Mail className="w-6 h-6 text-blue-600" />
+              <div className={`p-3 rounded-xl ${theme === 'dark' ? 'bg-blue-900' : 'bg-blue-100'}`}>
+                <Mail className={`w-6 h-6 ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`} />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <h3 className={`text-lg font-semibold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                   Email Us
                 </h3>
-                <p className="text-gray-600">
+                <p className={theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}>
                   Kinh@phenu.com
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-200">
+          <div className={`rounded-2xl shadow-xl p-8 border ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
             <div className="flex items-start space-x-4">
-              <div className="bg-green-100 p-3 rounded-xl">
-                <MessageSquare className="w-6 h-6 text-green-600" />
+              <div className={`p-3 rounded-xl ${theme === 'dark' ? 'bg-green-900' : 'bg-green-100'}`}>
+                <MessageSquare className={`w-6 h-6 ${theme === 'dark' ? 'text-green-400' : 'text-green-600'}`} />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <h3 className={`text-lg font-semibold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                   Quick Response
                 </h3>
-                <p className="text-gray-600">
+                <p className={theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}>
                   We typically respond within 24 hours
                 </p>
               </div>
@@ -153,16 +167,16 @@ export default function ContactPage() {
         </div>
 
         {/* Contact Form */}
-        <div className="bg-white rounded-2xl shadow-2xl p-8 md:p-12 border border-gray-200">
+        <div className={`rounded-2xl shadow-2xl p-8 md:p-12 border ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
           {submitSuccess ? (
             <div className="text-center py-12">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
-                <CheckCircle className="w-8 h-8 text-green-600" />
+              <div className={`inline-flex items-center justify-center w-16 h-16 rounded-full mb-4 ${theme === 'dark' ? 'bg-green-900' : 'bg-green-100'}`}>
+                <CheckCircle className={`w-8 h-8 ${theme === 'dark' ? 'text-green-400' : 'text-green-600'}`} />
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">
+              <h3 className={`text-2xl font-bold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                 Message Sent Successfully!
               </h3>
-              <p className="text-gray-600 mb-6">
+              <p className={`mb-6 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
                 Thank you for contacting us. We'll get back to you soon.
               </p>
               <button
@@ -176,7 +190,7 @@ export default function ContactPage() {
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Name Field */}
               <div>
-                <label htmlFor="name" className="block text-sm font-semibold text-gray-700 mb-2">
+                <label htmlFor="name" className={`block text-sm font-semibold mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
                   Name <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
@@ -189,9 +203,11 @@ export default function ContactPage() {
                     name="name"
                     value={formData.name}
                     onChange={handleChange}
-                    className={`w-full pl-12 pr-4 py-3 bg-gray-50 border ${
-                      errors.name ? 'border-red-500' : 'border-gray-300'
-                    } rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 transition-all`}
+                    className={`w-full pl-12 pr-4 py-3 border ${
+                      errors.name ? 'border-red-500' : theme === 'dark' ? 'border-gray-600' : 'border-gray-300'
+                    } rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
+                      theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'
+                    }`}
                     placeholder="Your name"
                   />
                 </div>
@@ -202,7 +218,7 @@ export default function ContactPage() {
 
               {/* Email Field */}
               <div>
-                <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">
+                <label htmlFor="email" className={`block text-sm font-semibold mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
                   Email <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
@@ -215,9 +231,11 @@ export default function ContactPage() {
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
-                    className={`w-full pl-12 pr-4 py-3 bg-gray-50 border ${
-                      errors.email ? 'border-red-500' : 'border-gray-300'
-                    } rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 transition-all`}
+                    className={`w-full pl-12 pr-4 py-3 border ${
+                      errors.email ? 'border-red-500' : theme === 'dark' ? 'border-gray-600' : 'border-gray-300'
+                    } rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
+                      theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'
+                    }`}
                     placeholder="your.email@example.com"
                   />
                 </div>
@@ -228,7 +246,7 @@ export default function ContactPage() {
 
               {/* Phone Field */}
               <div>
-                <label htmlFor="phone" className="block text-sm font-semibold text-gray-700 mb-2">
+                <label htmlFor="phone" className={`block text-sm font-semibold mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
                   Phone <span className="text-gray-400 text-xs">(optional)</span>
                 </label>
                 <div className="relative">
@@ -241,7 +259,9 @@ export default function ContactPage() {
                     name="phone"
                     value={formData.phone}
                     onChange={handleChange}
-                    className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 transition-all"
+                    className={`w-full pl-12 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
+                      theme === 'dark' ? 'bg-gray-900 text-white border-gray-600' : 'bg-gray-50 text-gray-900 border-gray-300'
+                    }`}
                     placeholder="(123) 456-7890"
                   />
                 </div>
@@ -249,7 +269,7 @@ export default function ContactPage() {
 
               {/* Message Field */}
               <div>
-                <label htmlFor="message" className="block text-sm font-semibold text-gray-700 mb-2">
+                <label htmlFor="message" className={`block text-sm font-semibold mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
                   Message <span className="text-red-500">*</span>
                 </label>
                 <textarea
@@ -258,9 +278,11 @@ export default function ContactPage() {
                   value={formData.message}
                   onChange={handleChange}
                   rows={6}
-                  className={`w-full px-4 py-3 bg-gray-50 border ${
-                    errors.message ? 'border-red-500' : 'border-gray-300'
-                  } rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 transition-all resize-none`}
+                  className={`w-full px-4 py-3 border ${
+                    errors.message ? 'border-red-500' : theme === 'dark' ? 'border-gray-600' : 'border-gray-300'
+                  } rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none ${
+                    theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'
+                  }`}
                   placeholder="Tell us how we can help you..."
                 />
                 {errors.message && (
@@ -270,8 +292,8 @@ export default function ContactPage() {
 
               {/* Submit Error */}
               {submitError && (
-                <div className="p-4 bg-red-50 border border-red-200 rounded-xl">
-                  <p className="text-red-600">{submitError}</p>
+                <div className={`p-4 border rounded-xl ${theme === 'dark' ? 'bg-red-900/20 border-red-800' : 'bg-red-50 border-red-200'}`}>
+                  <p className={theme === 'dark' ? 'text-red-400' : 'text-red-600'}>{submitError}</p>
                 </div>
               )}
 
@@ -279,7 +301,9 @@ export default function ContactPage() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full flex items-center justify-center space-x-2 px-6 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-blue-800 focus:ring-4 focus:ring-blue-300 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
+                className={`w-full flex items-center justify-center space-x-2 px-6 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-blue-800 focus:ring-4 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl ${
+                  theme === 'dark' ? 'focus:ring-blue-800' : 'focus:ring-blue-300'
+                }`}
               >
                 {isSubmitting ? (
                   <>
