@@ -517,7 +517,6 @@ function DynamicPage() {
   const displayTopics = topTopics.slice(startIndex, endIndex);
 
   const topTopicNames = topTopics.slice(0, 5).map(t => t.name.replace(/"/g, '')).join(', ');
-  const currentDate = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
   const lastUpdated = topics.length > 0 ? new Date(Math.max(...topics.map(t => new Date(t.pubDate || t.createdAt || Date.now()).getTime()))) : new Date();
 
   const baseUrl = import.meta.env.VITE_BASE_URL || 'https://topbestcharts.com';
@@ -537,7 +536,7 @@ function DynamicPage() {
   const topicType = extractTopicType(pageData.meta_title);
   const topTitle = `Top ${topTopics.length} ${topicType || 'Trending Topics'} (${lastUpdated.getFullYear()})`;
 
-  const enhancedTitle = `${pageData.meta_title} - ${currentDate}`;
+  const enhancedTitle = pageData.meta_title;
   const enhancedDescription = topTopicNames
     ? `${pageData.meta_description} Top trending: ${topTopicNames}. Updated ${lastUpdated.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}.`
     : pageData.meta_description;
