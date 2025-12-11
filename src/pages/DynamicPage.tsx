@@ -904,27 +904,27 @@ snapshotButton={null}
                             return (
                           <li
                             key={index}
-                            className={`px-4 py-2 transition-colors ${index < displayTopics.length - 1 ? `border-b ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}` : ''} ${theme === 'dark' ? 'hover:bg-gray-700' : 'hover:bg-gray-50'}`}
+                            className={`px-2 py-1.5 transition-colors ${index < displayTopics.length - 1 ? `border-b ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}` : ''} ${theme === 'dark' ? 'hover:bg-gray-700' : 'hover:bg-gray-50'}`}
                             itemProp="itemListElement"
                             itemScope
                             itemType="https://schema.org/ListItem"
                           >
                             <meta itemProp="position" content={String(actualRank)} />
                             <article className="flex-1" itemProp="item" itemScope itemType="https://schema.org/Thing">
-                              <div className="flex items-center gap-3 mb-1">
-                                <div className="w-10 flex items-center justify-center flex-shrink-0" aria-label={`Rank ${actualRank}`}>
-                                  <div className={`text-base ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                              <div className="flex items-center gap-2 mb-0.5">
+                                <div className="w-8 flex items-center justify-center flex-shrink-0" aria-label={`Rank ${actualRank}`}>
+                                  <div className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
                                     {actualRank}
                                   </div>
                                 </div>
-                                <div className="flex items-center gap-3 flex-wrap flex-1">
-                                  <h3 className={`font-bold text-base ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`} itemProp="name">{topic.name.replace(/"/g, '')}</h3>
-                                  <span className={`text-base ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`} itemProp="description">
+                                <div className="flex items-center gap-2 flex-wrap flex-1">
+                                  <h3 className={`font-bold text-sm ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`} itemProp="name">{topic.name.replace(/"/g, '')}</h3>
+                                  <span className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`} itemProp="description">
                                     {topic.searchVolumeRaw.replace(/"/g, '')}
                                   </span>
                                 </div>
                               </div>
-                              <div className="flex flex-wrap items-center gap-2 text-sm pl-[52px]">
+                              <div className="flex flex-wrap items-center gap-2 text-xs pl-[40px]">
                                 {topic.category && (
                                   <span className={`px-2 py-0.5 rounded text-xs ${theme === 'dark' ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-700'}`}>
                                     {topic.category}
@@ -990,18 +990,18 @@ snapshotButton={null}
                               return (
                                 <li
                                   key={index}
-                                  className={`px-3 py-2 transition-colors ${index < topGainers.length - 1 ? `border-b ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}` : ''} ${theme === 'dark' ? 'hover:bg-gray-700' : 'hover:bg-gray-50'}`}
+                                  className={`px-2 py-1.5 transition-colors ${index < topGainers.length - 1 ? `border-b ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}` : ''} ${theme === 'dark' ? 'hover:bg-gray-700' : 'hover:bg-gray-50'}`}
                                 >
                                   <div className="flex-1">
                                     <div className="flex items-center gap-2 mb-0.5">
-                                      <div className="w-7 flex items-center justify-center flex-shrink-0">
-                                        <div className={`text-base font-bold ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                                      <div className="w-6 flex items-center justify-center flex-shrink-0">
+                                        <div className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
                                           {actualRank}
                                         </div>
                                       </div>
                                       <h4 className={`font-semibold text-sm ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{topic.name.replace(/"/g, '')}</h4>
                                     </div>
-                                    <div className="flex items-center gap-2 text-sm pl-[44px]">
+                                    <div className="flex items-center gap-2 text-xs pl-[32px]">
                                       <span className="text-green-500 font-bold">
                                         +{typeof change === 'number' ? change.toFixed(2) : change}%
                                       </span>
@@ -1031,18 +1031,18 @@ snapshotButton={null}
                               return (
                                 <li
                                   key={index}
-                                  className={`px-3 py-2 transition-colors ${index < topLosers.length - 1 ? `border-b ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}` : ''} ${theme === 'dark' ? 'hover:bg-gray-700' : 'hover:bg-gray-50'}`}
+                                  className={`px-2 py-1.5 transition-colors ${index < topLosers.length - 1 ? `border-b ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}` : ''} ${theme === 'dark' ? 'hover:bg-gray-700' : 'hover:bg-gray-50'}`}
                                 >
                                   <div className="flex-1">
                                     <div className="flex items-center gap-2 mb-0.5">
-                                      <div className="w-7 flex items-center justify-center flex-shrink-0">
-                                        <div className={`text-base font-bold ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                                      <div className="w-6 flex items-center justify-center flex-shrink-0">
+                                        <div className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
                                           {actualRank}
                                         </div>
                                       </div>
                                       <h4 className={`font-semibold text-sm ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{topic.name.replace(/"/g, '')}</h4>
                                     </div>
-                                    <div className="flex items-center gap-2 text-sm pl-[44px]">
+                                    <div className="flex items-center gap-2 text-xs pl-[32px]">
                                       <span className="text-red-500 font-bold">
                                         {typeof change === 'number' ? change.toFixed(2) : change}%
                                       </span>
