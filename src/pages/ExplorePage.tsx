@@ -245,14 +245,14 @@ export default function ExplorePage() {
             {/* Top Section */}
             {(heroPage || topPages.length > 0) && (
               <div className="mb-12">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-2 gap-4 md:gap-6">
                   {/* Hero Page */}
                   {heroPage && (
                     <Link
                       to={heroPage.page_url}
                       className={`group block rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 ${
                         theme === 'dark' ? 'bg-gray-800' : 'bg-white'
-                      } md:col-span-2`}
+                      } col-span-2`}
                     >
                       <div className="relative h-80 bg-gradient-to-br from-blue-500 to-purple-600 overflow-hidden">
                         <div className="absolute inset-0 bg-black bg-opacity-30 group-hover:bg-opacity-20 transition-all duration-300"></div>
@@ -287,24 +287,24 @@ export default function ExplorePage() {
                         theme === 'dark' ? 'bg-gray-800' : 'bg-white'
                       }`}
                     >
-                      <div className="relative h-48 bg-gradient-to-br from-green-500 to-teal-600 overflow-hidden">
+                      <div className="relative h-32 md:h-48 bg-gradient-to-br from-green-500 to-teal-600 overflow-hidden">
                         <div className="absolute inset-0 bg-black bg-opacity-30 group-hover:bg-opacity-20 transition-all duration-300"></div>
-                        <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-                          <div className="flex items-center gap-2 text-sm mb-2 opacity-90">
+                        <div className="absolute bottom-0 left-0 right-0 p-3 md:p-6 text-white">
+                          <div className="flex items-center gap-1 md:gap-2 text-xs md:text-sm mb-1 md:mb-2 opacity-90">
                             <span className="uppercase font-semibold">Top</span>
-                            <span>/</span>
-                            <span className="flex items-center gap-1">
+                            <span className="hidden md:inline">/</span>
+                            <span className="hidden md:flex items-center gap-1">
                               <Clock className="w-4 h-4" />
                               {formatTimeAgo(page.created_at)}
                             </span>
                           </div>
-                          <h3 className="font-bold text-xl group-hover:text-blue-300 transition-colors">
+                          <h3 className="font-bold text-sm md:text-xl group-hover:text-blue-300 transition-colors line-clamp-2">
                             {page.meta_title}
                           </h3>
                         </div>
                       </div>
-                      <div className="p-4">
-                        <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} line-clamp-2`}>
+                      <div className="p-2 md:p-4">
+                        <p className={`text-xs md:text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} line-clamp-2`}>
                           {page.meta_description}
                         </p>
                       </div>
