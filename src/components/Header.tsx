@@ -210,7 +210,7 @@ export default function Header({ theme, isAdmin, onLoginClick, onLogout, title =
                       <span>Trending Now</span>
                     </a>
                     <a
-                      href="mailto:contact@example.com"
+                      href="/contact"
                       className={`flex items-center gap-3 px-6 py-3 ${theme === 'dark' ? 'text-gray-300 hover:bg-gray-700 hover:text-white' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'} transition-colors`}
                       onClick={() => setIsMenuOpen(false)}
                     >
