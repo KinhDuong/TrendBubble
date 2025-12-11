@@ -318,40 +318,49 @@ export default function ExplorePage() {
             {latestPages.length > 0 && (
               <div className="mb-12">
                 <div className="relative mb-6">
-                  <h2 className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} inline-block px-4 py-2 relative`}>
+                  <h2 className={`text-xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} inline-block px-3 py-1 relative`}>
                     <span className="relative z-10">LATEST</span>
                     <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-blue-600 transform -skew-x-12"></div>
                   </h2>
                 </div>
-                <div className="space-y-4">
-                  {latestPages.map((page) => (
+                <div className="space-y-6">
+                  {latestPages.map((page, index) => (
                     <Link
                       key={page.id}
                       to={page.page_url}
-                      className={`flex gap-4 p-4 rounded-lg hover:shadow-lg transition-all duration-300 ${
-                        theme === 'dark' ? 'bg-gray-800 hover:bg-gray-750' : 'bg-white hover:bg-gray-50'
-                      }`}
+                      className="block group"
                     >
-                      <div className="flex-shrink-0 w-32 h-24 bg-gradient-to-br from-blue-400 to-cyan-500 rounded-lg"></div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 text-xs mb-2">
-                          <span className={`uppercase font-semibold ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`}>
-                            Page
-                          </span>
-                          <span className={theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}>/</span>
-                          <span className={`flex items-center gap-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                            <Clock className="w-3 h-3" />
-                            {formatTimeAgo(page.created_at)}
-                          </span>
+                      <div className="flex gap-3">
+                        <div className={`flex-shrink-0 w-16 h-16 rounded-lg bg-gradient-to-br ${
+                          index === 0 ? 'from-blue-400 to-cyan-500' :
+                          index === 1 ? 'from-cyan-400 to-teal-500' :
+                          index === 2 ? 'from-teal-400 to-green-500' :
+                          index === 3 ? 'from-green-400 to-emerald-500' :
+                          'from-emerald-400 to-blue-500'
+                        } flex items-center justify-center`}>
+                          <span className="text-white font-bold text-xl">{index + 1}</span>
                         </div>
-                        <h3 className={`font-bold text-lg mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                          {page.meta_title}
-                        </h3>
-                        {page.meta_description && (
-                          <p className={`text-sm line-clamp-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                            {page.meta_description}
-                          </p>
-                        )}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 text-xs mb-1">
+                            <span className={`uppercase font-semibold ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`}>
+                              Page
+                            </span>
+                            <span className={theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}>/</span>
+                            <span className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}>
+                              {formatTimeAgo(page.created_at)}
+                            </span>
+                          </div>
+                          <h3 className={`font-semibold group-hover:text-blue-600 transition-colors line-clamp-2 ${
+                            theme === 'dark' ? 'text-white' : 'text-gray-900'
+                          }`}>
+                            {page.meta_title}
+                          </h3>
+                          {page.meta_description && (
+                            <p className={`text-xs mt-1 line-clamp-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                              {page.meta_description}
+                            </p>
+                          )}
+                        </div>
                       </div>
                     </Link>
                   ))}
