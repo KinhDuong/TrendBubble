@@ -288,9 +288,9 @@ async function generateContentHTML(pageData, topics, sourceLabel) {
 
   if (pageData.faq) {
     contentHTML += `
-      <section class="page-faq" aria-labelledby="page-faq" itemscope itemtype="https://schema.org/FAQPage" style="max-width: 80rem; margin: 2rem auto 1.5rem; padding: 0 0.5rem;">
+      <section class="page-faq" aria-labelledby="page-faq" style="max-width: 80rem; margin: 2rem auto 1.5rem; padding: 0 0.5rem;">
         <div class="faq-container" style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; padding: 1.5rem;">
-          <div class="summary-content" itemprop="mainEntity" itemscope itemtype="https://schema.org/Question">
+          <div class="summary-content">
             ${pageData.faq}
           </div>
         </div>
