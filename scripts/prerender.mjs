@@ -193,7 +193,7 @@ function generateMetaTags(pageData, topics) {
     <meta property="og:url" content="${pageUrl}" data-prerendered />
     <meta property="og:title" content="${enhancedTitle}" data-prerendered />
     <meta property="og:description" content="${enhancedDescription}" data-prerendered />
-    <meta property="og:site_name" content="Google Trending Topics" data-prerendered />
+    <meta property="og:site_name" content="Top Best Charts" data-prerendered />
 
     <meta name="twitter:card" content="summary_large_image" data-prerendered />
     <meta name="twitter:title" content="${enhancedTitle}" data-prerendered />

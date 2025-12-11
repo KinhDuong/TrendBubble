@@ -520,7 +520,7 @@ function DynamicPage() {
   const currentDate = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
   const lastUpdated = topics.length > 0 ? new Date(Math.max(...topics.map(t => new Date(t.pubDate || t.createdAt || Date.now()).getTime()))) : new Date();
 
-  const pageUrl = typeof window !== 'undefined' ? window.location.href : `https://googletrendingtopics.com/${pageData.page_url}`;
+  const pageUrl = typeof window !== 'undefined' ? window.location.href : `${import.meta.env.VITE_BASE_URL}${pageData.page_url}`;
   const sourceName = sources.find(s => s.value === pageData.source)?.label || 'Custom';
 
   const extractTopicType = (title: string) => {
@@ -555,7 +555,7 @@ function DynamicPage() {
           }
         `}</style>
         <meta name="keywords" content={keywords} />
-        <meta name="author" content="Google Trending Topics" />
+        <meta name="author" content="Top Best Charts" />
         <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
         <link rel="canonical" href={pageUrl} />
 
@@ -563,7 +563,7 @@ function DynamicPage() {
         <meta property="og:url" content={pageUrl} />
         <meta property="og:title" content={enhancedTitle} />
         <meta property="og:description" content={enhancedDescription} />
-        <meta property="og:site_name" content="Google Trending Topics" />
+        <meta property="og:site_name" content="Top Best Charts" />
         <meta property="og:locale" content="en_US" />
         <meta property="og:updated_time" content={lastUpdated.toISOString()} />
 
@@ -592,8 +592,8 @@ function DynamicPage() {
             },
             "publisher": {
               "@type": "Organization",
-              "name": "Google Trending Topics",
-              "url": "https://googletrendingtopics.com"
+              "name": "Top Best Charts",
+              "url": import.meta.env.VITE_BASE_URL
             },
             "breadcrumb": {
               "@type": "BreadcrumbList",
@@ -602,7 +602,7 @@ function DynamicPage() {
                   "@type": "ListItem",
                   "position": 1,
                   "name": "Home",
-                  "item": "https://googletrendingtopics.com"
+                  "item": import.meta.env.VITE_BASE_URL
                 },
                 {
                   "@type": "ListItem",

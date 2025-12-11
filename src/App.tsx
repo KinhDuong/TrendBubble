@@ -843,7 +843,7 @@ function HomePage() {
         <meta name="description" content={`Discover today's trending topics on Google: ${topTopicNames || 'live search trends, viral topics, and popular searches'}. Updated in real-time with interactive visualizations. ${currentDate}`} />
         <meta property="og:title" content="Google Trending Topics Today - Real-Time Search Trends" />
         <meta property="og:description" content={`Live trending topics: ${topTopicNames || 'Track what\'s popular on Google right now'}. Interactive bubble chart visualization updated hourly.`} />
-        <link rel="canonical" href="https://googletrendingtopics.com/" />
+        <link rel="canonical" href={`${import.meta.env.VITE_BASE_URL}/`} />
       </Helmet>
       {isAdmin && (
         <header className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-b py-4 md:py-6 px-3 md:px-6 shadow-sm border-t-0`}>

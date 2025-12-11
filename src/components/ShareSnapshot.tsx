@@ -30,7 +30,7 @@ export default function ShareSnapshot({ theme, canvasRef, variant = 'floating' }
       const ctx = snapshot.getContext('2d');
       if (ctx) {
         const padding = 40;
-        const watermarkText = 'googletrendingtopics.com';
+        const watermarkText = 'topbestcharts.com';
         const fontSize = 24;
 
         ctx.font = `bold ${fontSize}px sans-serif`;
