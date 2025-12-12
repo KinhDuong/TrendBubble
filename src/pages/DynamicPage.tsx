@@ -812,15 +812,6 @@ snapshotButton={null}
                         <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-lg border p-6 shadow-md`}>
                     {!isCryptoPage && (
                       <>
-                        {pageData.cover_image && (
-                          <div className="mb-6 rounded-xl overflow-hidden">
-                            <img
-                              src={pageData.cover_image}
-                              alt={pageData.meta_title}
-                              className="w-full h-64 md:h-96 object-cover"
-                            />
-                          </div>
-                        )}
                         <h2 id="top-trending-heading" className={`text-xl md:text-2xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                           {topTitle}
                         </h2>
@@ -855,15 +846,6 @@ snapshotButton={null}
                     )}
                     {isCryptoPage && (
                       <>
-                        {pageData.cover_image && (
-                          <div className="mb-6 rounded-xl overflow-hidden">
-                            <img
-                              src={pageData.cover_image}
-                              alt={pageData.meta_title}
-                              className="w-full h-64 md:h-96 object-cover"
-                            />
-                          </div>
-                        )}
                         <h2 id="top-trending-heading" className={`text-xl md:text-2xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                           Top {topTopics.length} Gainers & Losers
                         </h2>
@@ -1242,6 +1224,15 @@ snapshotButton={null}
               itemType="https://schema.org/Article"
             >
               <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-lg border p-4 md:p-6`}>
+                {pageData.cover_image && (
+                  <div className="mb-6 rounded-xl overflow-hidden">
+                    <img
+                      src={pageData.cover_image}
+                      alt={pageData.meta_title}
+                      className="w-full h-64 md:h-96 object-cover"
+                    />
+                  </div>
+                )}
                 <div
                   itemProp="articleBody"
                   className="summary-content"

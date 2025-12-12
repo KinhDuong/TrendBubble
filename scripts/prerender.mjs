@@ -275,6 +275,10 @@ async function generateContentHTML(pageData, topics, sourceLabel) {
     contentHTML += `
       <section class="page-summary" aria-labelledby="page-summary" itemscope itemtype="https://schema.org/Article" style="max-width: 80rem; margin: 2rem auto 1.5rem; padding: 0 0.5rem;">
         <div class="summary-container" style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; padding: 1.5rem;">
+          ${pageData.cover_image ? `
+          <div style="margin-bottom: 1.5rem; border-radius: 0.75rem; overflow: hidden;">
+            <img src="${pageData.cover_image}" alt="${pageData.meta_title}" style="width: 100%; height: 24rem; object-fit: cover;" />
+          </div>` : ''}
           <div class="summary-content" itemprop="articleBody">
             ${pageData.summary}
           </div>
@@ -314,10 +318,6 @@ async function generateContentHTML(pageData, topics, sourceLabel) {
   contentHTML += `
     <section class="top-topics" aria-labelledby="top-trending-heading" itemscope itemtype="https://schema.org/ItemList" style="max-width: 80rem; margin: 2rem auto 1.5rem; padding: 0 0.5rem;">
       <div style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; padding: 1.5rem;">
-        ${pageData.cover_image ? `
-        <div style="margin-bottom: 1.5rem; border-radius: 0.75rem; overflow: hidden;">
-          <img src="${pageData.cover_image}" alt="${pageData.meta_title}" style="width: 100%; height: 24rem; object-fit: cover;" />
-        </div>` : ''}
         <h2 id="top-trending-heading" style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; color: white;">
           ${rankingTitle}
         </h2>
