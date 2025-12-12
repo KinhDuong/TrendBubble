@@ -96,6 +96,24 @@ export default function PageEditor({ theme, onClose, existingPage }: PageEditorP
     setError('');
 
     try {
+      // Delete old image if it exists
+      const oldImageUrl = coverImage || existingPage?.cover_image;
+      if (oldImageUrl) {
+        try {
+          // Extract filename from the public URL
+          const urlParts = oldImageUrl.split('/');
+          const oldFileName = urlParts[urlParts.length - 1];
+
+          // Delete the old image from storage
+          await supabase.storage
+            .from('page-covers')
+            .remove([oldFileName]);
+        } catch (deleteErr) {
+          console.warn('Could not delete old image:', deleteErr);
+          // Continue with upload even if delete fails
+        }
+      }
+
       const fileExt = file.name.split('.').pop();
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
       const filePath = `${fileName}`;
@@ -119,7 +137,22 @@ export default function PageEditor({ theme, onClose, existingPage }: PageEditorP
     }
   };
 
-  const handleRemoveImage = () => {
+  const handleRemoveImage = async () => {
+    const imageUrl = coverImage || existingPage?.cover_image;
+    if (imageUrl) {
+      try {
+        // Extract filename from the public URL
+        const urlParts = imageUrl.split('/');
+        const fileName = urlParts[urlParts.length - 1];
+
+        // Delete the image from storage
+        await supabase.storage
+          .from('page-covers')
+          .remove([fileName]);
+      } catch (deleteErr) {
+        console.warn('Could not delete image:', deleteErr);
+      }
+    }
     setCoverImage('');
   };
 
