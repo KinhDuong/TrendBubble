@@ -154,12 +154,6 @@ function generateMetaTags(pageData, topics) {
     ? new Date(Math.max(...topics.map(t => new Date(t.pub_date || t.created_at || Date.now()).getTime())))
     : new Date();
 
-  const currentDate = lastUpdated.toLocaleDateString('en-US', {
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric'
-  });
-
   const currentYear = new Date().getFullYear();
   const extractTopicType = (title) => {
     const lowerTitle = title.toLowerCase();
@@ -171,7 +165,7 @@ function generateMetaTags(pageData, topics) {
   const topicType = extractTopicType(pageData.meta_title);
   const rankingTitle = `Top ${topics.length} ${topicType || 'Trending Topics'} (${currentYear})`;
 
-  const enhancedTitle = `${pageData.meta_title} - ${currentDate}`;
+  const enhancedTitle = pageData.meta_title;
 
   let enhancedDescription = pageData.meta_description;
   if (topTopics) {
@@ -391,11 +385,6 @@ async function generateContentHTML(pageData, topics, sourceLabel) {
 }
 
 function generateStructuredData(pageData, topics) {
-  const currentDate = new Date().toLocaleDateString('en-US', {
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric'
-  });
   const pageUrl = `${BASE_URL}${pageData.page_url}/`;
   const topTopics = [...topics].sort((a, b) => b.search_volume - a.search_volume);
 
@@ -416,7 +405,7 @@ function generateStructuredData(pageData, topics) {
   const webPageSchema = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    "name": `${pageData.meta_title} - ${currentDate}`,
+    "name": pageData.meta_title,
     "description": description,
     "url": pageUrl,
     "datePublished": pageData.created_at,
