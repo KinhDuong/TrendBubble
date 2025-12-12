@@ -793,7 +793,7 @@ snapshotButton={null}
                         href="#top-trending-heading"
                         className={`px-2 py-1 rounded text-xs cursor-pointer transition-all hover:scale-105 inline-block ${theme === 'dark' ? 'bg-blue-900/30 text-blue-400 hover:bg-blue-900/50' : 'bg-blue-100 text-blue-700 hover:bg-blue-200'}`}
                       >
-                        Top {topics.length} {sourceName}
+                        View Top {topics.length} {sourceName}
                       </a>
                     </div>
                   </header>
