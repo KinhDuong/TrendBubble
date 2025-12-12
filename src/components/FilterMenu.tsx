@@ -91,6 +91,18 @@ export default function FilterMenu({
               <div className="flex items-center gap-2 md:gap-4">
                 {(viewMode === 'bubble' || viewMode === 'bar' || viewMode === 'treemap' || viewMode === 'donut') && maxBubbles !== undefined && onMaxBubblesChange && (
                   <>
+                    <button
+                      onClick={() => onMaxBubblesChange(10)}
+                      className={`px-2 md:px-3 py-1 md:py-1.5 text-xs md:text-sm font-medium rounded transition-colors whitespace-nowrap ${
+                        maxBubbles === 10
+                          ? 'bg-blue-600 text-white'
+                          : theme === 'dark'
+                            ? 'bg-gray-700 text-gray-300 hover:bg-gray-600 border border-gray-600'
+                            : 'bg-white text-gray-900 hover:bg-gray-100 border border-gray-300'
+                      }`}
+                    >
+                      Top 10
+                    </button>
                     <label htmlFor="maxBubbles" className={`text-xs md:text-sm font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                       Max:
                     </label>
@@ -511,6 +523,18 @@ export default function FilterMenu({
               {(viewMode === 'bubble' || viewMode === 'bar' || viewMode === 'treemap' || viewMode === 'donut') && maxBubbles !== undefined && onMaxBubblesChange && (
                 <>
                   <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => onMaxBubblesChange(10)}
+                      className={`px-2 py-1 text-xs font-medium rounded transition-colors whitespace-nowrap ${
+                        maxBubbles === 10
+                          ? 'bg-blue-600 text-white'
+                          : theme === 'dark'
+                            ? 'bg-gray-700 text-gray-300 hover:bg-gray-600 border border-gray-600'
+                            : 'bg-white text-gray-900 hover:bg-gray-100 border border-gray-300'
+                      }`}
+                    >
+                      Top 10
+                    </button>
                     <label htmlFor="maxBubbles" className={`text-xs font-medium whitespace-nowrap ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                       Max:
                     </label>
