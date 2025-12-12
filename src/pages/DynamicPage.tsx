@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import BubbleChart from '../components/BubbleChart';
 import BarChart from '../components/BarChart';
@@ -35,11 +35,25 @@ interface PageData {
 function DynamicPage() {
   const { '*': urlPath } = useParams();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { isAdmin, logout } = useAuth();
   const [pageData, setPageData] = useState<PageData | null>(null);
   const [topics, setTopics] = useState<TrendingTopic[]>([]);
   const isMobile = window.innerWidth < 768;
-  const [maxBubbles, setMaxBubbles] = useState<number>(isMobile ? 40 : 100);
+
+  // Initialize maxBubbles from URL parameter "Top" or default
+  const getInitialMaxBubbles = () => {
+    const topParam = searchParams.get('Top');
+    if (topParam) {
+      const parsed = parseInt(topParam, 10);
+      if (!isNaN(parsed) && parsed > 0) {
+        return parsed;
+      }
+    }
+    return isMobile ? 40 : 100;
+  };
+
+  const [maxBubbles, setMaxBubbles] = useState<number>(getInitialMaxBubbles());
   const [dateFilter, setDateFilter] = useState<'now' | 'all' | '24h' | 'week' | 'month' | 'year'>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [categories, setCategories] = useState<string[]>([]);
@@ -129,6 +143,17 @@ function DynamicPage() {
   useEffect(() => {
     document.documentElement.style.backgroundColor = theme === 'dark' ? '#111827' : '#f1f3f4';
   }, [theme]);
+
+  // Sync maxBubbles with URL parameter
+  useEffect(() => {
+    const topParam = searchParams.get('Top');
+    if (topParam) {
+      const parsed = parseInt(topParam, 10);
+      if (!isNaN(parsed) && parsed > 0 && parsed !== maxBubbles) {
+        setMaxBubbles(parsed);
+      }
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     const bubbleInterval = setInterval(() => {
@@ -235,6 +260,13 @@ function DynamicPage() {
     setTheme(newTheme);
     localStorage.setItem('theme', newTheme);
     document.documentElement.style.backgroundColor = newTheme === 'dark' ? '#111827' : '#f1f3f4';
+  };
+
+  const handleMaxBubblesChange = (newMax: number) => {
+    setMaxBubbles(newMax);
+    const newSearchParams = new URLSearchParams(searchParams);
+    newSearchParams.set('Top', newMax.toString());
+    setSearchParams(newSearchParams, { replace: true });
   };
 
   const handleBubbleTimingUpdate = (nextPopTime: number | null, createdTime?: number, lifetime?: number) => {
@@ -695,7 +727,7 @@ snapshotButton={null}
         onDateFilterChange={setDateFilter}
         onCategoryFilterChange={setCategoryFilter}
         onSourceFilterChange={setSourceFilter}
-        onMaxBubblesChange={setMaxBubbles}
+        onMaxBubblesChange={handleMaxBubblesChange}
         onThemeChange={handleThemeChange}
         onSearchQueryChange={setSearchQuery}
         onSearchClear={() => {
