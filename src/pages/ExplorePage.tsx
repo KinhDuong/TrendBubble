@@ -227,8 +227,8 @@ export default function ExplorePage() {
   return (
     <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-100'}`}>
       <Helmet>
-        <title>Top Best Chart - Interactive Charts & Top Rankings Made Easy</title>
-        <meta name="description" content="Top Best Chart makes exploring rankings simple. Visualize data with Bubble, Bar, Donut, and Treemap charts, see trends at a glance, and uncover insights from the world's top lists" />
+        <title>Top Best Charts - Interactive Charts & Top Rankings Made Easy</title>
+        <meta name="description" content="Top Best Charts makes exploring rankings simple. Visualize data with Bubble, Bar, Donut, and Treemap charts, see trends at a glance, and uncover insights from the world's top lists" />
       </Helmet>
 
       <Header
@@ -590,7 +590,7 @@ export default function ExplorePage() {
               Your Ultimate Data Visualization Hub
             </p>
             <p className={`mt-4 max-w-4xl mx-auto ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-              Top Best Chart helps you explore the world's top-ranked items quickly and visually. From rankings to insights,
+              Top Best Charts helps you explore the world's top-ranked items quickly and visually. From rankings to insights,
               our platform makes data easy to understand and engaging for everyone.
             </p>
           </div>

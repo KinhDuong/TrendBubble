@@ -28,8 +28,8 @@ export default function AboutPage() {
   return (
     <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-100'}`}>
       <Helmet>
-        <title>About Us - Top Best Chart</title>
-        <meta name="description" content="Learn about Top Best Chart, our mission to make data easy to understand, engaging, and visually stunning through interactive charts and rankings." />
+        <title>About Us - Top Best Charts</title>
+        <meta name="description" content="Learn about Top Best Charts, our mission to make data easy to understand, engaging, and visually stunning through interactive charts and rankings." />
       </Helmet>
 
       <Header
@@ -49,7 +49,7 @@ export default function AboutPage() {
 
             <div className={`prose prose-lg max-w-none ${theme === 'dark' ? 'prose-invert' : ''}`}>
               <p className={`text-lg leading-relaxed mb-8 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                At Top Best Chart, our mission is simple: to make data easy to understand, engaging, and visually stunning. We transform complex rankings and statistics into interactive charts and lists that anyone can explore, whether you're a researcher, marketer, student, or simply curious.
+                At Top Best Charts, our mission is simple: to make data easy to understand, engaging, and visually stunning. We transform complex rankings and statistics into interactive charts and lists that anyone can explore, whether you're a researcher, marketer, student, or simply curious.
               </p>
 
               <p className={`text-lg leading-relaxed mb-8 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
@@ -139,11 +139,11 @@ export default function AboutPage() {
               </div>
 
               <p className={`text-lg leading-relaxed mb-8 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                We believe that data should tell a story, not overwhelm you. That's why Top Best Chart combines simplicity, interactivity, and accuracy to help you discover patterns, trends, and insights across a wide range of topics.
+                We believe that data should tell a story, not overwhelm you. That's why Top Best Charts combines simplicity, interactivity, and accuracy to help you discover patterns, trends, and insights across a wide range of topics.
               </p>
 
               <p className={`text-lg leading-relaxed mb-8 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                Whether you're tracking the most popular dog breeds, analyzing top salaries, or comparing products and trends, Top Best Chart turns raw numbers into actionable insights that are easy to understand and share.
+                Whether you're tracking the most popular dog breeds, analyzing top salaries, or comparing products and trends, Top Best Charts turns raw numbers into actionable insights that are easy to understand and share.
               </p>
 
               <h2 className={`text-2xl font-bold mt-12 mb-6 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
@@ -211,7 +211,7 @@ export default function AboutPage() {
                   Discover. Compare. Visualize.
                 </p>
                 <p className={`text-xl mt-2 ${theme === 'dark' ? 'text-blue-200' : 'text-blue-700'}`}>
-                  That's Top Best Chart.
+                  That's Top Best Charts.
                 </p>
               </div>
             </div>

@@ -620,7 +620,7 @@ async function prerenderExplorePage(baseHTML, distPath) {
         <h2 style="font-size: 2rem; font-weight: 700; color: white; margin-bottom: 1rem;">What Is Top Best Charts?</h2>
         <p style="font-size: 1.125rem; color: #d1d5db; margin-bottom: 1rem;">Your Ultimate Data Visualization Hub</p>
         <p style="color: #9ca3af; max-width: 60rem; margin: 0 auto;">
-          Top Best Chart helps you explore the world's top-ranked items quickly and visually. From rankings to insights,
+          Top Best Charts helps you explore the world's top-ranked items quickly and visually. From rankings to insights,
           our platform makes data easy to understand and engaging for everyone.
         </p>
       </div>
@@ -1059,21 +1059,21 @@ async function prerenderAboutPage(baseHTML, distPath) {
   console.log('Pre-rendering: /about');
 
   const aboutMetaTags = `
-    <title>About Us - Top Best Chart</title>
-    <meta name="description" content="Learn about Top Best Chart, our mission to make data easy to understand, engaging, and visually stunning through interactive charts and rankings." data-prerendered />
+    <title>About Us - Top Best Charts</title>
+    <meta name="description" content="Learn about Top Best Charts, our mission to make data easy to understand, engaging, and visually stunning through interactive charts and rankings." data-prerendered />
     <meta name="keywords" content="about top best chart, data visualization, interactive charts, rankings, about us" data-prerendered />
     <meta name="robots" content="index, follow" />
     <link rel="canonical" href="${BASE_URL}/about/" />
 
     <meta property="og:type" content="website" data-prerendered />
     <meta property="og:url" content="${BASE_URL}/about/" data-prerendered />
-    <meta property="og:title" content="About Us - Top Best Chart" data-prerendered />
-    <meta property="og:description" content="Learn about Top Best Chart, our mission to make data easy to understand, engaging, and visually stunning through interactive charts and rankings." data-prerendered />
+    <meta property="og:title" content="About Us - Top Best Charts" data-prerendered />
+    <meta property="og:description" content="Learn about Top Best Charts, our mission to make data easy to understand, engaging, and visually stunning through interactive charts and rankings." data-prerendered />
     <meta property="og:site_name" content="Top Best Charts" data-prerendered />
 
     <meta name="twitter:card" content="summary_large_image" data-prerendered />
-    <meta name="twitter:title" content="About Us - Top Best Chart" data-prerendered />
-    <meta name="twitter:description" content="Learn about Top Best Chart, our mission to make data easy to understand, engaging, and visually stunning through interactive charts and rankings." data-prerendered />
+    <meta name="twitter:title" content="About Us - Top Best Charts" data-prerendered />
+    <meta name="twitter:description" content="Learn about Top Best Charts, our mission to make data easy to understand, engaging, and visually stunning through interactive charts and rankings." data-prerendered />
   `;
 
   const aboutContentHTML = `
@@ -1093,10 +1093,10 @@ async function prerenderAboutPage(baseHTML, distPath) {
 
       <main style="max-width: 80rem; margin: 2rem auto; padding: 0 1rem;">
         <article style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; padding: 2rem;">
-          <h1 style="font-size: 2.5rem; font-weight: 700; color: white; margin-bottom: 1.5rem;">About Us – Top Best Chart</h1>
+          <h1 style="font-size: 2.5rem; font-weight: 700; color: white; margin-bottom: 1.5rem;">About Us – Top Best Charts</h1>
 
           <p style="font-size: 1.125rem; line-height: 1.75; color: #d1d5db; margin-bottom: 2rem;">
-            At Top Best Chart, our mission is simple: to make data easy to understand, engaging, and visually stunning. We transform complex rankings and statistics into interactive charts and lists that anyone can explore, whether you're a researcher, marketer, student, or simply curious.
+            At Top Best Charts, our mission is simple: to make data easy to understand, engaging, and visually stunning. We transform complex rankings and statistics into interactive charts and lists that anyone can explore, whether you're a researcher, marketer, student, or simply curious.
           </p>
 
           <h2 style="font-size: 1.875rem; font-weight: 700; color: white; margin: 2rem 0 1.5rem;">Our Platform Features</h2>
@@ -1129,11 +1129,11 @@ async function prerenderAboutPage(baseHTML, distPath) {
           </div>
 
           <p style="font-size: 1.125rem; line-height: 1.75; color: #d1d5db; margin: 2rem 0;">
-            We believe that data should tell a story, not overwhelm you. That's why Top Best Chart combines simplicity, interactivity, and accuracy to help you discover patterns, trends, and insights across a wide range of topics.
+            We believe that data should tell a story, not overwhelm you. That's why Top Best Charts combines simplicity, interactivity, and accuracy to help you discover patterns, trends, and insights across a wide range of topics.
           </p>
 
           <p style="font-size: 1.125rem; line-height: 1.75; color: #d1d5db; margin: 2rem 0;">
-            Whether you're tracking the most popular dog breeds, analyzing top salaries, or comparing products and trends, Top Best Chart turns raw numbers into actionable insights that are easy to understand and share.
+            Whether you're tracking the most popular dog breeds, analyzing top salaries, or comparing products and trends, Top Best Charts turns raw numbers into actionable insights that are easy to understand and share.
           </p>
 
           <h2 style="font-size: 1.875rem; font-weight: 700; color: white; margin: 2rem 0 1.5rem;">Our Vision</h2>
@@ -1168,7 +1168,7 @@ async function prerenderAboutPage(baseHTML, distPath) {
               Discover. Compare. Visualize.
             </p>
             <p style="font-size: 1.25rem; color: #93c5fd;">
-              That's Top Best Chart.
+              That's Top Best Charts.
             </p>
           </div>
         </article>
