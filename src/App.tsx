@@ -424,6 +424,8 @@ function HomePage() {
               pub_date: earliestPubDate,
               category: topic.category || existing.category,
               source: sourceValue,
+              note: topic.note || existing.note,
+              value: topic.value !== undefined ? topic.value : existing.value,
               updated_at: now
             })
             .eq('id', existing.id);
@@ -457,7 +459,9 @@ function HomePage() {
               url: topic.url,
               pub_date: topic.pubDate,
               category: topic.category,
-              source: sourceValue
+              source: sourceValue,
+              note: topic.note,
+              value: topic.value
             })
             .select('id, name, search_volume, search_volume_raw, rank, url')
             .maybeSingle();

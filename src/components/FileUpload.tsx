@@ -114,6 +114,8 @@ export default function FileUpload({ onUpload, theme, sourceFilter, sources, onS
     const volumeIndex = headers.findIndex(h => h.includes('volume') || h.includes('search'));
     const urlIndex = headers.findIndex(h => h.includes('explore') || h.includes('link') || h.includes('url'));
     const startedIndex = headers.findIndex(h => h.includes('started'));
+    const noteIndex = headers.findIndex(h => h.includes('note'));
+    const valueIndex = headers.findIndex(h => h.includes('value'));
 
     const parseSearchVolumeForSize = (volumeStr: string): number => {
       const cleanStr = volumeStr.replace(/[^0-9.MKBmkb+]/g, '').replace(/\+/g, '');
@@ -142,6 +144,8 @@ export default function FileUpload({ onUpload, theme, sourceFilter, sources, onS
         const searchVolumeRaw = values[volumeIndex >= 0 ? volumeIndex : 1] || '';
         const url = urlIndex >= 0 ? values[urlIndex] : undefined;
         const pubDateRaw = startedIndex >= 0 ? values[startedIndex] : undefined;
+        const noteRaw = noteIndex >= 0 ? values[noteIndex] : undefined;
+        const valueRaw = valueIndex >= 0 ? values[valueIndex] : undefined;
 
         const cleanedRaw = searchVolumeRaw.replace(/^"|"$/g, '').trim();
 
@@ -154,12 +158,28 @@ export default function FileUpload({ onUpload, theme, sourceFilter, sources, onS
           }
         }
 
+        let note: string | undefined = undefined;
+        if (noteRaw && noteRaw.trim() !== '') {
+          note = noteRaw.replace(/^"|"$/g, '').trim();
+        }
+
+        let value: number | undefined = undefined;
+        if (valueRaw && valueRaw.trim() !== '') {
+          const cleanedValue = valueRaw.replace(/^"|"$/g, '').trim().replace(/[^0-9.-]/g, '');
+          const parsedValue = parseFloat(cleanedValue);
+          if (!isNaN(parsedValue)) {
+            value = parsedValue;
+          }
+        }
+
         return {
           name: name.replace(/^"|"$/g, '').trim(),
           searchVolumeRaw: cleanedRaw,
           searchVolume: parseSearchVolumeForSize(cleanedRaw),
           url: url && url.trim() !== '' ? url.replace(/^"|"$/g, '').trim() : undefined,
-          pubDate
+          pubDate,
+          note,
+          value
         };
       });
   };

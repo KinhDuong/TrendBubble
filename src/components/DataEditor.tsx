@@ -14,6 +14,8 @@ interface TrendingTopic {
   source: string;
   user_id?: string;
   crypto_data?: any;
+  note?: string;
+  value?: number;
 }
 
 interface DataEditorProps {
@@ -32,6 +34,8 @@ export default function DataEditor({ theme, onClose, existingData }: DataEditorP
     pub_date: new Date().toISOString(),
     category: '',
     source: '',
+    note: '',
+    value: undefined,
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -50,6 +54,8 @@ export default function DataEditor({ theme, onClose, existingData }: DataEditorP
         pub_date: existingData.pub_date || new Date().toISOString(),
         category: existingData.category || '',
         source: existingData.source || '',
+        note: existingData.note || '',
+        value: existingData.value,
       });
     }
   }, [existingData]);
@@ -261,6 +267,43 @@ export default function DataEditor({ theme, onClose, existingData }: DataEditorP
                 type="url"
                 value={formData.url}
                 onChange={(e) => handleChange('url', e.target.value)}
+                className={`w-full px-4 py-2 rounded-lg border ${
+                  theme === 'dark'
+                    ? 'bg-gray-700 border-gray-600 text-white'
+                    : 'bg-white border-gray-300 text-gray-900'
+                } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+              />
+            </div>
+
+            <div className="md:col-span-2">
+              <label className={`block text-sm font-medium mb-2 ${
+                theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+              }`}>
+                Note
+              </label>
+              <textarea
+                value={formData.note || ''}
+                onChange={(e) => handleChange('note', e.target.value)}
+                rows={3}
+                className={`w-full px-4 py-2 rounded-lg border ${
+                  theme === 'dark'
+                    ? 'bg-gray-700 border-gray-600 text-white'
+                    : 'bg-white border-gray-300 text-gray-900'
+                } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+              />
+            </div>
+
+            <div>
+              <label className={`block text-sm font-medium mb-2 ${
+                theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+              }`}>
+                Value
+              </label>
+              <input
+                type="number"
+                step="any"
+                value={formData.value !== undefined ? formData.value : ''}
+                onChange={(e) => handleChange('value', e.target.value === '' ? undefined : parseFloat(e.target.value))}
                 className={`w-full px-4 py-2 rounded-lg border ${
                   theme === 'dark'
                     ? 'bg-gray-700 border-gray-600 text-white'
