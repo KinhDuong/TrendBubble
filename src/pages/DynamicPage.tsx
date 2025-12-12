@@ -518,14 +518,20 @@ function DynamicPage() {
     );
   }
 
-  const topTopics = [...topics]
-    .filter(topic => {
-      if (!topSearchQuery.trim()) return true;
-      const query = topSearchQuery.toLowerCase();
-      return topic.name.toLowerCase().includes(query) ||
-             topic.category?.toLowerCase().includes(query);
-    })
-    .sort((a, b) => b.searchVolume - a.searchVolume);
+  // First, sort all topics by searchVolume and assign original ranks
+  const allTopicsSorted = [...topics].sort((a, b) => b.searchVolume - a.searchVolume);
+  const topicsWithRanks = allTopicsSorted.map((topic, index) => ({
+    ...topic,
+    originalRank: index + 1
+  }));
+
+  // Then filter by search query while preserving original ranks
+  const topTopics = topicsWithRanks.filter(topic => {
+    if (!topSearchQuery.trim()) return true;
+    const query = topSearchQuery.toLowerCase();
+    return topic.name.toLowerCase().includes(query) ||
+           topic.category?.toLowerCase().includes(query);
+  });
 
   // For crypto pages, split into gainers and losers
   const isCryptoPage = pageData?.source === 'coingecko_crypto';
@@ -547,13 +553,36 @@ function DynamicPage() {
     };
 
     const sortedByChange = [...topics].sort((a, b) => getCryptoChange(b) - getCryptoChange(a));
-    const gainers = sortedByChange.filter(t => getCryptoChange(t) > 0);
-    const losers = sortedByChange.filter(t => getCryptoChange(t) < 0).reverse();
+    const gainers = sortedByChange.filter(t => getCryptoChange(t) > 0).map((topic, index) => ({
+      ...topic,
+      originalRank: index + 1
+    }));
+    const losers = sortedByChange.filter(t => getCryptoChange(t) < 0).reverse().map((topic, index) => ({
+      ...topic,
+      originalRank: index + 1
+    }));
+
+    // Filter by search query if present
+    const filteredGainers = topSearchQuery.trim()
+      ? gainers.filter(topic => {
+          const query = topSearchQuery.toLowerCase();
+          return topic.name.toLowerCase().includes(query) ||
+                 topic.category?.toLowerCase().includes(query);
+        })
+      : gainers;
+
+    const filteredLosers = topSearchQuery.trim()
+      ? losers.filter(topic => {
+          const query = topSearchQuery.toLowerCase();
+          return topic.name.toLowerCase().includes(query) ||
+                 topic.category?.toLowerCase().includes(query);
+        })
+      : losers;
 
     const startIndexGainers = (currentPage - 1) * itemsPerPage;
     const endIndexGainers = startIndexGainers + itemsPerPage;
-    topGainers = gainers.slice(startIndexGainers, endIndexGainers);
-    topLosers = losers.slice(startIndexGainers, endIndexGainers);
+    topGainers = filteredGainers.slice(startIndexGainers, endIndexGainers);
+    topLosers = filteredLosers.slice(startIndexGainers, endIndexGainers);
   }
 
   const totalPages = Math.ceil(topTopics.length / itemsPerPage);
@@ -945,7 +974,6 @@ snapshotButton={null}
                         <>
                         <ol className="list-none" itemScope itemType="https://schema.org/ItemList">
                           {displayTopics.map((topic, index) => {
-                            const actualRank = startIndex + index + 1;
                             return (
                           <li
                             key={index}
@@ -954,12 +982,12 @@ snapshotButton={null}
                             itemScope
                             itemType="https://schema.org/ListItem"
                           >
-                            <meta itemProp="position" content={String(actualRank)} />
+                            <meta itemProp="position" content={String(topic.originalRank)} />
                             <article className="flex-1" itemProp="item" itemScope itemType="https://schema.org/Thing">
                               <div className="flex items-center gap-2 mb-0.5">
-                                <div className="w-8 flex items-center justify-center flex-shrink-0" aria-label={`Rank ${actualRank}`}>
+                                <div className="w-8 flex items-center justify-center flex-shrink-0" aria-label={`Rank ${topic.originalRank}`}>
                                   <div className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-                                    {actualRank}
+                                    {topic.originalRank}
                                   </div>
                                 </div>
                                 <div className="flex items-center gap-2 flex-wrap flex-1">
@@ -1052,7 +1080,6 @@ snapshotButton={null}
                           <ol className="list-none">
                             {topGainers.map((topic, index) => {
                               const change = topic.crypto_data?.[`change_${cryptoTimeframe}` as keyof typeof topic.crypto_data] || 0;
-                              const actualRank = startIndex + index + 1;
                               return (
                                 <li
                                   key={index}
@@ -1062,7 +1089,7 @@ snapshotButton={null}
                                     <div className="flex items-center gap-2 mb-0.5">
                                       <div className="w-6 flex items-center justify-center flex-shrink-0">
                                         <div className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-                                          {actualRank}
+                                          {topic.originalRank}
                                         </div>
                                       </div>
                                       <h4 className={`font-semibold text-sm ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{topic.name.replace(/"/g, '')}</h4>
@@ -1093,7 +1120,6 @@ snapshotButton={null}
                           <ol className="list-none">
                             {topLosers.map((topic, index) => {
                               const change = topic.crypto_data?.[`change_${cryptoTimeframe}` as keyof typeof topic.crypto_data] || 0;
-                              const actualRank = startIndex + index + 1;
                               return (
                                 <li
                                   key={index}
@@ -1103,7 +1129,7 @@ snapshotButton={null}
                                     <div className="flex items-center gap-2 mb-0.5">
                                       <div className="w-6 flex items-center justify-center flex-shrink-0">
                                         <div className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-                                          {actualRank}
+                                          {topic.originalRank}
                                         </div>
                                       </div>
                                       <h4 className={`font-semibold text-sm ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{topic.name.replace(/"/g, '')}</h4>

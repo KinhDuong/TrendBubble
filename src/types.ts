@@ -30,6 +30,7 @@ export interface TrendingTopic {
   crypto_data?: CryptoData;
   note?: string;
   value?: number;
+  originalRank?: number;
 }
 
 export type CryptoTimeframe = '1h' | '24h' | '7d' | '30d' | '1y';
