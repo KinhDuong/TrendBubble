@@ -978,6 +978,11 @@ snapshotButton={null}
                                     {topic.category}
                                   </span>
                                 )}
+                                {topic.note && (
+                                  <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                                    {topic.note}
+                                  </span>
+                                )}
                               </div>
                             </article>
                           </li>
