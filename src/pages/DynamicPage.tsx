@@ -690,6 +690,7 @@ snapshotButton={null}
         cryptoTimeframe={cryptoTimeframe}
         showCryptoTimeframe={pageData?.source === 'coingecko_crypto'}
         showDateFilter={false}
+        showCategoryFilter={false}
         onViewModeChange={setViewMode}
         onDateFilterChange={setDateFilter}
         onCategoryFilterChange={setCategoryFilter}

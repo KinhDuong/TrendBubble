@@ -25,6 +25,7 @@ interface FilterMenuProps {
   cryptoTimeframe?: CryptoTimeframe;
   showCryptoTimeframe?: boolean;
   showDateFilter?: boolean;
+  showCategoryFilter?: boolean;
   onViewModeChange: (mode: ViewMode) => void;
   onDateFilterChange: (filter: 'now' | 'all' | '24h' | 'week' | 'month' | 'year') => void;
   onCategoryFilterChange: (category: string) => void;
@@ -60,6 +61,7 @@ export default function FilterMenu({
   cryptoTimeframe = '1h',
   showCryptoTimeframe = false,
   showDateFilter = true,
+  showCategoryFilter = true,
   onViewModeChange,
   onDateFilterChange,
   onCategoryFilterChange,
@@ -154,21 +156,25 @@ export default function FilterMenu({
                     <Divider />
                   </>
                 )}
-                <label htmlFor="categoryFilter" className={`text-xs md:text-sm font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                  Category:
-                </label>
-                <select
-                  id="categoryFilter"
-                  value={categoryFilter}
-                  onChange={(e) => onCategoryFilterChange(e.target.value)}
-                  className={`${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} border rounded px-2 md:px-3 py-1 md:py-1.5 text-xs md:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500`}
-                >
-                  <option value="all">All</option>
-                  {categories.map(category => (
-                    <option key={category} value={category}>{category}</option>
-                  ))}
-                </select>
-                <Divider />
+                {showCategoryFilter && (
+                  <>
+                    <label htmlFor="categoryFilter" className={`text-xs md:text-sm font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                      Category:
+                    </label>
+                    <select
+                      id="categoryFilter"
+                      value={categoryFilter}
+                      onChange={(e) => onCategoryFilterChange(e.target.value)}
+                      className={`${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} border rounded px-2 md:px-3 py-1 md:py-1.5 text-xs md:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                    >
+                      <option value="all">All</option>
+                      {categories.map(category => (
+                        <option key={category} value={category}>{category}</option>
+                      ))}
+                    </select>
+                    <Divider />
+                  </>
+                )}
                 {sourceFilter !== undefined && sources && onSourceFilterChange && (
                   <>
                     <label htmlFor="sourceFilter" className={`text-xs md:text-sm font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
@@ -483,21 +489,25 @@ export default function FilterMenu({
                   <Divider />
                 </>
               )}
-              <div className="flex items-center gap-2">
-                <select
-                  id="categoryFilter"
-                  value={categoryFilter}
-                  onChange={(e) => onCategoryFilterChange(e.target.value)}
-                  className={`flex-1 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} border rounded px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500`}
-                  aria-label="Filter trending topics by category"
-                >
-                  <option value="all">All Categories</option>
-                  {categories.map(category => (
-                    <option key={category} value={category}>{category}</option>
-                  ))}
-                </select>
-              </div>
-              <Divider />
+              {showCategoryFilter && (
+                <>
+                  <div className="flex items-center gap-2">
+                    <select
+                      id="categoryFilter"
+                      value={categoryFilter}
+                      onChange={(e) => onCategoryFilterChange(e.target.value)}
+                      className={`flex-1 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} border rounded px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                      aria-label="Filter trending topics by category"
+                    >
+                      <option value="all">All Categories</option>
+                      {categories.map(category => (
+                        <option key={category} value={category}>{category}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <Divider />
+                </>
+              )}
               {(viewMode === 'bubble' || viewMode === 'bar' || viewMode === 'treemap' || viewMode === 'donut') && maxBubbles !== undefined && onMaxBubblesChange && (
                 <>
                   <div className="flex items-center gap-2">
