@@ -990,21 +990,21 @@ snapshotButton={null}
                           })}
                         </ol>
                         {totalPages > 1 && (
-                          <div className="mt-6 flex items-center justify-center gap-1 md:gap-2">
+                          <div className="mt-4 flex items-center justify-center gap-1">
                             <button
                               onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                               disabled={currentPage === 1}
-                              className={`px-2 py-1 md:px-4 md:py-2 rounded-lg text-sm md:text-base font-semibold transition-colors ${currentPage === 1 ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}
+                              className={`px-3 py-1 rounded text-sm transition-colors ${currentPage === 1 ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}
                             >
                               Previous
                             </button>
-                            <span className={`px-2 py-1 md:px-4 md:py-2 text-xs md:text-base ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                            <span className={`px-3 py-1 text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
                               Page {currentPage} of {totalPages}
                             </span>
                             <button
                               onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                               disabled={currentPage === totalPages}
-                              className={`px-2 py-1 md:px-4 md:py-2 rounded-lg text-sm md:text-base font-semibold transition-colors ${currentPage === totalPages ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}
+                              className={`px-3 py-1 rounded text-sm transition-colors ${currentPage === totalPages ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}
                             >
                               Next
                             </button>
