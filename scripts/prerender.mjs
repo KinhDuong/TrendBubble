@@ -271,37 +271,7 @@ async function generateContentHTML(pageData, topics, sourceLabel) {
     </article>
   `;
 
-  if (pageData.summary) {
-    contentHTML += `
-      <section class="page-summary" aria-labelledby="page-summary" itemscope itemtype="https://schema.org/Article" style="max-width: 80rem; margin: 2rem auto 1.5rem; padding: 0 0.5rem;">
-        <div class="summary-container" style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; padding: 1.5rem;">
-          ${pageData.cover_image ? `
-          <div style="margin-bottom: 1.5rem; border-radius: 0.75rem; overflow: hidden;">
-            <img src="${pageData.cover_image}" alt="${pageData.meta_title}" style="width: 100%; height: 24rem; object-fit: cover;" />
-          </div>` : ''}
-          <div class="summary-content" itemprop="articleBody">
-            ${pageData.summary}
-          </div>
-          <meta itemprop="author" content="Top Best Charts" />
-          <meta itemprop="datePublished" content="${pageData.created_at}" />
-        </div>
-      </section>
-    `;
-  }
-
-  if (pageData.faq) {
-    contentHTML += `
-      <section class="page-faq" aria-labelledby="page-faq" style="max-width: 80rem; margin: 2rem auto 1.5rem; padding: 0 0.5rem;">
-        <div class="faq-container" style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; padding: 1.5rem;">
-          <div class="summary-content">
-            ${pageData.faq}
-          </div>
-        </div>
-      </section>
-    `;
-  }
-
-  // Add topic rankings for SEO
+  // Add topic rankings for SEO - moved before summary
   const currentYear = new Date().getFullYear();
 
   const extractTopicType = (title) => {
@@ -346,6 +316,36 @@ async function generateContentHTML(pageData, topics, sourceLabel) {
       </div>
     </section>
   `;
+
+  if (pageData.summary) {
+    contentHTML += `
+      <section class="page-summary" aria-labelledby="page-summary" itemscope itemtype="https://schema.org/Article" style="max-width: 80rem; margin: 2rem auto 1.5rem; padding: 0 0.5rem;">
+        <div class="summary-container" style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; padding: 1.5rem;">
+          ${pageData.cover_image ? `
+          <div style="margin-bottom: 1.5rem; border-radius: 0.75rem; overflow: hidden;">
+            <img src="${pageData.cover_image}" alt="${pageData.meta_title}" style="width: 100%; height: 24rem; object-fit: cover;" />
+          </div>` : ''}
+          <div class="summary-content" itemprop="articleBody">
+            ${pageData.summary}
+          </div>
+          <meta itemprop="author" content="Top Best Charts" />
+          <meta itemprop="datePublished" content="${pageData.created_at}" />
+        </div>
+      </section>
+    `;
+  }
+
+  if (pageData.faq) {
+    contentHTML += `
+      <section class="page-faq" aria-labelledby="page-faq" style="max-width: 80rem; margin: 2rem auto 1.5rem; padding: 0 0.5rem;">
+        <div class="faq-container" style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; padding: 1.5rem;">
+          <div class="summary-content">
+            ${pageData.faq}
+          </div>
+        </div>
+      </section>
+    `;
+  }
 
   // Add Latest pages section for SEO
   const { data: latestPages } = await supabase
