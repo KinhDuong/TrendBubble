@@ -180,7 +180,10 @@ function DynamicPage() {
   const loadPageData = async () => {
     try {
       let fullPath = '/' + (urlPath || '');
-      fullPath = fullPath.replace(/\/+$/, '');
+      // Normalize to have trailing slash (except root)
+      fullPath = fullPath.replace(/\/+$/, '') + '/';
+      if (fullPath === '//') fullPath = '/';
+
       const { data, error } = await supabase
         .from('pages')
         .select('*')
