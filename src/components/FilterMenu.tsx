@@ -24,6 +24,7 @@ interface FilterMenuProps {
   bubbleLayout?: BubbleLayout;
   cryptoTimeframe?: CryptoTimeframe;
   showCryptoTimeframe?: boolean;
+  showDateFilter?: boolean;
   onViewModeChange: (mode: ViewMode) => void;
   onDateFilterChange: (filter: 'now' | 'all' | '24h' | 'week' | 'month' | 'year') => void;
   onCategoryFilterChange: (category: string) => void;
@@ -58,6 +59,7 @@ export default function FilterMenu({
   bubbleLayout = 'force',
   cryptoTimeframe = '1h',
   showCryptoTimeframe = false,
+  showDateFilter = true,
   onViewModeChange,
   onDateFilterChange,
   onCategoryFilterChange,
@@ -188,7 +190,7 @@ export default function FilterMenu({
                     <Divider />
                   </>
                 )}
-                {!showCryptoTimeframe && (
+                {showDateFilter && !showCryptoTimeframe && (
                   <>
                     <label htmlFor="dateFilter" className={`text-xs md:text-sm font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                       Date:
@@ -437,7 +439,7 @@ export default function FilterMenu({
                 </button>
               )}
               <Divider />
-              {!showCryptoTimeframe && (
+              {showDateFilter && !showCryptoTimeframe && (
                 <>
                   <div className="flex items-center gap-2">
                     <select
