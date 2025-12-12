@@ -119,7 +119,7 @@ async function fetchTopicsForPage(pageSource) {
 
   const { data, error } = await query
     .order('rank', { ascending: true })
-    .limit(10000);
+    .limit(1000);
 
   if (error) {
     console.error('Error fetching topics:', error);
@@ -201,7 +201,8 @@ function generateMetaTags(pageData, topics) {
 
 async function generateContentHTML(pageData, topics, sourceLabel) {
   const topTopics = [...topics]
-    .sort((a, b) => b.search_volume - a.search_volume);
+    .sort((a, b) => b.search_volume - a.search_volume)
+    .slice(0, 1000);
 
   const isCryptoPage = pageData.source === 'coingecko_crypto';
 
@@ -760,7 +761,7 @@ async function prerenderTrendingNowPage(baseHTML, distPath) {
     .from('trending_topics')
     .select('*')
     .order('rank', { ascending: true })
-    .limit(10000);
+    .limit(1000);
 
   const { data: pages } = await supabase
     .from('pages')
@@ -831,7 +832,8 @@ async function prerenderTrendingNowPage(baseHTML, distPath) {
 
   // Generate home page content HTML
   const topTopicsForDisplay = [...(topics || [])]
-    .sort((a, b) => b.search_volume - a.search_volume);
+    .sort((a, b) => b.search_volume - a.search_volume)
+    .slice(0, 1000);
 
   const lastUpdated = (topics || []).length > 0
     ? new Date(Math.max(...(topics || []).map(t => new Date(t.pub_date || t.created_at || Date.now()).getTime())))
