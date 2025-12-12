@@ -158,18 +158,11 @@ export default function BubbleTooltip({
               </div>
 
               {topic.note && (
-                <div className="flex flex-col gap-2">
-                  <span className={`text-sm font-medium ${
-                    theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-                  }`}>
-                    Note
-                  </span>
-                  <span className={`text-sm leading-relaxed ${
-                    theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
-                  }`}>
-                    {topic.note}
-                  </span>
-                </div>
+                <p className={`text-sm leading-relaxed ${
+                  theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                }`}>
+                  <span className="font-bold">Note:</span> {topic.note}
+                </p>
               )}
             </div>
 
@@ -285,14 +278,9 @@ export default function BubbleTooltip({
           </div>
 
           {topic.note && (
-            <div className="flex flex-col gap-2">
-              <span className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                Note
-              </span>
-              <span className={`text-sm leading-relaxed ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                {topic.note}
-              </span>
-            </div>
+            <p className={`text-sm leading-relaxed ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+              <span className="font-bold">Note:</span> {topic.note}
+            </p>
           )}
         </div>
 
