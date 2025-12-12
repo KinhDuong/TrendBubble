@@ -263,9 +263,9 @@ async function generateContentHTML(pageData, topics, sourceLabel) {
           <time style="color: #9ca3af;">
             Last updated: ${formattedDate} ET
           </time>
-          <span style="padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; background-color: rgba(30, 64, 175, 0.3); color: #93c5fd;">
+          <a href="#top-trending-heading" style="padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; background-color: rgba(30, 64, 175, 0.3); color: #93c5fd; text-decoration: none; display: inline-block;">
             Top ${topics.length} ${sourceLabel}
-          </span>
+          </a>
         </div>
       </header>
     </article>
@@ -892,9 +892,9 @@ async function prerenderTrendingNowPage(baseHTML, distPath) {
             <time style="color: #9ca3af;">
               Last updated: ${formattedDate} ET
             </time>
-            <span style="padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; background-color: rgba(30, 64, 175, 0.3); color: #93c5fd;">
+            <a href="#top-trending-heading" style="padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; background-color: rgba(30, 64, 175, 0.3); color: #93c5fd; text-decoration: none; display: inline-block;">
               Top ${(topics || []).length} Google Trends
-            </span>
+            </a>
           </div>
         </header>
       </article>
