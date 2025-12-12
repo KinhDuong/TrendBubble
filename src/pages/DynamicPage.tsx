@@ -14,7 +14,7 @@ import AnimationSelector, { AnimationStyle } from '../components/AnimationSelect
 import { TrendingTopic, CryptoTimeframe, FAQ } from '../types';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
-import { TrendingUp, ArrowUpDown, ArrowUp, ArrowDown, Search, X } from 'lucide-react';
+import { TrendingUp, ArrowUpDown, ArrowUp, ArrowDown, Search, X, ChevronsLeft, ChevronsRight } from 'lucide-react';
 
 type SortField = 'name' | 'category' | 'searchVolume' | 'rank' | 'pubDate' | 'createdAt';
 type SortDirection = 'asc' | 'desc';
@@ -992,6 +992,14 @@ snapshotButton={null}
                         {totalPages > 1 && (
                           <div className="mt-4 flex items-center justify-center gap-1">
                             <button
+                              onClick={() => setCurrentPage(1)}
+                              disabled={currentPage === 1}
+                              className={`px-2 py-1 rounded text-sm transition-colors ${currentPage === 1 ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}
+                              title="First page"
+                            >
+                              <ChevronsLeft size={16} />
+                            </button>
+                            <button
                               onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                               disabled={currentPage === 1}
                               className={`px-3 py-1 rounded text-sm transition-colors ${currentPage === 1 ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}
@@ -1007,6 +1015,14 @@ snapshotButton={null}
                               className={`px-3 py-1 rounded text-sm transition-colors ${currentPage === totalPages ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}
                             >
                               Next
+                            </button>
+                            <button
+                              onClick={() => setCurrentPage(totalPages)}
+                              disabled={currentPage === totalPages}
+                              className={`px-2 py-1 rounded text-sm transition-colors ${currentPage === totalPages ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}
+                              title="Last page"
+                            >
+                              <ChevronsRight size={16} />
                             </button>
                           </div>
                         )}
