@@ -256,11 +256,7 @@ async function generateContentHTML(pageData, topics, sourceLabel) {
     </nav>
 
     <article class="dynamic-page-article" style="max-width: 80rem; margin: 0 auto; padding: 0 0.5rem;">
-      ${pageData.cover_image ? `
-      <div style="margin-top: 2rem; margin-bottom: 1.5rem; border-radius: 0.75rem; overflow: hidden;">
-        <img src="${pageData.cover_image}" alt="${pageData.meta_title}" style="width: 100%; height: 24rem; object-fit: cover;" />
-      </div>` : ''}
-      <header class="page-header" style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; padding: 1.5rem; margin-bottom: 2rem; ${pageData.cover_image ? '' : 'margin-top: 2rem;'}">
+      <header class="page-header" style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; padding: 1.5rem; margin-bottom: 2rem; margin-top: 2rem;">
         <h1 style="font-size: 1.875rem; font-weight: 700; color: white; margin-bottom: 0.75rem;">${pageData.meta_title}</h1>
         <p style="color: #d1d5db; font-size: 1rem; line-height: 1.625; margin-bottom: 1rem;">${pageData.meta_description}</p>
         <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; font-size: 0.875rem;">
@@ -318,6 +314,10 @@ async function generateContentHTML(pageData, topics, sourceLabel) {
   contentHTML += `
     <section class="top-topics" aria-labelledby="top-trending-heading" itemscope itemtype="https://schema.org/ItemList" style="max-width: 80rem; margin: 2rem auto 1.5rem; padding: 0 0.5rem;">
       <div style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; padding: 1.5rem;">
+        ${pageData.cover_image ? `
+        <div style="margin-bottom: 1.5rem; border-radius: 0.75rem; overflow: hidden;">
+          <img src="${pageData.cover_image}" alt="${pageData.meta_title}" style="width: 100%; height: 24rem; object-fit: cover;" />
+        </div>` : ''}
         <h2 id="top-trending-heading" style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; color: white;">
           ${rankingTitle}
         </h2>

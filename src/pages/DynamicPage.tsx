@@ -705,15 +705,6 @@ snapshotButton={null}
               {topics.length > 0 && (
                 <article className="max-w-7xl mx-auto mb-8">
                   <header>
-                    {pageData.cover_image && (
-                      <div className="mb-6 rounded-xl overflow-hidden">
-                        <img
-                          src={pageData.cover_image}
-                          alt={pageData.meta_title}
-                          className="w-full h-64 md:h-96 object-cover"
-                        />
-                      </div>
-                    )}
                     <div className="flex items-center justify-between gap-4 mb-4">
                       <h1 className={`text-2xl md:text-4xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                         {pageData.meta_title}
@@ -821,6 +812,15 @@ snapshotButton={null}
                         <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-lg border p-6 shadow-md`}>
                     {!isCryptoPage && (
                       <>
+                        {pageData.cover_image && (
+                          <div className="mb-6 rounded-xl overflow-hidden">
+                            <img
+                              src={pageData.cover_image}
+                              alt={pageData.meta_title}
+                              className="w-full h-64 md:h-96 object-cover"
+                            />
+                          </div>
+                        )}
                         <h2 id="top-trending-heading" className={`text-xl md:text-2xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                           {topTitle}
                         </h2>
@@ -855,6 +855,15 @@ snapshotButton={null}
                     )}
                     {isCryptoPage && (
                       <>
+                        {pageData.cover_image && (
+                          <div className="mb-6 rounded-xl overflow-hidden">
+                            <img
+                              src={pageData.cover_image}
+                              alt={pageData.meta_title}
+                              className="w-full h-64 md:h-96 object-cover"
+                            />
+                          </div>
+                        )}
                         <h2 id="top-trending-heading" className={`text-xl md:text-2xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                           Top {topTopics.length} Gainers & Losers
                         </h2>
