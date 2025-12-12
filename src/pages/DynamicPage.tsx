@@ -332,7 +332,8 @@ function DynamicPage() {
           pubDate: topic.pub_date,
           category: topic.category,
           source: topic.source,
-          crypto_data: topic.crypto_data
+          crypto_data: topic.crypto_data,
+          note: topic.note
         }));
 
         const sortedTopics = [...formattedTopics].sort((a, b) => {
@@ -1160,12 +1161,12 @@ snapshotButton={null}
               {topics.length > 0 && viewMode === 'list' && (
               <div className="max-w-7xl mx-auto">
                 <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200 shadow-md'} rounded-lg border overflow-hidden`}>
-                  <div className={`hidden md:grid grid-cols-5 gap-4 px-6 py-4 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200'} font-semibold text-sm`}>
+                  <div className={`hidden md:grid grid-cols-3 gap-4 px-6 py-4 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200'} font-semibold text-sm`}>
                     <button
                       onClick={() => handleSort('name')}
                       className={`flex items-center gap-1 hover:${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'} transition-colors`}
                     >
-                      Topic <SortIcon field="name" />
+                      Name <SortIcon field="name" />
                     </button>
                     <button
                       onClick={() => handleSort('searchVolume')}
@@ -1173,80 +1174,34 @@ snapshotButton={null}
                     >
                       Search Volume <SortIcon field="searchVolume" />
                     </button>
-                    <button
-                      onClick={() => handleSort('rank')}
-                      className={`flex items-center justify-center gap-1 hover:${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'} transition-colors`}
-                    >
-                      Rank <SortIcon field="rank" />
-                    </button>
-                    <div className="text-center">Source</div>
-                    <button
-                      onClick={() => handleSort('pubDate')}
-                      className={`flex items-center justify-center gap-1 hover:${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'} transition-colors`}
-                    >
-                      Started (ET) <SortIcon field="pubDate" />
-                    </button>
+                    <div className="text-center">Note</div>
                   </div>
                   <div className={`divide-y ${theme === 'dark' ? 'divide-gray-700' : 'divide-gray-200'}`}>
                     {getSortedTopics().map((topic, index) => (
                       <div key={index} className={`${theme === 'dark' ? 'hover:bg-gray-750' : 'hover:bg-gray-50'} transition-colors`}>
-                        <div className="hidden md:grid grid-cols-5 gap-4 px-6 py-4">
+                        <div className="hidden md:grid grid-cols-3 gap-4 px-6 py-4">
                           <div className="font-medium">{topic.name.replace(/"/g, '')}</div>
                           <div className={`text-center ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>{topic.searchVolumeRaw.replace(/"/g, '')}</div>
-                          <div className={`text-center ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>#{index + 1}</div>
-                          <div className={`text-center text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-                            <span className={`px-2 py-1 rounded text-xs ${topic.source === 'user_upload' ? (theme === 'dark' ? 'bg-green-900/30 text-green-400' : 'bg-green-100 text-green-700') : (theme === 'dark' ? 'bg-blue-900/30 text-blue-400' : 'bg-blue-100 text-blue-700')}`}>
-                              {(() => {
-                                const found = sources.find(s => s.value === topic.source);
-                                if (found) return found.label;
-                                if (topic.source) return topic.source.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-                                return '-';
-                              })()}
-                            </span>
-                          </div>
-                          <div className={`text-center text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-                            {(topic.pubDate || topic.createdAt) ? new Date(topic.pubDate || topic.createdAt).toLocaleString('en-US', {
-                              timeZone: 'America/New_York',
-                              month: 'short',
-                              day: 'numeric',
-                              hour: 'numeric',
-                              minute: '2-digit',
-                              hour12: true
-                            }) : '-'}
+                          <div className={`text-center ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                            {topic.note || '-'}
                           </div>
                         </div>
                         <div className="md:hidden px-4 py-3 space-y-2">
-                          <div className="flex items-start justify-between gap-2">
-                            <div className="font-medium text-base flex-1">{topic.name.replace(/"/g, '')}</div>
-                            <div className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'} font-mono`}>#{index + 1}</div>
-                          </div>
-                          <div className="flex flex-wrap gap-2 text-xs">
-                            <span className={`px-2 py-1 rounded ${theme === 'dark' ? 'bg-gray-700 text-gray-300' : 'bg-gray-100 text-gray-700'}`}>
+                          <div className="font-medium text-base">{topic.name.replace(/"/g, '')}</div>
+                          <div className="flex items-center gap-2 text-xs">
+                            <span className={`font-medium ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>Volume:</span>
+                            <span className={`${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
                               {topic.searchVolumeRaw.replace(/"/g, '')}
                             </span>
-                            <span className={`px-2 py-1 rounded ${topic.source === 'user_upload' ? (theme === 'dark' ? 'bg-green-900/30 text-green-400' : 'bg-green-100 text-green-700') : (theme === 'dark' ? 'bg-blue-900/30 text-blue-400' : 'bg-blue-100 text-blue-700')}`}>
-                              {(() => {
-                                const found = sources.find(s => s.value === topic.source);
-                                if (found) return found.label;
-                                if (topic.source) return topic.source.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-                                return '-';
-                              })()}
-                            </span>
                           </div>
-                          <div className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-                            {(topic.pubDate || topic.createdAt) && (
-                              <div>
-                                <span className="font-medium">Started:</span> {new Date(topic.pubDate || topic.createdAt).toLocaleString('en-US', {
-                                  timeZone: 'America/New_York',
-                                  month: 'short',
-                                  day: 'numeric',
-                                  hour: 'numeric',
-                                  minute: '2-digit',
-                                  hour12: true
-                                })}
-                              </div>
-                            )}
-                          </div>
+                          {topic.note && (
+                            <div className="flex items-start gap-2 text-xs">
+                              <span className={`font-medium ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>Note:</span>
+                              <span className={`${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+                                {topic.note}
+                              </span>
+                            </div>
+                          )}
                         </div>
                       </div>
                     ))}
