@@ -55,7 +55,7 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
   const lastSpawnTimeRef = useRef<number>(0);
   const hoveredBubbleRef = useRef<Bubble | null>(null);
   const shrinkFactorRef = useRef<number>(1.0);
-  const [tooltipData, setTooltipData] = useState<{ topic: TrendingTopic; x: number; y: number } | null>(null);
+  const [tooltipData, setTooltipData] = useState<{ topic: TrendingTopic; x: number; y: number; rank: number } | null>(null);
   const [pinnedTopics, setPinnedTopics] = useState<Set<string>>(new Set());
   const [internalComparingTopics, setInternalComparingTopics] = useState<Set<string>>(new Set());
   const [userId, setUserId] = useState<string | null>(null);
@@ -134,10 +134,12 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
       if (distance <= bubble.radius) {
         event.preventDefault();
         event.stopPropagation();
+        const rank = topics.findIndex(t => t.name === bubble.topic.name) + 1;
         setTooltipData({
           topic: bubble.topic,
           x: event.clientX,
-          y: event.clientY
+          y: event.clientY,
+          rank
         });
         break;
       }
@@ -179,10 +181,12 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
       if (distance <= bubble.radius) {
         event.preventDefault();
         event.stopPropagation();
+        const rank = topics.findIndex(t => t.name === bubble.topic.name) + 1;
         setTooltipData({
           topic: bubble.topic,
           x: touch.clientX,
-          y: touch.clientY
+          y: touch.clientY,
+          rank
         });
         break;
       }
@@ -1294,6 +1298,7 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
           topic={tooltipData.topic}
           x={tooltipData.x}
           y={tooltipData.y}
+          rank={tooltipData.rank}
           theme={theme}
           isPinned={pinnedTopics.has(tooltipData.topic.name)}
           onTogglePin={() => handleTogglePin(tooltipData.topic.name)}

@@ -6,6 +6,7 @@ interface BubbleTooltipProps {
   topic: TrendingTopic;
   x: number;
   y: number;
+  rank: number;
   theme: 'dark' | 'light';
   isPinned: boolean;
   onTogglePin: () => void;
@@ -19,6 +20,7 @@ export default function BubbleTooltip({
   topic,
   x,
   y,
+  rank,
   theme,
   isPinned,
   onTogglePin,
@@ -58,6 +60,34 @@ export default function BubbleTooltip({
       'custom': 'Custom'
     };
     return sourceMap[source] || source.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+  };
+
+  const getRankColor = (rankIndex: number) => {
+    if (topic.source === 'coingecko_crypto') {
+      const timeframeMap = {
+        '1h': 'change_1h',
+        '24h': 'change_24h',
+        '7d': 'change_7d',
+        '30d': 'change_30d',
+        '1y': 'change_1y',
+      };
+      const field = timeframeMap[cryptoTimeframe] as keyof typeof topic.crypto_data;
+      const percentChange = topic.crypto_data?.[field] as number || 0;
+
+      if (percentChange >= 5) return '#0D7C4E';
+      if (percentChange >= 2) return '#16A34A';
+      if (percentChange >= 0) return '#22C55E';
+      if (percentChange >= -2) return '#DC2626';
+      if (percentChange >= -5) return '#B91C1C';
+      return '#991B1B';
+    }
+
+    const colors = [
+      '#3B82F6', '#10B981', '#EAB308', '#EF4444',
+      '#EC4899', '#14B8A6', '#F97316', '#06B6D4',
+      '#8B5CF6', '#84CC16', '#F59E0B', '#6366F1'
+    ];
+    return colors[(rankIndex - 1) % colors.length];
   };
 
   const getDisplayVolume = () => {
@@ -106,11 +136,24 @@ export default function BubbleTooltip({
           </button>
           <div className="space-y-4">
             <div>
-              <h3 className={`font-bold text-xl mb-2 pr-10 ${
-                theme === 'dark' ? 'text-white' : 'text-gray-900'
-              }`}>
-                {topic.name.replace(/"/g, '')}
-              </h3>
+              <div className="flex items-center gap-3 mb-2">
+                <div
+                  className="flex items-center justify-center rounded-full font-bold text-white shadow-lg"
+                  style={{
+                    backgroundColor: getRankColor(rank),
+                    width: '48px',
+                    height: '48px',
+                    fontSize: '18px'
+                  }}
+                >
+                  {rank}
+                </div>
+                <h3 className={`font-bold text-xl flex-1 ${
+                  theme === 'dark' ? 'text-white' : 'text-gray-900'
+                }`}>
+                  {topic.name.replace(/"/g, '')}
+                </h3>
+              </div>
               {topic.category && (
                 <div className="flex items-center gap-1">
                   <Tag size={14} className={theme === 'dark' ? 'text-gray-400' : 'text-gray-500'} />
@@ -238,9 +281,22 @@ export default function BubbleTooltip({
         </button>
       <div className="space-y-3">
         <div>
-          <h3 className={`font-bold text-lg mb-1 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-            {topic.name.replace(/"/g, '')}
-          </h3>
+          <div className="flex items-center gap-2 mb-1">
+            <div
+              className="flex items-center justify-center rounded-full font-bold text-white shadow-lg flex-shrink-0"
+              style={{
+                backgroundColor: getRankColor(rank),
+                width: '36px',
+                height: '36px',
+                fontSize: '14px'
+              }}
+            >
+              {rank}
+            </div>
+            <h3 className={`font-bold text-lg ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+              {topic.name.replace(/"/g, '')}
+            </h3>
+          </div>
           {topic.category && (
             <div className="flex items-center gap-1 mb-2">
               <Tag size={14} className={theme === 'dark' ? 'text-gray-400' : 'text-gray-500'} />
