@@ -47,21 +47,7 @@
       background: #2563eb;
     }
   </style>
-  <script>
-    // GitHub Pages SPA redirect
-    (function() {
-      // Store the attempted URL for the SPA to handle
-      if (typeof sessionStorage !== 'undefined') {
-        var path = location.pathname.slice(1);
-        var query = location.search;
-        if (path) {
-          sessionStorage.redirect = location.origin + '/' + path + query;
-          // Redirect to root - the main app will handle routing
-          location.replace('/' + (query ? '?redirect=' + encodeURIComponent(path + query) : ''));
-        }
-      }
-    })();
-  </script>
+  <meta name="robots" content="noindex, nofollow" />
 </head>
 <body>
   <div class="container">
