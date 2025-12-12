@@ -1,5 +1,5 @@
 import { TrendingTopic, CryptoTimeframe } from '../types';
-import { TrendingUp, Clock, Tag, Pin, X } from 'lucide-react';
+import { TrendingUp, Tag, Pin, X } from 'lucide-react';
 import { createPortal } from 'react-dom';
 
 interface BubbleTooltipProps {
@@ -49,17 +49,6 @@ export default function BubbleTooltip({
   if (top < padding) {
     top = padding;
   }
-
-  const formatDate = (dateString: string | null) => {
-    if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true
-    });
-  };
 
   const getSourceLabel = (source: string | null) => {
     if (!source) return 'Unknown';
@@ -168,21 +157,18 @@ export default function BubbleTooltip({
                 </span>
               </div>
 
-              {topic.pubDate && (
-                <div className="flex items-center justify-between">
+              {topic.note && (
+                <div className="flex flex-col gap-1">
                   <span className={`text-sm ${
                     theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
                   }`}>
-                    Started
+                    Note
                   </span>
-                  <div className="flex items-center gap-1">
-                    <Clock size={16} className={theme === 'dark' ? 'text-gray-400' : 'text-gray-500'} />
-                    <span className={`text-sm ${
-                      theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
-                    }`}>
-                      {formatDate(topic.pubDate)}
-                    </span>
-                  </div>
+                  <span className={`text-sm ${
+                    theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                  }`}>
+                    {topic.note}
+                  </span>
                 </div>
               )}
             </div>
@@ -298,17 +284,14 @@ export default function BubbleTooltip({
             </span>
           </div>
 
-          {topic.pubDate && (
-            <div className="flex items-center justify-between">
+          {topic.note && (
+            <div className="flex flex-col gap-1">
               <span className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                Started
+                Note
               </span>
-              <div className="flex items-center gap-1">
-                <Clock size={14} className={theme === 'dark' ? 'text-gray-400' : 'text-gray-500'} />
-                <span className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                  {formatDate(topic.pubDate)}
-                </span>
-              </div>
+              <span className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                {topic.note}
+              </span>
             </div>
           )}
         </div>
