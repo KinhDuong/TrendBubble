@@ -789,15 +789,12 @@ snapshotButton={null}
                           hour12: true
                         })} ET
                       </time>
-                      <button
-                        onClick={() => {
-                          const element = document.getElementById('top-trending-heading');
-                          element?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                        }}
-                        className={`px-2 py-1 rounded text-xs cursor-pointer transition-all hover:scale-105 ${theme === 'dark' ? 'bg-blue-900/30 text-blue-400 hover:bg-blue-900/50' : 'bg-blue-100 text-blue-700 hover:bg-blue-200'}`}
+                      <a
+                        href="#top-trending-heading"
+                        className={`px-2 py-1 rounded text-xs cursor-pointer transition-all hover:scale-105 inline-block ${theme === 'dark' ? 'bg-blue-900/30 text-blue-400 hover:bg-blue-900/50' : 'bg-blue-100 text-blue-700 hover:bg-blue-200'}`}
                       >
                         Top {topics.length} {sourceName}
-                      </button>
+                      </a>
                     </div>
                   </header>
                 </article>
