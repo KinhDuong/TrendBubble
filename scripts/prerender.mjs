@@ -174,7 +174,7 @@ function generateMetaTags(pageData, topics) {
 
   const keywords = topics.slice(0, 10).map(t => t.name.replace(/"/g, '')).join(', ') + ', trending topics, search trends, real-time trends, trend analysis';
 
-  const pageUrl = `${BASE_URL}${pageData.page_url}/`;
+  const pageUrl = `${BASE_URL}${pageData.page_url}`;
 
   const ogImageTag = pageData.cover_image ? `
     <meta property="og:image" content="${pageData.cover_image}" data-prerendered />
@@ -393,7 +393,7 @@ async function generateContentHTML(pageData, topics, sourceLabel) {
 }
 
 function generateStructuredData(pageData, topics) {
-  const pageUrl = `${BASE_URL}${pageData.page_url}/`;
+  const pageUrl = `${BASE_URL}${pageData.page_url}`;
   const topTopics = [...topics].sort((a, b) => b.search_volume - a.search_volume);
 
   const extractTopicType = (title) => {
@@ -1276,7 +1276,7 @@ async function prerenderPages() {
       .replace('<!-- PRERENDER_STRUCTURED_DATA -->', structuredData)
       .replace('<div id="root"></div>', `<div id="root">${contentHTML}</div><div id="prerender-footer">${generateFooterHTML()}</div>`);
 
-    const pagePath = page.page_url.replace(/^\//, '');
+    const pagePath = page.page_url.replace(/^\//, '').replace(/\/$/, '');
     const outputDir = path.join(distPath, pagePath);
 
     fs.mkdirSync(outputDir, { recursive: true });
@@ -1326,8 +1326,7 @@ async function generateSitemap(pages, distPath) {
 
   // Add all dynamic pages
   for (const page of pages) {
-    // Add trailing slash to match GitHub Pages directory structure
-    const pageUrl = `${BASE_URL}${page.page_url}/`;
+    const pageUrl = `${BASE_URL}${page.page_url}`;
     const lastmod = page.updated_at
       ? new Date(page.updated_at).toISOString().split('T')[0]
       : new Date(page.created_at).toISOString().split('T')[0];
