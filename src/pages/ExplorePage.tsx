@@ -17,6 +17,7 @@ interface FeaturedPage {
   source: string;
   display_section?: string;
   created_at: string;
+  cover_image?: string;
 }
 
 export default function ExplorePage() {
@@ -254,8 +255,18 @@ export default function ExplorePage() {
                         theme === 'dark' ? 'bg-gray-800' : 'bg-white'
                       } col-span-2`}
                     >
-                      <div className="relative h-80 bg-gradient-to-br from-blue-500 to-purple-600 overflow-hidden">
-                        <div className="absolute inset-0 bg-black bg-opacity-30 group-hover:bg-opacity-20 transition-all duration-300"></div>
+                      <div className="relative h-80 overflow-hidden">
+                        {heroPage.cover_image ? (
+                          <>
+                            <img src={heroPage.cover_image} alt={heroPage.meta_title} className="w-full h-full object-cover" />
+                            <div className="absolute inset-0 bg-black bg-opacity-30 group-hover:bg-opacity-20 transition-all duration-300"></div>
+                          </>
+                        ) : (
+                          <>
+                            <div className="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600"></div>
+                            <div className="absolute inset-0 bg-black bg-opacity-30 group-hover:bg-opacity-20 transition-all duration-300"></div>
+                          </>
+                        )}
                         <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
                           <div className="flex items-center gap-2 text-sm mb-2 opacity-90">
                             <span className="uppercase font-semibold">Featured</span>
@@ -287,8 +298,18 @@ export default function ExplorePage() {
                         theme === 'dark' ? 'bg-gray-800' : 'bg-white'
                       }`}
                     >
-                      <div className="relative h-32 md:h-48 bg-gradient-to-br from-green-500 to-teal-600 overflow-hidden">
-                        <div className="absolute inset-0 bg-black bg-opacity-30 group-hover:bg-opacity-20 transition-all duration-300"></div>
+                      <div className="relative h-32 md:h-48 overflow-hidden">
+                        {page.cover_image ? (
+                          <>
+                            <img src={page.cover_image} alt={page.meta_title} className="w-full h-full object-cover" />
+                            <div className="absolute inset-0 bg-black bg-opacity-30 group-hover:bg-opacity-20 transition-all duration-300"></div>
+                          </>
+                        ) : (
+                          <>
+                            <div className="w-full h-full bg-gradient-to-br from-green-500 to-teal-600"></div>
+                            <div className="absolute inset-0 bg-black bg-opacity-30 group-hover:bg-opacity-20 transition-all duration-300"></div>
+                          </>
+                        )}
                         <div className="absolute bottom-0 left-0 right-0 p-3 md:p-6 text-white">
                           <div className="flex items-center gap-1 md:gap-2 text-xs md:text-sm mb-1 md:mb-2 opacity-90">
                             <span className="uppercase font-semibold">Top</span>
@@ -332,7 +353,13 @@ export default function ExplorePage() {
                         theme === 'dark' ? 'bg-gray-800 hover:bg-gray-750' : 'bg-white hover:bg-gray-50'
                       }`}
                     >
-                      <div className="flex-shrink-0 w-32 h-24 bg-gradient-to-br from-blue-400 to-cyan-500 rounded-lg"></div>
+                      <div className="flex-shrink-0 w-32 h-24 rounded-lg overflow-hidden">
+                        {page.cover_image ? (
+                          <img src={page.cover_image} alt={page.meta_title} className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full bg-gradient-to-br from-blue-400 to-cyan-500"></div>
+                        )}
+                      </div>
                       <div className="flex-1">
                         <div className="flex items-center gap-2 text-xs mb-2">
                           <span className={`uppercase font-semibold ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`}>
@@ -429,14 +456,27 @@ export default function ExplorePage() {
                       className="block group"
                     >
                       <div className="flex gap-3">
-                        <div className={`flex-shrink-0 w-16 h-16 rounded-lg bg-gradient-to-br ${
-                          index === 0 ? 'from-yellow-400 to-orange-500' :
-                          index === 1 ? 'from-blue-400 to-cyan-500' :
-                          index === 2 ? 'from-green-400 to-teal-500' :
-                          index === 3 ? 'from-pink-400 to-rose-500' :
-                          'from-orange-400 to-red-500'
-                        } flex items-center justify-center`}>
-                          <span className="text-white font-bold text-xl">{index + 1}</span>
+                        <div className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden relative ${
+                          !page.cover_image ? 'flex items-center justify-center' : ''
+                        }`}>
+                          {page.cover_image ? (
+                            <>
+                              <img src={page.cover_image} alt={page.meta_title} className="w-full h-full object-cover" />
+                              <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+                                <span className="text-white font-bold text-xl">{index + 1}</span>
+                              </div>
+                            </>
+                          ) : (
+                            <div className={`w-full h-full bg-gradient-to-br ${
+                              index === 0 ? 'from-yellow-400 to-orange-500' :
+                              index === 1 ? 'from-blue-400 to-cyan-500' :
+                              index === 2 ? 'from-green-400 to-teal-500' :
+                              index === 3 ? 'from-pink-400 to-rose-500' :
+                              'from-orange-400 to-red-500'
+                            } flex items-center justify-center`}>
+                              <span className="text-white font-bold text-xl">{index + 1}</span>
+                            </div>
+                          )}
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 text-xs mb-1">
@@ -484,14 +524,27 @@ export default function ExplorePage() {
                       className="block group"
                     >
                       <div className="flex gap-3">
-                        <div className={`flex-shrink-0 w-16 h-16 rounded-lg bg-gradient-to-br ${
-                          index === 0 ? 'from-pink-400 to-rose-500' :
-                          index === 1 ? 'from-red-400 to-orange-500' :
-                          index === 2 ? 'from-purple-400 to-pink-500' :
-                          index === 3 ? 'from-orange-400 to-yellow-500' :
-                          'from-rose-400 to-pink-500'
-                        } flex items-center justify-center`}>
-                          <span className="text-white font-bold text-xl">{index + 1}</span>
+                        <div className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden relative ${
+                          !page.cover_image ? 'flex items-center justify-center' : ''
+                        }`}>
+                          {page.cover_image ? (
+                            <>
+                              <img src={page.cover_image} alt={page.meta_title} className="w-full h-full object-cover" />
+                              <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+                                <span className="text-white font-bold text-xl">{index + 1}</span>
+                              </div>
+                            </>
+                          ) : (
+                            <div className={`w-full h-full bg-gradient-to-br ${
+                              index === 0 ? 'from-pink-400 to-rose-500' :
+                              index === 1 ? 'from-red-400 to-orange-500' :
+                              index === 2 ? 'from-purple-400 to-pink-500' :
+                              index === 3 ? 'from-orange-400 to-yellow-500' :
+                              'from-rose-400 to-pink-500'
+                            } flex items-center justify-center`}>
+                              <span className="text-white font-bold text-xl">{index + 1}</span>
+                            </div>
+                          )}
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 text-xs mb-1">
