@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import ReactQuill from 'react-quill';
 import { supabase } from '../lib/supabase';
-import { X, Save, Plus, Code, Eye } from 'lucide-react';
+import { X, Save, Plus, Code, Eye, Upload, Image as ImageIcon } from 'lucide-react';
 import 'quill/dist/quill.snow.css';
 
 interface Page {
@@ -15,6 +15,7 @@ interface Page {
   template?: string;
   display_section?: string;
   faq?: string;
+  cover_image?: string;
   created_at: string;
 }
 
@@ -34,6 +35,8 @@ export default function PageEditor({ theme, onClose, existingPage }: PageEditorP
   const [faq, setFaq] = useState(existingPage?.faq || '');
   const [template, setTemplate] = useState(existingPage?.template || 'default');
   const [displaySection, setDisplaySection] = useState(existingPage?.display_section || '');
+  const [coverImage, setCoverImage] = useState(existingPage?.cover_image || '');
+  const [uploadingImage, setUploadingImage] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [sources, setSources] = useState<Array<{ value: string; label: string }>>([]);
@@ -73,6 +76,53 @@ export default function PageEditor({ theme, onClose, existingPage }: PageEditorP
     }
   };
 
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      setError('Please select a valid image file');
+      return;
+    }
+
+    // Validate file size (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      setError('Image size must be less than 5MB');
+      return;
+    }
+
+    setUploadingImage(true);
+    setError('');
+
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('page-covers')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('page-covers')
+        .getPublicUrl(filePath);
+
+      setCoverImage(publicUrl);
+    } catch (err: any) {
+      console.error('Error uploading image:', err);
+      setError(err.message || 'Failed to upload image');
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setCoverImage('');
+  };
+
 
   const handleSave = async () => {
     if (!pageUrl || !metaTitle || !metaDescription) {
@@ -98,7 +148,8 @@ export default function PageEditor({ theme, onClose, existingPage }: PageEditorP
         summary: summary || null,
         faq: faq || null,
         template: template || 'default',
-        display_section: displaySection || null
+        display_section: displaySection || null,
+        cover_image: coverImage || null
       };
 
       if (existingPage) {
@@ -235,6 +286,60 @@ export default function PageEditor({ theme, onClose, existingPage }: PageEditorP
                 rows={3}
                 className={`w-full px-3 py-2 rounded-lg border ${theme === 'dark' ? 'bg-gray-900 border-gray-700 text-white' : 'bg-white border-gray-300 text-gray-900'} focus:outline-none focus:ring-2 focus:ring-blue-500`}
               />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                Cover Image
+              </label>
+              {coverImage ? (
+                <div className="space-y-3">
+                  <div className={`relative rounded-lg overflow-hidden border ${theme === 'dark' ? 'border-gray-700' : 'border-gray-300'}`}>
+                    <img
+                      src={coverImage}
+                      alt="Cover preview"
+                      className="w-full h-48 object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleRemoveImage}
+                      className="absolute top-2 right-2 p-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <label className={`flex items-center justify-center gap-2 px-4 py-8 border-2 border-dashed rounded-lg cursor-pointer transition-colors ${
+                    theme === 'dark'
+                      ? 'border-gray-700 hover:border-gray-600 bg-gray-900'
+                      : 'border-gray-300 hover:border-gray-400 bg-gray-50'
+                  } ${uploadingImage ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                    {uploadingImage ? (
+                      <>
+                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-500"></div>
+                        <span>Uploading...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Upload size={20} />
+                        <span>Click to upload cover image</span>
+                      </>
+                    )}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      disabled={uploadingImage}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
+              )}
+              <p className={`text-xs mt-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                Recommended: 1200x630px. Max size: 5MB. Formats: JPG, PNG, WebP, GIF
+              </p>
             </div>
 
             <div>

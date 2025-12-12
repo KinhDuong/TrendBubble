@@ -176,6 +176,10 @@ function generateMetaTags(pageData, topics) {
 
   const pageUrl = `${BASE_URL}${pageData.page_url}/`;
 
+  const ogImageTag = pageData.cover_image ? `
+    <meta property="og:image" content="${pageData.cover_image}" data-prerendered />
+    <meta name="twitter:image" content="${pageData.cover_image}" data-prerendered />` : '';
+
   return `
     <title>${enhancedTitle}</title>
     <meta name="description" content="${enhancedDescription}" data-prerendered />
@@ -187,7 +191,7 @@ function generateMetaTags(pageData, topics) {
     <meta property="og:url" content="${pageUrl}" data-prerendered />
     <meta property="og:title" content="${enhancedTitle}" data-prerendered />
     <meta property="og:description" content="${enhancedDescription}" data-prerendered />
-    <meta property="og:site_name" content="Top Best Charts" data-prerendered />
+    <meta property="og:site_name" content="Top Best Charts" data-prerendered />${ogImageTag}
 
     <meta name="twitter:card" content="summary_large_image" data-prerendered />
     <meta name="twitter:title" content="${enhancedTitle}" data-prerendered />
@@ -252,7 +256,11 @@ async function generateContentHTML(pageData, topics, sourceLabel) {
     </nav>
 
     <article class="dynamic-page-article" style="max-width: 80rem; margin: 0 auto; padding: 0 0.5rem;">
-      <header class="page-header" style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; padding: 1.5rem; margin-bottom: 2rem; margin-top: 2rem;">
+      ${pageData.cover_image ? `
+      <div style="margin-top: 2rem; margin-bottom: 1.5rem; border-radius: 0.75rem; overflow: hidden;">
+        <img src="${pageData.cover_image}" alt="${pageData.meta_title}" style="width: 100%; height: 24rem; object-fit: cover;" />
+      </div>` : ''}
+      <header class="page-header" style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; padding: 1.5rem; margin-bottom: 2rem; ${pageData.cover_image ? '' : 'margin-top: 2rem;'}">
         <h1 style="font-size: 1.875rem; font-weight: 700; color: white; margin-bottom: 0.75rem;">${pageData.meta_title}</h1>
         <p style="color: #d1d5db; font-size: 1rem; line-height: 1.625; margin-bottom: 1rem;">${pageData.meta_description}</p>
         <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; font-size: 0.875rem;">

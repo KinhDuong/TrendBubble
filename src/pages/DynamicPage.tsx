@@ -29,6 +29,7 @@ interface PageData {
   created_at: string;
   summary?: string;
   faq?: string;
+  cover_image?: string;
 }
 
 function DynamicPage() {
@@ -568,11 +569,13 @@ function DynamicPage() {
         <meta property="og:site_name" content="Top Best Charts" />
         <meta property="og:locale" content="en_US" />
         <meta property="og:updated_time" content={lastUpdated.toISOString()} />
+        {pageData.cover_image && <meta property="og:image" content={pageData.cover_image} />}
 
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:url" content={pageUrl} />
         <meta name="twitter:title" content={enhancedTitle} />
         <meta name="twitter:description" content={enhancedDescription} />
+        {pageData.cover_image && <meta name="twitter:image" content={pageData.cover_image} />}
 
         <meta property="article:published_time" content={pageData.created_at} />
         <meta property="article:modified_time" content={lastUpdated.toISOString()} />
@@ -702,6 +705,15 @@ snapshotButton={null}
               {topics.length > 0 && (
                 <article className="max-w-7xl mx-auto mb-8">
                   <header>
+                    {pageData.cover_image && (
+                      <div className="mb-6 rounded-xl overflow-hidden">
+                        <img
+                          src={pageData.cover_image}
+                          alt={pageData.meta_title}
+                          className="w-full h-64 md:h-96 object-cover"
+                        />
+                      </div>
+                    )}
                     <div className="flex items-center justify-between gap-4 mb-4">
                       <h1 className={`text-2xl md:text-4xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                         {pageData.meta_title}
