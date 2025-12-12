@@ -994,7 +994,7 @@ snapshotButton={null}
                             <button
                               onClick={() => setCurrentPage(1)}
                               disabled={currentPage === 1}
-                              className={`px-2 py-1 rounded text-sm transition-colors ${currentPage === 1 ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}
+                              className={`px-3 py-1 rounded text-sm transition-colors ${currentPage === 1 ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}
                               title="First page"
                             >
                               <ChevronsLeft size={16} />
@@ -1019,7 +1019,7 @@ snapshotButton={null}
                             <button
                               onClick={() => setCurrentPage(totalPages)}
                               disabled={currentPage === totalPages}
-                              className={`px-2 py-1 rounded text-sm transition-colors ${currentPage === totalPages ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}
+                              className={`px-3 py-1 rounded text-sm transition-colors ${currentPage === totalPages ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}
                               title="Last page"
                             >
                               <ChevronsRight size={16} />
