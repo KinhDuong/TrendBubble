@@ -118,6 +118,12 @@ export default function FileUpload({ onUpload, theme, sourceFilter, sources, onS
     const valueIndex = headers.findIndex(h => h.includes('value'));
 
     const parseSearchVolumeForSize = (volumeStr: string): number => {
+      // Check for tons first (before removing letters)
+      if (/tons?/i.test(volumeStr)) {
+        const num = parseFloat(volumeStr.replace(/[^0-9.]/g, ''));
+        return Math.floor(num * 1000); // Convert tons to kg
+      }
+
       const cleanStr = volumeStr.replace(/[^0-9.MKBmkb+]/g, '').replace(/\+/g, '');
 
       if (cleanStr.includes('B') || cleanStr.includes('b')) {
@@ -165,10 +171,19 @@ export default function FileUpload({ onUpload, theme, sourceFilter, sources, onS
 
         let value: number | undefined = undefined;
         if (valueRaw && valueRaw.trim() !== '') {
-          const cleanedValue = valueRaw.replace(/^"|"$/g, '').trim().replace(/[^0-9.-]/g, '');
-          const parsedValue = parseFloat(cleanedValue);
-          if (!isNaN(parsedValue)) {
-            value = parsedValue;
+          const cleanedValueRaw = valueRaw.replace(/^"|"$/g, '').trim();
+          // Check for tons in value field
+          if (/tons?/i.test(cleanedValueRaw)) {
+            const num = parseFloat(cleanedValueRaw.replace(/[^0-9.-]/g, ''));
+            if (!isNaN(num)) {
+              value = num * 1000; // Convert tons to kg
+            }
+          } else {
+            const cleanedValue = cleanedValueRaw.replace(/[^0-9.-]/g, '');
+            const parsedValue = parseFloat(cleanedValue);
+            if (!isNaN(parsedValue)) {
+              value = parsedValue;
+            }
           }
         }
 
