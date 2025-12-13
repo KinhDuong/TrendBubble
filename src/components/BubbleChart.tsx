@@ -252,30 +252,20 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
       canvas.addEventListener('mousemove', handleMouseMove);
     }
 
-    const getNormalizedValue = (topic: TrendingTopic): number => {
-      if (topic.crypto_data && useCryptoColors) {
-        const timeframeMap = {
-          '1h': topic.crypto_data.change_1h,
-          '24h': topic.crypto_data.change_24h,
-          '7d': topic.crypto_data.change_7d,
-          '30d': topic.crypto_data.change_30d,
-          '1y': topic.crypto_data.change_1y,
-        };
-        const changeValue = timeframeMap[cryptoTimeframe];
-        return Math.floor(Math.abs(changeValue) * 100000);
-      }
+    const getCryptoValue = (topic: TrendingTopic): number => {
+      if (!topic.crypto_data || !useCryptoColors) return topic.searchVolume;
 
-      // Normalize weights: convert tons to kg for consistent comparison
-      const rawValue = topic.searchVolumeRaw.toLowerCase();
-      if (rawValue.includes('ton')) {
-        // If in tons, multiply by 1000 to get kg equivalent
-        return topic.searchVolume * 1000;
-      }
-      // Otherwise use the raw value (already in kg)
-      return topic.searchVolume;
+      const timeframeMap = {
+        '1h': topic.crypto_data.change_1h,
+        '24h': topic.crypto_data.change_24h,
+        '7d': topic.crypto_data.change_7d,
+        '30d': topic.crypto_data.change_30d,
+        '1y': topic.crypto_data.change_1y,
+      };
+
+      const changeValue = timeframeMap[cryptoTimeframe];
+      return Math.floor(Math.abs(changeValue) * 100000);
     };
-
-    const getCryptoValue = getNormalizedValue;
 
     const getCryptoDisplayText = (topic: TrendingTopic): string => {
       if (!topic.crypto_data || !useCryptoColors) return topic.searchVolumeRaw;
