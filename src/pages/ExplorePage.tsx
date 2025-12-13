@@ -179,7 +179,7 @@ export default function ExplorePage() {
           onLogout={logout}
           useH1={true}
         />
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <main className="max-w-7xl mx-auto py-8">
           <div className="flex flex-col lg:flex-row gap-8 animate-pulse">
             <div className="flex-1">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
@@ -239,7 +239,7 @@ export default function ExplorePage() {
         useH1={true}
       />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-7xl mx-auto py-8">
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Main Content */}
           <div className="flex-1">
@@ -547,15 +547,6 @@ export default function ExplorePage() {
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 text-xs mb-1">
-                            <span className={`uppercase font-semibold ${theme === 'dark' ? 'text-pink-400' : 'text-pink-600'}`}>
-                              Popular
-                            </span>
-                            <span className={theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}>/</span>
-                            <span className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}>
-                              {formatTimeAgo(page.created_at)}
-                            </span>
-                          </div>
                           <h3 className={`font-semibold group-hover:text-pink-600 transition-colors line-clamp-2 ${
                             theme === 'dark' ? 'text-white' : 'text-gray-900'
                           }`}>
@@ -577,7 +568,7 @@ export default function ExplorePage() {
         </div>
 
         {/* What Is Top Best Charts Section */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="max-w-7xl mx-auto py-12">
           <div className="text-center mb-8">
             <div className="inline-flex items-center gap-2 mb-4">
               <Sparkles className={`w-8 h-8 ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`} />
