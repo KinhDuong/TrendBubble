@@ -39,12 +39,12 @@ export default function DataFilters({ theme, onFilterChange, initialFilters }: D
   const loadSourcesAndCategories = async () => {
     try {
       const [sourcesRes, categoriesRes] = await Promise.all([
-        supabase.from('custom_sources').select('name').order('name'),
+        supabase.from('custom_sources').select('value, label').order('label'),
         supabase.from('custom_categories').select('name').order('name'),
       ]);
 
       if (sourcesRes.data) {
-        setSources(sourcesRes.data.map(s => s.name));
+        setSources(sourcesRes.data.map(s => s.value));
       }
       if (categoriesRes.data) {
         setCategories(categoriesRes.data.map(c => c.name));

@@ -3,8 +3,10 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import DataManager from '../components/DataManager';
+import SourceManager from '../components/SourceManager';
 import { useAuth } from '../hooks/useAuth';
 import Login from '../components/Login';
+import { Database, Tag } from 'lucide-react';
 
 export default function AdminData() {
   const { isAdmin, logout } = useAuth();
@@ -15,6 +17,7 @@ export default function AdminData() {
     return (savedTheme === 'dark' || savedTheme === 'light') ? savedTheme : 'dark';
   });
   const [showLogin, setShowLogin] = useState(!isAdmin);
+  const [activeTab, setActiveTab] = useState<'data' | 'sources'>('data');
 
   useEffect(() => {
     if (!isAdmin) {
@@ -54,7 +57,46 @@ export default function AdminData() {
       />
 
       <div className={`max-w-7xl mx-auto px-4 py-8`}>
-        <DataManager theme={theme} initialSource={searchParams.get('source') || undefined} />
+        <div className="mb-6">
+          <div className="flex items-center gap-2 border-b border-gray-700">
+            <button
+              onClick={() => setActiveTab('data')}
+              className={`px-4 py-3 font-medium transition-colors flex items-center gap-2 ${
+                activeTab === 'data'
+                  ? theme === 'dark'
+                    ? 'border-b-2 border-blue-500 text-blue-400'
+                    : 'border-b-2 border-blue-600 text-blue-600'
+                  : theme === 'dark'
+                  ? 'text-gray-400 hover:text-gray-300'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              <Database size={18} />
+              Data Manager
+            </button>
+            <button
+              onClick={() => setActiveTab('sources')}
+              className={`px-4 py-3 font-medium transition-colors flex items-center gap-2 ${
+                activeTab === 'sources'
+                  ? theme === 'dark'
+                    ? 'border-b-2 border-blue-500 text-blue-400'
+                    : 'border-b-2 border-blue-600 text-blue-600'
+                  : theme === 'dark'
+                  ? 'text-gray-400 hover:text-gray-300'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              <Tag size={18} />
+              Source Manager
+            </button>
+          </div>
+        </div>
+
+        {activeTab === 'data' ? (
+          <DataManager theme={theme} initialSource={searchParams.get('source') || undefined} />
+        ) : (
+          <SourceManager theme={theme} />
+        )}
       </div>
 
       <Footer theme={theme} />
