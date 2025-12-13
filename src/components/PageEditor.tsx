@@ -171,6 +171,9 @@ export default function PageEditor({ theme, onClose, existingPage }: PageEditorP
       if (!formattedUrl.startsWith('/')) {
         formattedUrl = '/' + formattedUrl;
       }
+      if (!formattedUrl.endsWith('/')) {
+        formattedUrl = formattedUrl + '/';
+      }
 
       const pageData = {
         page_url: formattedUrl,
