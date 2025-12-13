@@ -116,6 +116,57 @@ export default function DataEditor({ theme, onClose, existingData }: DataEditorP
     }
   };
 
+  const parseSearchVolumeWithUnits = (input: string): { numeric: number; raw: string } => {
+    const trimmedInput = input.trim();
+
+    // Check for tons
+    if (/tons?/i.test(trimmedInput)) {
+      const num = parseFloat(trimmedInput.replace(/[^0-9.]/g, ''));
+      return {
+        numeric: Math.floor(num * 1000), // Convert tons to kg
+        raw: trimmedInput
+      };
+    }
+
+    // Check for kg (just remove the unit)
+    if (/kg/i.test(trimmedInput)) {
+      const num = parseFloat(trimmedInput.replace(/[^0-9.]/g, ''));
+      return {
+        numeric: Math.floor(num),
+        raw: trimmedInput
+      };
+    }
+
+    // Check for M, K, B suffixes
+    const cleanStr = trimmedInput.replace(/[^0-9.MKBmkb+]/g, '').replace(/\+/g, '');
+
+    if (cleanStr.includes('B') || cleanStr.includes('b')) {
+      const num = parseFloat(cleanStr.replace(/[Bb]/g, ''));
+      return {
+        numeric: Math.floor(num * 1000000000),
+        raw: trimmedInput
+      };
+    } else if (cleanStr.includes('M') || cleanStr.includes('m')) {
+      const num = parseFloat(cleanStr.replace(/[Mm]/g, ''));
+      return {
+        numeric: Math.floor(num * 1000000),
+        raw: trimmedInput
+      };
+    } else if (cleanStr.includes('K') || cleanStr.includes('k')) {
+      const num = parseFloat(cleanStr.replace(/[Kk]/g, ''));
+      return {
+        numeric: Math.floor(num * 1000),
+        raw: trimmedInput
+      };
+    } else {
+      const num = parseFloat(cleanStr);
+      return {
+        numeric: Math.floor(num || 0),
+        raw: trimmedInput
+      };
+    }
+  };
+
   const handleChange = (field: keyof TrendingTopic, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
@@ -217,24 +268,30 @@ export default function DataEditor({ theme, onClose, existingData }: DataEditorP
               <label className={`block text-sm font-medium mb-2 ${
                 theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
               }`}>
-                Search Volume *
+                Search Volume * <span className="text-xs text-gray-500">(supports: 40 tons, 50 kg, 1.5M, 200K)</span>
               </label>
               <input
-                type="number"
-                value={formData.search_volume}
+                type="text"
+                value={formData.search_volume_raw}
                 onChange={(e) => {
                   const val = e.target.value;
-                  handleChange('search_volume', val);
-                  handleChange('search_volume_raw', val);
+                  const parsed = parseSearchVolumeWithUnits(val);
+                  handleChange('search_volume_raw', parsed.raw);
+                  handleChange('search_volume', parsed.numeric);
                 }}
                 required
-                min="0"
+                placeholder="e.g., 40 tons, 50 kg, 1.5M"
                 className={`w-full px-4 py-2 rounded-lg border ${
                   theme === 'dark'
                     ? 'bg-gray-700 border-gray-600 text-white'
                     : 'bg-white border-gray-300 text-gray-900'
                 } focus:outline-none focus:ring-2 focus:ring-blue-500`}
               />
+              {formData.search_volume > 0 && (
+                <div className="text-xs mt-1 text-gray-500">
+                  = {formData.search_volume.toLocaleString()} kg
+                </div>
+              )}
             </div>
 
             <div>
@@ -297,13 +354,29 @@ export default function DataEditor({ theme, onClose, existingData }: DataEditorP
               <label className={`block text-sm font-medium mb-2 ${
                 theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
               }`}>
-                Value
+                Value <span className="text-xs text-gray-500">(supports: 40 tons, 50 kg)</span>
               </label>
               <input
-                type="number"
-                step="any"
-                value={formData.value !== undefined ? formData.value : ''}
-                onChange={(e) => handleChange('value', e.target.value === '' ? undefined : parseFloat(e.target.value))}
+                type="text"
+                value={formData.value !== undefined ? formData.value.toString() : ''}
+                onChange={(e) => {
+                  const val = e.target.value.trim();
+                  if (val === '') {
+                    handleChange('value', undefined);
+                  } else {
+                    // Check for tons
+                    if (/tons?/i.test(val)) {
+                      const num = parseFloat(val.replace(/[^0-9.-]/g, ''));
+                      handleChange('value', !isNaN(num) ? num * 1000 : undefined);
+                    } else {
+                      // Remove any non-numeric characters except decimal point and minus
+                      const cleanedValue = val.replace(/[^0-9.-]/g, '');
+                      const parsedValue = parseFloat(cleanedValue);
+                      handleChange('value', !isNaN(parsedValue) ? parsedValue : undefined);
+                    }
+                  }
+                }}
+                placeholder="e.g., 40 tons, 50 kg, or numeric value"
                 className={`w-full px-4 py-2 rounded-lg border ${
                   theme === 'dark'
                     ? 'bg-gray-700 border-gray-600 text-white'
