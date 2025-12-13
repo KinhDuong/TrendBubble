@@ -781,7 +781,7 @@ snapshotButton={null}
                 <article className="max-w-7xl mx-auto mb-8">
                   <header>
                     <div className="flex items-center justify-between gap-4 mb-4">
-                      <h1 className={`text-2xl md:text-4xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                      <h1 className={`text-xl md:text-4xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                         {pageData.meta_title}
                       </h1>
                       {(viewMode === 'bubble' || viewMode === 'bar' || viewMode === 'treemap' || viewMode === 'donut') && topics.length > 0 && (

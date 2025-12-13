@@ -1587,7 +1587,7 @@ function HomePage() {
               <article className="max-w-7xl mx-auto mb-8">
                 <header>
                   <div className="flex items-center justify-between gap-4 mb-4">
-                    <h1 className={`text-2xl md:text-3xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                    <h1 className={`text-xl md:text-3xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                       Real-Time Trending Topics, People, News & Politics Bubble Charts
                     </h1>
                     {viewMode === 'bubble' && topics.length > 0 && (
