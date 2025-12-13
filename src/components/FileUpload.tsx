@@ -121,7 +121,13 @@ export default function FileUpload({ onUpload, theme, sourceFilter, sources, onS
       // Check for tons first (before removing letters)
       if (/tons?/i.test(volumeStr)) {
         const num = parseFloat(volumeStr.replace(/[^0-9.]/g, ''));
-        return Math.floor(num * 1000); // Convert tons to kg
+        return Math.floor(num * 1000000); // Convert tons to base scale (1 ton = 1000 kg, kg * 1000 for scale)
+      }
+
+      // Check for kg
+      if (/kg/i.test(volumeStr)) {
+        const num = parseFloat(volumeStr.replace(/[^0-9.]/g, ''));
+        return Math.floor(num * 1000); // Scale kg values consistently
       }
 
       const cleanStr = volumeStr.replace(/[^0-9.MKBmkb+]/g, '').replace(/\+/g, '');
