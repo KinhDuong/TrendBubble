@@ -204,23 +204,26 @@ function DynamicPage() {
 
   const loadPageData = async () => {
     try {
-      const rawPath = '/' + (urlPath || '');
-      const hasTrailingSlash = rawPath.endsWith('/');
+      let rawPath = '/' + (urlPath || '');
 
       // Normalize to have trailing slash (except root)
-      let fullPath = rawPath.replace(/\/+$/, '') + '/';
-      if (fullPath === '//') fullPath = '/';
+      let normalizedPath = rawPath.replace(/\/+$/, '');
+      if (normalizedPath !== '') {
+        normalizedPath += '/';
+      } else {
+        normalizedPath = '/';
+      }
 
-      // Redirect to trailing slash version if missing (for SEO canonicalization)
-      if (!hasTrailingSlash && rawPath !== '/') {
-        navigate(fullPath, { replace: true });
+      // Only redirect if the current path doesn't match the normalized path
+      if (rawPath !== normalizedPath) {
+        navigate(normalizedPath, { replace: true });
         return;
       }
 
       const { data, error } = await supabase
         .from('pages')
         .select('*')
-        .eq('page_url', fullPath)
+        .eq('page_url', normalizedPath)
         .maybeSingle();
 
       if (error) throw error;
