@@ -251,7 +251,7 @@ export default function ExplorePage() {
                   {heroPage && (
                     <Link
                       to={heroPage.page_url}
-                      className={`group block rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 ${
+                      className={`group block rounded-none md:rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 ${
                         theme === 'dark' ? 'bg-gray-800' : 'bg-white'
                       } col-span-2`}
                     >
@@ -294,7 +294,7 @@ export default function ExplorePage() {
                     <Link
                       key={page.id}
                       to={page.page_url}
-                      className={`group block rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 ${
+                      className={`group block rounded-none md:rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 ${
                         theme === 'dark' ? 'bg-gray-800' : 'bg-white'
                       }`}
                     >
@@ -349,11 +349,11 @@ export default function ExplorePage() {
                     <Link
                       key={page.id}
                       to={page.page_url}
-                      className={`flex gap-4 p-4 rounded-lg hover:shadow-lg transition-all duration-300 ${
+                      className={`flex gap-4 p-4 rounded-none md:rounded-lg hover:shadow-lg transition-all duration-300 ${
                         theme === 'dark' ? 'bg-gray-800 hover:bg-gray-750' : 'bg-white hover:bg-gray-50'
                       }`}
                     >
-                      <div className="flex-shrink-0 w-32 h-24 rounded-lg overflow-hidden">
+                      <div className="flex-shrink-0 w-32 h-24 rounded-none md:rounded-lg overflow-hidden">
                         {page.cover_image ? (
                           <img src={page.cover_image} alt={page.meta_title} className="w-full h-full object-cover" />
                         ) : (
@@ -456,7 +456,7 @@ export default function ExplorePage() {
                       className="block group"
                     >
                       <div className="flex gap-3">
-                        <div className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden relative ${
+                        <div className={`flex-shrink-0 w-16 h-16 rounded-none md:rounded-lg overflow-hidden relative ${
                           !page.cover_image ? 'flex items-center justify-center' : ''
                         }`}>
                           {page.cover_image ? (
@@ -508,7 +508,7 @@ export default function ExplorePage() {
 
             {/* Popular Section */}
             {popularPages.length > 0 && (
-              <div className={`rounded-lg p-6 ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} shadow-lg`}>
+              <div className={`rounded-none md:rounded-lg p-6 ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} shadow-lg`}>
                 <div className="relative mb-6">
                   <h2 className={`text-xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} inline-block px-3 py-1 relative`}>
                     <span className="relative z-10">POPULAR</span>
@@ -524,7 +524,7 @@ export default function ExplorePage() {
                       className="block group"
                     >
                       <div className="flex gap-3">
-                        <div className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden relative ${
+                        <div className={`flex-shrink-0 w-16 h-16 rounded-none md:rounded-lg overflow-hidden relative ${
                           !page.cover_image ? 'flex items-center justify-center' : ''
                         }`}>
                           {page.cover_image ? (
