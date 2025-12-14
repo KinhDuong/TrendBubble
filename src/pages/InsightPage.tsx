@@ -4,6 +4,9 @@ import { TrendingUp, Download, Trash2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import BrandKeywordUpload from '../components/BrandKeywordUpload';
 import KeywordChart from '../components/KeywordChart';
+import Header from '../components/Header';
+import Login from '../components/Login';
+import Footer from '../components/Footer';
 import { useAuth } from '../hooks/useAuth';
 
 interface MonthlyData {
@@ -16,7 +19,8 @@ interface MonthlyData {
 }
 
 export default function InsightPage() {
-  const { user } = useAuth();
+  const { user, isAdmin, logout } = useAuth();
+  const [showLogin, setShowLogin] = useState(false);
   const [monthlyData, setMonthlyData] = useState<MonthlyData[]>([]);
   const [brands, setBrands] = useState<string[]>([]);
   const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
@@ -111,15 +115,49 @@ export default function InsightPage() {
     }
   };
 
+  if (showLogin && !user) {
+    return (
+      <>
+        <Header
+          theme="light"
+          isAdmin={isAdmin}
+          onLoginClick={() => setShowLogin(true)}
+          onLogout={logout}
+        />
+        <Login onLogin={() => setShowLogin(false)} theme="light" />
+        <Footer theme="light" />
+      </>
+    );
+  }
+
   if (!user) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <TrendingUp className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-          <h2 className="text-2xl font-semibold text-gray-900 mb-2">Sign In Required</h2>
-          <p className="text-gray-600">Please sign in to access keyword insights</p>
+      <>
+        <Helmet>
+          <title>Brand Keyword Insights | SEO Analysis</title>
+          <meta name="description" content="Analyze and visualize brand keyword search trends and SEO performance data" />
+        </Helmet>
+        <Header
+          theme="light"
+          isAdmin={isAdmin}
+          onLoginClick={() => setShowLogin(true)}
+          onLogout={logout}
+        />
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="text-center">
+            <TrendingUp className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+            <h2 className="text-2xl font-semibold text-gray-900 mb-2">Sign In Required</h2>
+            <p className="text-gray-600 mb-4">Please sign in to access keyword insights</p>
+            <button
+              onClick={() => setShowLogin(true)}
+              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Sign In
+            </button>
+          </div>
         </div>
-      </div>
+        <Footer theme="light" />
+      </>
     );
   }
 
@@ -129,7 +167,12 @@ export default function InsightPage() {
         <title>Brand Keyword Insights | SEO Analysis</title>
         <meta name="description" content="Analyze and visualize brand keyword search trends and SEO performance data" />
       </Helmet>
-
+      <Header
+        theme="light"
+        isAdmin={isAdmin}
+        onLoginClick={() => setShowLogin(true)}
+        onLogout={logout}
+      />
       <div className="min-h-screen bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="mb-8">
@@ -220,6 +263,7 @@ export default function InsightPage() {
           )}
         </div>
       </div>
+      <Footer theme="light" />
     </>
   );
 }

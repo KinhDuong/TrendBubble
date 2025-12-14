@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
+import { User } from '@supabase/supabase-js';
 
 export function useAuth() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
     checkAuth();
@@ -15,6 +17,7 @@ export function useAuth() {
         })();
       } else if (event === 'SIGNED_OUT') {
         setIsAdmin(false);
+        setUser(null);
         setIsLoading(false);
       }
     });
@@ -30,9 +33,12 @@ export function useAuth() {
 
       if (!user) {
         setIsAdmin(false);
+        setUser(null);
         setIsLoading(false);
         return;
       }
+
+      setUser(user);
 
       const { data: adminData, error } = await supabase
         .from('admin_users')
@@ -46,6 +52,7 @@ export function useAuth() {
     } catch (error) {
       console.error('Error checking auth:', error);
       setIsAdmin(false);
+      setUser(null);
     } finally {
       setIsLoading(false);
     }
@@ -54,7 +61,8 @@ export function useAuth() {
   const logout = async () => {
     await supabase.auth.signOut();
     setIsAdmin(false);
+    setUser(null);
   };
 
-  return { isAdmin, isLoading, logout };
+  return { isAdmin, isLoading, user, logout };
 }
