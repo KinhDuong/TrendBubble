@@ -257,31 +257,25 @@ export default function ExplorePage() {
                     >
                       <div className="relative h-80 overflow-hidden">
                         {heroPage.cover_image ? (
-                          <>
-                            <img src={heroPage.cover_image} alt={heroPage.meta_title} className="w-full h-full object-cover" />
-                            <div className="absolute inset-0 bg-black bg-opacity-30 group-hover:bg-opacity-20 transition-all duration-300"></div>
-                          </>
+                          <img src={heroPage.cover_image} alt={heroPage.meta_title} className="w-full h-full object-cover" />
                         ) : (
-                          <>
-                            <div className="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600"></div>
-                            <div className="absolute inset-0 bg-black bg-opacity-30 group-hover:bg-opacity-20 transition-all duration-300"></div>
-                          </>
+                          <div className="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600"></div>
                         )}
-                        <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-                          <div className="flex items-center gap-2 text-sm mb-2 opacity-90">
-                            <span className="uppercase font-semibold">Featured</span>
-                            <span>/</span>
-                            <span className="flex items-center gap-1">
-                              <Clock className="w-4 h-4" />
-                              {formatTimeAgo(heroPage.created_at)}
-                            </span>
-                          </div>
-                          <h3 className="font-bold text-3xl group-hover:text-blue-300 transition-colors">
-                            {heroPage.meta_title}
-                          </h3>
-                        </div>
                       </div>
-                      <div className="p-4">
+                      <div className="p-6">
+                        <div className={`flex items-center gap-2 text-sm mb-3 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                          <span className="uppercase font-semibold">Featured</span>
+                          <span>/</span>
+                          <span className="flex items-center gap-1">
+                            <Clock className="w-4 h-4" />
+                            {formatTimeAgo(heroPage.created_at)}
+                          </span>
+                        </div>
+                        <h3 className={`font-bold text-3xl mb-3 group-hover:text-blue-600 transition-colors ${
+                          theme === 'dark' ? 'text-white' : 'text-gray-900'
+                        }`}>
+                          {heroPage.meta_title}
+                        </h3>
                         <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} line-clamp-2`}>
                           {heroPage.meta_description}
                         </p>
@@ -300,31 +294,25 @@ export default function ExplorePage() {
                     >
                       <div className="relative h-32 md:h-48 overflow-hidden">
                         {page.cover_image ? (
-                          <>
-                            <img src={page.cover_image} alt={page.meta_title} className="w-full h-full object-cover" />
-                            <div className="absolute inset-0 bg-black bg-opacity-30 group-hover:bg-opacity-20 transition-all duration-300"></div>
-                          </>
+                          <img src={page.cover_image} alt={page.meta_title} className="w-full h-full object-cover" />
                         ) : (
-                          <>
-                            <div className="w-full h-full bg-gradient-to-br from-green-500 to-teal-600"></div>
-                            <div className="absolute inset-0 bg-black bg-opacity-30 group-hover:bg-opacity-20 transition-all duration-300"></div>
-                          </>
+                          <div className="w-full h-full bg-gradient-to-br from-green-500 to-teal-600"></div>
                         )}
-                        <div className="absolute bottom-0 left-0 right-0 p-3 md:p-6 text-white">
-                          <div className="flex items-center gap-1 md:gap-2 text-xs md:text-sm mb-1 md:mb-2 opacity-90">
-                            <span className="uppercase font-semibold">Top</span>
-                            <span className="hidden md:inline">/</span>
-                            <span className="hidden md:flex items-center gap-1">
-                              <Clock className="w-4 h-4" />
-                              {formatTimeAgo(page.created_at)}
-                            </span>
-                          </div>
-                          <h3 className="font-bold text-sm md:text-xl group-hover:text-blue-300 transition-colors line-clamp-2">
-                            {page.meta_title}
-                          </h3>
-                        </div>
                       </div>
-                      <div className="p-2 md:p-4">
+                      <div className="p-3 md:p-4">
+                        <div className={`flex items-center gap-1 md:gap-2 text-xs md:text-sm mb-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                          <span className="uppercase font-semibold">Top</span>
+                          <span>/</span>
+                          <span className="flex items-center gap-1">
+                            <Clock className="w-4 h-4" />
+                            {formatTimeAgo(page.created_at)}
+                          </span>
+                        </div>
+                        <h3 className={`font-bold text-sm md:text-xl mb-2 group-hover:text-blue-600 transition-colors line-clamp-2 ${
+                          theme === 'dark' ? 'text-white' : 'text-gray-900'
+                        }`}>
+                          {page.meta_title}
+                        </h3>
                         <p className={`text-xs md:text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} line-clamp-2`}>
                           {page.meta_description}
                         </p>
