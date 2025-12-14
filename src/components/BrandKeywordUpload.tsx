@@ -131,7 +131,7 @@ export default function BrandKeywordUpload({ onUploadComplete }: BrandKeywordUpl
       await supabase
         .from('brand_keyword_monthly_data')
         .upsert(record, {
-          onConflict: 'brand,month',
+          onConflict: 'brand,month,user_id',
           ignoreDuplicates: false
         });
     }
