@@ -973,6 +973,7 @@ export default function BrandInsightPage() {
             return next;
           });
         }}
+        brandName={decodedBrand}
       />
 
       <Footer key={`footer-${theme}`} theme={theme} />

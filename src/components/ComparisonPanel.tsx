@@ -1,14 +1,74 @@
 import { X, TrendingUp } from 'lucide-react';
 import { TrendingTopic } from '../types';
+import { useEffect, useState } from 'react';
+import { supabase } from '../lib/supabase';
 
 interface ComparisonPanelProps {
   topics: TrendingTopic[];
   theme: 'dark' | 'light';
   onClose: () => void;
   onRemoveTopic: (topicName: string) => void;
+  brandName?: string;
 }
 
-export default function ComparisonPanel({ topics, theme, onClose, onRemoveTopic }: ComparisonPanelProps) {
+interface MonthlySearchData {
+  keyword: string;
+  monthlyVolumes: { month: string; volume: number }[];
+}
+
+export default function ComparisonPanel({ topics, theme, onClose, onRemoveTopic, brandName }: ComparisonPanelProps) {
+  const [monthlyData, setMonthlyData] = useState<MonthlySearchData[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (topics.length === 0 || !brandName) {
+      setMonthlyData([]);
+      return;
+    }
+
+    const fetchMonthlyData = async () => {
+      setLoading(true);
+      try {
+        const keywordNames = topics.map(t => t.name);
+
+        const { data, error } = await supabase
+          .from('brand_keyword_data')
+          .select('keyword, search_volume, month')
+          .eq('brand', brandName)
+          .in('keyword', keywordNames)
+          .order('month', { ascending: true });
+
+        if (error) throw error;
+
+        const groupedData: { [key: string]: { month: string; volume: number }[] } = {};
+
+        data?.forEach(row => {
+          if (!groupedData[row.keyword]) {
+            groupedData[row.keyword] = [];
+          }
+          groupedData[row.keyword].push({
+            month: new Date(row.month).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
+            volume: row.search_volume
+          });
+        });
+
+        const result: MonthlySearchData[] = Object.entries(groupedData).map(([keyword, volumes]) => ({
+          keyword,
+          monthlyVolumes: volumes
+        }));
+
+        setMonthlyData(result);
+      } catch (error) {
+        console.error('Error fetching monthly data:', error);
+        setMonthlyData([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMonthlyData();
+  }, [topics, brandName]);
+
   if (topics.length === 0) return null;
 
   const sortedTopics = [...topics].sort((a, b) => b.searchVolume - a.searchVolume);
@@ -57,6 +117,7 @@ export default function ComparisonPanel({ topics, theme, onClose, onRemoveTopic 
             {sortedTopics.map((topic) => {
               const size = getBubbleSize(topic.searchVolume);
               const fontSize = getFontSize(size);
+              const keywordMonthlyData = monthlyData.find(d => d.keyword === topic.name);
 
               return (
                 <div
@@ -96,6 +157,16 @@ export default function ComparisonPanel({ topics, theme, onClose, onRemoveTopic 
                       </div>
                     </div>
                   </div>
+
+                  {keywordMonthlyData && keywordMonthlyData.monthlyVolumes.length > 0 && (
+                    <div className={`text-xs ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'} max-h-32 overflow-y-auto`}>
+                      {keywordMonthlyData.monthlyVolumes.map((mv, idx) => (
+                        <div key={idx} className="whitespace-nowrap">
+                          <span className="font-semibold">{mv.month}:</span> {mv.volume.toLocaleString()}
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               );
             })}
