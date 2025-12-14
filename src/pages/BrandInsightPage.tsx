@@ -84,11 +84,6 @@ export default function BrandInsightPage() {
   const [comparingTopics, setComparingTopics] = useState<Set<string>>(new Set());
   const [bubbleLayout, setBubbleLayout] = useState<BubbleLayout>('force');
   const [animationStyle, setAnimationStyle] = useState<AnimationStyle>('default');
-  const [nextBubbleIn, setNextBubbleIn] = useState<string>('');
-  const [bubbleProgress, setBubbleProgress] = useState<number>(0);
-  const [oldestBubbleTime, setOldestBubbleTime] = useState<number | null>(null);
-  const [oldestBubbleCreated, setOldestBubbleCreated] = useState<number | null>(null);
-  const [oldestBubbleLifetime, setOldestBubbleLifetime] = useState<number | null>(null);
 
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     const savedTheme = localStorage.getItem('theme');
@@ -115,30 +110,6 @@ export default function BrandInsightPage() {
       }
     }
   }, [searchParams]);
-
-  useEffect(() => {
-    const bubbleInterval = setInterval(() => {
-      if (oldestBubbleTime && oldestBubbleCreated && oldestBubbleLifetime) {
-        const now = Date.now();
-        const remaining = oldestBubbleTime - now;
-        const elapsed = now - oldestBubbleCreated;
-        const progress = Math.min(100, Math.max(0, (elapsed / oldestBubbleLifetime) * 100));
-
-        setBubbleProgress(progress);
-
-        if (remaining > 0) {
-          const seconds = Math.ceil(remaining / 1000);
-          setNextBubbleIn(`${seconds}s`);
-        } else {
-          setNextBubbleIn('0s');
-        }
-      } else {
-        setNextBubbleIn('--');
-        setBubbleProgress(0);
-      }
-    }, 100);
-    return () => clearInterval(bubbleInterval);
-  }, [oldestBubbleTime, oldestBubbleCreated, oldestBubbleLifetime]);
 
   useEffect(() => {
     if (brandName) {
@@ -275,12 +246,6 @@ export default function BrandInsightPage() {
     const newSearchParams = new URLSearchParams(searchParams);
     newSearchParams.set('Top', newMax.toString());
     setSearchParams(newSearchParams, { replace: true });
-  };
-
-  const handleBubbleTimingUpdate = (nextPopTime: number | null, createdTime?: number, lifetime?: number) => {
-    setOldestBubbleTime(nextPopTime);
-    setOldestBubbleCreated(createdTime || null);
-    setOldestBubbleLifetime(lifetime || null);
   };
 
   const transformToTopics = useMemo((): TrendingTopic[] => {
@@ -571,8 +536,6 @@ export default function BrandInsightPage() {
         sources={[]}
         maxBubbles={maxBubbles}
         searchQuery={searchQuery}
-        nextBubbleIn={nextBubbleIn}
-        bubbleProgress={bubbleProgress}
         bubbleLayout={bubbleLayout}
         cryptoTimeframe="24h"
         showCryptoTimeframe={false}
@@ -589,7 +552,6 @@ export default function BrandInsightPage() {
           setSearchQuery('');
           setViewMode('keyword');
         }}
-        onRefresh={loadAllData}
         onBubbleLayoutChange={setBubbleLayout}
         onCryptoTimeframeChange={() => {}}
         variant="brand"
@@ -699,7 +661,6 @@ export default function BrandInsightPage() {
                     maxDisplay={maxBubbles}
                     theme={theme}
                     layout={bubbleLayout}
-                    onBubbleTimingUpdate={handleBubbleTimingUpdate}
                     comparingTopics={comparingTopics}
                     onComparingTopicsChange={setComparingTopics}
                     useCryptoColors={false}
