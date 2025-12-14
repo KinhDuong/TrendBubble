@@ -273,11 +273,21 @@ export default function PageEditor({ theme, onClose, existingPage }: PageEditorP
                 type="text"
                 value={pageUrl}
                 onChange={(e) => setPageUrl(e.target.value)}
-                placeholder="/my-page-url"
+                onBlur={(e) => {
+                  let formatted = e.target.value.trim();
+                  if (formatted && !formatted.startsWith('/')) {
+                    formatted = '/' + formatted;
+                  }
+                  if (formatted && !formatted.endsWith('/')) {
+                    formatted = formatted + '/';
+                  }
+                  setPageUrl(formatted);
+                }}
+                placeholder="/my-page-url/"
                 className={`w-full px-3 py-2 rounded-lg border ${theme === 'dark' ? 'bg-gray-900 border-gray-700 text-white' : 'bg-white border-gray-300 text-gray-900'} focus:outline-none focus:ring-2 focus:ring-blue-500`}
               />
               <p className={`text-xs mt-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-                Example: /best-crypto-to-buy-now
+                Example: /best-crypto-to-buy-now/ (trailing slash will be added automatically)
               </p>
             </div>
 
