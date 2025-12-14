@@ -94,7 +94,7 @@ export default function ExplorePage() {
           .select('*')
           .neq('page_url', '/explore')
           .order('created_at', { ascending: false })
-          .limit(5)
+          .limit(10)
       ]);
 
       if (topicsResponse.error) throw topicsResponse.error;
