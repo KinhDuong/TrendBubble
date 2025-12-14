@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { TrendingUp, Download, Trash2 } from 'lucide-react';
+import { TrendingUp, Download, Trash2, ExternalLink } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import BrandKeywordUpload from '../components/BrandKeywordUpload';
 import KeywordChart from '../components/KeywordChart';
@@ -230,7 +230,7 @@ export default function InsightPage() {
                   {selectedBrand && monthlyData.length > 0 && (
                     <div className="mt-4 p-4 bg-gray-50 rounded-lg">
                       <h4 className="text-sm font-semibold text-gray-700 mb-2">Summary</h4>
-                      <div className="space-y-1 text-sm text-gray-600">
+                      <div className="space-y-1 text-sm text-gray-600 mb-3">
                         <p>Total Months: {monthlyData.filter(d => d.brand === selectedBrand).length}</p>
                         <p>Avg. Keywords: {Math.round(
                           monthlyData
@@ -245,6 +245,13 @@ export default function InsightPage() {
                           monthlyData.filter(d => d.brand === selectedBrand).length
                         ).toLocaleString()}</p>
                       </div>
+                      <a
+                        href={`/insight/${encodeURIComponent(selectedBrand)}`}
+                        className="flex items-center justify-center gap-2 w-full px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-900 transition-colors text-sm font-medium"
+                      >
+                        <ExternalLink className="w-4 h-4" />
+                        View Brand Page
+                      </a>
                     </div>
                   )}
                 </>
