@@ -309,7 +309,14 @@ export default function BrandInsightPage() {
       }
     });
 
-    return Array.from(keywordMap.values()).sort((a, b) => b.searchVolume - a.searchVolume);
+    const result = Array.from(keywordMap.values()).sort((a, b) => b.searchVolume - a.searchVolume);
+    console.log('BrandInsightPage - transformToTopics:', {
+      monthlyDataCount: monthlyData.length,
+      allKeywordsCount: allKeywords.length,
+      resultCount: result.length,
+      sampleData: result.slice(0, 3)
+    });
+    return result;
   }, [monthlyData]);
 
   const getFilteredTopics = () => {
@@ -320,6 +327,14 @@ export default function BrandInsightPage() {
   };
 
   const filteredTopics = getFilteredTopics();
+
+  console.log('BrandInsightPage - render state:', {
+    viewMode,
+    transformToTopicsLength: transformToTopics.length,
+    filteredTopicsLength: filteredTopics.length,
+    maxBubbles,
+    loading
+  });
 
   const topTopics = filteredTopics.filter(topic => {
     if (!topSearchQuery.trim()) return true;
