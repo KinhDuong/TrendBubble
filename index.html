@@ -19,6 +19,15 @@
           document.documentElement.classList.add('dark-mode');
         }
       })();
+
+      // GitHub Pages SPA redirect handling
+      (function() {
+        var redirect = sessionStorage.redirect;
+        delete sessionStorage.redirect;
+        if (redirect && redirect !== location.href) {
+          history.replaceState(null, null, redirect);
+        }
+      })();
     </script>
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-3CM256TL0T"></script>
