@@ -1,12 +1,24 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useState, useEffect, useMemo, useRef } from 'react';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import KeywordChart from '../components/KeywordChart';
-import { TrendingUp, Download, ArrowLeft } from 'lucide-react';
+import BubbleChart from '../components/BubbleChart';
+import BarChart from '../components/BarChart';
+import Treemap from '../components/Treemap';
+import DonutChart from '../components/DonutChart';
+import FilterMenu, { BubbleLayout, ViewMode } from '../components/FilterMenu';
+import ShareSnapshot from '../components/ShareSnapshot';
+import AnimationSelector, { AnimationStyle } from '../components/AnimationSelector';
+import ComparisonPanel from '../components/ComparisonPanel';
+import { TrendingTopic, FAQ } from '../types';
+import { TrendingUp, Download, ArrowLeft, Search, X, ChevronsLeft, ChevronsRight } from 'lucide-react';
+
+type SortField = 'name' | 'searchVolume' | 'rank' | 'month';
+type SortDirection = 'asc' | 'desc';
 
 interface MonthlyData {
   id: string;
@@ -17,31 +29,140 @@ interface MonthlyData {
   top_keywords: Array<{ keyword: string; volume: number }>;
 }
 
+interface BrandPageData {
+  id: string;
+  brand: string;
+  meta_title: string;
+  meta_description: string;
+  intro_text?: string;
+  summary?: string;
+  faq?: string;
+  cover_image?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+interface LatestBrandPage {
+  id: string;
+  brand: string;
+  meta_title: string;
+  meta_description: string;
+  created_at: string;
+}
+
 export default function BrandInsightPage() {
   const { brandName } = useParams<{ brandName: string }>();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { isAdmin, logout } = useAuth();
+  const isMobile = window.innerWidth < 768;
+
   const [monthlyData, setMonthlyData] = useState<MonthlyData[]>([]);
+  const [brandPageData, setBrandPageData] = useState<BrandPageData | null>(null);
+  const [latestBrandPages, setLatestBrandPages] = useState<LatestBrandPage[]>([]);
+  const [faqs, setFaqs] = useState<FAQ[]>([]);
   const [loading, setLoading] = useState(true);
-  const [theme] = useState<'dark' | 'light'>(() => {
+
+  const getInitialMaxBubbles = () => {
+    const topParam = searchParams.get('Top');
+    if (topParam) {
+      const parsed = parseInt(topParam, 10);
+      if (!isNaN(parsed) && parsed > 0) {
+        return parsed;
+      }
+    }
+    return isMobile ? 40 : 100;
+  };
+
+  const [maxBubbles, setMaxBubbles] = useState<number>(getInitialMaxBubbles());
+  const [viewMode, setViewMode] = useState<ViewMode>('keyword');
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [topSearchQuery, setTopSearchQuery] = useState<string>('');
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [sortField, setSortField] = useState<SortField>('searchVolume');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+  const [comparingTopics, setComparingTopics] = useState<Set<string>>(new Set());
+  const [bubbleLayout, setBubbleLayout] = useState<BubbleLayout>('force');
+  const [animationStyle, setAnimationStyle] = useState<AnimationStyle>('default');
+  const [nextBubbleIn, setNextBubbleIn] = useState<string>('');
+  const [bubbleProgress, setBubbleProgress] = useState<number>(0);
+  const [oldestBubbleTime, setOldestBubbleTime] = useState<number | null>(null);
+  const [oldestBubbleCreated, setOldestBubbleCreated] = useState<number | null>(null);
+  const [oldestBubbleLifetime, setOldestBubbleLifetime] = useState<number | null>(null);
+
+  const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     const savedTheme = localStorage.getItem('theme');
     return (savedTheme === 'dark' || savedTheme === 'light') ? savedTheme : 'light';
   });
+
+  const bubbleChartRef = useRef<HTMLDivElement>(null);
+  const treemapChartRef = useRef<HTMLDivElement>(null);
+  const donutChartRef = useRef<HTMLDivElement>(null);
+  const barChartRef = useRef<HTMLDivElement>(null);
+
+  const itemsPerPage = 10;
 
   useEffect(() => {
     document.documentElement.style.backgroundColor = theme === 'dark' ? '#111827' : '#f1f3f4';
   }, [theme]);
 
   useEffect(() => {
+    const topParam = searchParams.get('Top');
+    if (topParam) {
+      const parsed = parseInt(topParam, 10);
+      if (!isNaN(parsed) && parsed > 0 && parsed !== maxBubbles) {
+        setMaxBubbles(parsed);
+      }
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
+    const bubbleInterval = setInterval(() => {
+      if (oldestBubbleTime && oldestBubbleCreated && oldestBubbleLifetime) {
+        const now = Date.now();
+        const remaining = oldestBubbleTime - now;
+        const elapsed = now - oldestBubbleCreated;
+        const progress = Math.min(100, Math.max(0, (elapsed / oldestBubbleLifetime) * 100));
+
+        setBubbleProgress(progress);
+
+        if (remaining > 0) {
+          const seconds = Math.ceil(remaining / 1000);
+          setNextBubbleIn(`${seconds}s`);
+        } else {
+          setNextBubbleIn('0s');
+        }
+      } else {
+        setNextBubbleIn('--');
+        setBubbleProgress(0);
+      }
+    }, 100);
+    return () => clearInterval(bubbleInterval);
+  }, [oldestBubbleTime, oldestBubbleCreated, oldestBubbleLifetime]);
+
+  useEffect(() => {
     if (brandName) {
-      loadBrandData();
+      loadAllData();
     }
   }, [brandName]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, topSearchQuery]);
+
+  const loadAllData = async () => {
+    setLoading(true);
+    await Promise.all([
+      loadBrandData(),
+      loadBrandPageData(),
+      loadLatestBrandPages()
+    ]);
+    setLoading(false);
+  };
 
   const loadBrandData = async () => {
     if (!brandName) return;
 
-    setLoading(true);
     try {
       const decodedBrand = decodeURIComponent(brandName);
 
@@ -61,10 +182,161 @@ export default function BrandInsightPage() {
     } catch (error) {
       console.error('Error loading brand data:', error);
       setMonthlyData([]);
-    } finally {
-      setLoading(false);
     }
   };
+
+  const loadBrandPageData = async () => {
+    if (!brandName) return;
+
+    try {
+      const decodedBrand = decodeURIComponent(brandName);
+
+      const { data, error } = await supabase
+        .from('brand_pages')
+        .select('*')
+        .eq('brand', decodedBrand)
+        .maybeSingle();
+
+      if (error) throw error;
+
+      if (data) {
+        setBrandPageData(data);
+        await loadFAQs(data.id);
+      } else {
+        const defaultData: BrandPageData = {
+          id: '',
+          brand: decodedBrand,
+          meta_title: `${decodedBrand} - Keyword Search Trends & SEO Insights`,
+          meta_description: `Analyze ${decodedBrand} keyword search volume trends and SEO performance data.`,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+        setBrandPageData(defaultData);
+      }
+    } catch (error) {
+      console.error('Error loading brand page data:', error);
+      if (brandName) {
+        const decodedBrand = decodeURIComponent(brandName);
+        const defaultData: BrandPageData = {
+          id: '',
+          brand: decodedBrand,
+          meta_title: `${decodedBrand} - Keyword Search Trends & SEO Insights`,
+          meta_description: `Analyze ${decodedBrand} keyword search volume trends and SEO performance data.`,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+        setBrandPageData(defaultData);
+      }
+    }
+  };
+
+  const loadFAQs = async (pageId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('faqs')
+        .select('*')
+        .eq('page_id', pageId)
+        .order('order_index', { ascending: true });
+
+      if (error) throw error;
+      setFaqs(data || []);
+    } catch (error) {
+      console.error('Error loading FAQs:', error);
+      setFaqs([]);
+    }
+  };
+
+  const loadLatestBrandPages = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('brand_pages')
+        .select('id, brand, meta_title, meta_description, created_at')
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      if (error) throw error;
+
+      if (data) {
+        setLatestBrandPages(data);
+      }
+    } catch (error) {
+      console.error('Error loading latest brand pages:', error);
+    }
+  };
+
+  const handleThemeChange = (newTheme: 'dark' | 'light') => {
+    setTheme(newTheme);
+    localStorage.setItem('theme', newTheme);
+    document.documentElement.style.backgroundColor = newTheme === 'dark' ? '#111827' : '#f1f3f4';
+  };
+
+  const handleMaxBubblesChange = (newMax: number) => {
+    setMaxBubbles(newMax);
+    const newSearchParams = new URLSearchParams(searchParams);
+    newSearchParams.set('Top', newMax.toString());
+    setSearchParams(newSearchParams, { replace: true });
+  };
+
+  const handleBubbleTimingUpdate = (nextPopTime: number | null, createdTime?: number, lifetime?: number) => {
+    setOldestBubbleTime(nextPopTime);
+    setOldestBubbleCreated(createdTime || null);
+    setOldestBubbleLifetime(lifetime || null);
+  };
+
+  const transformToTopics = useMemo((): TrendingTopic[] => {
+    const allKeywords: TrendingTopic[] = [];
+
+    monthlyData.forEach((monthData) => {
+      monthData.top_keywords.forEach((kw, index) => {
+        allKeywords.push({
+          name: kw.keyword,
+          searchVolume: kw.volume,
+          searchVolumeRaw: kw.volume.toLocaleString(),
+          url: '',
+          createdAt: monthData.month,
+          pubDate: monthData.month,
+          category: monthData.brand,
+          source: 'brand_keywords'
+        });
+      });
+    });
+
+    const keywordMap = new Map<string, TrendingTopic>();
+    allKeywords.forEach(topic => {
+      const existing = keywordMap.get(topic.name);
+      if (!existing || topic.searchVolume > existing.searchVolume) {
+        keywordMap.set(topic.name, topic);
+      }
+    });
+
+    return Array.from(keywordMap.values()).sort((a, b) => b.searchVolume - a.searchVolume);
+  }, [monthlyData]);
+
+  const getFilteredTopics = () => {
+    return transformToTopics.filter(topic => {
+      const matchesSearch = !searchQuery || topic.name.toLowerCase().includes(searchQuery.toLowerCase());
+      return matchesSearch;
+    });
+  };
+
+  const filteredTopics = getFilteredTopics();
+
+  const topTopics = filteredTopics.filter(topic => {
+    if (!topSearchQuery.trim()) return true;
+    const query = topSearchQuery.toLowerCase();
+    return topic.name.toLowerCase().includes(query) ||
+           topic.category?.toLowerCase().includes(query);
+  });
+
+  const topicsWithRanks = topTopics.map((topic, index) => ({
+    ...topic,
+    originalRank: index + 1
+  }));
+
+  const totalPages = Math.ceil(topicsWithRanks.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const displayTopics = topicsWithRanks.slice(startIndex, endIndex);
 
   const handleExport = async () => {
     if (!brandName) return;
@@ -101,29 +373,15 @@ export default function BrandInsightPage() {
 
   if (loading) {
     return (
-      <>
-        <Header
-          theme={theme}
-          isAdmin={isAdmin}
-          onLoginClick={() => {}}
-          onLogout={logout}
-          title="Top Best Charts"
-        />
-        <div className={`min-h-screen flex items-center justify-center ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'}`}>
-          <div className="text-xl">Loading...</div>
-        </div>
-        <Footer theme={theme} />
-      </>
+      <div className={`min-h-screen flex items-center justify-center ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'}`}>
+        <div className="text-xl">Loading...</div>
+      </div>
     );
   }
 
-  if (!monthlyData.length) {
+  if (!monthlyData.length || !brandPageData) {
     return (
       <>
-        <Helmet>
-          <title>Brand Not Found | Top Best Charts</title>
-          <meta name="description" content="Brand keyword data not found" />
-        </Helmet>
         <Header
           theme={theme}
           isAdmin={isAdmin}
@@ -160,38 +418,66 @@ export default function BrandInsightPage() {
     monthlyData.reduce((sum, d) => sum + d.total_volume, 0) / monthlyData.length
   );
   const totalMonths = monthlyData.length;
+  const lastUpdated = monthlyData.length > 0 ? new Date(monthlyData[monthlyData.length - 1].month) : new Date();
 
   const baseUrl = import.meta.env.VITE_BASE_URL || 'https://topbestcharts.com';
   const pageUrl = `${baseUrl}/insight/${encodeURIComponent(decodedBrand)}/`;
-  const pageTitle = `${decodedBrand} - Keyword Search Trends & SEO Insights`;
-  const pageDescription = `Analyze ${decodedBrand} keyword search volume trends and SEO performance data. Track ${avgKeywordCount} keywords across ${totalMonths} months with an average monthly search volume of ${avgVolume.toLocaleString()}.`;
+  const topTopicNames = topTopics.slice(0, 5).map(t => t.name).join(', ');
+  const keywords = topTopics.slice(0, 10).map(t => t.name).join(', ') + ', keyword trends, search volume, SEO insights, brand analysis';
+
+  const enhancedTitle = brandPageData.meta_title;
+  const enhancedDescription = topTopicNames
+    ? `${brandPageData.meta_description} Top keywords: ${topTopicNames}. Track ${avgKeywordCount} keywords across ${totalMonths} months.`
+    : brandPageData.meta_description;
 
   return (
     <>
       <Helmet>
-        <title>{pageTitle}</title>
-        <meta name="description" content={pageDescription} />
-        <meta name="robots" content="index, follow, max-image-preview:large" />
+        <title>{enhancedTitle}</title>
+        <meta name="description" content={enhancedDescription} />
+        <meta name="keywords" content={keywords} />
+        <meta name="author" content="Top Best Charts" />
+        <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
         <link rel="canonical" href={pageUrl} />
 
         <meta property="og:type" content="website" />
         <meta property="og:url" content={pageUrl} />
-        <meta property="og:title" content={pageTitle} />
-        <meta property="og:description" content={pageDescription} />
+        <meta property="og:title" content={enhancedTitle} />
+        <meta property="og:description" content={enhancedDescription} />
         <meta property="og:site_name" content="Top Best Charts" />
+        <meta property="og:locale" content="en_US" />
+        <meta property="og:updated_time" content={lastUpdated.toISOString()} />
+        {brandPageData.cover_image && <meta property="og:image" content={brandPageData.cover_image} />}
 
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:url" content={pageUrl} />
-        <meta name="twitter:title" content={pageTitle} />
-        <meta name="twitter:description" content={pageDescription} />
+        <meta name="twitter:title" content={enhancedTitle} />
+        <meta name="twitter:description" content={enhancedDescription} />
+        {brandPageData.cover_image && <meta name="twitter:image" content={brandPageData.cover_image} />}
+
+        <meta property="article:published_time" content={brandPageData.created_at} />
+        <meta property="article:modified_time" content={lastUpdated.toISOString()} />
+        <meta property="article:section" content="Brand Keywords" />
+        <meta property="article:tag" content={topTopicNames} />
 
         <script type="application/ld+json">
           {JSON.stringify({
             "@context": "https://schema.org",
             "@type": "WebPage",
-            "name": pageTitle,
-            "description": pageDescription,
+            "name": enhancedTitle,
+            "description": enhancedDescription,
             "url": pageUrl,
+            "datePublished": brandPageData.created_at,
+            "dateModified": lastUpdated.toISOString(),
+            "author": {
+              "@type": "Organization",
+              "name": "Top Best Charts"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "name": "Top Best Charts",
+              "url": baseUrl
+            },
             "breadcrumb": {
               "@type": "BreadcrumbList",
               "itemListElement": [
@@ -214,9 +500,41 @@ export default function BrandInsightPage() {
                   "item": pageUrl
                 }
               ]
+            },
+            "mainEntity": {
+              "@type": "ItemList",
+              "name": "Top Keywords",
+              "description": "Top keywords ranked by search volume",
+              "numberOfItems": topTopics.length,
+              "itemListElement": topTopics.slice(0, 10).map((topic, index) => ({
+                "@type": "ListItem",
+                "position": index + 1,
+                "item": {
+                  "@type": "Thing",
+                  "name": topic.name,
+                  "description": `${topic.searchVolumeRaw}`
+                }
+              }))
             }
           })}
         </script>
+
+        {faqs.length > 0 && (
+          <script type="application/ld+json">
+            {JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "FAQPage",
+              "mainEntity": faqs.map(faq => ({
+                "@type": "Question",
+                "name": faq.question,
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": faq.answer
+                }
+              }))
+            })}
+          </script>
+        )}
       </Helmet>
 
       <Header
@@ -227,68 +545,461 @@ export default function BrandInsightPage() {
         title="Top Best Charts"
       />
 
-      <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'}`}>
-        <div className="max-w-7xl mx-auto px-4 py-8">
-          <div className="mb-6">
-            <button
-              onClick={() => navigate('/insight')}
-              className={`inline-flex items-center gap-2 text-sm mb-4 transition-colors ${theme === 'dark' ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'}`}
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Back to Insights
-            </button>
-            <h1 className={`text-3xl font-bold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-              {decodedBrand} - Keyword Insights
-            </h1>
-            <p className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}>
-              Search volume trends and keyword performance analysis
-            </p>
-          </div>
+      <FilterMenu
+        theme={theme}
+        loading={loading}
+        viewMode={viewMode}
+        dateFilter="all"
+        categoryFilter="all"
+        categories={[]}
+        sourceFilter="all"
+        sources={[]}
+        maxBubbles={maxBubbles}
+        searchQuery={searchQuery}
+        nextBubbleIn={nextBubbleIn}
+        bubbleProgress={bubbleProgress}
+        bubbleLayout={bubbleLayout}
+        cryptoTimeframe="24h"
+        showCryptoTimeframe={false}
+        showDateFilter={false}
+        showCategoryFilter={false}
+        onViewModeChange={setViewMode}
+        onDateFilterChange={() => {}}
+        onCategoryFilterChange={() => {}}
+        onSourceFilterChange={() => {}}
+        onMaxBubblesChange={handleMaxBubblesChange}
+        onThemeChange={handleThemeChange}
+        onSearchQueryChange={setSearchQuery}
+        onSearchClear={() => {
+          setSearchQuery('');
+          setViewMode('keyword');
+        }}
+        onRefresh={loadAllData}
+        onBubbleLayoutChange={setBubbleLayout}
+        onCryptoTimeframeChange={() => {}}
+        variant="brand"
+      />
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-            <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-sm p-6`}>
-              <h3 className={`text-sm font-semibold mb-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                Total Months
-              </h3>
-              <p className={`text-3xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                {totalMonths}
-              </p>
-            </div>
+      <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'} px-2 md:px-6 py-2 md:py-6 pb-0`}>
+        <main role="main" aria-label="Brand keyword analysis" style={{ minHeight: '80vh' }}>
+          {!loading && (
+            <>
+              <article className="max-w-7xl mx-auto mb-8">
+                <header>
+                  <div className="flex items-center justify-between gap-4 mb-4">
+                    <div className="flex-1">
+                      <button
+                        onClick={() => navigate('/insight')}
+                        className={`inline-flex items-center gap-2 text-sm mb-2 transition-colors ${theme === 'dark' ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'}`}
+                      >
+                        <ArrowLeft className="w-4 h-4" />
+                        Back to Insights
+                      </button>
+                      <h1 className={`text-xl md:text-4xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                        {brandPageData.meta_title}
+                      </h1>
+                    </div>
+                    {(viewMode === 'bubble' || viewMode === 'bar' || viewMode === 'treemap' || viewMode === 'donut') && transformToTopics.length > 0 && (
+                      <div className="flex items-center gap-2">
+                        {viewMode === 'bubble' && (
+                          <AnimationSelector
+                            theme={theme}
+                            selectedAnimation={animationStyle}
+                            onAnimationChange={setAnimationStyle}
+                          />
+                        )}
+                        <ShareSnapshot
+                          theme={theme}
+                          canvasRef={
+                            viewMode === 'bubble' ? bubbleChartRef :
+                            viewMode === 'treemap' ? treemapChartRef :
+                            viewMode === 'donut' ? donutChartRef :
+                            barChartRef
+                          }
+                          variant="inline"
+                        />
+                      </div>
+                    )}
+                  </div>
+                  <div className={`flex flex-wrap items-center gap-3 mb-4 text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                    <time dateTime={lastUpdated.toISOString()}>
+                      Last updated: {lastUpdated.toLocaleString('en-US', {
+                        timeZone: 'America/New_York',
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric',
+                        hour12: true
+                      })} ET
+                    </time>
+                    <button
+                      onClick={handleExport}
+                      className={`flex items-center gap-2 px-2 py-1 rounded text-xs cursor-pointer transition-all hover:scale-105 ${theme === 'dark' ? 'bg-blue-900/30 text-blue-400 hover:bg-blue-900/50' : 'bg-blue-100 text-blue-700 hover:bg-blue-200'}`}
+                    >
+                      <Download className="w-3 h-3" />
+                      Export CSV
+                    </button>
+                  </div>
+                </header>
+              </article>
 
-            <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-sm p-6`}>
-              <h3 className={`text-sm font-semibold mb-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                Avg. Keywords
-              </h3>
-              <p className={`text-3xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                {avgKeywordCount}
-              </p>
-            </div>
+              {viewMode === 'keyword' && (
+                <div className="max-w-7xl mx-auto mb-8">
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                    <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-sm p-6`}>
+                      <h3 className={`text-sm font-semibold mb-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                        Total Months
+                      </h3>
+                      <p className={`text-3xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                        {totalMonths}
+                      </p>
+                    </div>
 
-            <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-sm p-6`}>
-              <h3 className={`text-sm font-semibold mb-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                Avg. Monthly Volume
-              </h3>
-              <p className={`text-3xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                {avgVolume.toLocaleString()}
-              </p>
-            </div>
-          </div>
+                    <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-sm p-6`}>
+                      <h3 className={`text-sm font-semibold mb-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                        Avg. Keywords
+                      </h3>
+                      <p className={`text-3xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                        {avgKeywordCount}
+                      </p>
+                    </div>
 
-          <div className="mb-6 flex justify-end">
-            <button
-              onClick={handleExport}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-colors ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}
-            >
-              <Download className="w-4 h-4" />
-              Export CSV
-            </button>
-          </div>
+                    <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-sm p-6`}>
+                      <h3 className={`text-sm font-semibold mb-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                        Avg. Monthly Volume
+                      </h3>
+                      <p className={`text-3xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                        {avgVolume.toLocaleString()}
+                      </p>
+                    </div>
+                  </div>
 
-          <KeywordChart data={monthlyData} selectedBrand={decodedBrand} />
-        </div>
+                  <KeywordChart data={monthlyData} selectedBrand={decodedBrand} />
+                </div>
+              )}
+
+              {transformToTopics.length > 0 && viewMode === 'bubble' && (
+                <div ref={bubbleChartRef} style={{ minHeight: '500px' }}>
+                  <BubbleChart
+                    topics={filteredTopics}
+                    maxDisplay={maxBubbles}
+                    theme={theme}
+                    layout={bubbleLayout}
+                    onBubbleTimingUpdate={handleBubbleTimingUpdate}
+                    comparingTopics={comparingTopics}
+                    onComparingTopicsChange={setComparingTopics}
+                    useCryptoColors={false}
+                    cryptoTimeframe="24h"
+                    animationStyle={animationStyle}
+                  />
+                </div>
+              )}
+
+              {transformToTopics.length > 0 && viewMode === 'bar' && (
+                <div ref={barChartRef} className="max-w-7xl mx-auto">
+                  <BarChart
+                    topics={filteredTopics}
+                    maxDisplay={maxBubbles}
+                    theme={theme}
+                    useCryptoColors={false}
+                    cryptoTimeframe="24h"
+                  />
+                </div>
+              )}
+
+              {transformToTopics.length > 0 && viewMode === 'treemap' && (
+                <div ref={treemapChartRef} className="max-w-7xl mx-auto" style={{ height: 'calc(100vh - 300px)', minHeight: '500px' }}>
+                  <Treemap
+                    topics={transformToTopics}
+                    maxDisplay={maxBubbles}
+                    theme={theme}
+                    useCryptoColors={false}
+                    cryptoTimeframe="24h"
+                  />
+                </div>
+              )}
+
+              {transformToTopics.length > 0 && viewMode === 'donut' && (
+                <div ref={donutChartRef} className="max-w-7xl mx-auto" style={{ height: 'calc(100vh - 300px)', minHeight: '600px' }}>
+                  <DonutChart
+                    topics={filteredTopics}
+                    maxDisplay={maxBubbles}
+                    theme={theme}
+                    useCryptoColors={false}
+                    cryptoTimeframe="24h"
+                  />
+                </div>
+              )}
+
+              {transformToTopics.length > 0 && (viewMode === 'bubble' || viewMode === 'bar' || viewMode === 'treemap' || viewMode === 'donut') && (
+                <div className="max-w-7xl mx-auto mt-8 mb-0 md:mb-8">
+                  <div className="flex flex-col lg:flex-row gap-6">
+                    <section className="flex-1 lg:w-[65%]" aria-labelledby="top-keywords-heading">
+                      <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-lg border p-6 shadow-md`}>
+                        <h2 id="top-keywords-heading" className={`text-xl md:text-2xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                          Top {topTopics.length} Keywords for {decodedBrand}
+                        </h2>
+                        {brandPageData.intro_text && (
+                          <div
+                            className={`mb-4 text-sm leading-relaxed rich-text-content ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}
+                            dangerouslySetInnerHTML={{
+                              __html: brandPageData.intro_text
+                            }}
+                          />
+                        )}
+                        <div className="relative mb-4">
+                          <Search className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`} />
+                          <input
+                            type="text"
+                            value={topSearchQuery}
+                            onChange={(e) => setTopSearchQuery(e.target.value)}
+                            placeholder="Search keywords"
+                            className={`w-full pl-10 pr-10 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-colors ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-blue-400' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-blue-500'}`}
+                          />
+                          {topSearchQuery && (
+                            <button
+                              onClick={() => setTopSearchQuery('')}
+                              className={`absolute right-3 top-1/2 transform -translate-y-1/2 transition-colors ${theme === 'dark' ? 'text-gray-400 hover:text-gray-200' : 'text-gray-500 hover:text-gray-700'}`}
+                              aria-label="Clear search"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          )}
+                        </div>
+
+                        {topTopics.length === 0 && topSearchQuery ? (
+                          <div className={`rounded-lg p-8 text-center border ${theme === 'dark' ? 'bg-gray-700 text-gray-300 border-gray-600' : 'bg-gray-50 text-gray-600 border-gray-200'}`}>
+                            <p className="text-lg">No keywords found matching "{topSearchQuery}"</p>
+                            <button
+                              onClick={() => setTopSearchQuery('')}
+                              className="mt-4 px-4 py-2 rounded-lg font-semibold bg-blue-600 hover:bg-blue-700 text-white transition-colors"
+                            >
+                              Clear Search
+                            </button>
+                          </div>
+                        ) : (
+                          <>
+                            <ol className="list-none" itemScope itemType="https://schema.org/ItemList">
+                              {displayTopics.map((topic, index) => (
+                                <li
+                                  key={index}
+                                  className={`px-2 py-1.5 transition-colors ${index < displayTopics.length - 1 ? `border-b ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}` : ''} ${theme === 'dark' ? 'hover:bg-gray-700' : 'hover:bg-gray-50'}`}
+                                  itemProp="itemListElement"
+                                  itemScope
+                                  itemType="https://schema.org/ListItem"
+                                >
+                                  <meta itemProp="position" content={String(topic.originalRank)} />
+                                  <article className="flex-1" itemProp="item" itemScope itemType="https://schema.org/Thing">
+                                    <div className="flex items-center gap-2 mb-0.5">
+                                      <div className="w-8 flex items-center justify-center flex-shrink-0" aria-label={`Rank ${topic.originalRank}`}>
+                                        <div className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                                          {topic.originalRank}
+                                        </div>
+                                      </div>
+                                      <div className="flex items-center gap-2 flex-wrap flex-1">
+                                        <h3 className={`font-bold text-sm ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`} itemProp="name">{topic.name}</h3>
+                                        <span className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`} itemProp="description">
+                                          {topic.searchVolumeRaw}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  </article>
+                                </li>
+                              ))}
+                            </ol>
+                            {totalPages > 1 && (
+                              <div className="mt-4 flex items-center justify-center gap-1">
+                                <button
+                                  onClick={() => setCurrentPage(1)}
+                                  disabled={currentPage === 1}
+                                  className={`px-3 py-1 rounded text-sm transition-colors ${currentPage === 1 ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}
+                                  title="First page"
+                                >
+                                  <ChevronsLeft size={16} />
+                                </button>
+                                <button
+                                  onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                                  disabled={currentPage === 1}
+                                  className={`px-3 py-1 rounded text-sm transition-colors ${currentPage === 1 ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}
+                                >
+                                  Previous
+                                </button>
+                                <span className={`px-3 py-1 text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                                  Page {currentPage} of {totalPages}
+                                </span>
+                                <button
+                                  onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                                  disabled={currentPage === totalPages}
+                                  className={`px-3 py-1 rounded-lg text-sm transition-colors ${currentPage === totalPages ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}
+                                >
+                                  Next
+                                </button>
+                                <button
+                                  onClick={() => setCurrentPage(totalPages)}
+                                  disabled={currentPage === totalPages}
+                                  className={`px-3 py-1 rounded text-sm transition-colors ${currentPage === totalPages ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}
+                                  title="Last page"
+                                >
+                                  <ChevronsRight size={16} />
+                                </button>
+                              </div>
+                            )}
+                          </>
+                        )}
+                      </div>
+                    </section>
+
+                    <aside className="lg:w-[35%]">
+                      <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-lg border p-6 sticky top-4 shadow-md`}>
+                        <h2 className={`text-xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                          Featured Brands
+                        </h2>
+                        {latestBrandPages.length > 0 && (
+                          <div className="flex flex-col gap-3">
+                            {latestBrandPages.map((page) => (
+                              <a
+                                key={page.id}
+                                href={`/insight/${encodeURIComponent(page.brand)}/`}
+                                className={`text-sm transition-colors hover:underline ${theme === 'dark' ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'}`}
+                              >
+                                {page.meta_title}
+                              </a>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </aside>
+                  </div>
+                </div>
+              )}
+
+              {brandPageData.summary && (
+                <section
+                  className="max-w-7xl mx-auto mt-8 mb-6 px-2 md:px-0"
+                  aria-labelledby="page-summary"
+                  itemScope
+                  itemType="https://schema.org/Article"
+                >
+                  <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-lg border p-4 md:p-6`}>
+                    {brandPageData.cover_image && (
+                      <div className="mb-6 rounded-xl overflow-hidden">
+                        <img
+                          src={brandPageData.cover_image}
+                          alt={brandPageData.meta_title}
+                          className="w-full h-64 md:h-96 object-cover"
+                        />
+                      </div>
+                    )}
+                    <div
+                      itemProp="articleBody"
+                      className="summary-content"
+                      dangerouslySetInnerHTML={{ __html: brandPageData.summary }}
+                    />
+                    <meta itemProp="author" content="Top Best Charts" />
+                    <meta itemProp="datePublished" content={brandPageData.created_at} />
+                  </div>
+                </section>
+              )}
+
+              {brandPageData.faq && (
+                <section
+                  className="max-w-7xl mx-auto mt-8 mb-6 px-2 md:px-0"
+                  aria-labelledby="page-faq"
+                >
+                  <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-lg border p-4 md:p-6`}>
+                    <div
+                      className="summary-content"
+                      dangerouslySetInnerHTML={{ __html: brandPageData.faq }}
+                    />
+                  </div>
+                </section>
+              )}
+
+              {latestBrandPages.length > 0 && (
+                <section className="max-w-7xl mx-auto mt-8 mb-0 px-4 md:px-6" aria-labelledby="latest-brands-heading">
+                  <h2 id="latest-brands-heading" className={`text-xl md:text-2xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                    Latest Brand Insights
+                  </h2>
+                  <p className={`text-sm mb-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                    Explore keyword trends and SEO insights for other brands. Discover what keywords are driving search volume and performance across different brands.
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {latestBrandPages.map((page) => (
+                      <a
+                        key={page.id}
+                        href={`/insight/${encodeURIComponent(page.brand)}/`}
+                        className={`group block ${theme === 'dark' ? 'bg-gray-800 hover:bg-gray-750' : 'bg-white hover:bg-gray-50 border border-gray-200'} rounded-lg overflow-hidden shadow-md transition-all hover:shadow-lg h-full`}
+                      >
+                        <div className="flex flex-row h-full min-h-[180px]">
+                          <div className={`w-2/5 ${theme === 'dark' ? 'bg-gradient-to-br from-green-900 to-green-800' : 'bg-gradient-to-br from-green-100 to-green-50'} flex items-center justify-center p-4`}>
+                            <div className="text-center">
+                              <div className={`text-4xl font-bold ${theme === 'dark' ? 'text-green-400' : 'text-green-600'} mb-2`}>
+                                {page.brand.substring(0, 2).toUpperCase()}
+                              </div>
+                              <div className={`text-xs font-medium ${theme === 'dark' ? 'text-green-300' : 'text-green-700'}`}>
+                                Brand
+                              </div>
+                            </div>
+                          </div>
+                          <div className="w-3/5 p-4 flex flex-col">
+                            <div className={`text-xs font-semibold uppercase tracking-wide mb-2 ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
+                              Brand Insights <span className="mx-1">|</span> {new Date(page.created_at).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}
+                            </div>
+                            <h3 className={`font-bold text-lg mb-2 ${theme === 'dark' ? 'text-white group-hover:text-green-400' : 'text-gray-900 group-hover:text-green-600'} transition-colors line-clamp-2`}>
+                              {page.meta_title}
+                            </h3>
+                            <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} line-clamp-2`}>
+                              {page.meta_description}
+                            </p>
+                          </div>
+                        </div>
+                      </a>
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {transformToTopics.length > 0 && faqs.length > 0 && (
+                <section className="max-w-7xl mx-auto mt-12 mb-0 px-4 md:px-6" aria-labelledby="faq-heading">
+                  <h2 id="faq-heading" className={`text-xl md:text-3xl font-bold mb-6 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                    Frequently Asked Questions
+                  </h2>
+                  <p className={`text-sm mb-6 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                    Find answers to common questions about {decodedBrand} keyword trends and SEO insights.
+                  </p>
+                  <div className="space-y-6">
+                    {faqs.map((faq) => (
+                      <details key={faq.id} className={`group ${theme === 'dark' ? 'bg-gray-800' : 'bg-white border border-gray-200'} rounded-lg`}>
+                        <summary className={`cursor-pointer px-6 py-4 font-semibold ${theme === 'dark' ? 'text-white hover:text-green-400' : 'text-gray-900 hover:text-green-600'} transition-colors list-none flex items-center justify-between`}>
+                          <span>{faq.question}</span>
+                          <span className="ml-2 text-2xl group-open:rotate-45 transition-transform">+</span>
+                        </summary>
+                        <div className={`px-6 pb-4 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                          <p>{faq.answer}</p>
+                        </div>
+                      </details>
+                    ))}
+                  </div>
+                </section>
+              )}
+            </>
+          )}
+        </main>
       </div>
 
-      <Footer theme={theme} />
+      <ComparisonPanel
+        topics={transformToTopics.filter(t => comparingTopics.has(t.name))}
+        theme={theme}
+        onClose={() => setComparingTopics(new Set())}
+        onRemoveTopic={(topicName) => {
+          setComparingTopics(prev => {
+            const next = new Set(prev);
+            next.delete(topicName);
+            return next;
+          });
+        }}
+      />
+
+      <Footer key={`footer-${theme}`} theme={theme} />
     </>
   );
 }
