@@ -31,13 +31,23 @@ export default function BrandKeywordUpload({ onUploadComplete }: BrandKeywordUpl
 
     return lines.slice(1).map(line => {
       const values = line.split(',').map(v => v.trim());
+      const monthValue = values[monthIndex];
+
+      let formattedMonth = monthValue;
+      if (monthValue && !monthValue.match(/^\d{4}-\d{2}-\d{2}$/)) {
+        const date = new Date(monthValue);
+        if (!isNaN(date.getTime())) {
+          formattedMonth = date.toISOString().split('T')[0];
+        }
+      }
+
       return {
         brand: values[brandIndex],
         keyword: values[keywordIndex],
         search_volume: parseInt(values[volumeIndex]) || 0,
-        month: values[monthIndex]
+        month: formattedMonth
       };
-    }).filter(row => row.brand && row.keyword);
+    }).filter(row => row.brand && row.keyword && row.month);
   };
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -102,11 +112,14 @@ export default function BrandKeywordUpload({ onUploadComplete }: BrandKeywordUpl
     }>();
 
     data.forEach(row => {
-      const key = `${row.brand}-${row.month}`;
+      const yearMonth = row.month.substring(0, 7);
+      const firstOfMonth = `${yearMonth}-01`;
+      const key = `${row.brand}-${yearMonth}`;
+
       if (!monthlyMap.has(key)) {
         monthlyMap.set(key, {
           brand: row.brand,
-          month: row.month,
+          month: firstOfMonth,
           total_volume: 0,
           keywords: []
         });
@@ -127,13 +140,16 @@ export default function BrandKeywordUpload({ onUploadComplete }: BrandKeywordUpl
       user_id: userId
     }));
 
-    for (const record of monthlyRecords) {
-      await supabase
-        .from('brand_keyword_monthly_data')
-        .upsert(record, {
-          onConflict: 'brand,month,user_id',
-          ignoreDuplicates: false
-        });
+    const { error: monthlyError } = await supabase
+      .from('brand_keyword_monthly_data')
+      .upsert(monthlyRecords, {
+        onConflict: 'brand,month,user_id',
+        ignoreDuplicates: false
+      });
+
+    if (monthlyError) {
+      console.error('Error upserting monthly data:', monthlyError);
+      throw monthlyError;
     }
   };
 
