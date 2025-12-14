@@ -135,8 +135,7 @@ export default function BrandKeywordUpload({ onUploadComplete }: BrandKeywordUpl
       total_volume: entry.total_volume,
       keyword_count: entry.keywords.length,
       top_keywords: entry.keywords
-        .sort((a, b) => b.volume - a.volume)
-        .slice(0, 10),
+        .sort((a, b) => b.volume - a.volume),
       user_id: userId
     }));
 
