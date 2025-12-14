@@ -142,7 +142,7 @@ export default function BarChart({
               {/* Desktop: Clean horizontal layout with fixed columns */}
               <div className="hidden md:block">
                 <div className="flex items-center gap-4">
-                  <span className={`text-sm font-medium truncate overflow-hidden flex-shrink-0 w-48 ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'}`}>
+                  <span className={`text-sm font-medium flex-shrink-0 w-64 ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'}`} style={{ overflow: 'visible', whiteSpace: 'normal', lineHeight: '1.2' }}>
                     {topic.name.replace(/"/g, '')}
                   </span>
                   <div className={`flex-1 h-10 rounded ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-200'} overflow-hidden relative`}>
