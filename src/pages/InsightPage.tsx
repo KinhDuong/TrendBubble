@@ -5,7 +5,7 @@ import { supabase } from '../lib/supabase';
 import BrandKeywordUpload from '../components/BrandKeywordUpload';
 import KeywordChart from '../components/KeywordChart';
 import Header from '../components/Header';
-import Login from '../components/Login';
+import UserLogin from '../components/UserLogin';
 import Footer from '../components/Footer';
 import { useAuth } from '../hooks/useAuth';
 
@@ -29,6 +29,8 @@ export default function InsightPage() {
   useEffect(() => {
     if (user) {
       loadData();
+    } else {
+      setLoading(false);
     }
   }, [user]);
 
@@ -115,6 +117,11 @@ export default function InsightPage() {
     }
   };
 
+  const handleLoginSuccess = () => {
+    setShowLogin(false);
+    loadData();
+  };
+
   if (showLogin && !user) {
     return (
       <>
@@ -124,7 +131,7 @@ export default function InsightPage() {
           onLoginClick={() => setShowLogin(true)}
           onLogout={logout}
         />
-        <Login onLogin={() => setShowLogin(false)} theme="light" />
+        <UserLogin onLogin={handleLoginSuccess} theme="light" />
         <Footer theme="light" />
       </>
     );
