@@ -1055,6 +1055,82 @@ async function prerenderContactPage(baseHTML, distPath) {
   console.log('✓ Generated: /contact/index.html');
 }
 
+async function prerenderInsightPage(baseHTML, distPath) {
+  console.log('Pre-rendering: /insight');
+
+  const insightMetaTags = `
+    <title>Brand Keyword Insights - SEO Analysis Tool | Top Best Charts</title>
+    <meta name="description" content="Upload and analyze brand keyword search volume data with interactive charts. Track SEO performance and keyword trends over time." data-prerendered />
+    <meta name="keywords" content="keyword analysis, SEO tools, search volume, brand keywords, keyword tracking" data-prerendered />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="${BASE_URL}/insight/" />
+
+    <meta property="og:type" content="website" data-prerendered />
+    <meta property="og:url" content="${BASE_URL}/insight/" data-prerendered />
+    <meta property="og:title" content="Brand Keyword Insights - SEO Analysis Tool" data-prerendered />
+    <meta property="og:description" content="Upload and analyze brand keyword search volume data with interactive charts" data-prerendered />
+    <meta property="og:site_name" content="Top Best Charts" data-prerendered />
+
+    <meta name="twitter:card" content="summary_large_image" data-prerendered />
+    <meta name="twitter:title" content="Brand Keyword Insights - SEO Analysis Tool" data-prerendered />
+    <meta name="twitter:description" content="Upload and analyze brand keyword search volume data with interactive charts" data-prerendered />
+  `;
+
+  const insightContentHTML = `
+    <div class="insight-page-content">
+      <header style="background-color: #111827; border-bottom: 1px solid #374151; padding: 0.5rem 1rem;">
+        <nav aria-label="Main navigation" style="max-width: 80rem; margin: 0 auto; display: flex; align-items: center; justify-content: space-between;">
+          <a href="/" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none;">
+            <span style="color: #2563eb; font-size: 1.5rem; font-weight: 700;">Top Best Charts</span>
+          </a>
+          <ul style="display: flex; gap: 1.5rem; list-style: none; margin: 0; padding: 0;">
+            <li><a href="/" style="color: #d1d5db; text-decoration: none;">Home</a></li>
+            <li><a href="/trending-now" style="color: #d1d5db; text-decoration: none;">Trending Now</a></li>
+            <li><a href="/insight" style="color: #d1d5db; text-decoration: none;">Insights</a></li>
+            <li><a href="/contact" style="color: #d1d5db; text-decoration: none;">Contact</a></li>
+            <li><a href="/about" style="color: #d1d5db; text-decoration: none;">About</a></li>
+          </ul>
+        </nav>
+      </header>
+
+      <main style="max-width: 80rem; margin: 2rem auto; padding: 0 1rem;">
+        <article style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; padding: 2rem;">
+          <h1 style="font-size: 2.5rem; font-weight: 700; color: white; margin-bottom: 1rem;">Brand Keyword Insights</h1>
+          <p style="font-size: 1.125rem; line-height: 1.75; color: #d1d5db; margin-bottom: 2rem;">
+            Upload and analyze keyword search volume data for your brands. Track performance over time with interactive visualizations.
+          </p>
+
+          <div style="background-color: #374151; border-radius: 0.5rem; padding: 2rem; margin: 2rem 0;">
+            <h2 style="font-size: 1.5rem; font-weight: 700; color: white; margin-bottom: 1rem;">Features</h2>
+            <ul style="color: #d1d5db; font-size: 1rem; line-height: 1.75; list-style: disc; margin-left: 1.5rem;">
+              <li>Upload CSV files with brand keyword data</li>
+              <li>Visualize search volume trends over time</li>
+              <li>Compare multiple brands side-by-side</li>
+              <li>Track top performing keywords</li>
+              <li>Export data for further analysis</li>
+            </ul>
+          </div>
+
+          <p style="font-size: 1rem; line-height: 1.75; color: #9ca3af; text-align: center; margin-top: 2rem;">
+            Sign in to start analyzing your brand keywords
+          </p>
+        </article>
+      </main>
+    </div>
+  `;
+
+  const html = baseHTML
+    .replace(/<title>.*?<\/title>/, '')
+    .replace('<!-- PRERENDER_META -->', insightMetaTags)
+    .replace('<!-- PRERENDER_STRUCTURED_DATA -->', '')
+    .replace('<div id="root"></div>', `<div id="root">${insightContentHTML}</div><div id="prerender-footer">${generateFooterHTML()}</div>`);
+
+  const outputDir = path.join(distPath, 'insight');
+  fs.mkdirSync(outputDir, { recursive: true });
+  fs.writeFileSync(path.join(outputDir, 'index.html'), html);
+  console.log('✓ Generated: /insight/index.html');
+}
+
 async function prerenderAboutPage(baseHTML, distPath) {
   console.log('Pre-rendering: /about');
 
@@ -1234,6 +1310,7 @@ async function prerenderPages() {
   await prerenderExplorePage(baseHTML, distPath);
   await prerenderTrendingNowPage(baseHTML, distPath);
   await prerenderContactPage(baseHTML, distPath);
+  await prerenderInsightPage(baseHTML, distPath);
   await prerenderAboutPage(baseHTML, distPath);
 
   // Create redirect from /explore to /
@@ -1320,6 +1397,12 @@ async function generateSitemap(pages, distPath) {
     <loc>${BASE_URL}/about/</loc>
     <lastmod>${today}</lastmod>
     <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>${BASE_URL}/insight/</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
 `;
