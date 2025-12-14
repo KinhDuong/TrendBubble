@@ -18,6 +18,7 @@ import AdminData from './pages/AdminData';
 import ExplorePage from './pages/ExplorePage';
 import AboutPage from './pages/AboutPage';
 import ContactPage from './pages/ContactPage';
+import InsightPage from './pages/InsightPage';
 import { TrendingTopic } from './types';
 import { supabase } from './lib/supabase';
 import { useAuth } from './hooks/useAuth';
@@ -2167,6 +2168,7 @@ function App() {
         <Route path="/trending-now" element={<HomePage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/contact" element={<ContactPage />} />
+        <Route path="/insight" element={<InsightPage />} />
         <Route path="/admin/pages" element={<AdminPages />} />
         <Route path="/admin/data" element={<AdminData />} />
         <Route path="*" element={<DynamicPage />} />
