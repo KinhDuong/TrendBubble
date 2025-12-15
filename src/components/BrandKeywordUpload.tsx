@@ -42,6 +42,10 @@ export default function BrandKeywordUpload({ onUploadComplete }: BrandKeywordUpl
     keyword: string;
     search_volume: number;
     month: string;
+    three_month_change?: number;
+    yoy_change?: number;
+    competition?: string;
+    competition_indexed?: number;
   }> => {
     const lines = text.split('\n').filter(line => line.trim());
     const rawHeaders = lines[0].split(',').map(h => h.trim());
@@ -54,6 +58,19 @@ export default function BrandKeywordUpload({ onUploadComplete }: BrandKeywordUpl
         monthColumns.push({ index, month });
       }
     });
+
+    const threeMonthChangeIndex = headers.findIndex(h =>
+      h.includes('three') && h.includes('month') && h.includes('change')
+    );
+    const yoyChangeIndex = headers.findIndex(h =>
+      h.includes('yoy') || (h.includes('year') && h.includes('change'))
+    );
+    const competitionIndex = headers.findIndex(h =>
+      h === 'competition' || (h.includes('competition') && !h.includes('index'))
+    );
+    const competitionIndexedIndex = headers.findIndex(h =>
+      h.includes('competition') && (h.includes('index') || h.includes('indexed'))
+    );
 
     if (monthColumns.length > 0) {
       const keywordIndex = headers.findIndex(h => h.includes('keyword'));
@@ -68,6 +85,10 @@ export default function BrandKeywordUpload({ onUploadComplete }: BrandKeywordUpl
         keyword: string;
         search_volume: number;
         month: string;
+        three_month_change?: number;
+        yoy_change?: number;
+        competition?: string;
+        competition_indexed?: number;
       }> = [];
 
       const defaultBrand = brandIndex !== -1 ? '' : 'Unknown Brand';
@@ -79,6 +100,11 @@ export default function BrandKeywordUpload({ onUploadComplete }: BrandKeywordUpl
 
         if (!keyword) return;
 
+        const threeMonthChange = threeMonthChangeIndex !== -1 ? parseFloat(values[threeMonthChangeIndex]) : undefined;
+        const yoyChange = yoyChangeIndex !== -1 ? parseFloat(values[yoyChangeIndex]) : undefined;
+        const competition = competitionIndex !== -1 ? values[competitionIndex] : undefined;
+        const competitionIndexed = competitionIndexedIndex !== -1 ? parseFloat(values[competitionIndexedIndex]) : undefined;
+
         monthColumns.forEach(({ index, month }) => {
           const volume = parseInt(values[index]) || 0;
           if (volume > 0) {
@@ -86,7 +112,11 @@ export default function BrandKeywordUpload({ onUploadComplete }: BrandKeywordUpl
               brand: brand || 'Unknown Brand',
               keyword,
               search_volume: volume,
-              month
+              month,
+              three_month_change: !isNaN(threeMonthChange!) ? threeMonthChange : undefined,
+              yoy_change: !isNaN(yoyChange!) ? yoyChange : undefined,
+              competition: competition || undefined,
+              competition_indexed: !isNaN(competitionIndexed!) ? competitionIndexed : undefined
             });
           }
         });
@@ -116,11 +146,20 @@ export default function BrandKeywordUpload({ onUploadComplete }: BrandKeywordUpl
         }
       }
 
+      const threeMonthChange = threeMonthChangeIndex !== -1 ? parseFloat(values[threeMonthChangeIndex]) : undefined;
+      const yoyChange = yoyChangeIndex !== -1 ? parseFloat(values[yoyChangeIndex]) : undefined;
+      const competition = competitionIndex !== -1 ? values[competitionIndex] : undefined;
+      const competitionIndexed = competitionIndexedIndex !== -1 ? parseFloat(values[competitionIndexedIndex]) : undefined;
+
       return {
         brand: values[brandIndex],
         keyword: values[keywordIndex],
         search_volume: parseInt(values[volumeIndex]) || 0,
-        month: formattedMonth
+        month: formattedMonth,
+        three_month_change: !isNaN(threeMonthChange!) ? threeMonthChange : undefined,
+        yoy_change: !isNaN(yoyChange!) ? yoyChange : undefined,
+        competition: competition || undefined,
+        competition_indexed: !isNaN(competitionIndexed!) ? competitionIndexed : undefined
       };
     }).filter(row => row.brand && row.keyword && row.month);
   };
@@ -151,7 +190,11 @@ export default function BrandKeywordUpload({ onUploadComplete }: BrandKeywordUpl
         keyword: row.keyword,
         search_volume: row.search_volume,
         month: row.month,
-        user_id: user.id
+        user_id: user.id,
+        three_month_change: row.three_month_change,
+        yoy_change: row.yoy_change,
+        competition: row.competition,
+        competition_indexed: row.competition_indexed
       }));
 
       const { error: insertError } = await supabase
@@ -246,6 +289,10 @@ export default function BrandKeywordUpload({ onUploadComplete }: BrandKeywordUpl
             <p>Columns: keyword, Searches: Nov 2021, Searches: Dec 2021, ...</p>
             <p className="italic">Example: "running shoes", 10000, 12000, 15000</p>
             <p className="text-gray-400">(Brand column is optional for this format)</p>
+          </div>
+          <div className="mt-3 pt-2 border-t border-gray-300">
+            <p className="font-semibold text-gray-600">Optional columns (both formats):</p>
+            <p className="text-gray-400">Three month change, YoY change, Competition, Competition (indexed value)</p>
           </div>
         </div>
       </div>
