@@ -111,6 +111,20 @@ export default function BubbleTooltip({
     return topic.searchVolumeRaw.replace(/"/g, '');
   };
 
+  const formatMonthYear = (monthStr: string) => {
+    const date = new Date(monthStr);
+    return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+  };
+
+  const getMonthlySearchColor = (volume: number, maxVolume: number) => {
+    const ratio = volume / maxVolume;
+    if (ratio >= 0.8) return theme === 'dark' ? '#3B82F6' : '#2563EB';
+    if (ratio >= 0.6) return theme === 'dark' ? '#10B981' : '#059669';
+    if (ratio >= 0.4) return theme === 'dark' ? '#F59E0B' : '#D97706';
+    if (ratio >= 0.2) return theme === 'dark' ? '#F97316' : '#EA580C';
+    return theme === 'dark' ? '#EF4444' : '#DC2626';
+  };
+
   if (isMobile) {
     return createPortal(
       <>
@@ -208,6 +222,53 @@ export default function BubbleTooltip({
                 </p>
               )}
             </div>
+
+            {topic.monthlySearches && topic.monthlySearches.length > 0 && (
+              <div className={`border-t ${
+                theme === 'dark' ? 'border-gray-700' : 'border-gray-200'
+              } pt-4`}>
+                <h4 className={`text-sm font-semibold mb-3 ${
+                  theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                }`}>
+                  Monthly Search Volumes
+                </h4>
+                <div className="flex flex-wrap gap-2">
+                  {topic.monthlySearches.map((monthData, index) => {
+                    const maxVolume = Math.max(...topic.monthlySearches!.map(m => m.volume));
+                    const color = getMonthlySearchColor(monthData.volume, maxVolume);
+                    const size = 32 + (monthData.volume / maxVolume) * 24;
+
+                    return (
+                      <div
+                        key={index}
+                        className="flex flex-col items-center group relative"
+                        style={{ minWidth: '64px' }}
+                      >
+                        <div
+                          className="flex items-center justify-center rounded-full text-white text-xs font-bold shadow-md transition-transform hover:scale-110"
+                          style={{
+                            width: `${size}px`,
+                            height: `${size}px`,
+                            backgroundColor: color,
+                            fontSize: `${Math.max(8, size / 4)}px`
+                          }}
+                          title={`${formatMonthYear(monthData.month)}: ${monthData.volume.toLocaleString()}`}
+                        >
+                          {monthData.volume >= 1000
+                            ? `${(monthData.volume / 1000).toFixed(1)}K`
+                            : monthData.volume}
+                        </div>
+                        <span className={`text-xs mt-1 text-center ${
+                          theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                        }`}>
+                          {formatMonthYear(monthData.month)}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             <div className={`border-t ${
               theme === 'dark' ? 'border-gray-700' : 'border-gray-200'
@@ -339,6 +400,49 @@ export default function BubbleTooltip({
             </p>
           )}
         </div>
+
+        {topic.monthlySearches && topic.monthlySearches.length > 0 && (
+          <div className={`border-t ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'} pt-3`}>
+            <h4 className={`text-xs font-semibold mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+              Monthly Search Volumes
+            </h4>
+            <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto">
+              {topic.monthlySearches.map((monthData, index) => {
+                const maxVolume = Math.max(...topic.monthlySearches!.map(m => m.volume));
+                const color = getMonthlySearchColor(monthData.volume, maxVolume);
+                const size = 28 + (monthData.volume / maxVolume) * 20;
+
+                return (
+                  <div
+                    key={index}
+                    className="flex flex-col items-center group relative"
+                    style={{ minWidth: '56px' }}
+                  >
+                    <div
+                      className="flex items-center justify-center rounded-full text-white text-xs font-bold shadow-md transition-transform hover:scale-110"
+                      style={{
+                        width: `${size}px`,
+                        height: `${size}px`,
+                        backgroundColor: color,
+                        fontSize: `${Math.max(7, size / 4)}px`
+                      }}
+                      title={`${formatMonthYear(monthData.month)}: ${monthData.volume.toLocaleString()}`}
+                    >
+                      {monthData.volume >= 1000
+                        ? `${(monthData.volume / 1000).toFixed(1)}K`
+                        : monthData.volume}
+                    </div>
+                    <span className={`text-xs mt-1 text-center ${
+                      theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                    }`} style={{ fontSize: '10px' }}>
+                      {formatMonthYear(monthData.month)}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         <div className={`border-t ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'} pt-3 flex gap-2`}>
           <button

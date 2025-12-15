@@ -31,6 +31,7 @@ export interface TrendingTopic {
   note?: string;
   value?: number;
   originalRank?: number;
+  monthlySearches?: Array<{ month: string; volume: number }>;
 }
 
 export type CryptoTimeframe = '1h' | '24h' | '7d' | '30d' | '1y';

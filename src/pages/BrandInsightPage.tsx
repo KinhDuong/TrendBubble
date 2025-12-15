@@ -249,35 +249,39 @@ export default function BrandInsightPage() {
   };
 
   const transformToTopics = useMemo((): TrendingTopic[] => {
-    const allKeywords: TrendingTopic[] = [];
+    const keywordMonthlyMap = new Map<string, { volumes: Array<{ month: string; volume: number }>; maxVolume: number }>();
 
     monthlyData.forEach((monthData) => {
-      monthData.top_keywords.forEach((kw, index) => {
-        allKeywords.push({
-          name: kw.keyword,
-          searchVolume: kw.volume,
-          searchVolumeRaw: kw.volume.toLocaleString(),
-          url: '',
-          createdAt: monthData.month,
-          pubDate: monthData.month,
-          category: monthData.brand,
-          source: 'brand_keywords'
-        });
+      monthData.top_keywords.forEach((kw) => {
+        if (!keywordMonthlyMap.has(kw.keyword)) {
+          keywordMonthlyMap.set(kw.keyword, { volumes: [], maxVolume: 0 });
+        }
+        const entry = keywordMonthlyMap.get(kw.keyword)!;
+        entry.volumes.push({ month: monthData.month, volume: kw.volume });
+        if (kw.volume > entry.maxVolume) {
+          entry.maxVolume = kw.volume;
+        }
       });
     });
 
-    const keywordMap = new Map<string, TrendingTopic>();
-    allKeywords.forEach(topic => {
-      const existing = keywordMap.get(topic.name);
-      if (!existing || topic.searchVolume > existing.searchVolume) {
-        keywordMap.set(topic.name, topic);
-      }
-    });
+    const result = Array.from(keywordMonthlyMap.entries()).map(([keyword, data]) => {
+      const sortedVolumes = data.volumes.sort((a, b) => new Date(a.month).getTime() - new Date(b.month).getTime());
 
-    const result = Array.from(keywordMap.values()).sort((a, b) => b.searchVolume - a.searchVolume);
+      return {
+        name: keyword,
+        searchVolume: data.maxVolume,
+        searchVolumeRaw: data.maxVolume.toLocaleString(),
+        url: '',
+        createdAt: sortedVolumes[sortedVolumes.length - 1]?.month || '',
+        pubDate: sortedVolumes[sortedVolumes.length - 1]?.month || '',
+        category: monthlyData[0]?.brand || '',
+        source: 'brand_keywords',
+        monthlySearches: sortedVolumes
+      };
+    }).sort((a, b) => b.searchVolume - a.searchVolume);
+
     console.log('BrandInsightPage - transformToTopics:', {
       monthlyDataCount: monthlyData.length,
-      allKeywordsCount: allKeywords.length,
       resultCount: result.length,
       sampleData: result.slice(0, 3)
     });
