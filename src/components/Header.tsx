@@ -114,12 +114,6 @@ export default function Header({ theme, isAdmin, onLoginClick, onLogout, title =
           {/* Desktop Navigation - Always visible on desktop for SEO */}
           <nav className="hidden lg:flex items-center gap-6" aria-label="Main navigation">
             <a
-              href="/"
-              className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'} transition-colors`}
-            >
-              Home
-            </a>
-            <a
               href="/trending-now"
               className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'} transition-colors`}
             >
@@ -143,23 +137,6 @@ export default function Header({ theme, isAdmin, onLoginClick, onLogout, title =
             >
               About
             </a>
-            {isAdmin ? (
-              <button
-                onClick={handleLogout}
-                className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'} transition-colors flex items-center gap-2`}
-              >
-                <LogOut size={16} />
-                Logout
-              </button>
-            ) : (
-              <button
-                onClick={handleLogin}
-                className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'} transition-colors flex items-center gap-2`}
-              >
-                <LogIn size={16} />
-                Login
-              </button>
-            )}
           </nav>
 
           <div className={`flex items-center gap-2 ${isSearchExpanded ? 'flex-1 md:flex-none' : ''}`}>
