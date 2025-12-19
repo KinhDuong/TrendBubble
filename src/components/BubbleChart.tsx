@@ -7,6 +7,8 @@ import { X } from 'lucide-react';
 
 export type AnimationStyle = 'default' | 'bounce' | 'elastic' | 'spiral' | 'drop' | 'pulse' | 'shimmer';
 
+export type Shape = 'bubble' | 'square' | 'rounded-square' | 'hexagon' | 'diamond' | 'triangle' | 'star';
+
 interface BubbleChartProps {
   topics: TrendingTopic[];
   maxDisplay: number;
@@ -18,6 +20,7 @@ interface BubbleChartProps {
   useCryptoColors?: boolean;
   cryptoTimeframe?: CryptoTimeframe;
   animationStyle?: AnimationStyle;
+  shape?: Shape;
 }
 
 interface Bubble {
@@ -44,7 +47,83 @@ interface Bubble {
   initialY?: number;
 }
 
-export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force', onBubbleTimingUpdate, comparingTopics: externalComparingTopics, onComparingTopicsChange, useCryptoColors = false, cryptoTimeframe = '1h', animationStyle = 'default' }: BubbleChartProps) {
+export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force', onBubbleTimingUpdate, comparingTopics: externalComparingTopics, onComparingTopicsChange, useCryptoColors = false, cryptoTimeframe = '1h', animationStyle = 'default', shape = 'bubble' }: BubbleChartProps) {
+  const drawShape = (ctx: CanvasRenderingContext2D, x: number, y: number, radius: number, shapeType: Shape) => {
+    ctx.beginPath();
+
+    switch (shapeType) {
+      case 'bubble':
+        ctx.arc(x, y, radius, 0, Math.PI * 2);
+        break;
+
+      case 'square':
+        ctx.rect(x - radius, y - radius, radius * 2, radius * 2);
+        break;
+
+      case 'rounded-square': {
+        const cornerRadius = radius * 0.2;
+        ctx.moveTo(x - radius + cornerRadius, y - radius);
+        ctx.lineTo(x + radius - cornerRadius, y - radius);
+        ctx.quadraticCurveTo(x + radius, y - radius, x + radius, y - radius + cornerRadius);
+        ctx.lineTo(x + radius, y + radius - cornerRadius);
+        ctx.quadraticCurveTo(x + radius, y + radius, x + radius - cornerRadius, y + radius);
+        ctx.lineTo(x - radius + cornerRadius, y + radius);
+        ctx.quadraticCurveTo(x - radius, y + radius, x - radius, y + radius - cornerRadius);
+        ctx.lineTo(x - radius, y - radius + cornerRadius);
+        ctx.quadraticCurveTo(x - radius, y - radius, x - radius + cornerRadius, y - radius);
+        ctx.closePath();
+        break;
+      }
+
+      case 'hexagon': {
+        for (let i = 0; i < 6; i++) {
+          const angle = (Math.PI / 3) * i - Math.PI / 2;
+          const px = x + radius * Math.cos(angle);
+          const py = y + radius * Math.sin(angle);
+          if (i === 0) ctx.moveTo(px, py);
+          else ctx.lineTo(px, py);
+        }
+        ctx.closePath();
+        break;
+      }
+
+      case 'diamond': {
+        ctx.moveTo(x, y - radius);
+        ctx.lineTo(x + radius, y);
+        ctx.lineTo(x, y + radius);
+        ctx.lineTo(x - radius, y);
+        ctx.closePath();
+        break;
+      }
+
+      case 'triangle': {
+        const height = radius * Math.sqrt(3);
+        ctx.moveTo(x, y - height * 0.6);
+        ctx.lineTo(x + radius, y + height * 0.4);
+        ctx.lineTo(x - radius, y + height * 0.4);
+        ctx.closePath();
+        break;
+      }
+
+      case 'star': {
+        const spikes = 5;
+        const outerRadius = radius;
+        const innerRadius = radius * 0.5;
+
+        for (let i = 0; i < spikes * 2; i++) {
+          const angle = (Math.PI / spikes) * i - Math.PI / 2;
+          const r = i % 2 === 0 ? outerRadius : innerRadius;
+          const px = x + r * Math.cos(angle);
+          const py = y + r * Math.sin(angle);
+          if (i === 0) ctx.moveTo(px, py);
+          else ctx.lineTo(px, py);
+        }
+        ctx.closePath();
+        break;
+      }
+    }
+  };
+
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const bubblesRef = useRef<Bubble[]>([]);
   const animationFrameRef = useRef<number>();
@@ -1103,13 +1182,11 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
           gradient.addColorStop(0.5, `rgba(30, 30, 30, ${0.85 * opacity})`);
           gradient.addColorStop(1, `rgba(20, 20, 20, ${0.9 * opacity})`);
 
-          ctx.beginPath();
-          ctx.arc(bubble.x, bubble.y, displayRadius, 0, Math.PI * 2);
+          drawShape(ctx, bubble.x, bubble.y, displayRadius, shape);
           ctx.fillStyle = gradient;
           ctx.fill();
 
-          ctx.beginPath();
-          ctx.arc(bubble.x, bubble.y, displayRadius, 0, Math.PI * 2);
+          drawShape(ctx, bubble.x, bubble.y, displayRadius, shape);
           ctx.fillStyle = innerGlow;
           ctx.fill();
 
@@ -1138,8 +1215,7 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
 
           ctx.shadowOffsetX = 0;
           ctx.shadowOffsetY = 0;
-          ctx.beginPath();
-          ctx.arc(bubble.x, bubble.y, displayRadius, 0, Math.PI * 2);
+          drawShape(ctx, bubble.x, bubble.y, displayRadius, shape);
           ctx.strokeStyle = bubble.color;
           ctx.globalAlpha = opacity * colorIntensity;
           ctx.lineWidth = 1;
@@ -1168,8 +1244,7 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
           ctx.restore();
         } else {
           // Light theme: flat solid color, no gradients or shadows
-          ctx.beginPath();
-          ctx.arc(bubble.x, bubble.y, displayRadius, 0, Math.PI * 2);
+          drawShape(ctx, bubble.x, bubble.y, displayRadius, shape);
           ctx.fillStyle = `rgba(${colorRgb[0]}, ${colorRgb[1]}, ${colorRgb[2]}, ${opacity})`;
           ctx.fill();
         }
@@ -1177,16 +1252,14 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
         const isMobile = window.innerWidth < 768;
 
         if (bubble.isPinned) {
-          ctx.beginPath();
-          ctx.arc(bubble.x, bubble.y, displayRadius + 4, 0, Math.PI * 2);
+          drawShape(ctx, bubble.x, bubble.y, displayRadius + 4, shape);
           ctx.strokeStyle = '#A855F7';
           ctx.lineWidth = 3;
           ctx.stroke();
         }
 
         if (bubble.isComparing) {
-          ctx.beginPath();
-          ctx.arc(bubble.x, bubble.y, displayRadius + 4, 0, Math.PI * 2);
+          drawShape(ctx, bubble.x, bubble.y, displayRadius + 4, shape);
           ctx.strokeStyle = '#3B82F6';
           ctx.lineWidth = 3;
           ctx.setLineDash([5, 5]);
@@ -1195,8 +1268,7 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
         }
 
         if (isMobile && bubble.isHovered && !bubble.isPinned && !bubble.isComparing) {
-          ctx.beginPath();
-          ctx.arc(bubble.x, bubble.y, displayRadius + 4, 0, Math.PI * 2);
+          drawShape(ctx, bubble.x, bubble.y, displayRadius + 4, shape);
           ctx.strokeStyle = theme === 'dark' ? '#FFFFFF' : '#000000';
           ctx.lineWidth = 3;
           ctx.stroke();
