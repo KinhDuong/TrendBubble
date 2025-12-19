@@ -122,12 +122,17 @@ function DynamicPage() {
       await Promise.all([
         loadPageData(),
         loadCategories(),
-        loadSources(),
-        loadLatestPages()
+        loadSources()
       ]);
     };
     loadAllData();
   }, [urlPath]);
+
+  useEffect(() => {
+    if (pageData) {
+      loadLatestPages(pageData.category, pageData.page_url);
+    }
+  }, [pageData?.category, pageData?.page_url]);
 
   useEffect(() => {
     const prerenderFooter = document.getElementById('prerender-footer');
@@ -395,11 +400,18 @@ function DynamicPage() {
     }
   };
 
-  const loadLatestPages = async () => {
+  const loadLatestPages = async (category: string | null, currentPageUrl: string) => {
     try {
+      if (!category) {
+        setLatestPages([]);
+        return;
+      }
+
       const { data, error } = await supabase
         .from('pages')
         .select('*')
+        .eq('category', category)
+        .neq('page_url', currentPageUrl)
         .order('created_at', { ascending: false })
         .limit(10);
 
@@ -409,7 +421,7 @@ function DynamicPage() {
         setLatestPages(data);
       }
     } catch (error) {
-      console.error('Error loading latest pages:', error);
+      console.error('Error loading category pages:', error);
     }
   };
 
@@ -1182,7 +1194,7 @@ snapshotButton={null}
                       <aside className="lg:w-[35%]">
                         <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-lg border p-6 sticky top-4 shadow-md`}>
                           <h2 className={`text-xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                            Featured
+                            {pageData?.category?.toUpperCase() || 'FEATURED'}
                           </h2>
                           {latestPages.length > 0 && (
                             <div className="flex flex-col gap-3">
@@ -1300,13 +1312,13 @@ snapshotButton={null}
               </div>
             </section>
           )}
-          {latestPages.length > 0 && (
-        <section className="max-w-7xl mx-auto mt-8 mb-0 px-4 md:px-6" aria-labelledby="latest-pages-heading">
-          <h2 id="latest-pages-heading" className={`text-xl md:text-2xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-            Latest
+          {latestPages.length > 0 && pageData?.category && (
+        <section className="max-w-7xl mx-auto mt-8 mb-0 px-4 md:px-6" aria-labelledby="category-pages-heading">
+          <h2 id="category-pages-heading" className={`text-xl md:text-2xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+            {pageData.category.toUpperCase()}
           </h2>
           <p className={`text-sm mb-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-            Explore the latest trending topics pages across different categories and sources. Stay informed with real-time updates on what's capturing attention and driving search volume across the internet.
+            Explore more trending topics in the {pageData.category} category. Discover the latest rankings and insights.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {latestPages.map((page) => {

@@ -334,42 +334,47 @@ async function generateContentHTML(pageData, topics, sourceLabel) {
     `;
   }
 
-  // Add Latest pages section for SEO
-  const { data: latestPages } = await supabase
-    .from('pages')
-    .select('*')
-    .order('created_at', { ascending: false })
-    .limit(10);
+  // Add category pages section for SEO
+  if (pageData.category) {
+    const { data: categoryPages } = await supabase
+      .from('pages')
+      .select('*')
+      .eq('category', pageData.category)
+      .neq('page_url', pageData.page_url)
+      .order('created_at', { ascending: false })
+      .limit(10);
 
-  if (latestPages && latestPages.length > 0) {
-    contentHTML += `
-      <section class="latest-pages" aria-labelledby="latest-pages-heading" style="max-width: 80rem; margin: 2rem auto 1.5rem; padding: 0 0.5rem;">
-        <h2 id="latest-pages-heading" style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; color: white;">Latest</h2>
-        <p style="color: #9ca3af; font-size: 0.875rem; margin-bottom: 1rem;">
-          Explore the latest trending topics pages across different categories and sources. Stay informed with real-time updates on what's capturing attention and driving search volume across the internet.
-        </p>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;">
-    `;
-
-    latestPages.forEach(page => {
-      const pageDate = new Date(page.created_at).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
+    if (categoryPages && categoryPages.length > 0) {
+      const categoryTitle = pageData.category.toUpperCase();
       contentHTML += `
-          <a href="${BASE_URL}${page.page_url}" style="display: block; background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; overflow: hidden; text-decoration: none; transition: all 0.2s;">
-            <div style="padding: 1rem;">
-              <div style="color: #6b7280; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; margin-bottom: 0.5rem;">
-                ${pageDate}
-              </div>
-              <h3 style="color: white; font-size: 1.125rem; font-weight: 700; margin-bottom: 0.5rem;">${page.meta_title}</h3>
-              <p style="color: #9ca3af; font-size: 0.875rem;">${page.meta_description}</p>
-            </div>
-          </a>
+        <section class="category-pages" aria-labelledby="category-pages-heading" style="max-width: 80rem; margin: 2rem auto 1.5rem; padding: 0 0.5rem;">
+          <h2 id="category-pages-heading" style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; color: white;">${categoryTitle}</h2>
+          <p style="color: #9ca3af; font-size: 0.875rem; margin-bottom: 1rem;">
+            Explore more trending topics in the ${pageData.category} category. Discover the latest rankings and insights.
+          </p>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;">
       `;
-    });
 
-    contentHTML += `
-        </div>
-      </section>
-    `;
+      categoryPages.forEach(page => {
+        const pageDate = new Date(page.created_at).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
+        contentHTML += `
+            <a href="${BASE_URL}${page.page_url}" style="display: block; background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; overflow: hidden; text-decoration: none; transition: all 0.2s;">
+              <div style="padding: 1rem;">
+                <div style="color: #6b7280; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; margin-bottom: 0.5rem;">
+                  ${pageDate}
+                </div>
+                <h3 style="color: white; font-size: 1.125rem; font-weight: 700; margin-bottom: 0.5rem;">${page.meta_title}</h3>
+                <p style="color: #9ca3af; font-size: 0.875rem;">${page.meta_description}</p>
+              </div>
+            </a>
+        `;
+      });
+
+      contentHTML += `
+          </div>
+        </section>
+      `;
+    }
   }
 
   contentHTML += `
