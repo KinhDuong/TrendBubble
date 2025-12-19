@@ -195,18 +195,32 @@ export default function BrandKeywordUpload({ onUploadComplete }: BrandKeywordUpl
       }));
 
       console.log('Inserting monthly records:', monthlyRecords);
+      console.log('First record sample:', JSON.stringify(monthlyRecords[0], null, 2));
 
-      const { error: monthlyInsertError } = await supabase
+      // Delete existing monthly data for this brand
+      const { error: deleteError } = await supabase
         .from('brand_keyword_monthly_data')
-        .upsert(monthlyRecords, {
-          onConflict: 'brand,month,user_id',
-          ignoreDuplicates: false
-        });
+        .delete()
+        .eq('brand', brandName.trim())
+        .eq('user_id', user.id);
+
+      if (deleteError) {
+        console.error('Delete error:', deleteError);
+      }
+
+      // Insert new monthly data
+      const { data: insertedData, error: monthlyInsertError } = await supabase
+        .from('brand_keyword_monthly_data')
+        .insert(monthlyRecords)
+        .select();
 
       if (monthlyInsertError) {
         console.error('Monthly data insert error:', monthlyInsertError);
+        console.error('Error details:', JSON.stringify(monthlyInsertError, null, 2));
         throw new Error(`Failed to save monthly data: ${monthlyInsertError.message}`);
       }
+
+      console.log('Successfully inserted monthly data:', insertedData);
 
       setSuccess(`Successfully uploaded ${data.length} keyword records across ${aggregatedData.length} months`);
       onUploadComplete();
