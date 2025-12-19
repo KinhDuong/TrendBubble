@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { CheckCircle, XCircle, AlertTriangle, Merge } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { CheckCircle, XCircle, AlertTriangle, Merge, X } from 'lucide-react';
 
 interface KeywordData {
   keyword: string;
@@ -23,14 +23,97 @@ interface KeywordMergeReviewProps {
 }
 
 export default function KeywordMergeReview({
-  mergeGroups,
+  mergeGroups: initialMergeGroups,
   onApprove,
   onCancel,
   theme = 'light'
 }: KeywordMergeReviewProps) {
+  const [mergeGroups, setMergeGroups] = useState<MergeGroup[]>(initialMergeGroups);
   const [selectedMerges, setSelectedMerges] = useState<Set<string>>(
-    new Set(mergeGroups.map(g => g.id))
+    new Set(initialMergeGroups.map(g => g.id))
   );
+
+  const recalculateMergedData = (originalData: KeywordData[]): KeywordData => {
+    if (originalData.length === 0) {
+      return {} as KeywordData;
+    }
+
+    const primaryKeyword = originalData.reduce((longest, current) =>
+      current.keyword.length > longest.keyword.length ? current : longest
+    ).keyword;
+
+    const mergedData: any = {
+      keyword: primaryKeyword,
+      brand: originalData[0].brand
+    };
+
+    const numericFields = new Set<string>();
+    originalData.forEach(item => {
+      Object.keys(item).forEach(key => {
+        if (typeof item[key] === 'number' && !['user_id'].includes(key)) {
+          numericFields.add(key);
+        }
+      });
+    });
+
+    numericFields.forEach(field => {
+      mergedData[field] = originalData.reduce((sum, item) => sum + (item[field] || 0), 0);
+    });
+
+    Object.keys(originalData[0]).forEach(key => {
+      if (!numericFields.has(key) && !['keyword', 'brand', 'user_id', 'created_at'].includes(key)) {
+        const nonZeroValues = originalData
+          .map(item => item[key])
+          .filter(v => v !== undefined && v !== null && v !== '' && v !== 0);
+
+        if (nonZeroValues.length > 0) {
+          if (typeof nonZeroValues[0] === 'number') {
+            mergedData[key] = Math.max(...nonZeroValues);
+          } else {
+            mergedData[key] = nonZeroValues[0];
+          }
+        }
+      }
+    });
+
+    return mergedData;
+  };
+
+  const removeKeywordFromMerge = (groupId: string, keywordToRemove: string) => {
+    setMergeGroups(prev => {
+      return prev
+        .map(group => {
+          if (group.id !== groupId) return group;
+
+          const updatedOriginalData = group.originalData.filter(
+            item => item.keyword !== keywordToRemove
+          );
+          const updatedVariants = group.variants.filter(v => v !== keywordToRemove);
+
+          if (updatedOriginalData.length <= 1) {
+            return null;
+          }
+
+          const updatedMergedData = recalculateMergedData(updatedOriginalData);
+
+          return {
+            ...group,
+            primaryKeyword: updatedMergedData.keyword,
+            variants: updatedVariants,
+            mergedData: updatedMergedData,
+            originalData: updatedOriginalData
+          };
+        })
+        .filter((group): group is MergeGroup => group !== null);
+    });
+  };
+
+  useEffect(() => {
+    setSelectedMerges(prev => {
+      const validIds = new Set(mergeGroups.map(g => g.id));
+      return new Set([...prev].filter(id => validIds.has(id)));
+    });
+  }, [mergeGroups]);
 
   const toggleMerge = (id: string) => {
     setSelectedMerges(prev => {
@@ -169,13 +252,22 @@ export default function KeywordMergeReview({
                           {group.variants.map((variant, idx) => (
                             <span
                               key={idx}
-                              className={`text-xs px-2 py-1 rounded ${
+                              className={`group/variant text-xs px-2 py-1 rounded flex items-center gap-1.5 ${
                                 theme === 'dark'
                                   ? 'bg-gray-700 text-gray-300'
                                   : 'bg-gray-200 text-gray-700'
                               }`}
                             >
                               {variant}
+                              <button
+                                onClick={() => removeKeywordFromMerge(group.id, variant)}
+                                className={`opacity-0 group-hover/variant:opacity-100 transition-opacity hover:bg-red-500 hover:text-white rounded-full p-0.5 ${
+                                  theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                                }`}
+                                title="Remove from merge"
+                              >
+                                <X className="w-3 h-3" />
+                              </button>
                             </span>
                           ))}
                         </div>
