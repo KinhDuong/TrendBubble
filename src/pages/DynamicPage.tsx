@@ -402,9 +402,15 @@ function DynamicPage() {
 
   const loadLatestPages = async (category: string | null, currentPageUrl: string) => {
     try {
+      if (!category) {
+        setLatestPages([]);
+        return;
+      }
+
       const { data, error } = await supabase
         .from('pages')
         .select('*')
+        .eq('category', category)
         .neq('page_url', currentPageUrl)
         .order('created_at', { ascending: false })
         .limit(10);
@@ -415,7 +421,7 @@ function DynamicPage() {
         setLatestPages(data);
       }
     } catch (error) {
-      console.error('Error loading latest pages:', error);
+      console.error('Error loading category pages:', error);
     }
   };
 
@@ -1344,12 +1350,12 @@ snapshotButton={null}
               </div>
             </section>
           )}
-          {latestPages.length > 0 && (
-        <section className="max-w-7xl mx-auto mt-8 mb-0 px-4 md:px-6" aria-labelledby="latest-pages-heading">
+          {latestPages.length > 0 && pageData?.category && (
+        <section className="max-w-7xl mx-auto mt-8 mb-0 px-4 md:px-6" aria-labelledby="category-pages-heading">
           <div className="relative mb-6">
-            <h2 id="latest-pages-heading" className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} inline-block px-4 py-2 relative`}>
-              <span className="relative z-10">LATEST</span>
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-blue-600 transform -skew-x-12"></div>
+            <h2 id="category-pages-heading" className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} inline-block px-4 py-2 relative`}>
+              <span className="relative z-10">{pageData.category.toUpperCase()}</span>
+              <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-orange-500 transform -skew-x-12"></div>
             </h2>
           </div>
           <div className="space-y-4">
@@ -1371,7 +1377,7 @@ snapshotButton={null}
                 <div className="flex-1">
                   <div className="flex items-center gap-2 text-xs mb-2">
                     <span className={`uppercase font-semibold ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`}>
-                      Page
+                      {pageData.category}
                     </span>
                     <span className={theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}>/</span>
                     <span className={`flex items-center gap-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
