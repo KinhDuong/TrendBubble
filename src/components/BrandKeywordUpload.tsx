@@ -60,9 +60,6 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light' }
       throw new Error('CSV must contain a "Keyword" column');
     }
 
-    const searchColumns = rawHeaders.filter(h => h.toLowerCase().startsWith('searches:'));
-    console.log('Found search columns:', searchColumns);
-
     const results: Array<Record<string, any>> = [];
 
     lines.slice(3).forEach((line, lineNum) => {
@@ -73,53 +70,73 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light' }
 
       if (!keyword) return;
 
+      const record: Record<string, any> = {
+        keyword: keyword,
+        brand: brandName.trim()
+      };
+
       rawHeaders.forEach((header, index) => {
         if (index === keywordIndex) return;
 
         const value = values[index];
-        if (!value || value === '' || value === '0') return;
+        if (!value || value === '') return;
 
         if (header.toLowerCase().startsWith('searches:')) {
-          const parsedValue = parseInt(value.replace(/,/g, ''));
-          if (!isNaN(parsedValue) && parsedValue > 0) {
-            const month = parseMonthFromHeader(header);
-            if (month) {
-              results.push({
-                keyword: keyword,
-                brand: brandName || 'Unknown',
-                search_volume: parsedValue,
-                month: month
-              });
-            } else {
-              console.warn(`Could not parse month from header: ${header}`);
-            }
+          const cleanValue = value.replace(/,/g, '');
+          const parsedValue = parseInt(cleanValue);
+          if (!isNaN(parsedValue)) {
+            record[header] = parsedValue;
           }
+        } else if (header === 'Avg. monthly searches') {
+          const cleanValue = value.replace(/,/g, '');
+          const parsedValue = parseInt(cleanValue);
+          if (!isNaN(parsedValue)) {
+            record[header] = parsedValue;
+          }
+        } else if (header === 'Competition (indexed value)' ||
+                   header === 'Top of page bid (low range)' ||
+                   header === 'Top of page bid (high range)') {
+          const parsedValue = parseFloat(value);
+          if (!isNaN(parsedValue)) {
+            record[header] = parsedValue;
+          }
+        } else {
+          record[header] = value;
         }
       });
+
+      results.push(record);
     });
 
     console.log(`Parsed ${results.length} records from CSV`);
 
-    return results.filter(row => row.keyword && row.month && row.search_volume > 0);
+    return results.filter(row => row.keyword);
   };
 
   const aggregateMonthlyData = (data: Array<Record<string, any>>) => {
     const monthlyMap = new Map<string, { keywords: Array<{ keyword: string; volume: number }>, totalVolume: number }>();
 
     data.forEach(row => {
-      const month = row.month;
-      if (!month) return;
+      Object.keys(row).forEach(key => {
+        if (key.toLowerCase().startsWith('searches:')) {
+          const volume = row[key];
+          if (volume && volume > 0) {
+            const month = parseMonthFromHeader(key);
+            if (month) {
+              if (!monthlyMap.has(month)) {
+                monthlyMap.set(month, { keywords: [], totalVolume: 0 });
+              }
 
-      if (!monthlyMap.has(month)) {
-        monthlyMap.set(month, { keywords: [], totalVolume: 0 });
-      }
-
-      const monthData = monthlyMap.get(month)!;
-      monthData.keywords.push({
-        keyword: row.keyword,
-        volume: row.search_volume || 0
+              const monthData = monthlyMap.get(month)!;
+              monthData.keywords.push({
+                keyword: row.keyword,
+                volume: volume
+              });
+              monthData.totalVolume += volume;
+            }
+          }
+        }
       });
-      monthData.totalVolume += (row.search_volume || 0);
     });
 
     const aggregated = Array.from(monthlyMap.entries()).map(([month, data]) => {
@@ -166,11 +183,25 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light' }
         throw new Error('You must be logged in to upload data');
       }
 
+      console.log('Deleting existing data for brand:', brandName.trim());
+      const { error: deleteError } = await supabase
+        .from('brand_keyword_data')
+        .delete()
+        .eq('brand', brandName.trim())
+        .eq('user_id', user.id);
+
+      if (deleteError) {
+        console.error('Delete error:', deleteError);
+      }
+
       const recordsToInsert = data.map(row => ({
         ...row,
         user_id: user.id,
         created_at: new Date().toISOString()
       }));
+
+      console.log('Inserting records:', recordsToInsert.length);
+      console.log('Sample record:', JSON.stringify(recordsToInsert[0], null, 2));
 
       const { error: insertError } = await supabase
         .from('brand_keyword_data')
@@ -198,18 +229,17 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light' }
       console.log('Inserting monthly records:', monthlyRecords);
       console.log('First record sample:', JSON.stringify(monthlyRecords[0], null, 2));
 
-      // Delete existing monthly data for this brand
-      const { error: deleteError } = await supabase
+      console.log('Deleting existing monthly data for brand:', brandName.trim());
+      const { error: monthlyDeleteError } = await supabase
         .from('brand_keyword_monthly_data')
         .delete()
         .eq('brand', brandName.trim())
         .eq('user_id', user.id);
 
-      if (deleteError) {
-        console.error('Delete error:', deleteError);
+      if (monthlyDeleteError) {
+        console.error('Monthly delete error:', monthlyDeleteError);
       }
 
-      // Insert new monthly data
       const { data: insertedData, error: monthlyInsertError } = await supabase
         .from('brand_keyword_monthly_data')
         .insert(monthlyRecords)
@@ -223,10 +253,15 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light' }
 
       console.log('Successfully inserted monthly data:', insertedData);
 
-      setSuccess(`Successfully uploaded ${data.length} keyword records across ${aggregatedData.length} months`);
+      setSuccess(`Successfully uploaded data for ${brandName.trim()}: ${data.length} keywords with ${aggregatedData.length} months of trend data`);
       onUploadComplete();
 
       event.target.value = '';
+
+      setTimeout(() => {
+        setBrandName('');
+        setSuccess(null);
+      }, 3000);
     } catch (err) {
       console.error('Upload error details:', err);
       setError(err instanceof Error ? err.message : 'Failed to upload file');
