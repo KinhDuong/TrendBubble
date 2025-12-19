@@ -14,6 +14,7 @@ import FilterMenu, { BubbleLayout, ViewMode, Shape as FilterShape } from '../com
 import ShareSnapshot from '../components/ShareSnapshot';
 import AnimationSelector, { AnimationStyle } from '../components/AnimationSelector';
 import ComparisonPanel from '../components/ComparisonPanel';
+import BrandKeywordUpload from '../components/BrandKeywordUpload';
 import { TrendingTopic, FAQ } from '../types';
 import { TrendingUp, Download, ArrowLeft, Search, X, ChevronsLeft, ChevronsRight } from 'lucide-react';
 
@@ -374,20 +375,28 @@ export default function BrandInsightPage() {
           onLogout={logout}
           title="Top Best Charts"
         />
-        <div className={`min-h-screen flex items-center justify-center ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'} px-4`}>
-          <div className="text-center max-w-md">
-            <TrendingUp className={`w-16 h-16 mx-auto mb-4 ${theme === 'dark' ? 'text-gray-600' : 'text-gray-400'}`} />
-            <h1 className="text-4xl font-bold mb-4">Brand not found</h1>
-            <p className={`mb-6 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-              No keyword data found for "{brandName}". The brand may not have any data uploaded yet.
-            </p>
-            <button
-              onClick={() => navigate('/insight')}
-              className={`inline-flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-colors ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-600 hover:bg-blue-700 shadow-sm hover:shadow text-white'}`}
-            >
-              <ArrowLeft className="w-5 h-5" />
-              Back to Insights
-            </button>
+        <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'} px-4 py-8`}>
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center mb-8">
+              <TrendingUp className={`w-16 h-16 mx-auto mb-4 ${theme === 'dark' ? 'text-gray-600' : 'text-gray-400'}`} />
+              <h1 className="text-4xl font-bold mb-4">Brand not found</h1>
+              <p className={`mb-6 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                No keyword data found for "{brandName}". The brand may not have any data uploaded yet.
+              </p>
+              <button
+                onClick={() => navigate('/insight')}
+                className={`inline-flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-colors ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-600 hover:bg-blue-700 shadow-sm hover:shadow text-white'}`}
+              >
+                <ArrowLeft className="w-5 h-5" />
+                Back to Insights
+              </button>
+            </div>
+
+            {isAdmin && (
+              <div className="mt-12">
+                <BrandKeywordUpload onUploadComplete={loadAllData} theme={theme} />
+              </div>
+            )}
           </div>
         </div>
         <Footer theme={theme} />

@@ -189,7 +189,7 @@ export default function InsightPage() {
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
             <div className="lg:col-span-2">
-              <BrandKeywordUpload onUploadComplete={loadData} />
+              <BrandKeywordUpload onUploadComplete={loadData} theme="light" />
             </div>
 
             <div className="bg-white rounded-lg shadow-sm p-6">

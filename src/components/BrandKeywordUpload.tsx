@@ -4,9 +4,10 @@ import { supabase } from '../lib/supabase';
 
 interface BrandKeywordUploadProps {
   onUploadComplete: () => void;
+  theme?: 'dark' | 'light';
 }
 
-export default function BrandKeywordUpload({ onUploadComplete }: BrandKeywordUploadProps) {
+export default function BrandKeywordUpload({ onUploadComplete, theme = 'light' }: BrandKeywordUploadProps) {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -236,11 +237,11 @@ export default function BrandKeywordUpload({ onUploadComplete }: BrandKeywordUpl
 
 
   return (
-    <div className="bg-white rounded-lg shadow-sm p-6">
-      <h2 className="text-xl font-semibold mb-4">Upload Keyword Data</h2>
+    <div className={`rounded-lg shadow-sm p-6 ${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'}`}>
+      <h2 className={`text-xl font-semibold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Upload Keyword Data</h2>
 
       <div className="mb-4">
-        <label htmlFor="brandName" className="block text-sm font-semibold text-gray-700 mb-2">
+        <label htmlFor="brandName" className={`block text-sm font-semibold mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
           Brand Name *
         </label>
         <input
@@ -249,22 +250,26 @@ export default function BrandKeywordUpload({ onUploadComplete }: BrandKeywordUpl
           value={brandName}
           onChange={(e) => setBrandName(e.target.value)}
           placeholder="Enter brand name (e.g., Starbucks, Nike)"
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+            theme === 'dark'
+              ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
+              : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
+          }`}
         />
       </div>
 
       <div className="mb-4">
-        <p className="text-sm text-gray-600 mb-2 font-semibold">
+        <p className={`text-sm mb-2 font-semibold ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
           Upload CSV/TSV file with keyword data
         </p>
-        <div className="text-xs text-gray-500 space-y-2">
+        <div className={`text-xs space-y-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
           <div>
             <p className="font-semibold">Required:</p>
             <p>Must have a "Keyword" column</p>
           </div>
           <div>
             <p className="font-semibold">Supported columns:</p>
-            <p className="text-gray-400">
+            <p className={theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}>
               All columns will be imported as-is. Typical columns include:
               Currency, Avg. monthly searches, Three month change, YoY change,
               Competition, Competition (indexed value), Top of page bids,
@@ -272,17 +277,21 @@ export default function BrandKeywordUpload({ onUploadComplete }: BrandKeywordUpl
             </p>
           </div>
           <div className="mt-2">
-            <p className="text-gray-400 italic">
+            <p className={`italic ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
               Note: First two rows (title and date) will be skipped automatically
             </p>
           </div>
         </div>
       </div>
 
-      <label className="flex items-center justify-center w-full px-4 py-6 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 transition-colors">
+      <label className={`flex items-center justify-center w-full px-4 py-6 border-2 border-dashed rounded-lg cursor-pointer hover:border-blue-500 transition-colors ${
+        theme === 'dark'
+          ? 'border-gray-600 hover:bg-gray-750'
+          : 'border-gray-300 hover:bg-gray-50'
+      }`}>
         <div className="flex flex-col items-center">
-          <Upload className="w-8 h-8 text-gray-400 mb-2" />
-          <span className="text-sm text-gray-600">
+          <Upload className={`w-8 h-8 mb-2 ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`} />
+          <span className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
             {uploading ? 'Uploading...' : 'Click to upload CSV file'}
           </span>
         </div>
@@ -296,16 +305,24 @@ export default function BrandKeywordUpload({ onUploadComplete }: BrandKeywordUpl
       </label>
 
       {error && (
-        <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2">
-          <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
-          <p className="text-sm text-red-700">{error}</p>
+        <div className={`mt-4 p-3 rounded-lg flex items-start gap-2 ${
+          theme === 'dark'
+            ? 'bg-red-900/30 border border-red-800 text-red-300'
+            : 'bg-red-50 border border-red-200 text-red-700'
+        }`}>
+          <AlertCircle className={`w-5 h-5 flex-shrink-0 mt-0.5 ${theme === 'dark' ? 'text-red-400' : 'text-red-500'}`} />
+          <p className="text-sm">{error}</p>
         </div>
       )}
 
       {success && (
-        <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg flex items-start gap-2">
-          <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-          <p className="text-sm text-green-700">{success}</p>
+        <div className={`mt-4 p-3 rounded-lg flex items-start gap-2 ${
+          theme === 'dark'
+            ? 'bg-green-900/30 border border-green-800 text-green-300'
+            : 'bg-green-50 border border-green-200 text-green-700'
+        }`}>
+          <CheckCircle className={`w-5 h-5 flex-shrink-0 mt-0.5 ${theme === 'dark' ? 'text-green-400' : 'text-green-500'}`} />
+          <p className="text-sm">{success}</p>
         </div>
       )}
     </div>
