@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { Plus, Edit, Trash2, ExternalLink, ChevronLeft, ChevronRight, Download, Upload, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { Plus, Edit, Trash2, ExternalLink, ChevronLeft, ChevronRight, Download, Upload, ArrowUpDown, ArrowUp, ArrowDown, List, Circle } from 'lucide-react';
 import DataEditor from './DataEditor';
 import DataFilters, { FilterState } from './DataFilters';
+import BubbleChart, { Shape } from './BubbleChart';
 
 interface TrendingTopic {
   id: string;
@@ -46,6 +47,8 @@ export default function DataManager({ theme, initialSource }: DataManagerProps) 
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
   const [sortColumn, setSortColumn] = useState<SortColumn>('created_at');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+  const [viewMode, setViewMode] = useState<'table' | 'bubble'>('table');
+  const [shape, setShape] = useState<Shape>('bubble');
 
   useEffect(() => {
     loadData();
@@ -254,6 +257,45 @@ export default function DataManager({ theme, initialSource }: DataManagerProps) 
             </p>
           </div>
           <div className="flex items-center gap-2">
+            <div className={`flex items-center gap-1 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'} rounded-lg p-1`}>
+              <button
+                onClick={() => setViewMode('table')}
+                className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded transition-colors ${
+                  viewMode === 'table'
+                    ? 'bg-blue-600 text-white'
+                    : theme === 'dark' ? 'text-gray-300 hover:text-gray-100' : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                <List size={16} />
+                Table
+              </button>
+              <button
+                onClick={() => setViewMode('bubble')}
+                className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded transition-colors ${
+                  viewMode === 'bubble'
+                    ? 'bg-blue-600 text-white'
+                    : theme === 'dark' ? 'text-gray-300 hover:text-gray-100' : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                <Circle size={16} />
+                Bubble
+              </button>
+            </div>
+            {viewMode === 'bubble' && (
+              <select
+                value={shape}
+                onChange={(e) => setShape(e.target.value as Shape)}
+                className={`${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500`}
+              >
+                <option value="bubble">Bubble</option>
+                <option value="square">Square</option>
+                <option value="rounded-square">Rounded Square</option>
+                <option value="hexagon">Hexagon</option>
+                <option value="diamond">Diamond</option>
+                <option value="triangle">Triangle</option>
+                <option value="star">Star</option>
+              </select>
+            )}
             {selectedItems.size > 0 && (
               <button
                 onClick={handleBulkDelete}
@@ -300,6 +342,26 @@ export default function DataManager({ theme, initialSource }: DataManagerProps) 
               <Plus size={18} />
               Add Your First Item
             </button>
+          </div>
+        ) : viewMode === 'bubble' ? (
+          <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'}`}>
+            <BubbleChart
+              topics={data.map(item => ({
+                id: item.id,
+                name: item.name,
+                searchVolume: item.search_volume,
+                searchVolumeRaw: item.search_volume_raw,
+                url: item.url,
+                createdAt: item.created_at,
+                pubDate: item.pub_date,
+                category: item.category,
+                source: item.source,
+              }))}
+              maxDisplay={data.length}
+              theme={theme}
+              layout="force"
+              shape={shape}
+            />
           </div>
         ) : (
           <>
