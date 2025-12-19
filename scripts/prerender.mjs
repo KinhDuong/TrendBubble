@@ -217,6 +217,7 @@ async function generateContentHTML(pageData, topics, sourceLabel) {
         <ul style="display: flex; gap: 1.5rem; list-style: none; margin: 0; padding: 0;">
           <li><a href="/" style="color: #d1d5db; text-decoration: none;">Home</a></li>
           <li><a href="/trending-now" style="color: #d1d5db; text-decoration: none;">Trending Now</a></li>
+          <li><a href="/browse-topics" style="color: #d1d5db; text-decoration: none;">Browse Topics</a></li>
           <li><a href="/contact" style="color: #d1d5db; text-decoration: none;">Contact</a></li>
           <li><a href="/about" style="color: #d1d5db; text-decoration: none;">About</a></li>
         </ul>
@@ -555,6 +556,8 @@ async function prerenderExplorePage(baseHTML, distPath) {
           <ul style="display: flex; gap: 1.5rem; list-style: none; margin: 0; padding: 0;">
             <li><a href="/" style="color: #d1d5db; text-decoration: none;">Home</a></li>
             <li><a href="/trending-now" style="color: #d1d5db; text-decoration: none;">Trending Now</a></li>
+            <li><a href="/browse-topics" style="color: #d1d5db; text-decoration: none;">Browse Topics</a></li>
+            <li><a href="/contact" style="color: #d1d5db; text-decoration: none;">Contact</a></li>
             <li><a href="/about" style="color: #d1d5db; text-decoration: none;">About</a></li>
           </ul>
         </nav>
@@ -868,6 +871,8 @@ async function prerenderTrendingNowPage(baseHTML, distPath) {
           <ul style="display: flex; gap: 1.5rem; list-style: none; margin: 0; padding: 0;">
             <li><a href="/" style="color: #d1d5db; text-decoration: none;">Home</a></li>
             <li><a href="/trending-now" style="color: #d1d5db; text-decoration: none;">Trending Now</a></li>
+            <li><a href="/browse-topics" style="color: #d1d5db; text-decoration: none;">Browse Topics</a></li>
+            <li><a href="/contact" style="color: #d1d5db; text-decoration: none;">Contact</a></li>
             <li><a href="/about" style="color: #d1d5db; text-decoration: none;">About</a></li>
           </ul>
         </nav>
@@ -1025,6 +1030,7 @@ async function prerenderContactPage(baseHTML, distPath) {
           <ul style="display: flex; gap: 1.5rem; list-style: none; margin: 0; padding: 0;">
             <li><a href="/" style="color: #d1d5db; text-decoration: none;">Home</a></li>
             <li><a href="/trending-now" style="color: #d1d5db; text-decoration: none;">Trending Now</a></li>
+            <li><a href="/browse-topics" style="color: #d1d5db; text-decoration: none;">Browse Topics</a></li>
             <li><a href="/contact" style="color: #d1d5db; text-decoration: none;">Contact</a></li>
             <li><a href="/about" style="color: #d1d5db; text-decoration: none;">About</a></li>
           </ul>
@@ -1094,6 +1100,7 @@ async function prerenderInsightPage(baseHTML, distPath) {
           <ul style="display: flex; gap: 1.5rem; list-style: none; margin: 0; padding: 0;">
             <li><a href="/" style="color: #d1d5db; text-decoration: none;">Home</a></li>
             <li><a href="/trending-now" style="color: #d1d5db; text-decoration: none;">Trending Now</a></li>
+            <li><a href="/browse-topics" style="color: #d1d5db; text-decoration: none;">Browse Topics</a></li>
             <li><a href="/insight" style="color: #d1d5db; text-decoration: none;">Insights</a></li>
             <li><a href="/contact" style="color: #d1d5db; text-decoration: none;">Contact</a></li>
             <li><a href="/about" style="color: #d1d5db; text-decoration: none;">About</a></li>
@@ -1287,6 +1294,8 @@ async function prerenderAboutPage(baseHTML, distPath) {
           <ul style="display: flex; gap: 1.5rem; list-style: none; margin: 0; padding: 0;">
             <li><a href="/" style="color: #d1d5db; text-decoration: none;">Home</a></li>
             <li><a href="/trending-now" style="color: #d1d5db; text-decoration: none;">Trending Now</a></li>
+            <li><a href="/browse-topics" style="color: #d1d5db; text-decoration: none;">Browse Topics</a></li>
+            <li><a href="/contact" style="color: #d1d5db; text-decoration: none;">Contact</a></li>
             <li><a href="/about" style="color: #d1d5db; text-decoration: none;">About</a></li>
           </ul>
         </nav>
