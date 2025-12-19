@@ -320,15 +320,20 @@ export default function BrandDataManager() {
                       <th
                         key={column}
                         onClick={() => handleSort(column)}
-                        className="px-4 py-3 text-left font-semibold text-gray-700 cursor-pointer hover:bg-gray-100 transition-colors whitespace-nowrap"
+                        className="px-4 py-3 text-left font-semibold text-gray-700 cursor-pointer hover:bg-gray-100 transition-colors"
                       >
-                        <div className="flex items-center gap-2">
-                          {column}
-                          {sortColumn === column && (
-                            <span className="text-blue-600">
-                              {sortDirection === 'asc' ? '↑' : '↓'}
-                            </span>
-                          )}
+                        <div className="flex flex-col gap-1 min-w-[180px]">
+                          <div className="flex items-center gap-2">
+                            <span className="whitespace-nowrap">{column}</span>
+                            {sortColumn === column && (
+                              <span className="text-blue-600">
+                                {sortDirection === 'asc' ? '↑' : '↓'}
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-xs font-normal text-gray-500 whitespace-nowrap">
+                            DB: {column}
+                          </div>
                         </div>
                       </th>
                     ))}
