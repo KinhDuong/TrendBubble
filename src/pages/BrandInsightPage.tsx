@@ -15,6 +15,7 @@ import ShareSnapshot from '../components/ShareSnapshot';
 import AnimationSelector, { AnimationStyle } from '../components/AnimationSelector';
 import ComparisonPanel from '../components/ComparisonPanel';
 import BrandKeywordUpload from '../components/BrandKeywordUpload';
+import KeywordAnalysis from '../components/KeywordAnalysis';
 import { TrendingTopic, FAQ } from '../types';
 import { TrendingUp, Download, ArrowLeft, Search, X, ChevronsLeft, ChevronsRight } from 'lucide-react';
 
@@ -59,6 +60,7 @@ export default function BrandInsightPage() {
   const isMobile = window.innerWidth < 768;
 
   const [monthlyData, setMonthlyData] = useState<MonthlyData[]>([]);
+  const [keywordData, setKeywordData] = useState<any[]>([]);
   const [brandPageData, setBrandPageData] = useState<BrandPageData | null>(null);
   const [latestBrandPages, setLatestBrandPages] = useState<LatestBrandPage[]>([]);
   const [faqs, setFaqs] = useState<FAQ[]>([]);
@@ -127,6 +129,7 @@ export default function BrandInsightPage() {
     setLoading(true);
     await Promise.all([
       loadBrandData(),
+      loadKeywordData(),
       loadBrandPageData(),
       loadLatestBrandPages()
     ]);
@@ -155,6 +158,30 @@ export default function BrandInsightPage() {
     } catch (error) {
       console.error('Error loading brand data:', error);
       setMonthlyData([]);
+    }
+  };
+
+  const loadKeywordData = async () => {
+    if (!brandName) return;
+
+    try {
+      const decodedBrand = decodeURIComponent(brandName);
+
+      const { data, error } = await supabase
+        .from('brand_keyword_data')
+        .select('*')
+        .eq('brand', decodedBrand);
+
+      if (error) throw error;
+
+      if (data && data.length > 0) {
+        setKeywordData(data);
+      } else {
+        setKeywordData([]);
+      }
+    } catch (error) {
+      console.error('Error loading keyword data:', error);
+      setKeywordData([]);
     }
   };
 
@@ -667,6 +694,12 @@ export default function BrandInsightPage() {
                   </div>
 
                   <KeywordChart data={monthlyData} selectedBrand={decodedBrand} />
+
+                  {keywordData.length > 0 && (
+                    <div className="mt-8">
+                      <KeywordAnalysis keywords={keywordData} theme={theme} />
+                    </div>
+                  )}
                 </div>
               )}
 
