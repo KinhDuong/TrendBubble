@@ -49,7 +49,7 @@ export default function PageEditor({ theme, onClose, existingPage }: PageEditorP
     'AI', 'MARKETS', 'ECONOMY', 'TECHNOLOGY', 'MONEY', 'HEALTHCARE',
     'DEMOGRAPHICS', 'ENERGY', 'MAPS', 'MINING', 'GREEN', 'QUIZZES',
     'TV & MOVIES', 'SHOPPING', 'VIDEOS', 'NEWS', 'TASTY', 'STREAMING & YOUTUBE',
-    'THE WORLD'
+    'THE WORLD', 'GAMING'
   ];
 
   useEffect(() => {
