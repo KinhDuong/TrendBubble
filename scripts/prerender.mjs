@@ -334,63 +334,59 @@ async function generateContentHTML(pageData, topics, sourceLabel) {
     `;
   }
 
-  // Add category pages section for SEO
-  if (pageData.category) {
-    const { data: categoryPages } = await supabase
-      .from('pages')
-      .select('*')
-      .eq('category', pageData.category)
-      .neq('page_url', pageData.page_url)
-      .order('created_at', { ascending: false })
-      .limit(10);
+  // Add latest pages section for SEO
+  const { data: latestPages } = await supabase
+    .from('pages')
+    .select('*')
+    .neq('page_url', pageData.page_url)
+    .order('created_at', { ascending: false })
+    .limit(10);
 
-    if (categoryPages && categoryPages.length > 0) {
-      const categoryTitle = pageData.category.toUpperCase();
+  if (latestPages && latestPages.length > 0) {
+    contentHTML += `
+      <section class="latest-pages" aria-labelledby="latest-pages-heading" style="max-width: 80rem; margin: 2rem auto 1.5rem; padding: 0 1rem;">
+        <div style="position: relative; margin-bottom: 1.5rem;">
+          <h2 id="latest-pages-heading" style="font-size: 1.5rem; font-weight: 700; color: white; display: inline-block; padding: 0.5rem 1rem; position: relative;">
+            <span style="position: relative; z-index: 10;">LATEST</span>
+            <div style="position: absolute; inset: 0; background: linear-gradient(to right, #3b82f6, #2563eb); transform: skewX(-12deg);"></div>
+          </h2>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
+    `;
+
+    latestPages.forEach(page => {
+      const pageDate = new Date(page.created_at).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
       contentHTML += `
-        <section class="category-pages" aria-labelledby="category-pages-heading" style="max-width: 80rem; margin: 2rem auto 1.5rem; padding: 0 1rem;">
-          <div style="position: relative; margin-bottom: 1.5rem;">
-            <h2 id="category-pages-heading" style="font-size: 1.5rem; font-weight: 700; color: white; display: inline-block; padding: 0.5rem 1rem; position: relative;">
-              <span style="position: relative; z-index: 10;">${categoryTitle}</span>
-              <div style="position: absolute; inset: 0; background: linear-gradient(to right, #facc15, #f59e0b); transform: skewX(-12deg);"></div>
-            </h2>
-          </div>
-          <div style="display: flex; flex-direction: column; gap: 1rem;">
-      `;
-
-      categoryPages.forEach(page => {
-        const pageDate = new Date(page.created_at).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
-        contentHTML += `
-            <a href="${BASE_URL}${page.page_url}" style="display: flex; gap: 1rem; padding: 1rem; background-color: #1f2937; border-radius: 0.5rem; text-decoration: none; transition: all 0.3s;" onmouseover="this.style.boxShadow='0 10px 15px -3px rgba(0, 0, 0, 0.4)'" onmouseout="this.style.boxShadow='none'">
-              <div style="flex-shrink: 0; width: 8rem; height: 6rem; border-radius: 0.5rem; overflow: hidden;">
-                ${page.cover_image
-                  ? `<img src="${page.cover_image}" alt="${page.meta_title}" style="width: 100%; height: 100%; object-fit: cover;" />`
-                  : `<div style="width: 100%; height: 100%; background: linear-gradient(to bottom right, #60a5fa, #22d3ee);"></div>`
-                }
+          <a href="${BASE_URL}${page.page_url}" style="display: flex; gap: 1rem; padding: 1rem; background-color: #1f2937; border-radius: 0.5rem; text-decoration: none; transition: all 0.3s;" onmouseover="this.style.boxShadow='0 10px 15px -3px rgba(0, 0, 0, 0.4)'" onmouseout="this.style.boxShadow='none'">
+            <div style="flex-shrink: 0; width: 8rem; height: 6rem; border-radius: 0.5rem; overflow: hidden;">
+              ${page.cover_image
+                ? `<img src="${page.cover_image}" alt="${page.meta_title}" style="width: 100%; height: 100%; object-fit: cover;" />`
+                : `<div style="width: 100%; height: 100%; background: linear-gradient(to bottom right, #60a5fa, #22d3ee);"></div>`
+              }
+            </div>
+            <div style="flex: 1;">
+              <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; margin-bottom: 0.5rem;">
+                <span style="color: #60a5fa; font-weight: 600; text-transform: uppercase;">Page</span>
+                <span style="color: #6b7280;">/</span>
+                <span style="color: #9ca3af; display: flex; align-items: center; gap: 0.25rem;">
+                  <svg style="width: 0.75rem; height: 0.75rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10" stroke-width="2"/>
+                    <path stroke-linecap="round" d="M12 6v6l4 2" stroke-width="2"/>
+                  </svg>
+                  ${pageDate}
+                </span>
               </div>
-              <div style="flex: 1;">
-                <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; margin-bottom: 0.5rem;">
-                  <span style="color: #60a5fa; font-weight: 600; text-transform: uppercase;">${pageData.category}</span>
-                  <span style="color: #6b7280;">/</span>
-                  <span style="color: #9ca3af; display: flex; align-items: center; gap: 0.25rem;">
-                    <svg style="width: 0.75rem; height: 0.75rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <circle cx="12" cy="12" r="10" stroke-width="2"/>
-                      <path stroke-linecap="round" d="M12 6v6l4 2" stroke-width="2"/>
-                    </svg>
-                    ${pageDate}
-                  </span>
-                </div>
-                <h3 style="color: white; font-size: 1.125rem; font-weight: 700; margin-bottom: 0.5rem;">${page.meta_title}</h3>
-                ${page.meta_description ? `<p style="color: #9ca3af; font-size: 0.875rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${page.meta_description}</p>` : ''}
-              </div>
-            </a>
-        `;
-      });
-
-      contentHTML += `
-          </div>
-        </section>
+              <h3 style="color: white; font-size: 1.125rem; font-weight: 700; margin-bottom: 0.5rem;">${page.meta_title}</h3>
+              ${page.meta_description ? `<p style="color: #9ca3af; font-size: 0.875rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${page.meta_description}</p>` : ''}
+            </div>
+          </a>
       `;
-    }
+    });
+
+    contentHTML += `
+        </div>
+      </section>
+    `;
   }
 
   contentHTML += `
