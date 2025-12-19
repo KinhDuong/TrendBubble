@@ -37,131 +37,72 @@ export default function BrandKeywordUpload({ onUploadComplete }: BrandKeywordUpl
     return null;
   };
 
-  const parseCSV = (text: string): Array<{
-    brand: string;
-    keyword: string;
-    search_volume: number;
-    month: string;
-    three_month_change?: number;
-    yoy_change?: number;
-    competition?: string;
-    competition_indexed?: number;
-  }> => {
+  const parseCSV = (text: string): Array<Record<string, any>> => {
     const lines = text.split('\n').filter(line => line.trim());
-    const rawHeaders = lines[0].split(',').map(h => h.trim());
-    const headers = rawHeaders.map(h => h.toLowerCase());
 
-    const monthColumns: Array<{ index: number; month: string }> = [];
-    headers.forEach((header, index) => {
-      const month = parseMonthFromHeader(header);
-      if (month) {
-        monthColumns.push({ index, month });
-      }
-    });
+    if (lines.length < 3) {
+      throw new Error('CSV must have at least 3 rows (title, date, headers, data)');
+    }
 
-    const threeMonthChangeIndex = headers.findIndex(h =>
-      h.includes('three') && h.includes('month') && h.includes('change')
-    );
-    const yoyChangeIndex = headers.findIndex(h =>
-      h.includes('yoy') || (h.includes('year') && h.includes('change'))
-    );
-    const competitionIndex = headers.findIndex(h =>
-      h === 'competition' || (h.includes('competition') && !h.includes('index'))
-    );
-    const competitionIndexedIndex = headers.findIndex(h =>
-      h.includes('competition') && (h.includes('index') || h.includes('indexed'))
-    );
+    const rawHeaders = lines[2].split('\t').map(h => h.trim());
 
-    if (monthColumns.length > 0) {
-      const keywordIndex = headers.findIndex(h => h.includes('keyword'));
-      const brandIndex = headers.findIndex(h => h.includes('brand'));
+    if (rawHeaders.length === 0) {
+      throw new Error('No headers found in CSV');
+    }
 
-      if (keywordIndex === -1) {
-        throw new Error('CSV must contain a "keyword" column');
-      }
+    const keywordIndex = rawHeaders.findIndex(h => h.toLowerCase() === 'keyword');
 
-      const results: Array<{
-        brand: string;
-        keyword: string;
-        search_volume: number;
-        month: string;
-        three_month_change?: number;
-        yoy_change?: number;
-        competition?: string;
-        competition_indexed?: number;
-      }> = [];
+    if (keywordIndex === -1) {
+      throw new Error('CSV must contain a "Keyword" column');
+    }
 
-      const defaultBrand = brandIndex !== -1 ? '' : 'Unknown Brand';
+    const results: Array<Record<string, any>> = [];
 
-      lines.slice(1).forEach(line => {
-        const values = line.split(',').map(v => v.trim());
-        const keyword = values[keywordIndex];
-        const brand = brandIndex !== -1 ? values[brandIndex] : defaultBrand;
+    lines.slice(3).forEach(line => {
+      if (!line.trim()) return;
 
-        if (!keyword) return;
+      const values = line.split('\t').map(v => v.trim());
+      const keyword = values[keywordIndex];
 
-        const threeMonthChange = threeMonthChangeIndex !== -1 ? parseFloat(values[threeMonthChangeIndex]) : undefined;
-        const yoyChange = yoyChangeIndex !== -1 ? parseFloat(values[yoyChangeIndex]) : undefined;
-        const competition = competitionIndex !== -1 ? values[competitionIndex] : undefined;
-        const competitionIndexed = competitionIndexedIndex !== -1 ? parseFloat(values[competitionIndexedIndex]) : undefined;
+      if (!keyword) return;
 
-        monthColumns.forEach(({ index, month }) => {
-          const volume = parseInt(values[index]) || 0;
-          if (volume > 0) {
-            results.push({
-              brand: brand || 'Unknown Brand',
-              keyword,
-              search_volume: volume,
-              month,
-              three_month_change: !isNaN(threeMonthChange!) ? threeMonthChange : undefined,
-              yoy_change: !isNaN(yoyChange!) ? yoyChange : undefined,
-              competition: competition || undefined,
-              competition_indexed: !isNaN(competitionIndexed!) ? competitionIndexed : undefined
-            });
+      const row: Record<string, any> = {
+        keyword: keyword,
+        brand: 'Starbucks'
+      };
+
+      rawHeaders.forEach((header, index) => {
+        if (index === keywordIndex) return;
+
+        const value = values[index];
+        if (!value || value === '') return;
+
+        if (header.toLowerCase().startsWith('searches:')) {
+          const parsedValue = parseInt(value.replace(/,/g, ''));
+          if (!isNaN(parsedValue) && parsedValue > 0) {
+            row[header] = parsedValue;
           }
-        });
+        } else if (header === 'Avg. monthly searches') {
+          const parsedValue = parseInt(value.replace(/,/g, ''));
+          if (!isNaN(parsedValue)) {
+            row[header] = parsedValue;
+          }
+        } else if (header === 'Competition (indexed value)' ||
+                   header === 'Top of page bid (low range)' ||
+                   header === 'Top of page bid (high range)') {
+          const parsedValue = parseFloat(value);
+          if (!isNaN(parsedValue)) {
+            row[header] = parsedValue;
+          }
+        } else {
+          row[header] = value;
+        }
       });
 
-      return results.filter(row => row.keyword);
-    }
+      results.push(row);
+    });
 
-    const brandIndex = headers.findIndex(h => h.includes('brand'));
-    const keywordIndex = headers.findIndex(h => h.includes('keyword'));
-    const volumeIndex = headers.findIndex(h => h.includes('volume') || h.includes('search'));
-    const monthIndex = headers.findIndex(h => h.includes('month') || h.includes('date'));
-
-    if (brandIndex === -1 || keywordIndex === -1 || volumeIndex === -1 || monthIndex === -1) {
-      throw new Error('CSV must contain either:\n1) "Searches: MMM YYYY" columns, OR\n2) brand, keyword, search_volume/volume, month/date columns');
-    }
-
-    return lines.slice(1).map(line => {
-      const values = line.split(',').map(v => v.trim());
-      const monthValue = values[monthIndex];
-
-      let formattedMonth = monthValue;
-      if (monthValue && !monthValue.match(/^\d{4}-\d{2}-\d{2}$/)) {
-        const date = new Date(monthValue);
-        if (!isNaN(date.getTime())) {
-          formattedMonth = date.toISOString().split('T')[0];
-        }
-      }
-
-      const threeMonthChange = threeMonthChangeIndex !== -1 ? parseFloat(values[threeMonthChangeIndex]) : undefined;
-      const yoyChange = yoyChangeIndex !== -1 ? parseFloat(values[yoyChangeIndex]) : undefined;
-      const competition = competitionIndex !== -1 ? values[competitionIndex] : undefined;
-      const competitionIndexed = competitionIndexedIndex !== -1 ? parseFloat(values[competitionIndexedIndex]) : undefined;
-
-      return {
-        brand: values[brandIndex],
-        keyword: values[keywordIndex],
-        search_volume: parseInt(values[volumeIndex]) || 0,
-        month: formattedMonth,
-        three_month_change: !isNaN(threeMonthChange!) ? threeMonthChange : undefined,
-        yoy_change: !isNaN(yoyChange!) ? yoyChange : undefined,
-        competition: competition || undefined,
-        competition_indexed: !isNaN(competitionIndexed!) ? competitionIndexed : undefined
-      };
-    }).filter(row => row.brand && row.keyword && row.month);
+    return results.filter(row => row.keyword);
   };
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -186,15 +127,9 @@ export default function BrandKeywordUpload({ onUploadComplete }: BrandKeywordUpl
       }
 
       const recordsToInsert = data.map(row => ({
-        brand: row.brand,
-        keyword: row.keyword,
-        search_volume: row.search_volume,
-        month: row.month,
+        ...row,
         user_id: user.id,
-        three_month_change: row.three_month_change,
-        yoy_change: row.yoy_change,
-        competition: row.competition,
-        competition_indexed: row.competition_indexed
+        created_at: new Date().toISOString()
       }));
 
       const { error: insertError } = await supabase
@@ -203,9 +138,7 @@ export default function BrandKeywordUpload({ onUploadComplete }: BrandKeywordUpl
 
       if (insertError) throw insertError;
 
-      await calculateMonthlyData(data, user.id);
-
-      setSuccess(`Successfully uploaded ${data.length} records`);
+      setSuccess(`Successfully uploaded ${data.length} keyword records`);
       onUploadComplete();
 
       event.target.value = '';
@@ -216,59 +149,6 @@ export default function BrandKeywordUpload({ onUploadComplete }: BrandKeywordUpl
     }
   };
 
-  const calculateMonthlyData = async (data: Array<{
-    brand: string;
-    keyword: string;
-    search_volume: number;
-    month: string;
-  }>, userId: string) => {
-    const monthlyMap = new Map<string, {
-      brand: string;
-      month: string;
-      total_volume: number;
-      keywords: Array<{ keyword: string; volume: number }>;
-    }>();
-
-    data.forEach(row => {
-      const yearMonth = row.month.substring(0, 7);
-      const firstOfMonth = `${yearMonth}-01`;
-      const key = `${row.brand}-${yearMonth}`;
-
-      if (!monthlyMap.has(key)) {
-        monthlyMap.set(key, {
-          brand: row.brand,
-          month: firstOfMonth,
-          total_volume: 0,
-          keywords: []
-        });
-      }
-      const entry = monthlyMap.get(key)!;
-      entry.total_volume += row.search_volume;
-      entry.keywords.push({ keyword: row.keyword, volume: row.search_volume });
-    });
-
-    const monthlyRecords = Array.from(monthlyMap.values()).map(entry => ({
-      brand: entry.brand,
-      month: entry.month,
-      total_volume: entry.total_volume,
-      keyword_count: entry.keywords.length,
-      top_keywords: entry.keywords
-        .sort((a, b) => b.volume - a.volume),
-      user_id: userId
-    }));
-
-    const { error: monthlyError } = await supabase
-      .from('brand_keyword_monthly_data')
-      .upsert(monthlyRecords, {
-        onConflict: 'brand,month,user_id',
-        ignoreDuplicates: false
-      });
-
-    if (monthlyError) {
-      console.error('Error upserting monthly data:', monthlyError);
-      throw monthlyError;
-    }
-  };
 
   return (
     <div className="bg-white rounded-lg shadow-sm p-6">
@@ -276,23 +156,26 @@ export default function BrandKeywordUpload({ onUploadComplete }: BrandKeywordUpl
 
       <div className="mb-4">
         <p className="text-sm text-gray-600 mb-2 font-semibold">
-          Upload CSV in one of two formats:
+          Upload CSV/TSV file with keyword data
         </p>
         <div className="text-xs text-gray-500 space-y-2">
           <div>
-            <p className="font-semibold">Format 1 (Long format):</p>
-            <p>Columns: brand, keyword, search_volume, month</p>
-            <p className="italic">Example: Nike, "running shoes", 12000, 2024-01-01</p>
+            <p className="font-semibold">Required:</p>
+            <p>Must have a "Keyword" column</p>
           </div>
           <div>
-            <p className="font-semibold">Format 2 (Wide format with monthly columns):</p>
-            <p>Columns: keyword, Searches: Nov 2021, Searches: Dec 2021, ...</p>
-            <p className="italic">Example: "running shoes", 10000, 12000, 15000</p>
-            <p className="text-gray-400">(Brand column is optional for this format)</p>
+            <p className="font-semibold">Supported columns:</p>
+            <p className="text-gray-400">
+              All columns will be imported as-is. Typical columns include:
+              Currency, Avg. monthly searches, Three month change, YoY change,
+              Competition, Competition (indexed value), Top of page bids,
+              and monthly search columns (Searches: MMM YYYY)
+            </p>
           </div>
-          <div className="mt-3 pt-2 border-t border-gray-300">
-            <p className="font-semibold text-gray-600">Optional columns (both formats):</p>
-            <p className="text-gray-400">Three month change, YoY change, Competition, Competition (indexed value)</p>
+          <div className="mt-2">
+            <p className="text-gray-400 italic">
+              Note: First two rows (title and date) will be skipped automatically
+            </p>
           </div>
         </div>
       </div>
@@ -306,7 +189,7 @@ export default function BrandKeywordUpload({ onUploadComplete }: BrandKeywordUpl
         </div>
         <input
           type="file"
-          accept=".csv"
+          accept=".csv,.tsv,.txt"
           onChange={handleFileUpload}
           disabled={uploading}
           className="hidden"
