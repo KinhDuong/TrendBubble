@@ -1356,7 +1356,7 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, [topics, maxDisplay, theme, layout, cryptoTimeframe, useCryptoColors, animationStyle]);
+  }, [topics, maxDisplay, theme, layout, cryptoTimeframe, useCryptoColors, animationStyle, shape]);
 
   const generateAriaLabel = () => {
     const topicCount = Math.min(maxDisplay, topics.length);
