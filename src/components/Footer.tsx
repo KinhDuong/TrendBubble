@@ -102,21 +102,8 @@ export default function Footer({ theme }: FooterProps) {
         </div>
 
         <div className={`mt-8 pt-6 border-t ${isDark ? 'border-gray-700' : 'border-gray-200'}`}>
-          <div className={`mb-6 p-4 rounded-lg ${isDark ? 'bg-gray-900/50 border border-gray-700' : 'bg-gray-50 border border-gray-200'}`}>
-            <h4 className={`text-sm font-semibold mb-2 ${isDark ? 'text-gray-200' : 'text-gray-800'}`}>
-              Disclaimer
-            </h4>
-            <p className={`text-xs leading-relaxed ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-              The trending topics and data displayed on this website are for informational and visualization purposes only.
-              While we strive for accuracy, the data may not be real-time and could contain errors, inaccuracies, or delays.
-              This platform aggregates and visualizes trending information from various sources but does not guarantee the
-              completeness, reliability, or timeliness of any data presented. Users should independently verify information
-              before making any decisions based on the trends shown here. We are not responsible for any actions taken based
-              on the information displayed on this site.
-            </p>
-          </div>
           <div className={`text-center text-sm ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-            <p>2026 Top Best Charts. All rights reserved.</p>
+            <p>{currentYear} Top Best Charts. All rights reserved.</p>
           </div>
         </div>
       </div>

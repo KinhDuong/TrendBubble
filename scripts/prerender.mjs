@@ -70,21 +70,8 @@ function generateFooterHTML() {
           </div>
         </div>
 
-        <!-- Disclaimer and Copyright -->
+        <!-- Copyright -->
         <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid #374151;">
-          <div style="margin-bottom: 1.5rem; padding: 1rem; border-radius: 0.5rem; background-color: rgba(17, 24, 39, 0.5); border: 1px solid #374151;">
-            <h4 style="font-size: 0.875rem; font-weight: 600; margin-bottom: 0.5rem; color: #e5e7eb;">
-              Disclaimer
-            </h4>
-            <p style="font-size: 0.75rem; line-height: 1.625; color: #9ca3af;">
-              The trending topics and data displayed on this website are for informational and visualization purposes only.
-              While we strive for accuracy, the data may not be real-time and could contain errors, inaccuracies, or delays.
-              This platform aggregates and visualizes trending information from various sources but does not guarantee the
-              completeness, reliability, or timeliness of any data presented. Users should independently verify information
-              before making any decisions based on the trends shown here. We are not responsible for any actions taken based
-              on the information displayed on this site.
-            </p>
-          </div>
           <div style="text-align: center; font-size: 0.875rem;">
             <p>${currentYear} Top Best Charts. All rights reserved.</p>
           </div>
