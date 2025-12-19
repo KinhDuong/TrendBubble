@@ -9,6 +9,14 @@ export type AnimationStyle = 'default' | 'bounce' | 'elastic' | 'spiral' | 'drop
 
 export type Shape = 'bubble' | 'square' | 'rounded-square' | 'hexagon' | 'diamond' | 'triangle' | 'star' | 'shark';
 
+interface KeywordPerformanceData {
+  keyword: string;
+  three_month_change?: number;
+  yoy_change?: number;
+  monthly_searches?: number[];
+  bid_high?: number;
+}
+
 interface BubbleChartProps {
   topics: TrendingTopic[];
   maxDisplay: number;
@@ -21,6 +29,7 @@ interface BubbleChartProps {
   cryptoTimeframe?: CryptoTimeframe;
   animationStyle?: AnimationStyle;
   shape?: Shape;
+  keywordPerformanceData?: KeywordPerformanceData[];
 }
 
 interface Bubble {
@@ -45,9 +54,11 @@ interface Bubble {
   layoutY?: number;
   rotation?: number;
   initialY?: number;
+  ringColor?: string;
+  ringIntensity?: number;
 }
 
-export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force', onBubbleTimingUpdate, comparingTopics: externalComparingTopics, onComparingTopicsChange, useCryptoColors = false, cryptoTimeframe = '1h', animationStyle = 'default', shape = 'bubble' }: BubbleChartProps) {
+export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force', onBubbleTimingUpdate, comparingTopics: externalComparingTopics, onComparingTopicsChange, useCryptoColors = false, cryptoTimeframe = '1h', animationStyle = 'default', shape = 'bubble', keywordPerformanceData = [] }: BubbleChartProps) {
   const drawShape = (ctx: CanvasRenderingContext2D, x: number, y: number, radius: number, shapeType: Shape) => {
     ctx.beginPath();
 
@@ -140,6 +151,83 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
         break;
       }
     }
+  };
+
+  const getKeywordColorAndRing = (topicName: string): { color: string; ringColor?: string; ringIntensity?: number } => {
+    if (!keywordPerformanceData.length) {
+      return { color: '#3B82F6' };
+    }
+
+    const perfData = keywordPerformanceData.find(k => k.keyword === topicName);
+    if (!perfData) {
+      return { color: '#3B82F6' };
+    }
+
+    const threeMonthChange = perfData.three_month_change || 0;
+    const yoyChange = perfData.yoy_change || 0;
+
+    const isYearRound = perfData.monthly_searches && perfData.monthly_searches.length >= 12
+      ? isYearRoundPerformer(perfData.monthly_searches)
+      : false;
+
+    if (isYearRound) {
+      return { color: '#A855F7' };
+    }
+
+    const significantThreshold = 0.05;
+
+    if (Math.abs(yoyChange) > significantThreshold) {
+      if (yoyChange > 0) {
+        const intensity = Math.min(Math.abs(yoyChange) * 100, 100) / 100;
+        return {
+          color: '#22C55E',
+          ringColor: '#16A34A',
+          ringIntensity: intensity
+        };
+      } else {
+        const intensity = Math.min(Math.abs(yoyChange) * 100, 100) / 100;
+        return {
+          color: '#EF4444',
+          ringColor: '#DC2626',
+          ringIntensity: intensity
+        };
+      }
+    }
+
+    if (Math.abs(threeMonthChange) > significantThreshold) {
+      if (threeMonthChange > 0) {
+        const intensity = Math.min(Math.abs(threeMonthChange) * 100, 100) / 100;
+        return {
+          color: '#86EFAC',
+          ringColor: '#4ADE80',
+          ringIntensity: intensity
+        };
+      } else {
+        const intensity = Math.min(Math.abs(threeMonthChange) * 100, 100) / 100;
+        return {
+          color: '#FCA5A5',
+          ringColor: '#F87171',
+          ringIntensity: intensity
+        };
+      }
+    }
+
+    return { color: '#3B82F6' };
+  };
+
+  const isYearRoundPerformer = (monthlySearches: number[]): boolean => {
+    if (monthlySearches.length < 12) return false;
+
+    const nonZeroSearches = monthlySearches.filter(v => v > 0);
+    if (nonZeroSearches.length < 10) return false;
+
+    const avg = nonZeroSearches.reduce((sum, val) => sum + val, 0) / nonZeroSearches.length;
+    const stdDev = Math.sqrt(
+      nonZeroSearches.reduce((sum, val) => sum + Math.pow(val - avg, 2), 0) / nonZeroSearches.length
+    );
+    const cv = stdDev / avg;
+
+    return cv < 0.5;
   };
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -782,6 +870,12 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
       // The shrink factor will be applied during animation
       const initialRadius = isStaticLayout ? radius : 0;
 
+      const colorData = useCryptoColors
+        ? { color: getCryptoColorByGain(cryptoValue, getCryptoDisplayText(topic)) }
+        : (keywordPerformanceData.length > 0
+            ? getKeywordColorAndRing(topic.name)
+            : { color: getRandomColor(topicIndex) });
+
       return {
         topic,
         x,
@@ -792,7 +886,9 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
         vy: usePhysics ? (Math.random() - 0.5) * 0.25 : 0,
         radius: initialRadius,
         baseRadius: radius,
-        color: useCryptoColors ? getCryptoColorByGain(cryptoValue, getCryptoDisplayText(topic)) : getRandomColor(topicIndex),
+        color: colorData.color,
+        ringColor: colorData.ringColor,
+        ringIntensity: colorData.ringIntensity,
         createdAt: Date.now(),
         lifetime: randomLifetime,
         isSpawning: !isStaticLayout,
@@ -1268,6 +1364,17 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
         }
 
         const isMobile = window.innerWidth < 768;
+
+        if (bubble.ringColor && bubble.ringIntensity) {
+          const ringOpacity = Math.min(bubble.ringIntensity, 1);
+          const ringLineWidth = 2 + (bubble.ringIntensity * 4);
+          const ringRgb = bubble.ringColor.match(/\w\w/g)?.map(x => parseInt(x, 16)) || [59, 130, 246];
+
+          drawShape(ctx, bubble.x, bubble.y, displayRadius + 3, shape);
+          ctx.strokeStyle = `rgba(${ringRgb[0]}, ${ringRgb[1]}, ${ringRgb[2]}, ${ringOpacity * opacity})`;
+          ctx.lineWidth = ringLineWidth;
+          ctx.stroke();
+        }
 
         if (bubble.isPinned) {
           drawShape(ctx, bubble.x, bubble.y, displayRadius + 4, shape);

@@ -317,6 +317,38 @@ export default function BrandInsightPage() {
     return result;
   }, [monthlyData]);
 
+  const keywordPerformanceData = useMemo(() => {
+    return keywordData.map(kw => {
+      const monthlySearches: number[] = [];
+      const monthColumns = [
+        'Searches: Dec 2021', 'Searches: Jan 2022', 'Searches: Feb 2022', 'Searches: Mar 2022',
+        'Searches: Apr 2022', 'Searches: May 2022', 'Searches: Jun 2022', 'Searches: Jul 2022',
+        'Searches: Aug 2022', 'Searches: Sep 2022', 'Searches: Oct 2022', 'Searches: Nov 2022',
+        'Searches: Dec 2022', 'Searches: Jan 2023', 'Searches: Feb 2023', 'Searches: Mar 2023',
+        'Searches: Apr 2023', 'Searches: May 2023', 'Searches: Jun 2023', 'Searches: Jul 2023',
+        'Searches: Aug 2023', 'Searches: Sep 2023', 'Searches: Oct 2023', 'Searches: Nov 2023',
+        'Searches: Dec 2023', 'Searches: Jan 2024', 'Searches: Feb 2024', 'Searches: Mar 2024',
+        'Searches: Apr 2024', 'Searches: May 2024', 'Searches: Jun 2024', 'Searches: Jul 2024',
+        'Searches: Aug 2024', 'Searches: Sep 2024', 'Searches: Oct 2024', 'Searches: Nov 2024',
+        'Searches: Dec 2024'
+      ];
+
+      monthColumns.forEach(col => {
+        if (kw[col] !== null && kw[col] !== undefined) {
+          monthlySearches.push(Number(kw[col]));
+        }
+      });
+
+      return {
+        keyword: kw.keyword,
+        three_month_change: kw.three_month_change,
+        yoy_change: kw.yoy_change,
+        monthly_searches: monthlySearches,
+        bid_high: kw['Top of page bid (high range)']
+      };
+    });
+  }, [keywordData]);
+
   const getFilteredTopics = () => {
     return transformToTopics.filter(topic => {
       const matchesSearch = !searchQuery || topic.name.toLowerCase().includes(searchQuery.toLowerCase());
@@ -716,6 +748,7 @@ export default function BrandInsightPage() {
                     cryptoTimeframe="24h"
                     animationStyle={animationStyle}
                     shape={shape as Shape}
+                    keywordPerformanceData={keywordPerformanceData}
                   />
                 </div>
               )}
