@@ -76,6 +76,7 @@ function DynamicPage() {
     { value: 'user_upload', label: 'My Uploads' }
   ]);
   const [latestPages, setLatestPages] = useState<PageData[]>([]);
+  const [allLatestPages, setAllLatestPages] = useState<PageData[]>([]);
   const [sortField, setSortField] = useState<SortField>('searchVolume');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const [sourceFilter, setSourceFilter] = useState<string>('all');
@@ -132,6 +133,7 @@ function DynamicPage() {
   useEffect(() => {
     if (pageData) {
       loadLatestPages(pageData.category, pageData.page_url);
+      loadAllLatestPages(pageData.page_url);
     }
   }, [pageData?.category, pageData?.page_url]);
 
@@ -403,9 +405,15 @@ function DynamicPage() {
 
   const loadLatestPages = async (category: string | null, currentPageUrl: string) => {
     try {
+      if (!category) {
+        setLatestPages([]);
+        return;
+      }
+
       const { data, error } = await supabase
         .from('pages')
         .select('*')
+        .eq('category', category)
         .neq('page_url', currentPageUrl)
         .order('created_at', { ascending: false })
         .limit(10);
@@ -416,7 +424,26 @@ function DynamicPage() {
         setLatestPages(data);
       }
     } catch (error) {
-      console.error('Error loading latest pages:', error);
+      console.error('Error loading category pages:', error);
+    }
+  };
+
+  const loadAllLatestPages = async (currentPageUrl: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('pages')
+        .select('*')
+        .neq('page_url', currentPageUrl)
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      if (error) throw error;
+
+      if (data) {
+        setAllLatestPages(data);
+      }
+    } catch (error) {
+      console.error('Error loading all latest pages:', error);
     }
   };
 
@@ -1345,7 +1372,7 @@ snapshotButton={null}
               </div>
             </section>
           )}
-          {latestPages.length > 0 && (
+          {allLatestPages.length > 0 && (
         <section className="max-w-7xl mx-auto mt-8 mb-0 px-4 md:px-6" aria-labelledby="latest-pages-heading">
           <div className="relative mb-6">
             <h2 id="latest-pages-heading" className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} inline-block px-4 py-2 relative`}>
@@ -1354,7 +1381,7 @@ snapshotButton={null}
             </h2>
           </div>
           <div className="space-y-4">
-            {latestPages.map((page) => (
+            {allLatestPages.map((page) => (
               <a
                 key={page.id}
                 href={page.page_url}
