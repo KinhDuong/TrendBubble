@@ -354,7 +354,7 @@ async function generateContentHTML(pageData, topics, sourceLabel) {
     latestPages.forEach(page => {
       const pageDate = new Date(page.created_at).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
       contentHTML += `
-          <a href="${page.page_url}" style="display: block; background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; overflow: hidden; text-decoration: none; transition: all 0.2s;">
+          <a href="${BASE_URL}${page.page_url}" style="display: block; background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; overflow: hidden; text-decoration: none; transition: all 0.2s;">
             <div style="padding: 1rem;">
               <div style="color: #6b7280; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; margin-bottom: 0.5rem;">
                 ${pageDate}
@@ -551,7 +551,7 @@ async function prerenderExplorePage(baseHTML, distPath) {
         <article style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; padding: 2rem; margin-bottom: 1.5rem;">
           <span style="color: #60a5fa; font-size: 0.875rem; font-weight: 600; text-transform: uppercase;">Featured</span>
           <h2 style="font-size: 1.5rem; font-weight: 700; color: white; margin: 0.5rem 0;">
-            <a href="${heroPage.page_url}" style="text-decoration: none; color: inherit;">${heroPage.meta_title}</a>
+            <a href="${BASE_URL}${heroPage.page_url}" style="text-decoration: none; color: inherit;">${heroPage.meta_title}</a>
           </h2>
           <p style="color: #d1d5db; font-size: 0.875rem;">${heroPage.meta_description}</p>
         </article>
@@ -565,7 +565,7 @@ async function prerenderExplorePage(baseHTML, distPath) {
           <article style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; padding: 1.5rem;">
             <span style="color: #34d399; font-size: 0.875rem; font-weight: 600; text-transform: uppercase;">Top</span>
             <h3 style="font-size: 1.25rem; font-weight: 700; color: white; margin: 0.5rem 0;">
-              <a href="${page.page_url}" style="text-decoration: none; color: inherit;">${page.meta_title}</a>
+              <a href="${BASE_URL}${page.page_url}" style="text-decoration: none; color: inherit;">${page.meta_title}</a>
             </h3>
             <p style="color: #d1d5db; font-size: 0.875rem;">${page.meta_description}</p>
           </article>
@@ -590,7 +590,7 @@ async function prerenderExplorePage(baseHTML, distPath) {
           <div style="flex: 1;">
             <span style="color: #60a5fa; font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">Page / ${pageDate}</span>
             <h3 style="font-size: 1.125rem; font-weight: 700; color: white; margin: 0.5rem 0;">
-              <a href="${page.page_url}" style="text-decoration: none; color: inherit;">${page.meta_title}</a>
+              <a href="${BASE_URL}${page.page_url}" style="text-decoration: none; color: inherit;">${page.meta_title}</a>
             </h3>
             ${page.meta_description ? `<p style="color: #d1d5db; font-size: 0.875rem;">${page.meta_description}</p>` : ''}
           </div>
@@ -694,7 +694,7 @@ async function prerenderExplorePage(baseHTML, distPath) {
           <article style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; padding: 1rem;">
             <span style="color: #60a5fa; font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">Featured #${index + 1}</span>
             <h3 style="font-size: 1rem; font-weight: 600; color: white; margin: 0.5rem 0;">
-              <a href="${page.page_url}" style="text-decoration: none; color: inherit;">${page.meta_title}</a>
+              <a href="${BASE_URL}${page.page_url}" style="text-decoration: none; color: inherit;">${page.meta_title}</a>
             </h3>
             ${page.meta_description ? `<p style="color: #9ca3af; font-size: 0.875rem;">${page.meta_description}</p>` : ''}
           </article>
@@ -714,7 +714,7 @@ async function prerenderExplorePage(baseHTML, distPath) {
           <article style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; padding: 1rem;">
             <span style="color: #ec4899; font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">Popular #${index + 1}</span>
             <h3 style="font-size: 1rem; font-weight: 600; color: white; margin: 0.5rem 0;">
-              <a href="${page.page_url}" style="text-decoration: none; color: inherit;">${page.meta_title}</a>
+              <a href="${BASE_URL}${page.page_url}" style="text-decoration: none; color: inherit;">${page.meta_title}</a>
             </h3>
             ${page.meta_description ? `<p style="color: #9ca3af; font-size: 0.875rem;">${page.meta_description}</p>` : ''}
           </article>
@@ -920,7 +920,7 @@ async function prerenderTrendingNowPage(baseHTML, distPath) {
 
     pages.forEach((page) => {
       homeContentHTML += `
-          <a href="${page.page_url}" style="text-decoration: underline; color: #60a5fa;">
+          <a href="${BASE_URL}${page.page_url}" style="text-decoration: underline; color: #60a5fa;">
             ${page.meta_title}
           </a>
       `;
@@ -942,7 +942,7 @@ async function prerenderTrendingNowPage(baseHTML, distPath) {
       homeContentHTML += `
           <article style="padding: 1rem; background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem;">
             <h3 style="font-size: 1.125rem; font-weight: 600; color: white; margin-bottom: 0.5rem;">
-              <a href="${page.page_url}" style="text-decoration: none; color: inherit;">
+              <a href="${BASE_URL}${page.page_url}" style="text-decoration: none; color: inherit;">
                 ${page.meta_title}
               </a>
             </h3>
@@ -1197,7 +1197,7 @@ async function prerenderBrowseTopicsPage(baseHTML, distPath) {
                   ${category} / ${pageDate}
                 </div>
                 <h3 style="font-size: 1.125rem; font-weight: 700; color: white; margin-bottom: 0.5rem;">
-                  <a href="${page.page_url}" style="text-decoration: none; color: inherit;">${page.meta_title}</a>
+                  <a href="${BASE_URL}${page.page_url}" style="text-decoration: none; color: inherit;">${page.meta_title}</a>
                 </h3>
                 ${page.meta_description ? `<p style="color: #9ca3af; font-size: 0.875rem;">${page.meta_description}</p>` : ''}
               </div>
