@@ -10,6 +10,7 @@ export default function BrandKeywordUpload({ onUploadComplete }: BrandKeywordUpl
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [brandName, setBrandName] = useState<string>('');
 
   const parseMonthFromHeader = (header: string): string | null => {
     const searchesMatch = header.match(/searches?:\s*(\w+)\s+(\d{4})/i);
@@ -68,7 +69,7 @@ export default function BrandKeywordUpload({ onUploadComplete }: BrandKeywordUpl
 
       const row: Record<string, any> = {
         keyword: keyword,
-        brand: 'Starbucks'
+        brand: brandName || 'Unknown'
       };
 
       rawHeaders.forEach((header, index) => {
@@ -109,6 +110,12 @@ export default function BrandKeywordUpload({ onUploadComplete }: BrandKeywordUpl
     const file = event.target.files?.[0];
     if (!file) return;
 
+    if (!brandName.trim()) {
+      setError('Please enter a brand name before uploading');
+      event.target.value = '';
+      return;
+    }
+
     setUploading(true);
     setError(null);
     setSuccess(null);
@@ -136,13 +143,17 @@ export default function BrandKeywordUpload({ onUploadComplete }: BrandKeywordUpl
         .from('brand_keyword_data')
         .insert(recordsToInsert);
 
-      if (insertError) throw insertError;
+      if (insertError) {
+        console.error('Insert error:', insertError);
+        throw new Error(`Database error: ${insertError.message || 'Unknown error'}`);
+      }
 
       setSuccess(`Successfully uploaded ${data.length} keyword records`);
       onUploadComplete();
 
       event.target.value = '';
     } catch (err) {
+      console.error('Upload error details:', err);
       setError(err instanceof Error ? err.message : 'Failed to upload file');
     } finally {
       setUploading(false);
@@ -153,6 +164,20 @@ export default function BrandKeywordUpload({ onUploadComplete }: BrandKeywordUpl
   return (
     <div className="bg-white rounded-lg shadow-sm p-6">
       <h2 className="text-xl font-semibold mb-4">Upload Keyword Data</h2>
+
+      <div className="mb-4">
+        <label htmlFor="brandName" className="block text-sm font-semibold text-gray-700 mb-2">
+          Brand Name *
+        </label>
+        <input
+          id="brandName"
+          type="text"
+          value={brandName}
+          onChange={(e) => setBrandName(e.target.value)}
+          placeholder="Enter brand name (e.g., Starbucks, Nike)"
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        />
+      </div>
 
       <div className="mb-4">
         <p className="text-sm text-gray-600 mb-2 font-semibold">
