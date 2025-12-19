@@ -134,12 +134,23 @@ export default function BrowseTopicsPage() {
             {[1, 2, 3].map((i) => (
               <div key={i} className="space-y-4">
                 <div className={`h-10 ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-200'} rounded w-48`}></div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="space-y-4 md:space-y-0 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-6">
                   {[1, 2, 3].map((j) => (
-                    <div key={j} className={`rounded-lg ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} p-4`}>
-                      <div className={`h-48 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'} rounded mb-4`}></div>
-                      <div className={`h-4 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'} rounded w-3/4 mb-2`}></div>
-                      <div className={`h-4 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'} rounded w-1/2`}></div>
+                    <div key={j}>
+                      {/* Mobile skeleton */}
+                      <div className={`flex gap-4 p-4 rounded-none md:hidden ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}>
+                        <div className={`flex-shrink-0 w-32 h-24 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'} rounded-lg`}></div>
+                        <div className="flex-1 space-y-2">
+                          <div className={`h-4 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'} rounded w-3/4`}></div>
+                          <div className={`h-4 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'} rounded w-1/2`}></div>
+                        </div>
+                      </div>
+                      {/* Desktop skeleton */}
+                      <div className={`hidden md:block rounded-lg ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} p-4`}>
+                        <div className={`h-48 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'} rounded mb-4`}></div>
+                        <div className={`h-4 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'} rounded w-3/4 mb-2`}></div>
+                        <div className={`h-4 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'} rounded w-1/2`}></div>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -195,45 +206,83 @@ export default function BrowseTopicsPage() {
                   </h2>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="space-y-4 md:space-y-0 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-6">
                   {group.pages.map((page) => (
                     <Link
                       key={page.id}
                       to={page.page_url}
-                      className={`group block rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 ${
+                      className={`group block rounded-none md:rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 ${
                         theme === 'dark' ? 'bg-gray-800' : 'bg-white'
                       }`}
                     >
-                      <div className="relative h-48 overflow-hidden">
-                        {page.cover_image ? (
-                          <img
-                            src={page.cover_image}
-                            alt={page.meta_title}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                          />
-                        ) : (
-                          <div className={`w-full h-full bg-gradient-to-br ${getCategoryColor(group.category, index)}`}></div>
-                        )}
-                      </div>
-                      <div className="p-4">
-                        <div className={`flex items-center gap-2 text-xs mb-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                          <span className="uppercase font-semibold">{group.category}</span>
-                          <span>/</span>
-                          <span className="flex items-center gap-1">
-                            <Clock className="w-3 h-3" />
-                            {formatTimeAgo(page.created_at)}
-                          </span>
+                      {/* Mobile: Horizontal card layout */}
+                      <div className="flex gap-4 p-4 md:hidden">
+                        <div className="flex-shrink-0 w-32 h-24 rounded-lg overflow-hidden">
+                          {page.cover_image ? (
+                            <img
+                              src={page.cover_image}
+                              alt={page.meta_title}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className={`w-full h-full bg-gradient-to-br ${getCategoryColor(group.category, index)}`}></div>
+                          )}
                         </div>
-                        <h3 className={`font-bold text-lg mb-2 group-hover:text-blue-600 transition-colors line-clamp-2 ${
-                          theme === 'dark' ? 'text-white' : 'text-gray-900'
-                        }`}>
-                          {page.meta_title}
-                        </h3>
-                        {page.meta_description && (
-                          <p className={`text-sm line-clamp-3 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                            {page.meta_description}
-                          </p>
-                        )}
+                        <div className="flex-1 min-w-0">
+                          <div className={`flex items-center gap-2 text-xs mb-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                            <span className="uppercase font-semibold">{group.category}</span>
+                            <span>/</span>
+                            <span className="flex items-center gap-1">
+                              <Clock className="w-3 h-3" />
+                              {formatTimeAgo(page.created_at)}
+                            </span>
+                          </div>
+                          <h3 className={`font-bold text-base mb-2 group-hover:text-blue-600 transition-colors line-clamp-2 ${
+                            theme === 'dark' ? 'text-white' : 'text-gray-900'
+                          }`}>
+                            {page.meta_title}
+                          </h3>
+                          {page.meta_description && (
+                            <p className={`text-sm line-clamp-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                              {page.meta_description}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Desktop: Vertical card layout */}
+                      <div className="hidden md:block">
+                        <div className="relative h-48 overflow-hidden">
+                          {page.cover_image ? (
+                            <img
+                              src={page.cover_image}
+                              alt={page.meta_title}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            />
+                          ) : (
+                            <div className={`w-full h-full bg-gradient-to-br ${getCategoryColor(group.category, index)}`}></div>
+                          )}
+                        </div>
+                        <div className="p-4">
+                          <div className={`flex items-center gap-2 text-xs mb-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                            <span className="uppercase font-semibold">{group.category}</span>
+                            <span>/</span>
+                            <span className="flex items-center gap-1">
+                              <Clock className="w-3 h-3" />
+                              {formatTimeAgo(page.created_at)}
+                            </span>
+                          </div>
+                          <h3 className={`font-bold text-lg mb-2 group-hover:text-blue-600 transition-colors line-clamp-2 ${
+                            theme === 'dark' ? 'text-white' : 'text-gray-900'
+                          }`}>
+                            {page.meta_title}
+                          </h3>
+                          {page.meta_description && (
+                            <p className={`text-sm line-clamp-3 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                              {page.meta_description}
+                            </p>
+                          )}
+                        </div>
                       </div>
                     </Link>
                   ))}
