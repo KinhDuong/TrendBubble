@@ -392,11 +392,25 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light' }
       console.error('Delete error:', deleteError);
     }
 
-    const recordsToInsert = data.map(row => ({
-      ...row,
-      user_id: user.id,
-      created_at: new Date().toISOString()
-    }));
+    const recordsToInsert = data.map(row => {
+      const mappedRow: Record<string, any> = {};
+
+      // Map column names to match database schema
+      Object.keys(row).forEach(key => {
+        if (key === 'Competition') {
+          // Map 'Competition' to lowercase 'competition'
+          mappedRow['competition'] = row[key];
+        } else {
+          mappedRow[key] = row[key];
+        }
+      });
+
+      return {
+        ...mappedRow,
+        user_id: user.id,
+        created_at: new Date().toISOString()
+      };
+    });
 
     console.log('Inserting records:', recordsToInsert.length);
     console.log('Sample record:', JSON.stringify(recordsToInsert[0], null, 2));
