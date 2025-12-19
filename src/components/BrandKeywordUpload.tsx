@@ -67,43 +67,66 @@ export default function BrandKeywordUpload({ onUploadComplete }: BrandKeywordUpl
 
       if (!keyword) return;
 
-      const row: Record<string, any> = {
-        keyword: keyword,
-        brand: brandName || 'Unknown'
-      };
-
       rawHeaders.forEach((header, index) => {
         if (index === keywordIndex) return;
 
         const value = values[index];
-        if (!value || value === '') return;
+        if (!value || value === '' || value === '0') return;
 
         if (header.toLowerCase().startsWith('searches:')) {
           const parsedValue = parseInt(value.replace(/,/g, ''));
           if (!isNaN(parsedValue) && parsedValue > 0) {
-            row[header] = parsedValue;
+            const month = parseMonthFromHeader(header);
+            if (month) {
+              results.push({
+                keyword: keyword,
+                brand: brandName || 'Unknown',
+                search_volume: parsedValue,
+                month: month
+              });
+            }
           }
-        } else if (header === 'Avg. monthly searches') {
-          const parsedValue = parseInt(value.replace(/,/g, ''));
-          if (!isNaN(parsedValue)) {
-            row[header] = parsedValue;
-          }
-        } else if (header === 'Competition (indexed value)' ||
-                   header === 'Top of page bid (low range)' ||
-                   header === 'Top of page bid (high range)') {
-          const parsedValue = parseFloat(value);
-          if (!isNaN(parsedValue)) {
-            row[header] = parsedValue;
-          }
-        } else {
-          row[header] = value;
         }
       });
-
-      results.push(row);
     });
 
-    return results.filter(row => row.keyword);
+    return results.filter(row => row.keyword && row.month && row.search_volume > 0);
+  };
+
+  const aggregateMonthlyData = (data: Array<Record<string, any>>) => {
+    const monthlyMap = new Map<string, { keywords: Array<{ keyword: string; volume: number }>, totalVolume: number }>();
+
+    data.forEach(row => {
+      const month = row.month;
+      if (!month) return;
+
+      if (!monthlyMap.has(month)) {
+        monthlyMap.set(month, { keywords: [], totalVolume: 0 });
+      }
+
+      const monthData = monthlyMap.get(month)!;
+      monthData.keywords.push({
+        keyword: row.keyword,
+        volume: row.search_volume || 0
+      });
+      monthData.totalVolume += (row.search_volume || 0);
+    });
+
+    const aggregated = Array.from(monthlyMap.entries()).map(([month, data]) => {
+      const topKeywords = data.keywords
+        .sort((a, b) => b.volume - a.volume)
+        .slice(0, 100);
+
+      return {
+        brand: brandName.trim(),
+        month: month,
+        total_volume: data.totalVolume,
+        keyword_count: data.keywords.length,
+        top_keywords: topKeywords
+      };
+    });
+
+    return aggregated;
   };
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -148,7 +171,28 @@ export default function BrandKeywordUpload({ onUploadComplete }: BrandKeywordUpl
         throw new Error(`Database error: ${insertError.message || 'Unknown error'}`);
       }
 
-      setSuccess(`Successfully uploaded ${data.length} keyword records`);
+      const aggregatedData = aggregateMonthlyData(data);
+
+      if (aggregatedData.length > 0) {
+        const monthlyRecords = aggregatedData.map(record => ({
+          ...record,
+          user_id: user.id,
+          created_at: new Date().toISOString()
+        }));
+
+        const { error: monthlyInsertError } = await supabase
+          .from('brand_keyword_monthly_data')
+          .upsert(monthlyRecords, {
+            onConflict: 'brand,month,user_id',
+            ignoreDuplicates: false
+          });
+
+        if (monthlyInsertError) {
+          console.error('Monthly data insert error:', monthlyInsertError);
+        }
+      }
+
+      setSuccess(`Successfully uploaded ${data.length} keyword records across ${aggregatedData.length} months`);
       onUploadComplete();
 
       event.target.value = '';
