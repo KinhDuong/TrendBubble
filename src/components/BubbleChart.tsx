@@ -7,7 +7,7 @@ import { X } from 'lucide-react';
 
 export type AnimationStyle = 'default' | 'bounce' | 'elastic' | 'spiral' | 'drop' | 'pulse' | 'shimmer';
 
-export type Shape = 'bubble' | 'square' | 'rounded-square' | 'hexagon' | 'diamond' | 'triangle' | 'star';
+export type Shape = 'bubble' | 'square' | 'rounded-square' | 'hexagon' | 'diamond' | 'triangle' | 'star' | 'shark';
 
 interface BubbleChartProps {
   topics: TrendingTopic[];
@@ -118,6 +118,24 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
           if (i === 0) ctx.moveTo(px, py);
           else ctx.lineTo(px, py);
         }
+        ctx.closePath();
+        break;
+      }
+
+      case 'shark': {
+        const scale = radius / 50;
+        ctx.moveTo(x + 45 * scale, y);
+        ctx.lineTo(x + 35 * scale, y - 8 * scale);
+        ctx.lineTo(x + 25 * scale, y - 5 * scale);
+        ctx.quadraticCurveTo(x + 15 * scale, y - 8 * scale, x + 5 * scale, y - 15 * scale);
+        ctx.lineTo(x - 5 * scale, y - 20 * scale);
+        ctx.lineTo(x - 15 * scale, y - 10 * scale);
+        ctx.quadraticCurveTo(x - 35 * scale, y - 12 * scale, x - 45 * scale, y - 8 * scale);
+        ctx.lineTo(x - 48 * scale, y);
+        ctx.quadraticCurveTo(x - 35 * scale, y + 8 * scale, x - 15 * scale, y + 8 * scale);
+        ctx.quadraticCurveTo(x + 5 * scale, y + 10 * scale, x + 15 * scale, y + 5 * scale);
+        ctx.lineTo(x + 25 * scale, y + 8 * scale);
+        ctx.lineTo(x + 35 * scale, y + 12 * scale);
         ctx.closePath();
         break;
       }

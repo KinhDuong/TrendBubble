@@ -294,6 +294,7 @@ export default function DataManager({ theme, initialSource }: DataManagerProps) 
                 <option value="diamond">Diamond</option>
                 <option value="triangle">Triangle</option>
                 <option value="star">Star</option>
+                <option value="shark">Shark</option>
               </select>
             )}
             {selectedItems.size > 0 && (
