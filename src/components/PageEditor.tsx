@@ -48,7 +48,8 @@ export default function PageEditor({ theme, onClose, existingPage }: PageEditorP
   const categories = [
     'AI', 'MARKETS', 'ECONOMY', 'TECHNOLOGY', 'MONEY', 'HEALTHCARE',
     'DEMOGRAPHICS', 'ENERGY', 'MAPS', 'MINING', 'GREEN', 'QUIZZES',
-    'TV & MOVIES', 'SHOPPING', 'VIDEOS', 'NEWS', 'TASTY', 'STREAMING & YOUTUBE'
+    'TV & MOVIES', 'SHOPPING', 'VIDEOS', 'NEWS', 'TASTY', 'STREAMING & YOUTUBE',
+    'THE WORLD'
   ];
 
   useEffect(() => {
