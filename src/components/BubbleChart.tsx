@@ -15,6 +15,8 @@ interface KeywordPerformanceData {
   yoy_change?: number;
   monthly_searches?: number[];
   bid_high?: number;
+  competition?: string | number;
+  searchVolume?: number;
 }
 
 interface BubbleChartProps {
@@ -56,6 +58,11 @@ interface Bubble {
   initialY?: number;
   ringColor?: string;
   ringIntensity?: number;
+  badges?: {
+    isSeasonal?: boolean;
+    isHighValue?: boolean;
+    opportunityScore?: number;
+  };
 }
 
 export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force', onBubbleTimingUpdate, comparingTopics: externalComparingTopics, onComparingTopicsChange, useCryptoColors = false, cryptoTimeframe = '1h', animationStyle = 'default', shape = 'bubble', keywordPerformanceData = [] }: BubbleChartProps) {
@@ -228,6 +235,65 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
     const cv = stdDev / avg;
 
     return cv < 0.5;
+  };
+
+  const detectSeasonalSpike = (monthlySearches: number[]): boolean => {
+    if (monthlySearches.length < 6) return false;
+
+    const nonZeroSearches = monthlySearches.filter(v => v > 0);
+    if (nonZeroSearches.length === 0) return false;
+
+    const avg = nonZeroSearches.reduce((sum, val) => sum + val, 0) / nonZeroSearches.length;
+    const maxMonth = Math.max(...monthlySearches);
+
+    const peakRatio = maxMonth / (avg || 1);
+    return peakRatio >= 5;
+  };
+
+  const isHighValue = (bidHigh?: number): boolean => {
+    if (!bidHigh) return false;
+    return bidHigh >= 50;
+  };
+
+  const calculateOpportunityScore = (perfData?: KeywordPerformanceData): number => {
+    if (!perfData) return 0;
+
+    let score = 0;
+
+    const volume = perfData.searchVolume || 0;
+    if (volume > 10000) score += 30;
+    else if (volume > 5000) score += 20;
+    else if (volume > 1000) score += 10;
+
+    const yoyChange = perfData.yoy_change || 0;
+    if (yoyChange > 0.5) score += 30;
+    else if (yoyChange > 0.2) score += 20;
+    else if (yoyChange > 0) score += 10;
+
+    const competition = typeof perfData.competition === 'string'
+      ? perfData.competition.toLowerCase()
+      : perfData.competition;
+
+    if (competition === 'low' || competition === 'LOW' || (typeof competition === 'number' && competition < 0.3)) {
+      score += 40;
+    } else if (competition === 'medium' || competition === 'MEDIUM' || (typeof competition === 'number' && competition < 0.6)) {
+      score += 20;
+    }
+
+    return Math.min(score, 100);
+  };
+
+  const getKeywordBadges = (topicName: string) => {
+    if (!keywordPerformanceData.length) return {};
+
+    const perfData = keywordPerformanceData.find(k => k.keyword === topicName);
+    if (!perfData) return {};
+
+    return {
+      isSeasonal: perfData.monthly_searches ? detectSeasonalSpike(perfData.monthly_searches) : false,
+      isHighValue: isHighValue(perfData.bid_high),
+      opportunityScore: calculateOpportunityScore(perfData)
+    };
   };
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -876,6 +942,8 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
             ? getKeywordColorAndRing(topic.name)
             : { color: getRandomColor(topicIndex) });
 
+      const badges = keywordPerformanceData.length > 0 ? getKeywordBadges(topic.name) : undefined;
+
       return {
         topic,
         x,
@@ -889,6 +957,7 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
         color: colorData.color,
         ringColor: colorData.ringColor,
         ringIntensity: colorData.ringIntensity,
+        badges,
         createdAt: Date.now(),
         lifetime: randomLifetime,
         isSpawning: !isStaticLayout,
@@ -1316,7 +1385,6 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
               shadowBlur = Math.max(22, displayRadius / 2.5) * glowIntensity;
             }
 
-            // Enhanced glow for pulse and shimmer
             if (animationStyle === 'pulse' || animationStyle === 'shimmer') {
               shadowBlur *= 1.5;
             }
@@ -1324,7 +1392,14 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
             ctx.shadowBlur = shadowBlur;
           } else {
             ctx.shadowColor = bubble.color;
-            ctx.shadowBlur = Math.max(8, displayRadius / 8) * colorIntensity;
+            let shadowBlur = Math.max(8, displayRadius / 8) * colorIntensity;
+
+            if (bubble.badges?.opportunityScore && bubble.badges.opportunityScore >= 70) {
+              ctx.shadowColor = '#10B981';
+              shadowBlur *= 1.8;
+            }
+
+            ctx.shadowBlur = shadowBlur;
           }
 
           ctx.shadowOffsetX = 0;
@@ -1460,6 +1535,66 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
             const cleanVolume = bubble.topic.searchVolumeRaw.replace(/"/g, '');
             ctx.fillText(cleanVolume, bubble.x, volumeY);
           }
+
+          if (bubble.badges && displayRadius > 30) {
+            const badgeSize = Math.min(displayRadius * 0.2, 14);
+            const badgeY = bubble.y - displayRadius + badgeSize / 2;
+            let badgeX = bubble.x - displayRadius + badgeSize;
+
+            if (bubble.badges.isSeasonal) {
+              ctx.save();
+              ctx.font = `${badgeSize}px sans-serif`;
+              ctx.fillStyle = '#FFEB3B';
+              ctx.shadowColor = 'rgba(255, 235, 59, 0.8)';
+              ctx.shadowBlur = 6;
+              ctx.fillText('☀️', badgeX, badgeY);
+              ctx.shadowBlur = 0;
+              ctx.restore();
+              badgeX += badgeSize * 1.5;
+            }
+
+            if (bubble.badges.isHighValue) {
+              ctx.save();
+              ctx.font = `${badgeSize}px sans-serif`;
+              ctx.fillStyle = '#FFD700';
+              ctx.shadowColor = 'rgba(255, 215, 0, 0.8)';
+              ctx.shadowBlur = 6;
+              ctx.fillText('💎', badgeX, badgeY);
+              ctx.shadowBlur = 0;
+              ctx.restore();
+              badgeX += badgeSize * 1.5;
+            }
+
+            if (bubble.badges.opportunityScore && bubble.badges.opportunityScore >= 70) {
+              ctx.save();
+              ctx.beginPath();
+              ctx.arc(bubble.x + displayRadius - badgeSize, bubble.y + displayRadius - badgeSize, badgeSize * 0.6, 0, Math.PI * 2);
+              const gradient = ctx.createRadialGradient(
+                bubble.x + displayRadius - badgeSize,
+                bubble.y + displayRadius - badgeSize,
+                0,
+                bubble.x + displayRadius - badgeSize,
+                bubble.y + displayRadius - badgeSize,
+                badgeSize * 0.6
+              );
+              gradient.addColorStop(0, '#10B981');
+              gradient.addColorStop(1, '#059669');
+              ctx.fillStyle = gradient;
+              ctx.fill();
+              ctx.shadowColor = 'rgba(16, 185, 129, 0.8)';
+              ctx.shadowBlur = 8;
+              ctx.stroke();
+              ctx.shadowBlur = 0;
+
+              ctx.font = `bold ${badgeSize * 0.7}px sans-serif`;
+              ctx.fillStyle = '#FFFFFF';
+              ctx.textAlign = 'center';
+              ctx.textBaseline = 'middle';
+              ctx.fillText('⭐', bubble.x + displayRadius - badgeSize, bubble.y + displayRadius - badgeSize);
+              ctx.restore();
+            }
+          }
+
           ctx.globalAlpha = 1;
         }
       });

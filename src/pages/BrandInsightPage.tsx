@@ -344,7 +344,9 @@ export default function BrandInsightPage() {
         three_month_change: kw.three_month_change,
         yoy_change: kw.yoy_change,
         monthly_searches: monthlySearches,
-        bid_high: kw['Top of page bid (high range)']
+        bid_high: kw['Top of page bid (high range)'],
+        competition: kw.competition,
+        searchVolume: kw.search_volume
       };
     });
   }, [keywordData]);
