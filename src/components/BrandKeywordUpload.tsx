@@ -1,10 +1,19 @@
 import React, { useState } from 'react';
 import { Upload, AlertCircle, CheckCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import KeywordMergeReview from './KeywordMergeReview';
 
 interface BrandKeywordUploadProps {
   onUploadComplete: () => void;
   theme?: 'dark' | 'light';
+}
+
+interface MergeGroup {
+  id: string;
+  primaryKeyword: string;
+  variants: string[];
+  mergedData: any;
+  originalData: any[];
 }
 
 export default function BrandKeywordUpload({ onUploadComplete, theme = 'light' }: BrandKeywordUploadProps) {
@@ -12,6 +21,139 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light' }
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [brandName, setBrandName] = useState<string>('');
+  const [mergeGroups, setMergeGroups] = useState<MergeGroup[]>([]);
+  const [showMergeReview, setShowMergeReview] = useState(false);
+  const [pendingData, setPendingData] = useState<any[]>([]);
+
+  const levenshteinDistance = (str1: string, str2: string): number => {
+    const len1 = str1.length;
+    const len2 = str2.length;
+    const matrix: number[][] = [];
+
+    for (let i = 0; i <= len1; i++) {
+      matrix[i] = [i];
+    }
+
+    for (let j = 0; j <= len2; j++) {
+      matrix[0][j] = j;
+    }
+
+    for (let i = 1; i <= len1; i++) {
+      for (let j = 1; j <= len2; j++) {
+        if (str1[i - 1] === str2[j - 1]) {
+          matrix[i][j] = matrix[i - 1][j - 1];
+        } else {
+          matrix[i][j] = Math.min(
+            matrix[i - 1][j - 1] + 1,
+            matrix[i][j - 1] + 1,
+            matrix[i - 1][j] + 1
+          );
+        }
+      }
+    }
+
+    return matrix[len1][len2];
+  };
+
+  const calculateSimilarity = (str1: string, str2: string): number => {
+    const s1 = str1.toLowerCase().trim();
+    const s2 = str2.toLowerCase().trim();
+
+    if (s1 === s2) return 1;
+
+    const distance = levenshteinDistance(s1, s2);
+    const maxLen = Math.max(s1.length, s2.length);
+    return 1 - distance / maxLen;
+  };
+
+  const detectMergeGroups = (data: Array<Record<string, any>>): MergeGroup[] => {
+    const groups: MergeGroup[] = [];
+    const processed = new Set<string>();
+    const threshold = 0.85;
+
+    data.forEach((record, i) => {
+      if (processed.has(record.keyword)) return;
+
+      const similar: any[] = [record];
+      processed.add(record.keyword);
+
+      for (let j = i + 1; j < data.length; j++) {
+        if (processed.has(data[j].keyword)) continue;
+
+        const similarity = calculateSimilarity(record.keyword, data[j].keyword);
+
+        if (similarity >= threshold) {
+          similar.push(data[j]);
+          processed.add(data[j].keyword);
+        }
+      }
+
+      if (similar.length > 1) {
+        const primaryKeyword = similar.reduce((longest, current) =>
+          current.keyword.length > longest.keyword.length ? current : longest
+        ).keyword;
+
+        const mergedData: any = {
+          keyword: primaryKeyword,
+          brand: record.brand
+        };
+
+        const numericFields = new Set<string>();
+        similar.forEach(item => {
+          Object.keys(item).forEach(key => {
+            if (typeof item[key] === 'number' && !['user_id'].includes(key)) {
+              numericFields.add(key);
+            }
+          });
+        });
+
+        numericFields.forEach(field => {
+          mergedData[field] = similar.reduce((sum, item) => sum + (item[field] || 0), 0);
+        });
+
+        Object.keys(similar[0]).forEach(key => {
+          if (!numericFields.has(key) && !['keyword', 'brand', 'user_id', 'created_at'].includes(key)) {
+            const nonZeroValues = similar
+              .map(item => item[key])
+              .filter(v => v !== undefined && v !== null && v !== '' && v !== 0);
+
+            if (nonZeroValues.length > 0) {
+              if (typeof nonZeroValues[0] === 'number') {
+                mergedData[key] = Math.max(...nonZeroValues);
+              } else {
+                mergedData[key] = nonZeroValues[0];
+              }
+            }
+          }
+        });
+
+        groups.push({
+          id: `merge-${i}`,
+          primaryKeyword,
+          variants: similar.map(s => s.keyword),
+          mergedData,
+          originalData: similar
+        });
+      }
+    });
+
+    return groups;
+  };
+
+  const applyMerges = (data: Array<Record<string, any>>, approvedMerges: MergeGroup[]): Array<Record<string, any>> => {
+    const mergedKeywords = new Set<string>();
+    approvedMerges.forEach(group => {
+      group.variants.forEach(v => mergedKeywords.add(v));
+    });
+
+    const filtered = data.filter(record => !mergedKeywords.has(record.keyword));
+
+    approvedMerges.forEach(group => {
+      filtered.push(group.mergedData);
+    });
+
+    return filtered;
+  };
 
   const parseMonthFromHeader = (header: string): string | null => {
     const searchesMatch = header.match(/searches?:\s*(\w+)\s+(\d{4})/i);
@@ -178,101 +320,147 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light' }
         throw new Error('No valid data found in CSV');
       }
 
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        throw new Error('You must be logged in to upload data');
+      const detectedMerges = detectMergeGroups(data);
+
+      if (detectedMerges.length > 0) {
+        setMergeGroups(detectedMerges);
+        setPendingData(data);
+        setShowMergeReview(true);
+        setUploading(false);
+      } else {
+        await processUpload(data);
       }
-
-      console.log('Deleting existing data for brand:', brandName.trim());
-      const { error: deleteError } = await supabase
-        .from('brand_keyword_data')
-        .delete()
-        .eq('brand', brandName.trim())
-        .eq('user_id', user.id);
-
-      if (deleteError) {
-        console.error('Delete error:', deleteError);
-      }
-
-      const recordsToInsert = data.map(row => ({
-        ...row,
-        user_id: user.id,
-        created_at: new Date().toISOString()
-      }));
-
-      console.log('Inserting records:', recordsToInsert.length);
-      console.log('Sample record:', JSON.stringify(recordsToInsert[0], null, 2));
-
-      const { error: insertError } = await supabase
-        .from('brand_keyword_data')
-        .insert(recordsToInsert);
-
-      if (insertError) {
-        console.error('Insert error:', insertError);
-        throw new Error(`Database error: ${insertError.message || 'Unknown error'}`);
-      }
-
-      const aggregatedData = aggregateMonthlyData(data);
-
-      console.log('Aggregated data:', aggregatedData);
-
-      if (aggregatedData.length === 0) {
-        throw new Error('No monthly data could be aggregated. Please check that your CSV has "Searches: MMM YYYY" columns with valid data.');
-      }
-
-      const monthlyRecords = aggregatedData.map(record => ({
-        ...record,
-        user_id: user.id,
-        created_at: new Date().toISOString()
-      }));
-
-      console.log('Inserting monthly records:', monthlyRecords);
-      console.log('First record sample:', JSON.stringify(monthlyRecords[0], null, 2));
-
-      console.log('Deleting existing monthly data for brand:', brandName.trim());
-      const { error: monthlyDeleteError } = await supabase
-        .from('brand_keyword_monthly_data')
-        .delete()
-        .eq('brand', brandName.trim())
-        .eq('user_id', user.id);
-
-      if (monthlyDeleteError) {
-        console.error('Monthly delete error:', monthlyDeleteError);
-      }
-
-      const { data: insertedData, error: monthlyInsertError } = await supabase
-        .from('brand_keyword_monthly_data')
-        .insert(monthlyRecords)
-        .select();
-
-      if (monthlyInsertError) {
-        console.error('Monthly data insert error:', monthlyInsertError);
-        console.error('Error details:', JSON.stringify(monthlyInsertError, null, 2));
-        throw new Error(`Failed to save monthly data: ${monthlyInsertError.message}`);
-      }
-
-      console.log('Successfully inserted monthly data:', insertedData);
-
-      setSuccess(`Successfully uploaded data for ${brandName.trim()}: ${data.length} keywords with ${aggregatedData.length} months of trend data`);
-      onUploadComplete();
 
       event.target.value = '';
-
-      setTimeout(() => {
-        setBrandName('');
-        setSuccess(null);
-      }, 3000);
     } catch (err) {
       console.error('Upload error details:', err);
       setError(err instanceof Error ? err.message : 'Failed to upload file');
-    } finally {
       setUploading(false);
     }
   };
 
+  const handleMergeApproval = async (approvedMerges: MergeGroup[]) => {
+    setShowMergeReview(false);
+    setUploading(true);
+
+    try {
+      const finalData = applyMerges(pendingData, approvedMerges);
+      await processUpload(finalData);
+    } catch (err) {
+      console.error('Merge approval error:', err);
+      setError(err instanceof Error ? err.message : 'Failed to process merges');
+    } finally {
+      setUploading(false);
+      setPendingData([]);
+      setMergeGroups([]);
+    }
+  };
+
+  const handleMergeCancel = () => {
+    setShowMergeReview(false);
+    setPendingData([]);
+    setMergeGroups([]);
+    setUploading(false);
+  };
+
+  const processUpload = async (data: Array<Record<string, any>>) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      throw new Error('You must be logged in to upload data');
+    }
+
+    console.log('Deleting existing data for brand:', brandName.trim());
+    const { error: deleteError } = await supabase
+      .from('brand_keyword_data')
+      .delete()
+      .eq('brand', brandName.trim())
+      .eq('user_id', user.id);
+
+    if (deleteError) {
+      console.error('Delete error:', deleteError);
+    }
+
+    const recordsToInsert = data.map(row => ({
+      ...row,
+      user_id: user.id,
+      created_at: new Date().toISOString()
+    }));
+
+    console.log('Inserting records:', recordsToInsert.length);
+    console.log('Sample record:', JSON.stringify(recordsToInsert[0], null, 2));
+
+    const { error: insertError } = await supabase
+      .from('brand_keyword_data')
+      .insert(recordsToInsert);
+
+    if (insertError) {
+      console.error('Insert error:', insertError);
+      throw new Error(`Database error: ${insertError.message || 'Unknown error'}`);
+    }
+
+    const aggregatedData = aggregateMonthlyData(data);
+
+    console.log('Aggregated data:', aggregatedData);
+
+    if (aggregatedData.length === 0) {
+      throw new Error('No monthly data could be aggregated. Please check that your CSV has "Searches: MMM YYYY" columns with valid data.');
+    }
+
+    const monthlyRecords = aggregatedData.map(record => ({
+      ...record,
+      user_id: user.id,
+      created_at: new Date().toISOString()
+    }));
+
+    console.log('Inserting monthly records:', monthlyRecords);
+    console.log('First record sample:', JSON.stringify(monthlyRecords[0], null, 2));
+
+    console.log('Deleting existing monthly data for brand:', brandName.trim());
+    const { error: monthlyDeleteError } = await supabase
+      .from('brand_keyword_monthly_data')
+      .delete()
+      .eq('brand', brandName.trim())
+      .eq('user_id', user.id);
+
+    if (monthlyDeleteError) {
+      console.error('Monthly delete error:', monthlyDeleteError);
+    }
+
+    const { data: insertedData, error: monthlyInsertError } = await supabase
+      .from('brand_keyword_monthly_data')
+      .insert(monthlyRecords)
+      .select();
+
+    if (monthlyInsertError) {
+      console.error('Monthly data insert error:', monthlyInsertError);
+      console.error('Error details:', JSON.stringify(monthlyInsertError, null, 2));
+      throw new Error(`Failed to save monthly data: ${monthlyInsertError.message}`);
+    }
+
+    console.log('Successfully inserted monthly data:', insertedData);
+
+    setSuccess(`Successfully uploaded data for ${brandName.trim()}: ${data.length} keywords with ${aggregatedData.length} months of trend data`);
+    onUploadComplete();
+
+    setTimeout(() => {
+      setBrandName('');
+      setSuccess(null);
+    }, 3000);
+  };
+
 
   return (
-    <div className={`rounded-lg shadow-sm p-6 ${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'}`}>
+    <>
+      {showMergeReview && (
+        <KeywordMergeReview
+          mergeGroups={mergeGroups}
+          onApprove={handleMergeApproval}
+          onCancel={handleMergeCancel}
+          theme={theme}
+        />
+      )}
+
+      <div className={`rounded-lg shadow-sm p-6 ${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'}`}>
       <h2 className={`text-xl font-semibold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Upload Keyword Data</h2>
 
       <div className="mb-4">
@@ -360,6 +548,7 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light' }
           <p className="text-sm">{success}</p>
         </div>
       )}
-    </div>
+      </div>
+    </>
   );
 }
