@@ -1627,6 +1627,12 @@ function HomePage() {
                     >
                       {topics.length} trending topics
                     </button>
+                    <a
+                      href="/insight"
+                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-all hover:scale-105 ${theme === 'dark' ? 'bg-green-600 text-white hover:bg-green-700' : 'bg-green-600 text-white hover:bg-green-700 shadow-sm'}`}
+                    >
+                      View Brand Insights
+                    </a>
                   </div>
                 </header>
               </article>
