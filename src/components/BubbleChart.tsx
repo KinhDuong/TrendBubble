@@ -1458,12 +1458,27 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
 
         if (bubble.ringColor && bubble.ringIntensity) {
           const ringOpacity = Math.min(bubble.ringIntensity, 1);
-          const ringLineWidth = 2 + (bubble.ringIntensity * 4);
+          const baseRingLineWidth = 2 + (bubble.ringIntensity * 4);
           const ringRgb = bubble.ringColor.match(/\w\w/g)?.map(x => parseInt(x, 16)) || [59, 130, 246];
 
-          drawShape(ctx, bubble.x, bubble.y, displayRadius + 3, shape);
-          ctx.strokeStyle = `rgba(${ringRgb[0]}, ${ringRgb[1]}, ${ringRgb[2]}, ${ringOpacity * opacity})`;
-          ctx.lineWidth = ringLineWidth;
+          // Animate ring with ripple effect (expand/contract)
+          const rippleSpeed = 0.002; // Speed of ripple animation
+          const rippleTime = Date.now() * rippleSpeed;
+          const rippleWave = Math.sin(rippleTime) * 0.5 + 0.5; // Oscillates between 0 and 1
+
+          // Ring expands and contracts
+          const rippleOffset = rippleWave * 8; // Max 8px expansion
+          const rippleRadius = displayRadius + 3 + rippleOffset;
+
+          // Opacity also pulses slightly
+          const rippleOpacity = ringOpacity * (0.6 + rippleWave * 0.4) * opacity;
+
+          // Line width pulses too
+          const rippleLineWidth = baseRingLineWidth * (0.8 + rippleWave * 0.4);
+
+          drawShape(ctx, bubble.x, bubble.y, rippleRadius, shape);
+          ctx.strokeStyle = `rgba(${ringRgb[0]}, ${ringRgb[1]}, ${ringRgb[2]}, ${rippleOpacity})`;
+          ctx.lineWidth = rippleLineWidth;
           ctx.stroke();
         }
 
