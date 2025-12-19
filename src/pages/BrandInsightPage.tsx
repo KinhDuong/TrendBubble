@@ -341,8 +341,8 @@ export default function BrandInsightPage() {
 
       return {
         keyword: kw.keyword,
-        three_month_change: kw.three_month_change,
-        yoy_change: kw.yoy_change,
+        three_month_change: kw['Three month change'],
+        yoy_change: kw['YoY change'],
         monthly_searches: monthlySearches,
         bid_high: kw['Top of page bid (high range)'],
         competition: kw.competition,
