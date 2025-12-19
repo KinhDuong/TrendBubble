@@ -211,15 +211,15 @@ async function generateContentHTML(pageData, topics, sourceLabel) {
     <!-- Header Navigation for SEO -->
     <header style="background-color: #111827; border-bottom: 1px solid #374151; padding: 0.5rem 1rem;">
       <nav aria-label="Main navigation" style="max-width: 80rem; margin: 0 auto; display: flex; align-items: center; justify-content: space-between;">
-        <a href="/" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none;">
+        <a href="${BASE_URL}/" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none;">
           <span style="color: #2563eb; font-size: 1.5rem; font-weight: 700;">Top Best Charts</span>
         </a>
         <ul style="display: flex; gap: 1.5rem; list-style: none; margin: 0; padding: 0;">
-          <li><a href="/" style="color: #d1d5db; text-decoration: none;">Home</a></li>
-          <li><a href="/browse-topics" style="color: #d1d5db; text-decoration: none;">Browse Topics</a></li>
-          <li><a href="/trending-now" style="color: #d1d5db; text-decoration: none;">Trending Now</a></li>
-          <li><a href="/contact" style="color: #d1d5db; text-decoration: none;">Contact</a></li>
-          <li><a href="/about" style="color: #d1d5db; text-decoration: none;">About</a></li>
+          <li><a href="${BASE_URL}/" style="color: #d1d5db; text-decoration: none;">Home</a></li>
+          <li><a href="${BASE_URL}/browse-topics" style="color: #d1d5db; text-decoration: none;">Browse Topics</a></li>
+          <li><a href="${BASE_URL}/trending-now" style="color: #d1d5db; text-decoration: none;">Trending Now</a></li>
+          <li><a href="${BASE_URL}/contact" style="color: #d1d5db; text-decoration: none;">Contact</a></li>
+          <li><a href="${BASE_URL}/about" style="color: #d1d5db; text-decoration: none;">About</a></li>
         </ul>
       </nav>
     </header>
@@ -550,15 +550,15 @@ async function prerenderExplorePage(baseHTML, distPath) {
     <div class="explore-page-content">
       <header style="background-color: #111827; border-bottom: 1px solid #374151; padding: 0.5rem 1rem;">
         <nav aria-label="Main navigation" style="max-width: 80rem; margin: 0 auto; display: flex; align-items: center; justify-content: space-between;">
-          <a href="/" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none;">
+          <a href="${BASE_URL}/" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none;">
             <h1 style="color: #2563eb; font-size: 1.5rem; font-weight: 700; margin: 0;">Top Best Charts</h1>
           </a>
           <ul style="display: flex; gap: 1.5rem; list-style: none; margin: 0; padding: 0;">
-            <li><a href="/" style="color: #d1d5db; text-decoration: none;">Home</a></li>
-            <li><a href="/browse-topics" style="color: #d1d5db; text-decoration: none;">Browse Topics</a></li>
-            <li><a href="/trending-now" style="color: #d1d5db; text-decoration: none;">Trending Now</a></li>
-            <li><a href="/contact" style="color: #d1d5db; text-decoration: none;">Contact</a></li>
-            <li><a href="/about" style="color: #d1d5db; text-decoration: none;">About</a></li>
+            <li><a href="${BASE_URL}/" style="color: #d1d5db; text-decoration: none;">Home</a></li>
+            <li><a href="${BASE_URL}/browse-topics" style="color: #d1d5db; text-decoration: none;">Browse Topics</a></li>
+            <li><a href="${BASE_URL}/trending-now" style="color: #d1d5db; text-decoration: none;">Trending Now</a></li>
+            <li><a href="${BASE_URL}/contact" style="color: #d1d5db; text-decoration: none;">Contact</a></li>
+            <li><a href="${BASE_URL}/about" style="color: #d1d5db; text-decoration: none;">About</a></li>
           </ul>
         </nav>
       </header>
@@ -865,15 +865,15 @@ async function prerenderTrendingNowPage(baseHTML, distPath) {
       <!-- Header Navigation for SEO -->
       <header style="background-color: #111827; border-bottom: 1px solid #374151; padding: 0.5rem 1rem;">
         <nav aria-label="Main navigation" style="max-width: 80rem; margin: 0 auto; display: flex; align-items: center; justify-content: space-between;">
-          <a href="/" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none;">
+          <a href="${BASE_URL}/" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none;">
             <span style="color: #2563eb; font-size: 1.5rem; font-weight: 700;">Top Best Charts</span>
           </a>
           <ul style="display: flex; gap: 1.5rem; list-style: none; margin: 0; padding: 0;">
-            <li><a href="/" style="color: #d1d5db; text-decoration: none;">Home</a></li>
-            <li><a href="/browse-topics" style="color: #d1d5db; text-decoration: none;">Browse Topics</a></li>
-            <li><a href="/trending-now" style="color: #d1d5db; text-decoration: none;">Trending Now</a></li>
-            <li><a href="/contact" style="color: #d1d5db; text-decoration: none;">Contact</a></li>
-            <li><a href="/about" style="color: #d1d5db; text-decoration: none;">About</a></li>
+            <li><a href="${BASE_URL}/" style="color: #d1d5db; text-decoration: none;">Home</a></li>
+            <li><a href="${BASE_URL}/browse-topics" style="color: #d1d5db; text-decoration: none;">Browse Topics</a></li>
+            <li><a href="${BASE_URL}/trending-now" style="color: #d1d5db; text-decoration: none;">Trending Now</a></li>
+            <li><a href="${BASE_URL}/contact" style="color: #d1d5db; text-decoration: none;">Contact</a></li>
+            <li><a href="${BASE_URL}/about" style="color: #d1d5db; text-decoration: none;">About</a></li>
           </ul>
         </nav>
       </header>
@@ -1024,15 +1024,15 @@ async function prerenderContactPage(baseHTML, distPath) {
     <div class="contact-page-content">
       <header style="background-color: #111827; border-bottom: 1px solid #374151; padding: 0.5rem 1rem;">
         <nav aria-label="Main navigation" style="max-width: 80rem; margin: 0 auto; display: flex; align-items: center; justify-content: space-between;">
-          <a href="/" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none;">
+          <a href="${BASE_URL}/" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none;">
             <span style="color: #2563eb; font-size: 1.5rem; font-weight: 700;">Top Best Charts</span>
           </a>
           <ul style="display: flex; gap: 1.5rem; list-style: none; margin: 0; padding: 0;">
-            <li><a href="/" style="color: #d1d5db; text-decoration: none;">Home</a></li>
-            <li><a href="/browse-topics" style="color: #d1d5db; text-decoration: none;">Browse Topics</a></li>
-            <li><a href="/trending-now" style="color: #d1d5db; text-decoration: none;">Trending Now</a></li>
-            <li><a href="/contact" style="color: #d1d5db; text-decoration: none;">Contact</a></li>
-            <li><a href="/about" style="color: #d1d5db; text-decoration: none;">About</a></li>
+            <li><a href="${BASE_URL}/" style="color: #d1d5db; text-decoration: none;">Home</a></li>
+            <li><a href="${BASE_URL}/browse-topics" style="color: #d1d5db; text-decoration: none;">Browse Topics</a></li>
+            <li><a href="${BASE_URL}/trending-now" style="color: #d1d5db; text-decoration: none;">Trending Now</a></li>
+            <li><a href="${BASE_URL}/contact" style="color: #d1d5db; text-decoration: none;">Contact</a></li>
+            <li><a href="${BASE_URL}/about" style="color: #d1d5db; text-decoration: none;">About</a></li>
           </ul>
         </nav>
       </header>
@@ -1094,16 +1094,16 @@ async function prerenderInsightPage(baseHTML, distPath) {
     <div class="insight-page-content">
       <header style="background-color: #111827; border-bottom: 1px solid #374151; padding: 0.5rem 1rem;">
         <nav aria-label="Main navigation" style="max-width: 80rem; margin: 0 auto; display: flex; align-items: center; justify-content: space-between;">
-          <a href="/" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none;">
+          <a href="${BASE_URL}/" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none;">
             <span style="color: #2563eb; font-size: 1.5rem; font-weight: 700;">Top Best Charts</span>
           </a>
           <ul style="display: flex; gap: 1.5rem; list-style: none; margin: 0; padding: 0;">
-            <li><a href="/" style="color: #d1d5db; text-decoration: none;">Home</a></li>
-            <li><a href="/browse-topics" style="color: #d1d5db; text-decoration: none;">Browse Topics</a></li>
-            <li><a href="/trending-now" style="color: #d1d5db; text-decoration: none;">Trending Now</a></li>
-            <li><a href="/insight" style="color: #d1d5db; text-decoration: none;">Insights</a></li>
-            <li><a href="/contact" style="color: #d1d5db; text-decoration: none;">Contact</a></li>
-            <li><a href="/about" style="color: #d1d5db; text-decoration: none;">About</a></li>
+            <li><a href="${BASE_URL}/" style="color: #d1d5db; text-decoration: none;">Home</a></li>
+            <li><a href="${BASE_URL}/browse-topics" style="color: #d1d5db; text-decoration: none;">Browse Topics</a></li>
+            <li><a href="${BASE_URL}/trending-now" style="color: #d1d5db; text-decoration: none;">Trending Now</a></li>
+            <li><a href="${BASE_URL}/insight" style="color: #d1d5db; text-decoration: none;">Insights</a></li>
+            <li><a href="${BASE_URL}/contact" style="color: #d1d5db; text-decoration: none;">Contact</a></li>
+            <li><a href="${BASE_URL}/about" style="color: #d1d5db; text-decoration: none;">About</a></li>
           </ul>
         </nav>
       </header>
@@ -1177,15 +1177,15 @@ async function prerenderBrowseTopicsPage(baseHTML, distPath) {
     <div class="browse-topics-page-content">
       <header style="background-color: #111827; border-bottom: 1px solid #374151; padding: 0.5rem 1rem;">
         <nav aria-label="Main navigation" style="max-width: 80rem; margin: 0 auto; display: flex; align-items: center; justify-content: space-between;">
-          <a href="/" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none;">
+          <a href="${BASE_URL}/" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none;">
             <span style="color: #2563eb; font-size: 1.5rem; font-weight: 700;">Top Best Charts</span>
           </a>
           <ul style="display: flex; gap: 1.5rem; list-style: none; margin: 0; padding: 0;">
-            <li><a href="/" style="color: #d1d5db; text-decoration: none;">Home</a></li>
-            <li><a href="/browse-topics" style="color: #d1d5db; text-decoration: none;">Browse Topics</a></li>
-            <li><a href="/trending-now" style="color: #d1d5db; text-decoration: none;">Trending Now</a></li>
-            <li><a href="/contact" style="color: #d1d5db; text-decoration: none;">Contact</a></li>
-            <li><a href="/about" style="color: #d1d5db; text-decoration: none;">About</a></li>
+            <li><a href="${BASE_URL}/" style="color: #d1d5db; text-decoration: none;">Home</a></li>
+            <li><a href="${BASE_URL}/browse-topics" style="color: #d1d5db; text-decoration: none;">Browse Topics</a></li>
+            <li><a href="${BASE_URL}/trending-now" style="color: #d1d5db; text-decoration: none;">Trending Now</a></li>
+            <li><a href="${BASE_URL}/contact" style="color: #d1d5db; text-decoration: none;">Contact</a></li>
+            <li><a href="${BASE_URL}/about" style="color: #d1d5db; text-decoration: none;">About</a></li>
           </ul>
         </nav>
       </header>
@@ -1288,15 +1288,15 @@ async function prerenderAboutPage(baseHTML, distPath) {
     <div class="about-page-content">
       <header style="background-color: #111827; border-bottom: 1px solid #374151; padding: 0.5rem 1rem;">
         <nav aria-label="Main navigation" style="max-width: 80rem; margin: 0 auto; display: flex; align-items: center; justify-content: space-between;">
-          <a href="/" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none;">
+          <a href="${BASE_URL}/" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none;">
             <span style="color: #2563eb; font-size: 1.5rem; font-weight: 700;">Top Best Charts</span>
           </a>
           <ul style="display: flex; gap: 1.5rem; list-style: none; margin: 0; padding: 0;">
-            <li><a href="/" style="color: #d1d5db; text-decoration: none;">Home</a></li>
-            <li><a href="/browse-topics" style="color: #d1d5db; text-decoration: none;">Browse Topics</a></li>
-            <li><a href="/trending-now" style="color: #d1d5db; text-decoration: none;">Trending Now</a></li>
-            <li><a href="/contact" style="color: #d1d5db; text-decoration: none;">Contact</a></li>
-            <li><a href="/about" style="color: #d1d5db; text-decoration: none;">About</a></li>
+            <li><a href="${BASE_URL}/" style="color: #d1d5db; text-decoration: none;">Home</a></li>
+            <li><a href="${BASE_URL}/browse-topics" style="color: #d1d5db; text-decoration: none;">Browse Topics</a></li>
+            <li><a href="${BASE_URL}/trending-now" style="color: #d1d5db; text-decoration: none;">Trending Now</a></li>
+            <li><a href="${BASE_URL}/contact" style="color: #d1d5db; text-decoration: none;">Contact</a></li>
+            <li><a href="${BASE_URL}/about" style="color: #d1d5db; text-decoration: none;">About</a></li>
           </ul>
         </nav>
       </header>
@@ -1459,7 +1459,7 @@ async function prerenderPages() {
   <title>Redirecting to Home...</title>
 </head>
 <body>
-  <p>Redirecting to <a href="/">Home</a>...</p>
+  <p>Redirecting to <a href="${BASE_URL}/">Home</a>...</p>
 </body>
 </html>`;
   const exploreDir = path.join(distPath, 'explore');
