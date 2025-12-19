@@ -1286,12 +1286,34 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
     };
   }, [topics, maxDisplay, theme, layout, cryptoTimeframe, useCryptoColors, animationStyle]);
 
+  const generateAriaLabel = () => {
+    const topicCount = Math.min(maxDisplay, topics.length);
+    const topTopic = topics[0]?.name || 'trending topics';
+    const category = topics[0]?.category || 'various categories';
+
+    if (useCryptoColors) {
+      return `Interactive bubble chart displaying ${topicCount} cryptocurrency trends by ${cryptoTimeframe} price change, with ${topTopic} as the top trending cryptocurrency`;
+    }
+
+    return `Interactive bubble chart showing ${topicCount} trending topics in ${category}, with ${topTopic} having the highest search volume`;
+  };
+
+  const generateTitle = () => {
+    if (useCryptoColors) {
+      return `Cryptocurrency trends visualization - ${cryptoTimeframe} timeframe`;
+    }
+    return 'Trending topics visualization - Click bubbles for details';
+  };
+
   return (
     <div className="w-full h-full relative">
       <canvas
         ref={canvasRef}
         className="w-full"
         style={{ background: 'transparent' }}
+        aria-label={generateAriaLabel()}
+        title={generateTitle()}
+        role="img"
       />
       {tooltipData && (
         <BubbleTooltip
