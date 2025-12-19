@@ -1192,19 +1192,57 @@ snapshotButton={null}
                       </section>
 
                       <aside className="lg:w-[35%]">
-                        <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-lg border p-6 sticky top-4 shadow-md`}>
-                          <h2 className={`text-xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                            {pageData?.category?.toUpperCase() || 'FEATURED'}
-                          </h2>
+                        <div className={`rounded-lg p-6 sticky top-4 shadow-lg ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}>
+                          <div className="relative mb-6">
+                            <h2 className={`text-xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} inline-block px-3 py-1 relative`}>
+                              <span className="relative z-10">{pageData?.category?.toUpperCase() || 'FEATURED'}</span>
+                              <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-orange-500 transform -skew-x-12"></div>
+                            </h2>
+                          </div>
                           {latestPages.length > 0 && (
-                            <div className="flex flex-col gap-3">
-                              {latestPages.map((page) => (
+                            <div className="space-y-6">
+                              {latestPages.map((page, index) => (
                                 <a
                                   key={page.id}
                                   href={page.page_url}
-                                  className={`text-sm transition-colors hover:underline ${theme === 'dark' ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'}`}
+                                  className="block group"
                                 >
-                                  {page.meta_title}
+                                  <div className="flex gap-3">
+                                    <div className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden relative ${
+                                      !page.cover_image ? 'flex items-center justify-center' : ''
+                                    }`}>
+                                      {page.cover_image ? (
+                                        <>
+                                          <img src={page.cover_image} alt={page.meta_title} className="w-full h-full object-cover" />
+                                          <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
+                                            <span className="text-white font-bold text-xl">{index + 1}</span>
+                                          </div>
+                                        </>
+                                      ) : (
+                                        <div className={`w-full h-full bg-gradient-to-br ${
+                                          index === 0 ? 'from-yellow-400 to-orange-500' :
+                                          index === 1 ? 'from-blue-400 to-cyan-500' :
+                                          index === 2 ? 'from-green-400 to-teal-500' :
+                                          index === 3 ? 'from-pink-400 to-rose-500' :
+                                          'from-orange-400 to-red-500'
+                                        } flex items-center justify-center`}>
+                                          <span className="text-white font-bold text-xl">{index + 1}</span>
+                                        </div>
+                                      )}
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                      <h3 className={`font-semibold group-hover:text-blue-600 transition-colors line-clamp-2 ${
+                                        theme === 'dark' ? 'text-white' : 'text-gray-900'
+                                      }`}>
+                                        {page.meta_title}
+                                      </h3>
+                                      {page.meta_description && (
+                                        <p className={`text-xs mt-1 line-clamp-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                                          {page.meta_description}
+                                        </p>
+                                      )}
+                                    </div>
+                                  </div>
                                 </a>
                               ))}
                             </div>
@@ -1314,49 +1352,53 @@ snapshotButton={null}
           )}
           {latestPages.length > 0 && pageData?.category && (
         <section className="max-w-7xl mx-auto mt-8 mb-0 px-4 md:px-6" aria-labelledby="category-pages-heading">
-          <h2 id="category-pages-heading" className={`text-xl md:text-2xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-            {pageData.category.toUpperCase()}
-          </h2>
-          <p className={`text-sm mb-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-            Explore more trending topics in the {pageData.category} category. Discover the latest rankings and insights.
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {latestPages.map((page) => {
-              const sourceInfo = sources.find(s => s.value === page.source);
-              return (
-                <a
-                  key={page.id}
-                  href={page.page_url}
-                  className={`group block ${theme === 'dark' ? 'bg-gray-800 hover:bg-gray-750' : 'bg-white hover:bg-gray-50 border border-gray-200'} rounded-lg overflow-hidden shadow-md transition-all hover:shadow-lg h-full`}
-                >
-                  <div className="flex flex-row h-full min-h-[180px]">
-                    <div className={`w-2/5 ${theme === 'dark' ? 'bg-gradient-to-br from-blue-900 to-blue-800' : 'bg-gradient-to-br from-blue-100 to-blue-50'} flex items-center justify-center p-4`}>
-                      <div className="text-center">
-                        <div className={`text-4xl font-bold ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'} mb-2`}>
-                          {sourceInfo ? sourceInfo.label.substring(0, 2).toUpperCase() : page.source.substring(0, 2).toUpperCase()}
-                        </div>
-                        {sourceInfo && (
-                          <div className={`text-xs font-medium ${theme === 'dark' ? 'text-blue-300' : 'text-blue-700'}`}>
-                            {sourceInfo.label}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    <div className="w-3/5 p-4 flex flex-col">
-                      <div className={`text-xs font-semibold uppercase tracking-wide mb-2 ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
-                        {sourceInfo ? sourceInfo.label : page.source} <span className="mx-1">|</span> {new Date(page.created_at).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}
-                      </div>
-                      <h3 className={`font-bold text-lg mb-2 ${theme === 'dark' ? 'text-white group-hover:text-blue-400' : 'text-gray-900 group-hover:text-blue-600'} transition-colors line-clamp-2`}>
-                        {page.meta_title}
-                      </h3>
-                      <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} line-clamp-2`}>
-                        {page.meta_description}
-                      </p>
-                    </div>
+          <div className="relative mb-6">
+            <h2 id="category-pages-heading" className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} inline-block px-4 py-2 relative`}>
+              <span className="relative z-10">{pageData.category.toUpperCase()}</span>
+              <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-orange-500 transform -skew-x-12"></div>
+            </h2>
+          </div>
+          <div className="space-y-4">
+            {latestPages.map((page) => (
+              <a
+                key={page.id}
+                href={page.page_url}
+                className={`flex gap-4 p-4 rounded-lg hover:shadow-lg transition-all duration-300 ${
+                  theme === 'dark' ? 'bg-gray-800 hover:bg-gray-750' : 'bg-white hover:bg-gray-50'
+                }`}
+              >
+                <div className="flex-shrink-0 w-32 h-24 rounded-lg overflow-hidden">
+                  {page.cover_image ? (
+                    <img src={page.cover_image} alt={page.meta_title} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-blue-400 to-cyan-500"></div>
+                  )}
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 text-xs mb-2">
+                    <span className={`uppercase font-semibold ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`}>
+                      {pageData.category}
+                    </span>
+                    <span className={theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}>/</span>
+                    <span className={`flex items-center gap-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10" strokeWidth="2"/>
+                        <path strokeLinecap="round" d="M12 6v6l4 2" strokeWidth="2"/>
+                      </svg>
+                      {new Date(page.created_at).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}
+                    </span>
                   </div>
-                </a>
-              );
-            })}
+                  <h3 className={`font-bold text-lg mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                    {page.meta_title}
+                  </h3>
+                  {page.meta_description && (
+                    <p className={`text-sm line-clamp-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                      {page.meta_description}
+                    </p>
+                  )}
+                </div>
+              </a>
+            ))}
           </div>
         </section>
       )}
