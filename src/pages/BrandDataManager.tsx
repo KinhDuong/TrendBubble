@@ -7,13 +7,9 @@ interface BrandKeywordData {
   brand: string;
   keyword: string;
   search_volume: number;
-  month: string | null;
   user_id: string;
   created_at: string;
-  three_month_change: number | null;
-  yoy_change: number | null;
   competition: string | null;
-  competition_indexed: number | null;
   Currency: string | null;
   'Avg. monthly searches': number | null;
   'Three month change': string | null;
@@ -26,7 +22,6 @@ interface BrandKeywordData {
   'Organic average position': string | null;
   'In account?': string | null;
   'In plan?': string | null;
-  Competition: string | null;
   [key: string]: any;
 }
 
@@ -188,7 +183,7 @@ export default function BrandDataManager() {
       'Avg. monthly searches',
       'Three month change',
       'YoY change',
-      'Competition',
+      'competition',
       'Competition (indexed value)',
       'Top of page bid (low range)',
       'Top of page bid (high range)',
@@ -202,7 +197,7 @@ export default function BrandDataManager() {
       .filter(key =>
         !priorityColumns.includes(key) &&
         !monthColumns.includes(key) &&
-        !['id', 'user_id', 'created_at', 'search_volume', 'month', 'three_month_change', 'yoy_change', 'competition', 'competition_indexed'].includes(key)
+        !['id', 'user_id', 'created_at', 'search_volume', 'competition'].includes(key)
       );
 
     return [...priorityColumns, ...monthColumns, ...otherColumns];
