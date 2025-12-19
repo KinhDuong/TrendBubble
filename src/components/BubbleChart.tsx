@@ -170,8 +170,15 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
       return { color: '#3B82F6' };
     }
 
-    const threeMonthChange = perfData.three_month_change || 0;
-    const yoyChange = perfData.yoy_change || 0;
+    const threeMonthChange = perfData.three_month_change ?? 0;
+    const yoyChange = perfData.yoy_change ?? 0;
+
+    console.log('Color calculation for', topicName, {
+      three_month_change: perfData.three_month_change,
+      yoy_change: perfData.yoy_change,
+      threeMonthChange,
+      yoyChange
+    });
 
     const isYearRound = perfData.monthly_searches && perfData.monthly_searches.length >= 12
       ? isYearRoundPerformer(perfData.monthly_searches)

@@ -318,7 +318,7 @@ export default function BrandInsightPage() {
   }, [monthlyData]);
 
   const keywordPerformanceData = useMemo(() => {
-    return keywordData.map(kw => {
+    const result = keywordData.map(kw => {
       const monthlySearches: number[] = [];
       const monthColumns = [
         'Searches: Dec 2021', 'Searches: Jan 2022', 'Searches: Feb 2022', 'Searches: Mar 2022',
@@ -349,6 +349,8 @@ export default function BrandInsightPage() {
         searchVolume: kw.search_volume
       };
     });
+    console.log('BrandInsightPage - keywordPerformanceData sample:', result.slice(0, 5));
+    return result;
   }, [keywordData]);
 
   const getFilteredTopics = () => {
