@@ -211,13 +211,13 @@ export default function BrowseTopicsPage() {
                     <Link
                       key={page.id}
                       to={page.page_url}
-                      className={`group block rounded-none md:rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 ${
+                      className={`group block rounded-lg md:rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 ${
                         theme === 'dark' ? 'bg-gray-800' : 'bg-white'
                       }`}
                     >
                       {/* Mobile: Horizontal card layout */}
                       <div className="flex gap-4 p-4 md:hidden">
-                        <div className="flex-shrink-0 w-32 h-24 rounded-lg overflow-hidden">
+                        <div className="flex-shrink-0 w-32 h-24 rounded-none md:rounded-lg overflow-hidden">
                           {page.cover_image ? (
                             <img
                               src={page.cover_image}
