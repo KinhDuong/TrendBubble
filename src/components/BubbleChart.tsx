@@ -170,8 +170,17 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
       return { color: '#3B82F6' };
     }
 
-    const threeMonthChange = perfData.three_month_change ?? 0;
-    const yoyChange = perfData.yoy_change ?? 0;
+    let threeMonthChange = perfData.three_month_change ?? 0;
+    let yoyChange = perfData.yoy_change ?? 0;
+
+    // Handle both decimal (0.05 = 5%) and whole number (5 = 5%) formats
+    // If values are greater than 1, they're likely whole percentages, so convert to decimal
+    if (Math.abs(threeMonthChange) > 1) {
+      threeMonthChange = threeMonthChange / 100;
+    }
+    if (Math.abs(yoyChange) > 1) {
+      yoyChange = yoyChange / 100;
+    }
 
     console.log('Color calculation for', topicName, {
       three_month_change: perfData.three_month_change,
