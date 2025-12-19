@@ -5,7 +5,7 @@ export type BubbleLayout = 'force' | 'hierarchical' | 'grid' | 'circular' | 'tim
 
 export type ViewMode = 'bubble' | 'bar' | 'list' | 'treemap' | 'donut';
 
-export type Shape = 'bubble' | 'square' | 'rounded-square' | 'hexagon' | 'diamond' | 'triangle' | 'star';
+export type Shape = 'bubble' | 'square' | 'rounded-square' | 'hexagon' | 'diamond' | 'triangle' | 'star' | 'shark';
 
 interface FilterMenuProps {
   theme: 'dark' | 'light';
@@ -192,6 +192,7 @@ export default function FilterMenu({
                       <option value="diamond">Diamond</option>
                       <option value="triangle">Triangle</option>
                       <option value="star">Star</option>
+                      <option value="shark">Shark</option>
                     </select>
                     <Divider />
                   </>
@@ -633,6 +634,7 @@ export default function FilterMenu({
                       <option value="diamond">Diamond</option>
                       <option value="triangle">Triangle</option>
                       <option value="star">Star</option>
+                      <option value="shark">Shark</option>
                     </select>
                   </div>
                   <Divider />
