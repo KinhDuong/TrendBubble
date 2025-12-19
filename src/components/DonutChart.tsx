@@ -198,6 +198,18 @@ export default function DonutChart({
 
   const displayTopics = topics.slice(0, maxDisplay);
 
+  const generateAriaLabel = () => {
+    const topicCount = displayTopics.length;
+    const topTopic = displayTopics[0]?.name || 'trending topics';
+    const category = displayTopics[0]?.category || 'various categories';
+
+    if (useCryptoColors) {
+      return `Donut chart displaying ${topicCount} cryptocurrencies by ${cryptoTimeframe} price change distribution, with ${topTopic} as the top trending cryptocurrency`;
+    }
+
+    return `Donut chart showing distribution of ${topicCount} trending topics in ${category}, with ${topTopic} having the highest search volume`;
+  };
+
   return (
     <div
       ref={containerRef}
@@ -211,6 +223,9 @@ export default function DonutChart({
             width="100%"
             height="100%"
             style={{ minHeight: '400px' }}
+            aria-label={generateAriaLabel()}
+            title={useCryptoColors ? `Cryptocurrency distribution - ${cryptoTimeframe} timeframe` : 'Trending topics distribution'}
+            role="img"
           />
         </div>
 

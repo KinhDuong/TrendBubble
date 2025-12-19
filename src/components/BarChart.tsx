@@ -90,6 +90,18 @@ export default function BarChart({
 
   const maxValue = Math.max(...displayTopics.map(t => getCryptoValue(t)));
 
+  const generateAriaLabel = () => {
+    const topicCount = displayTopics.length;
+    const topTopic = displayTopics[0]?.name || 'trending topics';
+    const category = displayTopics[0]?.category || 'various categories';
+
+    if (useCryptoColors) {
+      return `Bar chart displaying ${topicCount} cryptocurrencies ranked by ${cryptoTimeframe} price change, with ${topTopic} as the top trending cryptocurrency`;
+    }
+
+    return `Bar chart showing ${topicCount} trending topics in ${category}, with ${topTopic} having the highest search volume`;
+  };
+
   const getBarColor = (topic: TrendingTopic, index: number) => {
     if (useCryptoColors && topic.crypto_data) {
       const change = getCryptoChange(topic);
@@ -109,6 +121,9 @@ export default function BarChart({
       ref={containerRef}
       className={`w-full ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'} rounded-lg p-2 md:p-6`}
       style={{ minHeight: '600px' }}
+      role="img"
+      aria-label={generateAriaLabel()}
+      title={useCryptoColors ? `Cryptocurrency trends - ${cryptoTimeframe} timeframe` : 'Trending topics ranked by search volume'}
     >
       <div className="space-y-2 md:space-y-3">
         {displayTopics.map((topic, index) => {

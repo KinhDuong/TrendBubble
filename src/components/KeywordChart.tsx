@@ -191,17 +191,40 @@ export default function KeywordChart({ data, selectedBrand }: KeywordChartProps)
       .text(d => `${d.keyword}\n${d.volume.toLocaleString()} searches`);
   };
 
+  const generateTrendAriaLabel = () => {
+    const brands = Array.from(new Set(data.map(d => d.brand)));
+    const brandList = selectedBrand || brands.join(', ');
+    return `Line chart showing search volume trends over time for ${brandList}`;
+  };
+
+  const generateKeywordsAriaLabel = () => {
+    if (!selectedBrand) return '';
+    return `Bar chart displaying top keywords by search volume for ${selectedBrand}`;
+  };
+
   return (
     <div className="space-y-8">
       <div className="bg-white rounded-lg shadow-sm p-6">
         <h3 className="text-lg font-semibold mb-4">Search Volume Trends</h3>
-        <svg ref={trendRef} className="w-full"></svg>
+        <svg
+          ref={trendRef}
+          className="w-full"
+          aria-label={generateTrendAriaLabel()}
+          title="Search volume trends over time"
+          role="img"
+        ></svg>
       </div>
 
       {selectedBrand && (
         <div className="bg-white rounded-lg shadow-sm p-6">
           <h3 className="text-lg font-semibold mb-4">Top Keywords - {selectedBrand}</h3>
-          <svg ref={keywordsRef} className="w-full"></svg>
+          <svg
+            ref={keywordsRef}
+            className="w-full"
+            aria-label={generateKeywordsAriaLabel()}
+            title={`Top keywords for ${selectedBrand}`}
+            role="img"
+          ></svg>
         </div>
       )}
     </div>

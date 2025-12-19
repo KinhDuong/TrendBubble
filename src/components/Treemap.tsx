@@ -263,9 +263,29 @@ export default function Treemap({ topics, maxDisplay, theme, useCryptoColors = f
 
   }, [topics, maxDisplay, theme, useCryptoColors, cryptoTimeframe]);
 
+  const displayTopics = topics.slice(0, maxDisplay);
+
+  const generateAriaLabel = () => {
+    const topicCount = displayTopics.length;
+    const topTopic = displayTopics[0]?.name || 'trending topics';
+    const category = displayTopics[0]?.category || 'various categories';
+
+    if (useCryptoColors) {
+      return `Treemap visualization displaying ${topicCount} cryptocurrencies by ${cryptoTimeframe} price change magnitude, with ${topTopic} as the largest block`;
+    }
+
+    return `Treemap visualization showing ${topicCount} trending topics in ${category}, with ${topTopic} having the largest area representing highest search volume`;
+  };
+
   return (
     <div ref={containerRef} className="w-full h-full relative">
-      <svg ref={svgRef} className="w-full h-full" />
+      <svg
+        ref={svgRef}
+        className="w-full h-full"
+        aria-label={generateAriaLabel()}
+        title={useCryptoColors ? `Cryptocurrency treemap - ${cryptoTimeframe} timeframe` : 'Trending topics treemap - Click tiles for details'}
+        role="img"
+      />
       {tooltip && (
         <div
           className={`fixed z-50 px-4 py-3 rounded-lg shadow-xl max-w-sm ${
