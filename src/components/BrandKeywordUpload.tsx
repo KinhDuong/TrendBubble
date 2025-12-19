@@ -47,6 +47,8 @@ export default function BrandKeywordUpload({ onUploadComplete }: BrandKeywordUpl
 
     const rawHeaders = lines[2].split('\t').map(h => h.trim());
 
+    console.log('CSV Headers:', rawHeaders);
+
     if (rawHeaders.length === 0) {
       throw new Error('No headers found in CSV');
     }
@@ -57,9 +59,12 @@ export default function BrandKeywordUpload({ onUploadComplete }: BrandKeywordUpl
       throw new Error('CSV must contain a "Keyword" column');
     }
 
+    const searchColumns = rawHeaders.filter(h => h.toLowerCase().startsWith('searches:'));
+    console.log('Found search columns:', searchColumns);
+
     const results: Array<Record<string, any>> = [];
 
-    lines.slice(3).forEach(line => {
+    lines.slice(3).forEach((line, lineNum) => {
       if (!line.trim()) return;
 
       const values = line.split('\t').map(v => v.trim());
@@ -84,11 +89,15 @@ export default function BrandKeywordUpload({ onUploadComplete }: BrandKeywordUpl
                 search_volume: parsedValue,
                 month: month
               });
+            } else {
+              console.warn(`Could not parse month from header: ${header}`);
             }
           }
         }
       });
     });
+
+    console.log(`Parsed ${results.length} records from CSV`);
 
     return results.filter(row => row.keyword && row.month && row.search_volume > 0);
   };
@@ -173,23 +182,30 @@ export default function BrandKeywordUpload({ onUploadComplete }: BrandKeywordUpl
 
       const aggregatedData = aggregateMonthlyData(data);
 
-      if (aggregatedData.length > 0) {
-        const monthlyRecords = aggregatedData.map(record => ({
-          ...record,
-          user_id: user.id,
-          created_at: new Date().toISOString()
-        }));
+      console.log('Aggregated data:', aggregatedData);
 
-        const { error: monthlyInsertError } = await supabase
-          .from('brand_keyword_monthly_data')
-          .upsert(monthlyRecords, {
-            onConflict: 'brand,month,user_id',
-            ignoreDuplicates: false
-          });
+      if (aggregatedData.length === 0) {
+        throw new Error('No monthly data could be aggregated. Please check that your CSV has "Searches: MMM YYYY" columns with valid data.');
+      }
 
-        if (monthlyInsertError) {
-          console.error('Monthly data insert error:', monthlyInsertError);
-        }
+      const monthlyRecords = aggregatedData.map(record => ({
+        ...record,
+        user_id: user.id,
+        created_at: new Date().toISOString()
+      }));
+
+      console.log('Inserting monthly records:', monthlyRecords);
+
+      const { error: monthlyInsertError } = await supabase
+        .from('brand_keyword_monthly_data')
+        .upsert(monthlyRecords, {
+          onConflict: 'brand,month,user_id',
+          ignoreDuplicates: false
+        });
+
+      if (monthlyInsertError) {
+        console.error('Monthly data insert error:', monthlyInsertError);
+        throw new Error(`Failed to save monthly data: ${monthlyInsertError.message}`);
       }
 
       setSuccess(`Successfully uploaded ${data.length} keyword records across ${aggregatedData.length} months`);
