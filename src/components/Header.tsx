@@ -1,4 +1,4 @@
-import { BarChart3, Menu, X, Home, Compass, Mail, Info, LogIn, LogOut, Search } from 'lucide-react';
+import { BarChart3, Menu, X, Home, Compass, BookOpen, Mail, Info, LogIn, LogOut, Search } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 
@@ -208,6 +208,14 @@ export default function Header({ theme, isAdmin, onLoginClick, onLogout, title =
                     >
                       <Compass size={20} />
                       <span>Trending Now</span>
+                    </a>
+                    <a
+                      href="/browse-topics"
+                      className={`flex items-center gap-3 px-6 py-3 ${theme === 'dark' ? 'text-gray-300 hover:bg-gray-700 hover:text-white' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'} transition-colors`}
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <BookOpen size={20} />
+                      <span>Browse Topics</span>
                     </a>
                     <a
                       href="/contact"

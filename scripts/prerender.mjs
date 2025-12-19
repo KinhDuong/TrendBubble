@@ -1131,6 +1131,123 @@ async function prerenderInsightPage(baseHTML, distPath) {
   console.log('✓ Generated: /insight/index.html');
 }
 
+async function prerenderBrowseTopicsPage(baseHTML, distPath) {
+  console.log('Pre-rendering: /browse-topics');
+
+  const { data: pages } = await supabase
+    .from('pages')
+    .select('*')
+    .not('category', 'is', null)
+    .order('created_at', { ascending: false });
+
+  const browseMetaTags = `
+    <title>Browse Topics by Category - Top Best Charts</title>
+    <meta name="description" content="Browse all topics and categories on Top Best Charts. Explore rankings, trends, and insights across various categories including AI, Markets, Technology, Gaming, and more." data-prerendered />
+    <meta name="keywords" content="browse topics, categories, AI, markets, technology, gaming, trends, rankings, explore topics" data-prerendered />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="${BASE_URL}/browse-topics/" />
+
+    <meta property="og:type" content="website" data-prerendered />
+    <meta property="og:url" content="${BASE_URL}/browse-topics/" data-prerendered />
+    <meta property="og:title" content="Browse Topics by Category - Top Best Charts" data-prerendered />
+    <meta property="og:description" content="Browse all topics and categories. Explore rankings and trends across AI, Markets, Technology, and more." data-prerendered />
+    <meta property="og:site_name" content="Top Best Charts" data-prerendered />
+
+    <meta name="twitter:card" content="summary_large_image" data-prerendered />
+    <meta name="twitter:title" content="Browse Topics by Category - Top Best Charts" data-prerendered />
+    <meta name="twitter:description" content="Browse all topics and categories. Explore rankings and trends across various categories." data-prerendered />
+  `;
+
+  let browseContentHTML = `
+    <div class="browse-topics-page-content">
+      <header style="background-color: #111827; border-bottom: 1px solid #374151; padding: 0.5rem 1rem;">
+        <nav aria-label="Main navigation" style="max-width: 80rem; margin: 0 auto; display: flex; align-items: center; justify-content: space-between;">
+          <a href="/" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none;">
+            <span style="color: #2563eb; font-size: 1.5rem; font-weight: 700;">Top Best Charts</span>
+          </a>
+          <ul style="display: flex; gap: 1.5rem; list-style: none; margin: 0; padding: 0;">
+            <li><a href="/" style="color: #d1d5db; text-decoration: none;">Home</a></li>
+            <li><a href="/trending-now" style="color: #d1d5db; text-decoration: none;">Trending Now</a></li>
+            <li><a href="/browse-topics" style="color: #d1d5db; text-decoration: none;">Browse Topics</a></li>
+            <li><a href="/contact" style="color: #d1d5db; text-decoration: none;">Contact</a></li>
+            <li><a href="/about" style="color: #d1d5db; text-decoration: none;">About</a></li>
+          </ul>
+        </nav>
+      </header>
+
+      <main style="max-width: 80rem; margin: 2rem auto; padding: 0 1rem;">
+        <div style="text-align: center; margin-bottom: 3rem;">
+          <h1 style="font-size: 2.5rem; font-weight: 700; color: white; margin-bottom: 1rem;">Browse Topics</h1>
+          <p style="font-size: 1.125rem; color: #d1d5db;">Explore our collection of topics organized by category</p>
+        </div>
+  `;
+
+  if (pages && pages.length > 0) {
+    const categoryGroups = {};
+    pages.forEach(page => {
+      const category = page.category || 'Uncategorized';
+      if (!categoryGroups[category]) {
+        categoryGroups[category] = [];
+      }
+      categoryGroups[category].push(page);
+    });
+
+    const categories = Object.entries(categoryGroups).sort(([a], [b]) => a.localeCompare(b));
+
+    categories.forEach(([category, categoryPages]) => {
+      browseContentHTML += `
+        <section style="margin-bottom: 3rem;">
+          <h2 style="font-size: 1.875rem; font-weight: 700; color: white; margin-bottom: 1.5rem; text-transform: uppercase;">${category}</h2>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+      `;
+
+      categoryPages.forEach(page => {
+        const pageDate = new Date(page.created_at).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
+        browseContentHTML += `
+            <article style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; overflow: hidden;">
+              <div style="padding: 1.5rem;">
+                <div style="color: #6b7280; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; margin-bottom: 0.5rem;">
+                  ${category} / ${pageDate}
+                </div>
+                <h3 style="font-size: 1.125rem; font-weight: 700; color: white; margin-bottom: 0.5rem;">
+                  <a href="${page.page_url}" style="text-decoration: none; color: inherit;">${page.meta_title}</a>
+                </h3>
+                ${page.meta_description ? `<p style="color: #9ca3af; font-size: 0.875rem;">${page.meta_description}</p>` : ''}
+              </div>
+            </article>
+        `;
+      });
+
+      browseContentHTML += `
+          </div>
+        </section>
+      `;
+    });
+  } else {
+    browseContentHTML += `
+      <div style="text-align: center; padding: 3rem; color: #9ca3af;">
+        <p>No topics available yet.</p>
+      </div>
+    `;
+  }
+
+  browseContentHTML += `
+      </main>
+    </div>
+  `;
+
+  const html = baseHTML
+    .replace(/<title>.*?<\/title>/, '')
+    .replace('<!-- PRERENDER_META -->', browseMetaTags)
+    .replace('<!-- PRERENDER_STRUCTURED_DATA -->', '')
+    .replace('<div id="root"></div>', `<div id="root">${browseContentHTML}</div><div id="prerender-footer">${generateFooterHTML()}</div>`);
+
+  const outputDir = path.join(distPath, 'browse-topics');
+  fs.mkdirSync(outputDir, { recursive: true });
+  fs.writeFileSync(path.join(outputDir, 'index.html'), html);
+  console.log('✓ Generated: /browse-topics/index.html');
+}
+
 async function prerenderAboutPage(baseHTML, distPath) {
   console.log('Pre-rendering: /about');
 
@@ -1309,6 +1426,7 @@ async function prerenderPages() {
 
   await prerenderExplorePage(baseHTML, distPath);
   await prerenderTrendingNowPage(baseHTML, distPath);
+  await prerenderBrowseTopicsPage(baseHTML, distPath);
   await prerenderContactPage(baseHTML, distPath);
   await prerenderInsightPage(baseHTML, distPath);
   await prerenderAboutPage(baseHTML, distPath);
@@ -1385,6 +1503,12 @@ async function generateSitemap(pages, distPath) {
     <loc>${BASE_URL}/trending-now/</loc>
     <lastmod>${today}</lastmod>
     <changefreq>hourly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>${BASE_URL}/browse-topics/</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>

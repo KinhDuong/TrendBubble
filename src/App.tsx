@@ -16,6 +16,7 @@ import DynamicPage from './pages/DynamicPage';
 import AdminPages from './pages/AdminPages';
 import AdminData from './pages/AdminData';
 import ExplorePage from './pages/ExplorePage';
+import BrowseTopicsPage from './pages/BrowseTopicsPage';
 import AboutPage from './pages/AboutPage';
 import ContactPage from './pages/ContactPage';
 import InsightPage from './pages/InsightPage';
@@ -2166,6 +2167,7 @@ function App() {
       <Routes>
         <Route path="/" element={<ExplorePage />} />
         <Route path="/explore" element={<Navigate to="/" replace />} />
+        <Route path="/browse-topics" element={<BrowseTopicsPage />} />
         <Route path="/trending-now" element={<HomePage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/contact" element={<ContactPage />} />
