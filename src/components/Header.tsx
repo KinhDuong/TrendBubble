@@ -111,6 +111,57 @@ export default function Header({ theme, isAdmin, onLoginClick, onLogout, title =
             </div>
           </a>
 
+          {/* Desktop Navigation - Always visible on desktop for SEO */}
+          <nav className="hidden lg:flex items-center gap-6" aria-label="Main navigation">
+            <a
+              href="/"
+              className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'} transition-colors`}
+            >
+              Home
+            </a>
+            <a
+              href="/trending-now"
+              className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'} transition-colors`}
+            >
+              Trending Now
+            </a>
+            <a
+              href="/browse-topics"
+              className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'} transition-colors`}
+            >
+              Browse Topics
+            </a>
+            <a
+              href="/contact"
+              className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'} transition-colors`}
+            >
+              Contact
+            </a>
+            <a
+              href="/about"
+              className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'} transition-colors`}
+            >
+              About
+            </a>
+            {isAdmin ? (
+              <button
+                onClick={handleLogout}
+                className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'} transition-colors flex items-center gap-2`}
+              >
+                <LogOut size={16} />
+                Logout
+              </button>
+            ) : (
+              <button
+                onClick={handleLogin}
+                className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'} transition-colors flex items-center gap-2`}
+              >
+                <LogIn size={16} />
+                Login
+              </button>
+            )}
+          </nav>
+
           <div className={`flex items-center gap-2 ${isSearchExpanded ? 'flex-1 md:flex-none' : ''}`}>
             <div className={`relative ${isSearchExpanded ? 'flex-1 md:flex-none' : ''}`} ref={searchRef}>
               {/* Mobile: Show icon only when not expanded */}
@@ -180,7 +231,8 @@ export default function Header({ theme, isAdmin, onLoginClick, onLogout, title =
               )}
             </div>
 
-            <div className="relative">
+            {/* Mobile Menu Button - Only show on mobile/tablet */}
+            <div className="relative lg:hidden">
               <button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
                 className={`p-2 rounded transition-colors ${theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-200'}`}
