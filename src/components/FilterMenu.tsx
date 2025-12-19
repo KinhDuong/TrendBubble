@@ -5,6 +5,8 @@ export type BubbleLayout = 'force' | 'hierarchical' | 'grid' | 'circular' | 'tim
 
 export type ViewMode = 'bubble' | 'bar' | 'list' | 'treemap' | 'donut';
 
+export type Shape = 'bubble' | 'square' | 'rounded-square' | 'hexagon' | 'diamond' | 'triangle' | 'star';
+
 interface FilterMenuProps {
   theme: 'dark' | 'light';
   loading: boolean;
@@ -22,6 +24,7 @@ interface FilterMenuProps {
   nextUpdateIn?: string;
   updateProgress?: number;
   bubbleLayout?: BubbleLayout;
+  shape?: Shape;
   cryptoTimeframe?: CryptoTimeframe;
   showCryptoTimeframe?: boolean;
   showDateFilter?: boolean;
@@ -37,6 +40,7 @@ interface FilterMenuProps {
   onRefresh?: () => void;
   onPauseToggle?: () => void;
   onBubbleLayoutChange?: (layout: BubbleLayout) => void;
+  onShapeChange?: (shape: Shape) => void;
   onCryptoTimeframeChange?: (timeframe: CryptoTimeframe) => void;
   variant?: 'homepage' | 'bubble';
 }
@@ -58,6 +62,7 @@ export default function FilterMenu({
   nextUpdateIn,
   updateProgress,
   bubbleLayout = 'force',
+  shape = 'bubble',
   cryptoTimeframe = '1h',
   showCryptoTimeframe = false,
   showDateFilter = true,
@@ -73,6 +78,7 @@ export default function FilterMenu({
   onRefresh,
   onPauseToggle,
   onBubbleLayoutChange,
+  onShapeChange,
   onCryptoTimeframeChange,
   variant = 'homepage'
 }: FilterMenuProps) {
@@ -164,6 +170,28 @@ export default function FilterMenu({
                       <option value="packed">Packed</option>
                       <option value="scatter">Scatter</option>
                       <option value="importance">Importance</option>
+                    </select>
+                    <Divider />
+                  </>
+                )}
+                {viewMode === 'bubble' && onShapeChange && (
+                  <>
+                    <label htmlFor="shape" className={`text-xs md:text-sm font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                      Shape:
+                    </label>
+                    <select
+                      id="shape"
+                      value={shape}
+                      onChange={(e) => onShapeChange(e.target.value as Shape)}
+                      className={`${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} border rounded px-2 md:px-3 py-1 md:py-1.5 text-xs md:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                    >
+                      <option value="bubble">Bubble</option>
+                      <option value="square">Square</option>
+                      <option value="rounded-square">Rounded Square</option>
+                      <option value="hexagon">Hexagon</option>
+                      <option value="diamond">Diamond</option>
+                      <option value="triangle">Triangle</option>
+                      <option value="star">Star</option>
                     </select>
                     <Divider />
                   </>
@@ -580,6 +608,31 @@ export default function FilterMenu({
                       <option value="packed">Packed</option>
                       <option value="scatter">Scatter</option>
                       <option value="importance">Importance</option>
+                    </select>
+                  </div>
+                  <Divider />
+                </>
+              )}
+              {viewMode === 'bubble' && onShapeChange && (
+                <>
+                  <div className="flex items-center gap-2">
+                    <label htmlFor="shape" className={`text-xs font-medium whitespace-nowrap ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                      Shape:
+                    </label>
+                    <select
+                      id="shape"
+                      value={shape}
+                      onChange={(e) => onShapeChange(e.target.value as Shape)}
+                      className={`flex-1 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} border rounded px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                      aria-label="Select bubble shape"
+                    >
+                      <option value="bubble">Bubble</option>
+                      <option value="square">Square</option>
+                      <option value="rounded-square">Rounded Square</option>
+                      <option value="hexagon">Hexagon</option>
+                      <option value="diamond">Diamond</option>
+                      <option value="triangle">Triangle</option>
+                      <option value="star">Star</option>
                     </select>
                   </div>
                   <Divider />

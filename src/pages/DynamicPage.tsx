@@ -7,7 +7,7 @@ import Treemap from '../components/Treemap';
 import DonutChart from '../components/DonutChart';
 import Footer from '../components/Footer';
 import Header from '../components/Header';
-import FilterMenu, { BubbleLayout, ViewMode } from '../components/FilterMenu';
+import FilterMenu, { BubbleLayout, ViewMode, Shape as FilterShape } from '../components/FilterMenu';
 import ComparisonPanel from '../components/ComparisonPanel';
 import ShareSnapshot from '../components/ShareSnapshot';
 import AnimationSelector, { AnimationStyle } from '../components/AnimationSelector';
@@ -82,6 +82,7 @@ function DynamicPage() {
   const [sourceFilter, setSourceFilter] = useState<string>('all');
   const [comparingTopics, setComparingTopics] = useState<Set<string>>(new Set());
   const [bubbleLayout, setBubbleLayout] = useState<BubbleLayout>('force');
+  const [shape, setShape] = useState<FilterShape>('bubble');
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [cryptoTimeframe, setCryptoTimeframe] = useState<CryptoTimeframe>('1h');
   const bubbleChartRef = useRef<HTMLDivElement>(null);
@@ -263,6 +264,12 @@ function DynamicPage() {
       setFaqs([]);
     }
   };
+
+  useEffect(() => {
+    if (pageData?.shape) {
+      setShape(pageData.shape as FilterShape);
+    }
+  }, [pageData]);
 
   const handleThemeChange = (newTheme: 'dark' | 'light') => {
     setTheme(newTheme);
@@ -783,6 +790,7 @@ snapshotButton={null}
         nextBubbleIn={nextBubbleIn}
         bubbleProgress={bubbleProgress}
         bubbleLayout={bubbleLayout}
+        shape={shape}
         cryptoTimeframe={cryptoTimeframe}
         showCryptoTimeframe={pageData?.source === 'coingecko_crypto'}
         showDateFilter={false}
@@ -800,6 +808,7 @@ snapshotButton={null}
         }}
         onRefresh={loadTopics}
         onBubbleLayoutChange={setBubbleLayout}
+        onShapeChange={setShape}
         onCryptoTimeframeChange={setCryptoTimeframe}
         variant="homepage"
       />
@@ -875,6 +884,7 @@ snapshotButton={null}
                     useCryptoColors={pageData?.source === 'coingecko_crypto'}
                     cryptoTimeframe={cryptoTimeframe}
                     animationStyle={animationStyle}
+                    shape={shape as Shape}
                   />
                 </div>
               )}

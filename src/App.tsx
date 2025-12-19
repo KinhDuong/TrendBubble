@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { BrowserRouter, Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import BubbleChart from './components/BubbleChart';
+import BubbleChart, { Shape } from './components/BubbleChart';
 import BarChart from './components/BarChart';
 import Treemap from './components/Treemap';
 import DonutChart from './components/DonutChart';
@@ -9,7 +9,7 @@ import FileUpload from './components/FileUpload';
 import Login from './components/Login';
 import Footer from './components/Footer';
 import Header from './components/Header';
-import FilterMenu, { BubbleLayout } from './components/FilterMenu';
+import FilterMenu, { BubbleLayout, Shape as FilterShape } from './components/FilterMenu';
 import ComparisonPanel from './components/ComparisonPanel';
 import ShareSnapshot from './components/ShareSnapshot';
 import DynamicPage from './pages/DynamicPage';
@@ -81,6 +81,7 @@ function HomePage() {
   const [editPageMetaDescription, setEditPageMetaDescription] = useState<string>('');
   const [editPageSummary, setEditPageSummary] = useState<string>('');
   const [bubbleLayout, setBubbleLayout] = useState<BubbleLayout>('force');
+  const [shape, setShape] = useState<FilterShape>('bubble');
   const [sources, setSources] = useState<Array<{value: string, label: string}>>([
     { value: 'all', label: 'All' },
     { value: 'google_trends', label: 'Google Trends' },
@@ -1033,6 +1034,7 @@ function HomePage() {
         nextBubbleIn={nextBubbleIn}
         bubbleProgress={bubbleProgress}
         bubbleLayout={bubbleLayout}
+        shape={shape}
         onViewModeChange={setViewMode}
         onDateFilterChange={setDateFilter}
         onCategoryFilterChange={setCategoryFilter}
@@ -1045,6 +1047,7 @@ function HomePage() {
         }}
         onRefresh={loadTopics}
         onBubbleLayoutChange={setBubbleLayout}
+        onShapeChange={setShape}
         variant="homepage"
       />
 
@@ -1682,7 +1685,7 @@ function HomePage() {
             {topics.length > 0 && viewMode === 'bubble' && (
               <>
                 <div ref={bubbleChartRef}>
-                  <BubbleChart topics={topics} maxDisplay={maxBubbles} theme={theme} layout={bubbleLayout} onBubbleTimingUpdate={handleBubbleTimingUpdate} comparingTopics={comparingTopics} onComparingTopicsChange={setComparingTopics} />
+                  <BubbleChart topics={topics} maxDisplay={maxBubbles} theme={theme} layout={bubbleLayout} onBubbleTimingUpdate={handleBubbleTimingUpdate} comparingTopics={comparingTopics} onComparingTopicsChange={setComparingTopics} shape={shape as Shape} />
                 </div>
 
                 {/* Featured Pages Section - Full Width */}

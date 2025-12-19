@@ -6,11 +6,11 @@ import { useAuth } from '../hooks/useAuth';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import KeywordChart from '../components/KeywordChart';
-import BubbleChart from '../components/BubbleChart';
+import BubbleChart, { Shape } from '../components/BubbleChart';
 import BarChart from '../components/BarChart';
 import Treemap from '../components/Treemap';
 import DonutChart from '../components/DonutChart';
-import FilterMenu, { BubbleLayout, ViewMode } from '../components/FilterMenu';
+import FilterMenu, { BubbleLayout, ViewMode, Shape as FilterShape } from '../components/FilterMenu';
 import ShareSnapshot from '../components/ShareSnapshot';
 import AnimationSelector, { AnimationStyle } from '../components/AnimationSelector';
 import ComparisonPanel from '../components/ComparisonPanel';
@@ -83,6 +83,7 @@ export default function BrandInsightPage() {
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const [comparingTopics, setComparingTopics] = useState<Set<string>>(new Set());
   const [bubbleLayout, setBubbleLayout] = useState<BubbleLayout>('force');
+  const [shape, setShape] = useState<FilterShape>('bubble');
   const [animationStyle, setAnimationStyle] = useState<AnimationStyle>('default');
 
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
@@ -541,6 +542,7 @@ export default function BrandInsightPage() {
         maxBubbles={maxBubbles}
         searchQuery={searchQuery}
         bubbleLayout={bubbleLayout}
+        shape={shape}
         cryptoTimeframe="24h"
         showCryptoTimeframe={false}
         showDateFilter={false}
@@ -557,6 +559,7 @@ export default function BrandInsightPage() {
           setViewMode('keyword');
         }}
         onBubbleLayoutChange={setBubbleLayout}
+        onShapeChange={setShape}
         onCryptoTimeframeChange={() => {}}
         variant="brand"
       />
@@ -670,6 +673,7 @@ export default function BrandInsightPage() {
                     useCryptoColors={false}
                     cryptoTimeframe="24h"
                     animationStyle={animationStyle}
+                    shape={shape as Shape}
                   />
                 </div>
               )}
