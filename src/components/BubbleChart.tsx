@@ -1458,7 +1458,7 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
 
         if (bubble.ringColor && bubble.ringIntensity) {
           const ringOpacity = Math.min(bubble.ringIntensity, 1);
-          const baseRingLineWidth = 2 + (bubble.ringIntensity * 4);
+          const baseRingLineWidth = 1 + (bubble.ringIntensity * 2);
           const ringRgb = bubble.ringColor.match(/\w\w/g)?.map(x => parseInt(x, 16)) || [59, 130, 246];
 
           // Animate ring with ripple effect (expand/contract)
