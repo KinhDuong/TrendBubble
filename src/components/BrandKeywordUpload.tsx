@@ -242,6 +242,18 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light' }
           if (!isNaN(parsedValue)) {
             record[header] = parsedValue;
           }
+        } else if (header === 'Three month change') {
+          const cleanValue = value.replace(/%/g, '').trim();
+          const parsedValue = parseFloat(cleanValue);
+          if (!isNaN(parsedValue)) {
+            record.three_month_change = parsedValue / 100;
+          }
+        } else if (header === 'YoY change') {
+          const cleanValue = value.replace(/%/g, '').trim();
+          const parsedValue = parseFloat(cleanValue);
+          if (!isNaN(parsedValue)) {
+            record.yoy_change = parsedValue / 100;
+          }
         } else {
           record[header] = value;
         }
@@ -252,55 +264,7 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light' }
 
     console.log(`Parsed ${results.length} records from CSV`);
 
-    const filtered = results.filter(row => row.keyword);
-
-    filtered.forEach(record => {
-      const monthlySearches: number[] = [];
-      const monthColumns = [
-        'Searches: Dec 2021', 'Searches: Jan 2022', 'Searches: Feb 2022', 'Searches: Mar 2022',
-        'Searches: Apr 2022', 'Searches: May 2022', 'Searches: Jun 2022', 'Searches: Jul 2022',
-        'Searches: Aug 2022', 'Searches: Sep 2022', 'Searches: Oct 2022', 'Searches: Nov 2022',
-        'Searches: Dec 2022', 'Searches: Jan 2023', 'Searches: Feb 2023', 'Searches: Mar 2023',
-        'Searches: Apr 2023', 'Searches: May 2023', 'Searches: Jun 2023', 'Searches: Jul 2023',
-        'Searches: Aug 2023', 'Searches: Sep 2023', 'Searches: Oct 2023', 'Searches: Nov 2023',
-        'Searches: Dec 2023', 'Searches: Jan 2024', 'Searches: Feb 2024', 'Searches: Mar 2024',
-        'Searches: Apr 2024', 'Searches: May 2024', 'Searches: Jun 2024', 'Searches: Jul 2024',
-        'Searches: Aug 2024', 'Searches: Sep 2024', 'Searches: Oct 2024', 'Searches: Nov 2024',
-        'Searches: Dec 2024'
-      ];
-
-      monthColumns.forEach(col => {
-        if (record[col] !== null && record[col] !== undefined) {
-          monthlySearches.push(Number(record[col]));
-        }
-      });
-
-      if (monthlySearches.length >= 6) {
-        const lastThreeMonths = monthlySearches.slice(-3);
-        const previousThreeMonths = monthlySearches.slice(-6, -3);
-
-        const lastThreeAvg = lastThreeMonths.reduce((sum, val) => sum + val, 0) / lastThreeMonths.length;
-        const prevThreeAvg = previousThreeMonths.reduce((sum, val) => sum + val, 0) / previousThreeMonths.length;
-
-        if (prevThreeAvg > 0) {
-          record.three_month_change = (lastThreeAvg - prevThreeAvg) / prevThreeAvg;
-        }
-      }
-
-      if (monthlySearches.length >= 24) {
-        const lastTwelveMonths = monthlySearches.slice(-12);
-        const previousTwelveMonths = monthlySearches.slice(-24, -12);
-
-        const lastYearAvg = lastTwelveMonths.reduce((sum, val) => sum + val, 0) / lastTwelveMonths.length;
-        const prevYearAvg = previousTwelveMonths.reduce((sum, val) => sum + val, 0) / previousTwelveMonths.length;
-
-        if (prevYearAvg > 0) {
-          record.yoy_change = (lastYearAvg - prevYearAvg) / prevYearAvg;
-        }
-      }
-    });
-
-    return filtered;
+    return results.filter(row => row.keyword);
   };
 
   const aggregateMonthlyData = (data: Array<Record<string, any>>) => {
