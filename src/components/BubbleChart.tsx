@@ -1357,76 +1357,140 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
             ctx.translate(-bubble.x, -bubble.y);
           }
 
-          // Dark theme: gradients and glows
-          const innerGlow = ctx.createRadialGradient(
-            bubble.x,
-            bubble.y,
-            displayRadius,
-            bubble.x,
-            bubble.y,
-            Math.max(0, displayRadius - 10)
-          );
-          innerGlow.addColorStop(0, `rgba(${colorRgb[0]}, ${colorRgb[1]}, ${colorRgb[2]}, ${0.8 * opacity * colorIntensity})`);
-          innerGlow.addColorStop(1, 'rgba(20, 20, 20, 0)');
+          // Check if this is a purple year-round bubble - use split color effect
+          const isPurpleBubble = bubble.color === '#A855F7';
 
-          const gradient = ctx.createRadialGradient(
-            bubble.x - displayRadius * 0.3,
-            bubble.y - displayRadius * 0.3,
-            0,
-            bubble.x,
-            bubble.y,
-            displayRadius
-          );
-          gradient.addColorStop(0, `rgba(50, 50, 50, ${0.9 * opacity})`);
-          gradient.addColorStop(0.5, `rgba(30, 30, 30, ${0.85 * opacity})`);
-          gradient.addColorStop(1, `rgba(20, 20, 20, ${0.9 * opacity})`);
+          if (isPurpleBubble && shape === 'bubble') {
+            // Draw left half in blue with glow
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(bubble.x, bubble.y, displayRadius, Math.PI * 0.5, Math.PI * 1.5);
+            ctx.closePath();
+            ctx.clip();
 
-          drawShape(ctx, bubble.x, bubble.y, displayRadius, shape);
-          ctx.fillStyle = gradient;
-          ctx.fill();
+            const blueGradient = ctx.createRadialGradient(
+              bubble.x - displayRadius * 0.3,
+              bubble.y,
+              0,
+              bubble.x,
+              bubble.y,
+              displayRadius
+            );
+            blueGradient.addColorStop(0, `rgba(96, 165, 250, ${0.9 * opacity})`);
+            blueGradient.addColorStop(1, `rgba(59, 130, 246, ${0.7 * opacity})`);
 
-          drawShape(ctx, bubble.x, bubble.y, displayRadius, shape);
-          ctx.fillStyle = innerGlow;
-          ctx.fill();
+            ctx.beginPath();
+            ctx.arc(bubble.x, bubble.y, displayRadius, 0, Math.PI * 2);
+            ctx.fillStyle = blueGradient;
+            ctx.fill();
+            ctx.restore();
 
-          if (bubble.isSpawning) {
-            const glowIntensity = bubble.spawnProgress || 0;
-            const displayCount = Math.min(maxDisplay, topics.length);
-            ctx.shadowColor = bubble.color;
-            let shadowBlur = Math.max(15, displayRadius / 3) * glowIntensity;
+            // Draw right half in red with glow
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(bubble.x, bubble.y, displayRadius, -Math.PI * 0.5, Math.PI * 0.5);
+            ctx.closePath();
+            ctx.clip();
 
-            if (displayCount < 30) {
-              shadowBlur = Math.max(30, displayRadius / 2) * glowIntensity;
-            } else if (displayCount <= 50) {
-              shadowBlur = Math.max(22, displayRadius / 2.5) * glowIntensity;
-            }
+            const redGradient = ctx.createRadialGradient(
+              bubble.x + displayRadius * 0.3,
+              bubble.y,
+              0,
+              bubble.x,
+              bubble.y,
+              displayRadius
+            );
+            redGradient.addColorStop(0, `rgba(248, 113, 113, ${0.9 * opacity})`);
+            redGradient.addColorStop(1, `rgba(239, 68, 68, ${0.7 * opacity})`);
 
-            if (animationStyle === 'pulse' || animationStyle === 'shimmer') {
-              shadowBlur *= 1.5;
-            }
-
-            ctx.shadowBlur = shadowBlur;
+            ctx.beginPath();
+            ctx.arc(bubble.x, bubble.y, displayRadius, 0, Math.PI * 2);
+            ctx.fillStyle = redGradient;
+            ctx.fill();
+            ctx.restore();
           } else {
-            ctx.shadowColor = bubble.color;
-            let shadowBlur = Math.max(8, displayRadius / 8) * colorIntensity;
+            // Dark theme: gradients and glows
+            const innerGlow = ctx.createRadialGradient(
+              bubble.x,
+              bubble.y,
+              displayRadius,
+              bubble.x,
+              bubble.y,
+              Math.max(0, displayRadius - 10)
+            );
+            innerGlow.addColorStop(0, `rgba(${colorRgb[0]}, ${colorRgb[1]}, ${colorRgb[2]}, ${0.8 * opacity * colorIntensity})`);
+            innerGlow.addColorStop(1, 'rgba(20, 20, 20, 0)');
 
-            if (bubble.badges?.opportunityScore && bubble.badges.opportunityScore >= 70) {
-              ctx.shadowColor = '#10B981';
-              shadowBlur *= 1.8;
-            }
+            const gradient = ctx.createRadialGradient(
+              bubble.x - displayRadius * 0.3,
+              bubble.y - displayRadius * 0.3,
+              0,
+              bubble.x,
+              bubble.y,
+              displayRadius
+            );
+            gradient.addColorStop(0, `rgba(50, 50, 50, ${0.9 * opacity})`);
+            gradient.addColorStop(0.5, `rgba(30, 30, 30, ${0.85 * opacity})`);
+            gradient.addColorStop(1, `rgba(20, 20, 20, ${0.9 * opacity})`);
 
-            ctx.shadowBlur = shadowBlur;
+            drawShape(ctx, bubble.x, bubble.y, displayRadius, shape);
+            ctx.fillStyle = gradient;
+            ctx.fill();
+
+            drawShape(ctx, bubble.x, bubble.y, displayRadius, shape);
+            ctx.fillStyle = innerGlow;
+            ctx.fill();
           }
 
-          ctx.shadowOffsetX = 0;
-          ctx.shadowOffsetY = 0;
-          drawShape(ctx, bubble.x, bubble.y, displayRadius, shape);
-          ctx.strokeStyle = bubble.color;
-          ctx.globalAlpha = opacity * colorIntensity;
-          ctx.lineWidth = 1;
-          ctx.stroke();
-          ctx.shadowBlur = 0;
-          ctx.globalAlpha = 1;
+          if (!isPurpleBubble) {
+            if (bubble.isSpawning) {
+              const glowIntensity = bubble.spawnProgress || 0;
+              const displayCount = Math.min(maxDisplay, topics.length);
+              ctx.shadowColor = bubble.color;
+              let shadowBlur = Math.max(15, displayRadius / 3) * glowIntensity;
+
+              if (displayCount < 30) {
+                shadowBlur = Math.max(30, displayRadius / 2) * glowIntensity;
+              } else if (displayCount <= 50) {
+                shadowBlur = Math.max(22, displayRadius / 2.5) * glowIntensity;
+              }
+
+              if (animationStyle === 'pulse' || animationStyle === 'shimmer') {
+                shadowBlur *= 1.5;
+              }
+
+              ctx.shadowBlur = shadowBlur;
+            } else {
+              ctx.shadowColor = bubble.color;
+              let shadowBlur = Math.max(8, displayRadius / 8) * colorIntensity;
+
+              if (bubble.badges?.opportunityScore && bubble.badges.opportunityScore >= 70) {
+                ctx.shadowColor = '#10B981';
+                shadowBlur *= 1.8;
+              }
+
+              ctx.shadowBlur = shadowBlur;
+            }
+
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 0;
+            drawShape(ctx, bubble.x, bubble.y, displayRadius, shape);
+            ctx.strokeStyle = bubble.color;
+            ctx.globalAlpha = opacity * colorIntensity;
+            ctx.lineWidth = 1;
+            ctx.stroke();
+            ctx.shadowBlur = 0;
+            ctx.globalAlpha = 1;
+          } else {
+            // For purple split bubbles, add subtle outline
+            ctx.shadowBlur = 0;
+            ctx.globalAlpha = opacity;
+            drawShape(ctx, bubble.x, bubble.y, displayRadius, shape);
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+            ctx.globalAlpha = 1;
+          }
 
           // Shimmer sparkles effect
           if (bubble.isSpawning && animationStyle === 'shimmer') {
@@ -1449,9 +1513,38 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
           ctx.restore();
         } else {
           // Light theme: flat solid color, no gradients or shadows
-          drawShape(ctx, bubble.x, bubble.y, displayRadius, shape);
-          ctx.fillStyle = `rgba(${colorRgb[0]}, ${colorRgb[1]}, ${colorRgb[2]}, ${opacity})`;
-          ctx.fill();
+          // Check if this is a purple year-round bubble - use split color effect
+          const isPurpleBubble = bubble.color === '#A855F7';
+
+          if (isPurpleBubble && shape === 'bubble') {
+            // Draw left half in blue
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(bubble.x, bubble.y, displayRadius, Math.PI * 0.5, Math.PI * 1.5);
+            ctx.closePath();
+            ctx.clip();
+            ctx.beginPath();
+            ctx.arc(bubble.x, bubble.y, displayRadius, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(59, 130, 246, ${opacity * 0.6})`;
+            ctx.fill();
+            ctx.restore();
+
+            // Draw right half in pink/red
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(bubble.x, bubble.y, displayRadius, -Math.PI * 0.5, Math.PI * 0.5);
+            ctx.closePath();
+            ctx.clip();
+            ctx.beginPath();
+            ctx.arc(bubble.x, bubble.y, displayRadius, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(239, 68, 68, ${opacity * 0.6})`;
+            ctx.fill();
+            ctx.restore();
+          } else {
+            drawShape(ctx, bubble.x, bubble.y, displayRadius, shape);
+            ctx.fillStyle = `rgba(${colorRgb[0]}, ${colorRgb[1]}, ${colorRgb[2]}, ${opacity})`;
+            ctx.fill();
+          }
         }
 
         const isMobile = window.innerWidth < 768;
