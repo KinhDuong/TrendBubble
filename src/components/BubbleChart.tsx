@@ -1376,8 +1376,8 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
               bubble.y,
               displayRadius
             );
-            lightGrayGradient.addColorStop(0, `rgba(120, 127, 141, ${0.9 * opacity})`);
-            lightGrayGradient.addColorStop(1, `rgba(107, 114, 128, ${0.7 * opacity})`);
+            lightGrayGradient.addColorStop(0, `rgba(140, 147, 161, ${0.9 * opacity})`);
+            lightGrayGradient.addColorStop(1, `rgba(127, 134, 148, ${0.7 * opacity})`);
 
             ctx.beginPath();
             ctx.arc(bubble.x, bubble.y, displayRadius, 0, Math.PI * 2);
@@ -1400,8 +1400,8 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
               bubble.y,
               displayRadius
             );
-            mediumGrayGradient.addColorStop(0, `rgba(107, 114, 128, ${0.9 * opacity})`);
-            mediumGrayGradient.addColorStop(1, `rgba(95, 102, 116, ${0.7 * opacity})`);
+            mediumGrayGradient.addColorStop(0, `rgba(127, 134, 148, ${0.9 * opacity})`);
+            mediumGrayGradient.addColorStop(1, `rgba(115, 122, 136, ${0.7 * opacity})`);
 
             ctx.beginPath();
             ctx.arc(bubble.x, bubble.y, displayRadius, 0, Math.PI * 2);
@@ -1525,7 +1525,7 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
             ctx.clip();
             ctx.beginPath();
             ctx.arc(bubble.x, bubble.y, displayRadius, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(120, 127, 141, ${opacity * 0.8})`;
+            ctx.fillStyle = `rgba(140, 147, 161, ${opacity * 0.8})`;
             ctx.fill();
             ctx.restore();
 
@@ -1537,7 +1537,7 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
             ctx.clip();
             ctx.beginPath();
             ctx.arc(bubble.x, bubble.y, displayRadius, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(107, 114, 128, ${opacity * 0.8})`;
+            ctx.fillStyle = `rgba(127, 134, 148, ${opacity * 0.8})`;
             ctx.fill();
             ctx.restore();
           } else {
