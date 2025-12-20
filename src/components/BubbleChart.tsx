@@ -221,15 +221,15 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
       if (threeMonthChange > 0) {
         const intensity = Math.min(Math.abs(threeMonthChange) * 100, 100) / 100;
         return {
-          color: '#86EFAC',
-          ringColor: '#4ADE80',
+          color: '#84CC16',
+          ringColor: '#65A30D',
           ringIntensity: intensity
         };
       } else {
         const intensity = Math.min(Math.abs(threeMonthChange) * 100, 100) / 100;
         return {
-          color: '#FCA5A5',
-          ringColor: '#F87171',
+          color: '#DC2626',
+          ringColor: '#B91C1C',
           ringIntensity: intensity
         };
       }
@@ -1457,8 +1457,8 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
         const isMobile = window.innerWidth < 768;
 
         // Skip rings for red bubbles (negative trends)
-        const isRedBubble = bubble.color === '#EF4444' || bubble.color === '#FCA5A5' ||
-                           bubble.ringColor === '#DC2626' || bubble.ringColor === '#F87171';
+        const isRedBubble = bubble.color === '#EF4444' || bubble.color === '#DC2626' ||
+                           bubble.ringColor === '#DC2626' || bubble.ringColor === '#B91C1C';
 
         if (bubble.ringColor && bubble.ringIntensity && !isRedBubble) {
           const ringOpacity = Math.min(bubble.ringIntensity, 1);
