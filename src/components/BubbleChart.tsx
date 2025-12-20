@@ -1361,53 +1361,22 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
           const isPurpleBubble = bubble.color === '#A855F7';
 
           if (isPurpleBubble && shape === 'bubble') {
-            // Draw left half in slightly lighter gray with glow
-            ctx.save();
-            ctx.beginPath();
-            ctx.arc(bubble.x, bubble.y, displayRadius, Math.PI * 0.5, Math.PI * 1.5);
-            ctx.closePath();
-            ctx.clip();
-
-            const lightGrayGradient = ctx.createRadialGradient(
+            // Year-round bubble with solid color #d7dbe2
+            const gradient = ctx.createRadialGradient(
               bubble.x - displayRadius * 0.3,
-              bubble.y,
+              bubble.y - displayRadius * 0.3,
               0,
               bubble.x,
               bubble.y,
               displayRadius
             );
-            lightGrayGradient.addColorStop(0, `rgba(140, 147, 161, ${0.9 * opacity})`);
-            lightGrayGradient.addColorStop(1, `rgba(127, 134, 148, ${0.7 * opacity})`);
+            gradient.addColorStop(0, `rgba(215, 219, 226, ${0.9 * opacity})`);
+            gradient.addColorStop(1, `rgba(215, 219, 226, ${0.6 * opacity})`);
 
             ctx.beginPath();
             ctx.arc(bubble.x, bubble.y, displayRadius, 0, Math.PI * 2);
-            ctx.fillStyle = lightGrayGradient;
+            ctx.fillStyle = gradient;
             ctx.fill();
-            ctx.restore();
-
-            // Draw right half in gray with glow
-            ctx.save();
-            ctx.beginPath();
-            ctx.arc(bubble.x, bubble.y, displayRadius, -Math.PI * 0.5, Math.PI * 0.5);
-            ctx.closePath();
-            ctx.clip();
-
-            const mediumGrayGradient = ctx.createRadialGradient(
-              bubble.x + displayRadius * 0.3,
-              bubble.y,
-              0,
-              bubble.x,
-              bubble.y,
-              displayRadius
-            );
-            mediumGrayGradient.addColorStop(0, `rgba(127, 134, 148, ${0.9 * opacity})`);
-            mediumGrayGradient.addColorStop(1, `rgba(115, 122, 136, ${0.7 * opacity})`);
-
-            ctx.beginPath();
-            ctx.arc(bubble.x, bubble.y, displayRadius, 0, Math.PI * 2);
-            ctx.fillStyle = mediumGrayGradient;
-            ctx.fill();
-            ctx.restore();
           } else {
             // Dark theme: gradients and glows
             const innerGlow = ctx.createRadialGradient(
@@ -1517,29 +1486,10 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
           const isPurpleBubble = bubble.color === '#A855F7';
 
           if (isPurpleBubble && shape === 'bubble') {
-            // Draw left half in slightly lighter gray
-            ctx.save();
-            ctx.beginPath();
-            ctx.arc(bubble.x, bubble.y, displayRadius, Math.PI * 0.5, Math.PI * 1.5);
-            ctx.closePath();
-            ctx.clip();
-            ctx.beginPath();
-            ctx.arc(bubble.x, bubble.y, displayRadius, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(140, 147, 161, ${opacity * 0.8})`;
+            // Year-round bubble with solid color #d7dbe2
+            drawShape(ctx, bubble.x, bubble.y, displayRadius, shape);
+            ctx.fillStyle = `rgba(215, 219, 226, ${opacity})`;
             ctx.fill();
-            ctx.restore();
-
-            // Draw right half in gray
-            ctx.save();
-            ctx.beginPath();
-            ctx.arc(bubble.x, bubble.y, displayRadius, -Math.PI * 0.5, Math.PI * 0.5);
-            ctx.closePath();
-            ctx.clip();
-            ctx.beginPath();
-            ctx.arc(bubble.x, bubble.y, displayRadius, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(127, 134, 148, ${opacity * 0.8})`;
-            ctx.fill();
-            ctx.restore();
           } else {
             drawShape(ctx, bubble.x, bubble.y, displayRadius, shape);
             ctx.fillStyle = `rgba(${colorRgb[0]}, ${colorRgb[1]}, ${colorRgb[2]}, ${opacity})`;
