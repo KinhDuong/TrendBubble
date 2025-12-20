@@ -82,6 +82,14 @@ export default function Footer({ theme }: FooterProps) {
               Browse Pages
             </h3>
             <ul className="text-sm space-y-2 max-h-64 overflow-y-auto">
+              <li>
+                <Link
+                  to="/browse-topics"
+                  className={`font-semibold hover:underline ${isDark ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'}`}
+                >
+                  View All Topics by Category →
+                </Link>
+              </li>
               {pages.map((page) => (
                 <li key={page.id}>
                   <Link

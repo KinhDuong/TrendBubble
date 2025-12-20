@@ -374,6 +374,37 @@ export default function ExplorePage() {
               </div>
             )}
 
+            {/* View All Topics CTA Section */}
+            <div className="mb-12">
+              <Link
+                to="/browse-topics"
+                className={`group relative block overflow-hidden rounded-none md:rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 ${
+                  theme === 'dark' ? 'bg-gradient-to-br from-gray-800 via-gray-900 to-gray-800' : 'bg-gradient-to-br from-blue-50 via-white to-cyan-50'
+                }`}
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-cyan-600 opacity-10 group-hover:opacity-20 transition-opacity duration-500"></div>
+                <div className="relative p-8 md:p-12 text-center">
+                  <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 mb-6 group-hover:scale-110 transition-transform duration-300">
+                    <BookOpen className="w-10 h-10 text-white" />
+                  </div>
+                  <h2 className={`text-3xl md:text-4xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                    Explore All Topics
+                  </h2>
+                  <p className={`text-lg md:text-xl mb-6 max-w-2xl mx-auto ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                    Browse our complete collection organized by category. Discover rankings, insights, and trends across all topics.
+                  </p>
+                  <div className={`inline-flex items-center gap-2 px-8 py-4 rounded-full font-semibold text-lg transition-all duration-300 ${
+                    theme === 'dark'
+                      ? 'bg-blue-600 text-white group-hover:bg-blue-500'
+                      : 'bg-blue-600 text-white group-hover:bg-blue-700'
+                  } shadow-lg group-hover:shadow-xl group-hover:scale-105`}>
+                    <span>View All Topics</span>
+                    <TrendingUp className="w-6 h-6 group-hover:translate-x-1 transition-transform duration-300" />
+                  </div>
+                </div>
+              </Link>
+            </div>
+
             {/* Category Sections */}
             {Object.entries(categoryTopics).slice(0, 3).map(([category, topics], index) => (
               <div key={category}>
