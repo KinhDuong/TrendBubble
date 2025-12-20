@@ -1,7 +1,7 @@
 import { TrendingTopic, CryptoTimeframe } from '../types';
 import { TrendingUp, Tag, Pin, X, DollarSign, Target, TrendingDown, BarChart3, Maximize2 } from 'lucide-react';
 import { createPortal } from 'react-dom';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface KeywordPerformanceData {
   keyword: string;
@@ -44,6 +44,12 @@ export default function BubbleTooltip({
 }: BubbleTooltipProps) {
   const isMobile = window.innerWidth < 768;
   const [isExpanded, setIsExpanded] = useState(!isMobile && !!keywordData);
+  const [isAnimating, setIsAnimating] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsAnimating(false), 400);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Desktop: small or expanded size
   const tooltipWidth = !isMobile && isExpanded ? 480 : 280;
@@ -380,8 +386,11 @@ export default function BubbleTooltip({
           top: `${top}px`,
           width: `${tooltipWidth}px`,
           maxHeight: `${tooltipHeight}px`,
-          transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
-          transform: isExpanded ? 'scale(1.02)' : 'scale(1)',
+          transition: isAnimating
+            ? 'all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease-out'
+            : 'all 0.35s cubic-bezier(0.4, 0, 0.2, 1)',
+          transform: isAnimating ? 'scale(0.85)' : 'scale(1)',
+          opacity: isAnimating ? 0 : 1,
           transformOrigin: 'top left'
         }}
       >
@@ -473,7 +482,12 @@ export default function BubbleTooltip({
         </div>
 
         {isExpanded && keywordData && (
-          <div className={`border-t ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'} pt-3`}>
+          <div
+            className={`border-t ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'} pt-3`}
+            style={{
+              animation: 'slideDown 0.35s cubic-bezier(0.4, 0, 0.2, 1)',
+            }}
+          >
             <h4 className={`text-sm font-semibold mb-3 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
               Keyword Performance Metrics
             </h4>

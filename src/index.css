@@ -535,3 +535,17 @@ html {
     font-size: 0.875rem;
   }
 }
+
+/* Tooltip animations */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    max-height: 1000px;
+    transform: translateY(0);
+  }
+}
