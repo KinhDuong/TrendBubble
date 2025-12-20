@@ -1462,7 +1462,7 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
           const ringRgb = bubble.ringColor.match(/\w\w/g)?.map(x => parseInt(x, 16)) || [59, 130, 246];
 
           // Ripple effect - multiple expanding rings
-          const rippleSpeed = 0.001; // Speed of ripple animation
+          const rippleSpeed = 0.0003; // Speed of ripple animation
           const currentTime = Date.now() * rippleSpeed;
           const numRipples = 3; // Number of concurrent ripples
           const maxExpansion = 20; // Max distance rings expand outward
