@@ -1361,7 +1361,7 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
           const isPurpleBubble = bubble.color === '#A855F7';
 
           if (isPurpleBubble && shape === 'bubble') {
-            // Draw left half in light gray with glow
+            // Draw left half in slightly lighter gray with glow
             ctx.save();
             ctx.beginPath();
             ctx.arc(bubble.x, bubble.y, displayRadius, Math.PI * 0.5, Math.PI * 1.5);
@@ -1376,8 +1376,8 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
               bubble.y,
               displayRadius
             );
-            lightGrayGradient.addColorStop(0, `rgba(209, 213, 219, ${0.9 * opacity})`);
-            lightGrayGradient.addColorStop(1, `rgba(156, 163, 175, ${0.7 * opacity})`);
+            lightGrayGradient.addColorStop(0, `rgba(120, 127, 141, ${0.9 * opacity})`);
+            lightGrayGradient.addColorStop(1, `rgba(107, 114, 128, ${0.7 * opacity})`);
 
             ctx.beginPath();
             ctx.arc(bubble.x, bubble.y, displayRadius, 0, Math.PI * 2);
@@ -1385,7 +1385,7 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
             ctx.fill();
             ctx.restore();
 
-            // Draw right half in medium gray with glow
+            // Draw right half in gray with glow
             ctx.save();
             ctx.beginPath();
             ctx.arc(bubble.x, bubble.y, displayRadius, -Math.PI * 0.5, Math.PI * 0.5);
@@ -1401,7 +1401,7 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
               displayRadius
             );
             mediumGrayGradient.addColorStop(0, `rgba(107, 114, 128, ${0.9 * opacity})`);
-            mediumGrayGradient.addColorStop(1, `rgba(75, 85, 99, ${0.7 * opacity})`);
+            mediumGrayGradient.addColorStop(1, `rgba(95, 102, 116, ${0.7 * opacity})`);
 
             ctx.beginPath();
             ctx.arc(bubble.x, bubble.y, displayRadius, 0, Math.PI * 2);
@@ -1517,7 +1517,7 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
           const isPurpleBubble = bubble.color === '#A855F7';
 
           if (isPurpleBubble && shape === 'bubble') {
-            // Draw left half in light gray
+            // Draw left half in slightly lighter gray
             ctx.save();
             ctx.beginPath();
             ctx.arc(bubble.x, bubble.y, displayRadius, Math.PI * 0.5, Math.PI * 1.5);
@@ -1525,11 +1525,11 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
             ctx.clip();
             ctx.beginPath();
             ctx.arc(bubble.x, bubble.y, displayRadius, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(209, 213, 219, ${opacity * 0.8})`;
+            ctx.fillStyle = `rgba(120, 127, 141, ${opacity * 0.8})`;
             ctx.fill();
             ctx.restore();
 
-            // Draw right half in medium gray
+            // Draw right half in gray
             ctx.save();
             ctx.beginPath();
             ctx.arc(bubble.x, bubble.y, displayRadius, -Math.PI * 0.5, Math.PI * 0.5);
