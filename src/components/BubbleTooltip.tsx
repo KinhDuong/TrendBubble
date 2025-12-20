@@ -98,7 +98,7 @@ export default function BubbleTooltip({
 
       if (percentChange >= 5) return '#0D7C4E';
       if (percentChange >= 2) return '#16A34A';
-      if (percentChange >= 0) return '#10B981';
+      if (percentChange >= 0) return '#22C55E';
       if (percentChange >= -2) return '#DC2626';
       if (percentChange >= -5) return '#B91C1C';
       return '#991B1B';
@@ -156,7 +156,7 @@ export default function BubbleTooltip({
   const getChangeColor = (value: number | undefined) => {
     if (value === undefined || value === null) return theme === 'dark' ? 'text-gray-400' : 'text-gray-600';
     if (value >= 0.05) return 'text-green-500';
-    if (value >= 0) return 'text-emerald-500';
+    if (value >= 0) return 'text-green-400';
     if (value >= -0.05) return 'text-red-400';
     return 'text-red-500';
   };
@@ -258,7 +258,7 @@ export default function BubbleTooltip({
                 </span>
                 <span className={`text-sm font-medium px-2 py-1 rounded ${
                   topic.source === 'user_upload'
-                    ? theme === 'dark' ? 'bg-emerald-900/30 text-emerald-400' : 'bg-green-100 text-green-700'
+                    ? theme === 'dark' ? 'bg-green-900/30 text-green-400' : 'bg-green-100 text-green-700'
                     : theme === 'dark' ? 'bg-blue-900/30 text-blue-400' : 'bg-blue-100 text-blue-700'
                 }`}>
                   {getSourceLabel(topic.source)}
@@ -467,7 +467,7 @@ export default function BubbleTooltip({
             </span>
             <span className={`text-sm font-medium px-2 py-0.5 rounded ${
               topic.source === 'user_upload'
-                ? theme === 'dark' ? 'bg-emerald-900/30 text-emerald-400' : 'bg-green-100 text-green-700'
+                ? theme === 'dark' ? 'bg-green-900/30 text-green-400' : 'bg-green-100 text-green-700'
                 : theme === 'dark' ? 'bg-blue-900/30 text-blue-400' : 'bg-blue-100 text-blue-700'
             }`}>
               {getSourceLabel(topic.source)}
