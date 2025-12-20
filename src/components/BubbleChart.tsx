@@ -1361,7 +1361,7 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
           const isPurpleBubble = bubble.color === '#A855F7';
 
           if (isPurpleBubble && shape === 'bubble') {
-            // Year-round bubble with solid color #d7dbe2
+            // Year-round bubble with solid color #bbbbbd
             const gradient = ctx.createRadialGradient(
               bubble.x - displayRadius * 0.3,
               bubble.y - displayRadius * 0.3,
@@ -1370,8 +1370,8 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
               bubble.y,
               displayRadius
             );
-            gradient.addColorStop(0, `rgba(215, 219, 226, ${0.9 * opacity})`);
-            gradient.addColorStop(1, `rgba(215, 219, 226, ${0.6 * opacity})`);
+            gradient.addColorStop(0, `rgba(187, 187, 189, ${0.9 * opacity})`);
+            gradient.addColorStop(1, `rgba(187, 187, 189, ${0.6 * opacity})`);
 
             ctx.beginPath();
             ctx.arc(bubble.x, bubble.y, displayRadius, 0, Math.PI * 2);
@@ -1486,9 +1486,9 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
           const isPurpleBubble = bubble.color === '#A855F7';
 
           if (isPurpleBubble && shape === 'bubble') {
-            // Year-round bubble with solid color #d7dbe2
+            // Year-round bubble with solid color #bbbbbd
             drawShape(ctx, bubble.x, bubble.y, displayRadius, shape);
-            ctx.fillStyle = `rgba(215, 219, 226, ${opacity})`;
+            ctx.fillStyle = `rgba(187, 187, 189, ${opacity})`;
             ctx.fill();
           } else {
             drawShape(ctx, bubble.x, bubble.y, displayRadius, shape);
