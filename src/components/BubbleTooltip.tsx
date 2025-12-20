@@ -43,7 +43,7 @@ export default function BubbleTooltip({
   keywordData
 }: BubbleTooltipProps) {
   const isMobile = window.innerWidth < 768;
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(!isMobile && !!keywordData);
 
   // Desktop: small or expanded size
   const tooltipWidth = !isMobile && isExpanded ? 480 : 280;
