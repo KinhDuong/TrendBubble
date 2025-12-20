@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { Clock, TrendingUp, Circle, BarChart3, PieChart, Grid3x3, Sparkles } from 'lucide-react';
+import { Clock, TrendingUp, Circle, BarChart3, PieChart, Grid3x3, Sparkles, BookOpen } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { TrendingTopic } from '../types';
 import { useAuth } from '../hooks/useAuth';
