@@ -1,6 +1,17 @@
 import { TrendingTopic, CryptoTimeframe } from '../types';
-import { TrendingUp, Tag, Pin, X } from 'lucide-react';
+import { TrendingUp, Tag, Pin, X, DollarSign, Target, TrendingDown, BarChart3, Maximize2 } from 'lucide-react';
 import { createPortal } from 'react-dom';
+import { useState } from 'react';
+
+interface KeywordPerformanceData {
+  keyword: string;
+  three_month_change?: number;
+  yoy_change?: number;
+  monthly_searches?: number[];
+  bid_high?: number;
+  competition?: string | number;
+  searchVolume?: number;
+}
 
 interface BubbleTooltipProps {
   topic: TrendingTopic;
@@ -14,6 +25,7 @@ interface BubbleTooltipProps {
   isComparing: boolean;
   onClose: () => void;
   cryptoTimeframe?: CryptoTimeframe;
+  keywordData?: KeywordPerformanceData;
 }
 
 export default function BubbleTooltip({
@@ -27,11 +39,15 @@ export default function BubbleTooltip({
   onCompare,
   isComparing,
   onClose,
-  cryptoTimeframe = '1h'
+  cryptoTimeframe = '1h',
+  keywordData
 }: BubbleTooltipProps) {
   const isMobile = window.innerWidth < 768;
-  const tooltipWidth = 280;
-  const tooltipHeight = 200;
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  // Desktop: small or expanded size
+  const tooltipWidth = !isMobile && isExpanded ? 480 : 280;
+  const tooltipHeight = !isMobile && isExpanded ? 600 : 200;
   const offset = 10;
   const padding = 20;
 
@@ -123,6 +139,35 @@ export default function BubbleTooltip({
     if (ratio >= 0.4) return theme === 'dark' ? '#F59E0B' : '#D97706';
     if (ratio >= 0.2) return theme === 'dark' ? '#F97316' : '#EA580C';
     return theme === 'dark' ? '#EF4444' : '#DC2626';
+  };
+
+  const formatChange = (value: number | undefined) => {
+    if (value === undefined || value === null) return 'N/A';
+    const formatted = (value * 100).toFixed(1);
+    return value >= 0 ? `+${formatted}%` : `${formatted}%`;
+  };
+
+  const getChangeColor = (value: number | undefined) => {
+    if (value === undefined || value === null) return theme === 'dark' ? 'text-gray-400' : 'text-gray-600';
+    if (value >= 0.05) return 'text-green-500';
+    if (value >= 0) return 'text-green-400';
+    if (value >= -0.05) return 'text-red-400';
+    return 'text-red-500';
+  };
+
+  const formatCompetition = (comp: string | number | undefined) => {
+    if (comp === undefined || comp === null) return 'N/A';
+    if (typeof comp === 'number') return comp.toFixed(2);
+    return comp;
+  };
+
+  const getCompetitionColor = (comp: string | number | undefined) => {
+    if (comp === undefined || comp === null) return theme === 'dark' ? 'text-gray-400' : 'text-gray-600';
+    const value = typeof comp === 'number' ? comp : parseFloat(comp);
+    if (isNaN(value)) return theme === 'dark' ? 'text-gray-400' : 'text-gray-600';
+    if (value >= 0.7) return 'text-red-500';
+    if (value >= 0.4) return 'text-yellow-500';
+    return 'text-green-500';
   };
 
   if (isMobile) {
@@ -329,17 +374,43 @@ export default function BubbleTooltip({
       <div
         className={`fixed z-50 ${
           theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-        } border rounded-lg shadow-2xl p-4`}
-        style={{ left: `${left}px`, top: `${top}px`, width: `${tooltipWidth}px` }}
+        } border rounded-lg shadow-2xl p-4 overflow-y-auto`}
+        style={{
+          left: `${left}px`,
+          top: `${top}px`,
+          width: `${tooltipWidth}px`,
+          maxHeight: `${tooltipHeight}px`,
+          transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
+          transform: isExpanded ? 'scale(1.02)' : 'scale(1)',
+          transformOrigin: 'top left'
+        }}
       >
-        <button
-          onClick={onClose}
-          className={`absolute top-2 right-2 p-1 rounded-full hover:${
-            theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'
-          } transition-colors`}
-        >
-          <X size={16} className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} />
-        </button>
+        <div className="absolute top-2 right-2 flex gap-1">
+          {keywordData && !isMobile && (
+            <button
+              onClick={() => setIsExpanded(!isExpanded)}
+              className={`p-1 rounded-full ${
+                theme === 'dark' ? 'hover:bg-gray-700' : 'hover:bg-gray-100'
+              } transition-colors`}
+              title={isExpanded ? 'Collapse' : 'Expand details'}
+            >
+              <Maximize2
+                size={16}
+                className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} transition-transform ${
+                  isExpanded ? 'rotate-180' : ''
+                }`}
+              />
+            </button>
+          )}
+          <button
+            onClick={onClose}
+            className={`p-1 rounded-full ${
+              theme === 'dark' ? 'hover:bg-gray-700' : 'hover:bg-gray-100'
+            } transition-colors`}
+          >
+            <X size={16} className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} />
+          </button>
+        </div>
       <div className="space-y-3">
         <div>
           <div className="flex items-center gap-2 mb-1">
@@ -401,12 +472,69 @@ export default function BubbleTooltip({
           )}
         </div>
 
+        {isExpanded && keywordData && (
+          <div className={`border-t ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'} pt-3`}>
+            <h4 className={`text-sm font-semibold mb-3 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+              Keyword Performance Metrics
+            </h4>
+            <div className="grid grid-cols-2 gap-3">
+              <div className={`${theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-50'} rounded-lg p-3`}>
+                <div className="flex items-center gap-2 mb-1">
+                  <TrendingUp size={14} className="text-blue-500" />
+                  <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                    3-Month Change
+                  </span>
+                </div>
+                <p className={`text-lg font-bold ${getChangeColor(keywordData.three_month_change)}`}>
+                  {formatChange(keywordData.three_month_change)}
+                </p>
+              </div>
+
+              <div className={`${theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-50'} rounded-lg p-3`}>
+                <div className="flex items-center gap-2 mb-1">
+                  <BarChart3 size={14} className="text-purple-500" />
+                  <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                    YoY Change
+                  </span>
+                </div>
+                <p className={`text-lg font-bold ${getChangeColor(keywordData.yoy_change)}`}>
+                  {formatChange(keywordData.yoy_change)}
+                </p>
+              </div>
+
+              <div className={`${theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-50'} rounded-lg p-3`}>
+                <div className="flex items-center gap-2 mb-1">
+                  <DollarSign size={14} className="text-green-500" />
+                  <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                    Top Bid (High)
+                  </span>
+                </div>
+                <p className={`text-lg font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                  {keywordData.bid_high ? `$${keywordData.bid_high.toFixed(2)}` : 'N/A'}
+                </p>
+              </div>
+
+              <div className={`${theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-50'} rounded-lg p-3`}>
+                <div className="flex items-center gap-2 mb-1">
+                  <Target size={14} className="text-orange-500" />
+                  <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                    Competition
+                  </span>
+                </div>
+                <p className={`text-lg font-bold ${getCompetitionColor(keywordData.competition)}`}>
+                  {formatCompetition(keywordData.competition)}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {topic.monthlySearches && topic.monthlySearches.length > 0 && (
           <div className={`border-t ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'} pt-3`}>
             <h4 className={`text-xs font-semibold mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
               Monthly Search Volumes
             </h4>
-            <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto">
+            <div className={`flex flex-wrap gap-2 overflow-y-auto ${isExpanded ? 'max-h-48' : 'max-h-32'}`}>
               {topic.monthlySearches.map((monthData, index) => {
                 const maxVolume = Math.max(...topic.monthlySearches!.map(m => m.volume));
                 const color = getMonthlySearchColor(monthData.volume, maxVolume);
