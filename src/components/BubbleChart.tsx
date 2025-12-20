@@ -1461,25 +1461,32 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
           const baseRingLineWidth = 1 + (bubble.ringIntensity * 2);
           const ringRgb = bubble.ringColor.match(/\w\w/g)?.map(x => parseInt(x, 16)) || [59, 130, 246];
 
-          // Animate ring with ripple effect (expand/contract)
-          const rippleSpeed = 0.002; // Speed of ripple animation
-          const rippleTime = Date.now() * rippleSpeed;
-          const rippleWave = Math.sin(rippleTime) * 0.5 + 0.5; // Oscillates between 0 and 1
+          // Ripple effect - multiple expanding rings
+          const rippleSpeed = 0.001; // Speed of ripple animation
+          const currentTime = Date.now() * rippleSpeed;
+          const numRipples = 3; // Number of concurrent ripples
+          const maxExpansion = 20; // Max distance rings expand outward
 
-          // Ring expands and contracts
-          const rippleOffset = rippleWave * 8; // Max 8px expansion
-          const rippleRadius = displayRadius + 3 + rippleOffset;
+          for (let i = 0; i < numRipples; i++) {
+            // Offset each ripple in time so they spawn sequentially
+            const ripplePhase = (currentTime + (i / numRipples)) % 1;
 
-          // Opacity also pulses slightly
-          const rippleOpacity = ringOpacity * (0.6 + rippleWave * 0.4) * opacity;
+            // Ring expands from 0 to maxExpansion
+            const rippleOffset = ripplePhase * maxExpansion;
+            const rippleRadius = displayRadius + 3 + rippleOffset;
 
-          // Line width pulses too
-          const rippleLineWidth = baseRingLineWidth * (0.8 + rippleWave * 0.4);
+            // Fade out as the ring expands
+            const fadeOut = 1 - ripplePhase;
+            const rippleOpacity = ringOpacity * fadeOut * opacity;
 
-          drawShape(ctx, bubble.x, bubble.y, rippleRadius, shape);
-          ctx.strokeStyle = `rgba(${ringRgb[0]}, ${ringRgb[1]}, ${ringRgb[2]}, ${rippleOpacity})`;
-          ctx.lineWidth = rippleLineWidth;
-          ctx.stroke();
+            // Only draw if visible
+            if (rippleOpacity > 0.01) {
+              drawShape(ctx, bubble.x, bubble.y, rippleRadius, shape);
+              ctx.strokeStyle = `rgba(${ringRgb[0]}, ${ringRgb[1]}, ${ringRgb[2]}, ${rippleOpacity})`;
+              ctx.lineWidth = baseRingLineWidth;
+              ctx.stroke();
+            }
+          }
         }
 
         if (bubble.isPinned) {
