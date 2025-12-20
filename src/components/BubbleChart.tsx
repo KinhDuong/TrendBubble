@@ -1456,7 +1456,11 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
 
         const isMobile = window.innerWidth < 768;
 
-        if (bubble.ringColor && bubble.ringIntensity) {
+        // Skip rings for red bubbles (negative trends)
+        const isRedBubble = bubble.color === '#EF4444' || bubble.color === '#FCA5A5' ||
+                           bubble.ringColor === '#DC2626' || bubble.ringColor === '#F87171';
+
+        if (bubble.ringColor && bubble.ringIntensity && !isRedBubble) {
           const ringOpacity = Math.min(bubble.ringIntensity, 1);
           const baseRingLineWidth = 1;
           const ringRgb = bubble.ringColor.match(/\w\w/g)?.map(x => parseInt(x, 16)) || [59, 130, 246];
