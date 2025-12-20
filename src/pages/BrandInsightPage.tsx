@@ -993,12 +993,12 @@ export default function BrandInsightPage() {
                         className={`group block ${theme === 'dark' ? 'bg-gray-800 hover:bg-gray-750' : 'bg-white hover:bg-gray-50 border border-gray-200'} rounded-lg overflow-hidden shadow-md transition-all hover:shadow-lg h-full`}
                       >
                         <div className="flex flex-row h-full min-h-[180px]">
-                          <div className={`w-2/5 flex items-center justify-center p-4`} style={{ background: theme === 'dark' ? 'linear-gradient(to bottom right, #5a7a14, #4a6811)' : '#94C120' }}>
+                          <div className={`w-2/5 ${theme === 'dark' ? 'bg-gradient-to-br from-green-900 to-green-800' : 'bg-gradient-to-br from-green-100 to-green-50'} flex items-center justify-center p-4`}>
                             <div className="text-center">
-                              <div className={`text-4xl font-bold mb-2`} style={{ color: theme === 'dark' ? '#c5e88a' : '#ffffff' }}>
+                              <div className={`text-4xl font-bold ${theme === 'dark' ? 'text-green-400' : 'text-green-600'} mb-2`}>
                                 {page.brand.substring(0, 2).toUpperCase()}
                               </div>
-                              <div className={`text-xs font-medium`} style={{ color: theme === 'dark' ? '#b5d87a' : '#ffffff' }}>
+                              <div className={`text-xs font-medium ${theme === 'dark' ? 'text-green-300' : 'text-green-700'}`}>
                                 Brand
                               </div>
                             </div>
@@ -1007,7 +1007,7 @@ export default function BrandInsightPage() {
                             <div className={`text-xs font-semibold uppercase tracking-wide mb-2 ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
                               Brand Insights <span className="mx-1">|</span> {new Date(page.created_at).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}
                             </div>
-                            <h3 className={`font-bold text-lg mb-2 transition-colors line-clamp-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'} group-hover:${theme === 'dark' ? '[color:#c5e88a]' : ''}`} style={{ '--hover-color': theme === 'dark' ? '#c5e88a' : '#94C120' } as React.CSSProperties} onMouseEnter={(e) => e.currentTarget.style.color = theme === 'dark' ? '#c5e88a' : '#94C120'} onMouseLeave={(e) => e.currentTarget.style.color = theme === 'dark' ? '#ffffff' : '#111827'}>
+                            <h3 className={`font-bold text-lg mb-2 ${theme === 'dark' ? 'text-white group-hover:text-green-400' : 'text-gray-900 group-hover:text-green-600'} transition-colors line-clamp-2`}>
                               {page.meta_title}
                             </h3>
                             <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} line-clamp-2`}>
@@ -1032,7 +1032,7 @@ export default function BrandInsightPage() {
                   <div className="space-y-6">
                     {faqs.map((faq) => (
                       <details key={faq.id} className={`group ${theme === 'dark' ? 'bg-gray-800' : 'bg-white border border-gray-200'} rounded-lg`}>
-                        <summary className={`cursor-pointer px-6 py-4 font-semibold transition-colors list-none flex items-center justify-between ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`} onMouseEnter={(e) => e.currentTarget.style.color = theme === 'dark' ? '#c5e88a' : '#94C120'} onMouseLeave={(e) => e.currentTarget.style.color = theme === 'dark' ? '#ffffff' : '#111827'}>
+                        <summary className={`cursor-pointer px-6 py-4 font-semibold ${theme === 'dark' ? 'text-white hover:text-green-400' : 'text-gray-900 hover:text-green-600'} transition-colors list-none flex items-center justify-between`}>
                           <span>{faq.question}</span>
                           <span className="ml-2 text-2xl group-open:rotate-45 transition-transform">+</span>
                         </summary>
