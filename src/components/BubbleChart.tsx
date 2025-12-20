@@ -1361,14 +1361,14 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
           const isPurpleBubble = bubble.color === '#A855F7';
 
           if (isPurpleBubble && shape === 'bubble') {
-            // Draw left half in blue with glow
+            // Draw left half in light gray with glow
             ctx.save();
             ctx.beginPath();
             ctx.arc(bubble.x, bubble.y, displayRadius, Math.PI * 0.5, Math.PI * 1.5);
             ctx.closePath();
             ctx.clip();
 
-            const blueGradient = ctx.createRadialGradient(
+            const lightGrayGradient = ctx.createRadialGradient(
               bubble.x - displayRadius * 0.3,
               bubble.y,
               0,
@@ -1376,23 +1376,23 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
               bubble.y,
               displayRadius
             );
-            blueGradient.addColorStop(0, `rgba(96, 165, 250, ${0.9 * opacity})`);
-            blueGradient.addColorStop(1, `rgba(59, 130, 246, ${0.7 * opacity})`);
+            lightGrayGradient.addColorStop(0, `rgba(209, 213, 219, ${0.9 * opacity})`);
+            lightGrayGradient.addColorStop(1, `rgba(156, 163, 175, ${0.7 * opacity})`);
 
             ctx.beginPath();
             ctx.arc(bubble.x, bubble.y, displayRadius, 0, Math.PI * 2);
-            ctx.fillStyle = blueGradient;
+            ctx.fillStyle = lightGrayGradient;
             ctx.fill();
             ctx.restore();
 
-            // Draw right half in red with glow
+            // Draw right half in medium gray with glow
             ctx.save();
             ctx.beginPath();
             ctx.arc(bubble.x, bubble.y, displayRadius, -Math.PI * 0.5, Math.PI * 0.5);
             ctx.closePath();
             ctx.clip();
 
-            const redGradient = ctx.createRadialGradient(
+            const mediumGrayGradient = ctx.createRadialGradient(
               bubble.x + displayRadius * 0.3,
               bubble.y,
               0,
@@ -1400,12 +1400,12 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
               bubble.y,
               displayRadius
             );
-            redGradient.addColorStop(0, `rgba(248, 113, 113, ${0.9 * opacity})`);
-            redGradient.addColorStop(1, `rgba(239, 68, 68, ${0.7 * opacity})`);
+            mediumGrayGradient.addColorStop(0, `rgba(107, 114, 128, ${0.9 * opacity})`);
+            mediumGrayGradient.addColorStop(1, `rgba(75, 85, 99, ${0.7 * opacity})`);
 
             ctx.beginPath();
             ctx.arc(bubble.x, bubble.y, displayRadius, 0, Math.PI * 2);
-            ctx.fillStyle = redGradient;
+            ctx.fillStyle = mediumGrayGradient;
             ctx.fill();
             ctx.restore();
           } else {
@@ -1517,7 +1517,7 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
           const isPurpleBubble = bubble.color === '#A855F7';
 
           if (isPurpleBubble && shape === 'bubble') {
-            // Draw left half in blue
+            // Draw left half in light gray
             ctx.save();
             ctx.beginPath();
             ctx.arc(bubble.x, bubble.y, displayRadius, Math.PI * 0.5, Math.PI * 1.5);
@@ -1525,11 +1525,11 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
             ctx.clip();
             ctx.beginPath();
             ctx.arc(bubble.x, bubble.y, displayRadius, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(59, 130, 246, ${opacity * 0.6})`;
+            ctx.fillStyle = `rgba(209, 213, 219, ${opacity * 0.8})`;
             ctx.fill();
             ctx.restore();
 
-            // Draw right half in pink/red
+            // Draw right half in medium gray
             ctx.save();
             ctx.beginPath();
             ctx.arc(bubble.x, bubble.y, displayRadius, -Math.PI * 0.5, Math.PI * 0.5);
@@ -1537,7 +1537,7 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
             ctx.clip();
             ctx.beginPath();
             ctx.arc(bubble.x, bubble.y, displayRadius, 0, Math.PI * 2);
-            ctx.fillStyle = `rgba(239, 68, 68, ${opacity * 0.6})`;
+            ctx.fillStyle = `rgba(107, 114, 128, ${opacity * 0.8})`;
             ctx.fill();
             ctx.restore();
           } else {
