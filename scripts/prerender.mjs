@@ -1506,42 +1506,51 @@ async function prerenderPages() {
 async function generateSitemap(pages, distPath) {
   console.log('Generating sitemap...');
 
+  const escapeXml = (str) => {
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&apos;');
+  };
+
   const today = new Date().toISOString().split('T')[0];
 
   let sitemap = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
   <url>
-    <loc>${BASE_URL}/</loc>
+    <loc>${escapeXml(BASE_URL)}/</loc>
     <lastmod>${today}</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>${BASE_URL}/trending-now/</loc>
+    <loc>${escapeXml(BASE_URL)}/trending-now/</loc>
     <lastmod>${today}</lastmod>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>${BASE_URL}/browse-topics/</loc>
+    <loc>${escapeXml(BASE_URL)}/browse-topics/</loc>
     <lastmod>${today}</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>${BASE_URL}/contact/</loc>
+    <loc>${escapeXml(BASE_URL)}/contact/</loc>
     <lastmod>${today}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>${BASE_URL}/about/</loc>
+    <loc>${escapeXml(BASE_URL)}/about/</loc>
     <lastmod>${today}</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>${BASE_URL}/insight/</loc>
+    <loc>${escapeXml(BASE_URL)}/insight/</loc>
     <lastmod>${today}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -1550,7 +1559,7 @@ async function generateSitemap(pages, distPath) {
 
   // Add all dynamic pages
   for (const page of pages) {
-    const pageUrl = `${BASE_URL}${page.page_url}`;
+    const pageUrl = escapeXml(`${BASE_URL}${page.page_url}`);
     const lastmod = page.updated_at
       ? new Date(page.updated_at).toISOString().split('T')[0]
       : new Date(page.created_at).toISOString().split('T')[0];
@@ -1567,13 +1576,13 @@ async function generateSitemap(pages, distPath) {
   sitemap += `</urlset>
 `;
 
-  // Write to dist folder
-  fs.writeFileSync(path.join(distPath, 'sitemap.xml'), sitemap);
+  // Write to dist folder with UTF-8 BOM for better compatibility
+  fs.writeFileSync(path.join(distPath, 'sitemap.xml'), sitemap, 'utf8');
   console.log('✓ Generated: sitemap.xml');
 
   // Also update the public folder for development
   const publicPath = path.join(__dirname, '..', 'public');
-  fs.writeFileSync(path.join(publicPath, 'sitemap.xml'), sitemap);
+  fs.writeFileSync(path.join(publicPath, 'sitemap.xml'), sitemap, 'utf8');
   console.log('✓ Updated: public/sitemap.xml');
 }
 
