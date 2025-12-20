@@ -88,6 +88,7 @@ export default function BrandInsightPage() {
   const [bubbleLayout, setBubbleLayout] = useState<BubbleLayout>('force');
   const [shape, setShape] = useState<FilterShape>('bubble');
   const [animationStyle, setAnimationStyle] = useState<AnimationStyle>('default');
+  const [performanceFilter, setPerformanceFilter] = useState<string>('all');
 
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     const savedTheme = localStorage.getItem('theme');
@@ -124,6 +125,12 @@ export default function BrandInsightPage() {
   useEffect(() => {
     setCurrentPage(1);
   }, [searchQuery, topSearchQuery]);
+
+  useEffect(() => {
+    if (viewMode !== 'bubble') {
+      setPerformanceFilter('all');
+    }
+  }, [viewMode]);
 
   const loadAllData = async () => {
     setLoading(true);
@@ -355,6 +362,53 @@ export default function BrandInsightPage() {
 
   const getFilteredTopics = () => {
     return transformToTopics.filter(topic => {
+      const matchesSearch = !searchQuery || topic.name.toLowerCase().includes(searchQuery.toLowerCase());
+
+      if (performanceFilter === 'all') return matchesSearch;
+
+      const kwData = keywordPerformanceData.find(kw => kw.keyword === topic.name);
+      if (!kwData) return false;
+
+      const threeMonthChange = kwData.three_month_change || 0;
+      const yoyChange = kwData.yoy_change || 0;
+      const bidHigh = kwData.bid_high || 0;
+      const searchVolume = kwData.searchVolume || topic.searchVolume;
+
+      const monthlySearches = kwData.monthly_searches || [];
+      const hasData = monthlySearches.length > 0;
+      const mean = hasData ? monthlySearches.reduce((a, b) => a + b, 0) / monthlySearches.length : 0;
+      const variance = hasData ? monthlySearches.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / monthlySearches.length : 0;
+      const stdDev = Math.sqrt(variance);
+      const coefficientOfVariation = mean > 0 ? (stdDev / mean) * 100 : 0;
+
+      switch (performanceFilter) {
+        case 'great-potential':
+          return yoyChange > 50 && threeMonthChange > 30;
+        case 'high-growth':
+          return yoyChange > 100 && threeMonthChange <= 30;
+        case 'has-potential':
+          return yoyChange <= 50 && threeMonthChange > 50;
+        case 'start-declining':
+          return yoyChange >= 0 && threeMonthChange < -10;
+        case 'declining':
+          return yoyChange < 0 && threeMonthChange < 0;
+        case 'solid-performer':
+          return coefficientOfVariation < 40 && searchVolume >= 1000;
+        case 'hidden-gem':
+          return (yoyChange > 50 || threeMonthChange > 50) && searchVolume < 10000;
+        case 'seasonal-spike':
+          const maxSearch = Math.max(...monthlySearches);
+          const minSearch = Math.min(...monthlySearches.filter(v => v > 0));
+          const peakVariance = minSearch > 0 ? ((maxSearch - minSearch) / minSearch) * 100 : 0;
+          return peakVariance > 500;
+        case 'recovery':
+          return yoyChange < 0 && threeMonthChange > 20;
+        case 'high-value':
+          return bidHigh > 50;
+        default:
+          return matchesSearch;
+      }
+    }).filter(topic => {
       const matchesSearch = !searchQuery || topic.name.toLowerCase().includes(searchQuery.toLowerCase());
       return matchesSearch;
     });
@@ -740,8 +794,55 @@ export default function BrandInsightPage() {
               )}
 
               {transformToTopics.length > 0 && viewMode === 'bubble' && (
-                <div ref={bubbleChartRef} style={{ minHeight: '500px' }}>
-                  <BubbleChart
+                <>
+                  <div className="max-w-7xl mx-auto mb-6">
+                    <div className={`${theme === 'dark' ? 'bg-gray-800/50' : 'bg-white/80'} rounded-lg p-4 backdrop-blur-sm`}>
+                      <h3 className={`text-sm font-semibold mb-3 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                        Filter by Performance
+                      </h3>
+                      <div className="flex flex-wrap gap-2">
+                        {[
+                          { id: 'all', label: 'All Keywords', emoji: '' },
+                          { id: 'great-potential', label: 'Great Potential', emoji: '🚀' },
+                          { id: 'high-growth', label: 'High Growth', emoji: '📈' },
+                          { id: 'has-potential', label: 'Has Potential', emoji: '🌱' },
+                          { id: 'solid-performer', label: 'Solid Performer', emoji: '⭐' },
+                          { id: 'hidden-gem', label: 'Hidden Gem', emoji: '💎' },
+                          { id: 'seasonal-spike', label: 'Seasonal Spike', emoji: '🎯' },
+                          { id: 'recovery', label: 'Recovery', emoji: '🔄' },
+                          { id: 'high-value', label: 'High Value', emoji: '👑' },
+                          { id: 'start-declining', label: 'Start Declining', emoji: '⚠️' },
+                          { id: 'declining', label: 'Declining', emoji: '📉' },
+                        ].map((filter) => (
+                          <button
+                            key={filter.id}
+                            onClick={() => setPerformanceFilter(filter.id)}
+                            className={`
+                              px-3 py-1.5 rounded-lg text-sm font-medium transition-all
+                              ${performanceFilter === filter.id
+                                ? theme === 'dark'
+                                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30'
+                                  : 'bg-blue-600 text-white shadow-md'
+                                : theme === 'dark'
+                                  ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                              }
+                            `}
+                          >
+                            {filter.emoji && <span className="mr-1.5">{filter.emoji}</span>}
+                            {filter.label}
+                          </button>
+                        ))}
+                      </div>
+                      {performanceFilter !== 'all' && (
+                        <div className={`mt-3 text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                          Showing {filteredTopics.length} keywords
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <div ref={bubbleChartRef} style={{ minHeight: '500px' }}>
+                    <BubbleChart
                     topics={filteredTopics}
                     maxDisplay={maxBubbles}
                     theme={theme}
@@ -754,7 +855,8 @@ export default function BrandInsightPage() {
                     shape={shape as Shape}
                     keywordPerformanceData={keywordPerformanceData}
                   />
-                </div>
+                  </div>
+                </>
               )}
 
               {transformToTopics.length > 0 && viewMode === 'bar' && (
