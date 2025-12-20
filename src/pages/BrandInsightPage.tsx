@@ -993,12 +993,12 @@ export default function BrandInsightPage() {
                         className={`group block ${theme === 'dark' ? 'bg-gray-800 hover:bg-gray-750' : 'bg-white hover:bg-gray-50 border border-gray-200'} rounded-lg overflow-hidden shadow-md transition-all hover:shadow-lg h-full`}
                       >
                         <div className="flex flex-row h-full min-h-[180px]">
-                          <div className={`w-2/5 ${theme === 'dark' ? 'bg-gradient-to-br from-green-900 to-green-800' : 'bg-gradient-to-br from-green-100 to-green-50'} flex items-center justify-center p-4`}>
+                          <div className={`w-2/5 ${theme === 'dark' ? 'bg-gradient-to-br from-green-900 to-green-800' : 'bg-gradient-to-br from-lime-500 to-lime-400'} flex items-center justify-center p-4`}>
                             <div className="text-center">
-                              <div className={`text-4xl font-bold ${theme === 'dark' ? 'text-green-400' : 'text-green-600'} mb-2`}>
+                              <div className={`text-4xl font-bold ${theme === 'dark' ? 'text-green-400' : 'text-white'} mb-2`}>
                                 {page.brand.substring(0, 2).toUpperCase()}
                               </div>
-                              <div className={`text-xs font-medium ${theme === 'dark' ? 'text-green-300' : 'text-green-700'}`}>
+                              <div className={`text-xs font-medium ${theme === 'dark' ? 'text-green-300' : 'text-white'}`}>
                                 Brand
                               </div>
                             </div>
