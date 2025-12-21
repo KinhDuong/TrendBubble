@@ -18,9 +18,9 @@ import BrandKeywordUpload from '../components/BrandKeywordUpload';
 import KeywordAnalysis from '../components/KeywordAnalysis';
 import ToolSchema from '../components/ToolSchema';
 import { TrendingTopic, FAQ } from '../types';
-import { TrendingUp, Download, ArrowLeft, Search, X, ChevronsLeft, ChevronsRight } from 'lucide-react';
+import { TrendingUp, Download, ArrowLeft, Search, X, ChevronsLeft, ChevronsRight, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 
-type SortField = 'name' | 'searchVolume' | 'rank' | 'month';
+type SortField = 'name' | 'searchVolume' | 'rank' | 'month' | 'threeMonth' | 'yoy';
 type SortDirection = 'asc' | 'desc';
 
 interface MonthlyData {
@@ -85,6 +85,8 @@ export default function BrandInsightPage() {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [sortField, setSortField] = useState<SortField>('searchVolume');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+  const [rankingSortField, setRankingSortField] = useState<SortField>('rank');
+  const [rankingSortDirection, setRankingSortDirection] = useState<SortDirection>('asc');
   const [comparingTopics, setComparingTopics] = useState<Set<string>>(new Set());
   const [bubbleLayout, setBubbleLayout] = useState<BubbleLayout>('force');
   const [shape, setShape] = useState<FilterShape>('bubble');
@@ -659,21 +661,68 @@ export default function BrandInsightPage() {
       return percentage >= 0 ? `+${percentage.toFixed(1)}%` : `${percentage.toFixed(1)}%`;
     };
 
+    const threeMonthRaw = kwData?.three_month_change;
+    const yoyRaw = kwData?.yoy_change;
+
     return {
       ...topic,
       originalRank: index + 1,
-      threeMonthChange: formatPercentageDisplay(kwData?.three_month_change),
-      yoyChange: formatPercentageDisplay(kwData?.yoy_change),
+      threeMonthChange: formatPercentageDisplay(threeMonthRaw),
+      yoyChange: formatPercentageDisplay(yoyRaw),
+      threeMonthRaw: threeMonthRaw !== undefined && threeMonthRaw !== null ? (typeof threeMonthRaw === 'number' ? threeMonthRaw : parseFloat(threeMonthRaw)) : null,
+      yoyRaw: yoyRaw !== undefined && yoyRaw !== null ? (typeof yoyRaw === 'number' ? yoyRaw : parseFloat(yoyRaw)) : null,
       competition: kwData?.competition || 'N/A',
       bidHigh: kwData?.bid_high || 0,
       category: getKeywordCategory(topic.name)
     };
   });
 
-  const totalPages = Math.ceil(topicsWithRanks.length / itemsPerPage);
+  const parsePercentageValue = (value: string): number => {
+    if (value === 'N/A') return -Infinity;
+    const numStr = value.replace('%', '').replace('+', '');
+    return parseFloat(numStr);
+  };
+
+  const sortedTopicsWithRanks = [...topicsWithRanks].sort((a, b) => {
+    let compareResult = 0;
+
+    switch (rankingSortField) {
+      case 'name':
+        compareResult = a.name.localeCompare(b.name);
+        break;
+      case 'threeMonth':
+        const aThree = a.threeMonthRaw !== null ? a.threeMonthRaw : -Infinity;
+        const bThree = b.threeMonthRaw !== null ? b.threeMonthRaw : -Infinity;
+        compareResult = aThree - bThree;
+        break;
+      case 'yoy':
+        const aYoy = a.yoyRaw !== null ? a.yoyRaw : -Infinity;
+        const bYoy = b.yoyRaw !== null ? b.yoyRaw : -Infinity;
+        compareResult = aYoy - bYoy;
+        break;
+      case 'rank':
+      default:
+        compareResult = a.originalRank - b.originalRank;
+        break;
+    }
+
+    return rankingSortDirection === 'asc' ? compareResult : -compareResult;
+  });
+
+  const totalPages = Math.ceil(sortedTopicsWithRanks.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const displayTopics = topicsWithRanks.slice(startIndex, endIndex);
+  const displayTopics = sortedTopicsWithRanks.slice(startIndex, endIndex);
+
+  const handleRankingSort = (field: SortField) => {
+    if (rankingSortField === field) {
+      setRankingSortDirection(rankingSortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setRankingSortField(field);
+      setRankingSortDirection(field === 'name' ? 'asc' : 'desc');
+    }
+    setCurrentPage(1);
+  };
 
   const handleExport = async () => {
     if (!brandName) return;
@@ -1239,6 +1288,48 @@ export default function BrandInsightPage() {
                           </div>
                         ) : (
                           <>
+                            <div className={`grid grid-cols-[auto_1fr_auto] gap-2 px-2 py-2 mb-2 border-b-2 ${theme === 'dark' ? 'border-gray-600 bg-gray-700/50' : 'border-gray-300 bg-gray-100'}`}>
+                              <div className="w-8"></div>
+                              <div className="flex items-center gap-3">
+                                <button
+                                  onClick={() => handleRankingSort('name')}
+                                  className={`flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide transition-colors ${theme === 'dark' ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'}`}
+                                >
+                                  Name
+                                  {rankingSortField === 'name' ? (
+                                    rankingSortDirection === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />
+                                  ) : (
+                                    <ArrowUpDown className="w-3 h-3 opacity-40" />
+                                  )}
+                                </button>
+                              </div>
+                              <div className="flex items-center gap-4">
+                                <button
+                                  onClick={() => handleRankingSort('threeMonth')}
+                                  className={`flex items-center gap-1 text-xs font-semibold uppercase tracking-wide transition-colors ${theme === 'dark' ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'}`}
+                                >
+                                  3-Month
+                                  {rankingSortField === 'threeMonth' ? (
+                                    rankingSortDirection === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />
+                                  ) : (
+                                    <ArrowUpDown className="w-3 h-3 opacity-40" />
+                                  )}
+                                </button>
+                                {hasYoYData && (
+                                  <button
+                                    onClick={() => handleRankingSort('yoy')}
+                                    className={`flex items-center gap-1 text-xs font-semibold uppercase tracking-wide transition-colors ${theme === 'dark' ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'}`}
+                                  >
+                                    YoY
+                                    {rankingSortField === 'yoy' ? (
+                                      rankingSortDirection === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />
+                                    ) : (
+                                      <ArrowUpDown className="w-3 h-3 opacity-40" />
+                                    )}
+                                  </button>
+                                )}
+                              </div>
+                            </div>
                             <ol className="list-none" itemScope itemType="https://schema.org/ItemList">
                               {displayTopics.map((topic, index) => (
                                 <li
