@@ -444,16 +444,16 @@ export default function BrandInsightPage() {
       switch (performanceFilter) {
         case 'great-potential':
           if (hasYoYData) {
-            return yoyChange > 50 && threeMonthChange > 30;
+            return yoyChange > 30 && threeMonthChange > 20;
           }
-          return threeMonthChange > 50;
+          return threeMonthChange > 40;
         case 'high-growth':
           if (hasYoYData) {
-            return yoyChange > 100 && threeMonthChange <= 30;
+            return yoyChange > 75 && threeMonthChange <= 30;
           }
-          return threeMonthChange > 80;
+          return threeMonthChange > 60;
         case 'has-potential':
-          return threeMonthChange > 50;
+          return threeMonthChange > 30;
         case 'start-declining':
           if (hasYoYData) {
             return yoyChange >= 0 && threeMonthChange < -10;
@@ -467,7 +467,10 @@ export default function BrandInsightPage() {
         case 'solid-performer':
           return coefficientOfVariation < 40 && searchVolume >= 1000;
         case 'hidden-gem':
-          return threeMonthChange > 50 && searchVolume < 10000;
+          if (hasYoYData) {
+            return (yoyChange > 30 || threeMonthChange > 30) && searchVolume < 15000;
+          }
+          return threeMonthChange > 40 && searchVolume < 15000;
         case 'seasonal-spike':
           if (monthlySearches.length === 0) return false;
           const positiveSearches = monthlySearches.filter(v => v > 0);
