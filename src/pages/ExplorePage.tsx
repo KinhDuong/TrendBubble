@@ -238,9 +238,9 @@ export default function ExplorePage() {
         url={`${import.meta.env.VITE_BASE_URL || 'https://topbestcharts.com'}/`}
         applicationCategory="AnalysisApplication"
         screenshot={[
-          `${import.meta.env.VITE_BASE_URL || 'https://topbestcharts.com'}/screenshots/bubble-chart.png`,
-          `${import.meta.env.VITE_BASE_URL || 'https://topbestcharts.com'}/screenshots/bar-chart.png`,
-          `${import.meta.env.VITE_BASE_URL || 'https://topbestcharts.com'}/screenshots/treemap.png`
+          `${import.meta.env.VITE_BASE_URL || 'https://topbestcharts.com'}/screenshots/bubble-chart.jpg`,
+          `${import.meta.env.VITE_BASE_URL || 'https://topbestcharts.com'}/screenshots/bar-chart.jpg`,
+          `${import.meta.env.VITE_BASE_URL || 'https://topbestcharts.com'}/screenshots/treemap.jpg`
         ]}
       />
 

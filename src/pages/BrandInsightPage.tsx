@@ -816,8 +816,9 @@ export default function BrandInsightPage() {
         url={pageUrl}
         applicationCategory="BusinessApplication"
         screenshot={[
-          `${baseUrl}/screenshots/bubble-chart.png`,
-          `${baseUrl}/screenshots/keyword-analysis.png`
+          `${baseUrl}/screenshots/bubble-chart.jpg`,
+          `${baseUrl}/screenshots/bar-chart.jpg`,
+          `${baseUrl}/screenshots/treemap.jpg`
         ]}
       />
 
