@@ -815,6 +815,10 @@ export default function BrandInsightPage() {
         description={`Interactive keyword research and SEO analysis tool for ${decodedBrand}. Visualize search trends, analyze keyword performance, and track search volume data.`}
         url={pageUrl}
         applicationCategory="BusinessApplication"
+        screenshot={[
+          `${baseUrl}/screenshots/bubble-chart.png`,
+          `${baseUrl}/screenshots/keyword-analysis.png`
+        ]}
       />
 
       <Header

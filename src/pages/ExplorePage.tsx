@@ -237,6 +237,11 @@ export default function ExplorePage() {
         description="Free interactive tool for visualizing trending topics and search data. Create bubble charts, bar charts, treemaps, and donut charts to explore rankings and insights."
         url={`${import.meta.env.VITE_BASE_URL || 'https://topbestcharts.com'}/`}
         applicationCategory="AnalysisApplication"
+        screenshot={[
+          `${import.meta.env.VITE_BASE_URL || 'https://topbestcharts.com'}/screenshots/bubble-chart.png`,
+          `${import.meta.env.VITE_BASE_URL || 'https://topbestcharts.com'}/screenshots/bar-chart.png`,
+          `${import.meta.env.VITE_BASE_URL || 'https://topbestcharts.com'}/screenshots/treemap.png`
+        ]}
       />
 
       <Header

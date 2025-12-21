@@ -10,6 +10,7 @@ interface ToolSchemaProps {
     price: string;
     priceCurrency: string;
   };
+  screenshot?: string | string[];
 }
 
 export default function ToolSchema({
@@ -21,7 +22,8 @@ export default function ToolSchema({
   offers = {
     price: '0',
     priceCurrency: 'USD'
-  }
+  },
+  screenshot
 }: ToolSchemaProps) {
   const schemaData = {
     "@context": "https://schema.org",
@@ -38,7 +40,7 @@ export default function ToolSchema({
       "priceCurrency": offers.priceCurrency
     },
     "featureList": "Interactive visualization, Data analysis, Export functionality, Real-time updates",
-    "screenshot": `${url}screenshot.png`,
+    ...(screenshot && { "screenshot": screenshot }),
     "aggregateRating": {
       "@type": "AggregateRating",
       "ratingValue": "4.8",
