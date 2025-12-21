@@ -194,90 +194,7 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
 
     const hasYoYData = monthlySearches.length >= 24;
 
-    // Check for Seasonal Spike
-    if (monthlySearches.length > 0) {
-      const positiveSearches = monthlySearches.filter(v => v > 0);
-      if (positiveSearches.length > 0) {
-        const maxSearch = Math.max(...positiveSearches);
-        const minSearch = Math.min(...positiveSearches);
-        const peakVariance = minSearch > 0 ? ((maxSearch - minSearch) / minSearch) * 100 : 0;
-        if (peakVariance > 500) {
-          return {
-            color: '#9B59B6',
-            ringColor: '#8E44AD',
-            ringIntensity: 0.8
-          };
-        }
-      }
-    }
-
-    // Check for High Growth
-    if (hasYoYData) {
-      if (yoyChange > 75) {
-        return {
-          color: '#1E8449',
-          ringColor: '#145A32',
-          ringIntensity: 0.9
-        };
-      }
-    } else {
-      if (threeMonthChange > 60) {
-        return {
-          color: '#1E8449',
-          ringColor: '#145A32',
-          ringIntensity: 0.9
-        };
-      }
-    }
-
-    // Check for Great Potential
-    if (hasYoYData) {
-      if (yoyChange > 30 && threeMonthChange > 20) {
-        return {
-          color: '#27AE60',
-          ringColor: '#1E8449',
-          ringIntensity: 0.85
-        };
-      }
-    } else {
-      if (threeMonthChange > 40) {
-        return {
-          color: '#27AE60',
-          ringColor: '#1E8449',
-          ringIntensity: 0.85
-        };
-      }
-    }
-
-    // Check for Hidden Gem
-    if (hasYoYData) {
-      if ((yoyChange > 30 || threeMonthChange > 30) && searchVolume < 15000) {
-        return {
-          color: '#F39C12',
-          ringColor: '#D68910',
-          ringIntensity: 0.75
-        };
-      }
-    } else {
-      if (threeMonthChange > 30 && searchVolume < 15000) {
-        return {
-          color: '#F39C12',
-          ringColor: '#D68910',
-          ringIntensity: 0.75
-        };
-      }
-    }
-
-    // Check for Has Potential
-    if (threeMonthChange > 30) {
-      return {
-        color: '#16A085',
-        ringColor: '#138D75',
-        ringIntensity: 0.7
-      };
-    }
-
-    // Check for Declining
+    // Priority 1: Check for Declining trends first (no rings for these)
     if (hasYoYData) {
       if (yoyChange < 0 && threeMonthChange < 0) {
         return {
@@ -296,7 +213,7 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
       }
     }
 
-    // Check for Start Declining
+    // Priority 2: Check for Start Declining
     if (hasYoYData) {
       if (yoyChange >= 0 && threeMonthChange < -5) {
         return {
@@ -315,7 +232,90 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
       }
     }
 
-    // Check for Solid Performer
+    // Priority 3: Check for High Growth (strongest growth signal)
+    if (hasYoYData) {
+      if (yoyChange > 75) {
+        return {
+          color: '#1E8449',
+          ringColor: '#145A32',
+          ringIntensity: 0.9
+        };
+      }
+    } else {
+      if (threeMonthChange > 60) {
+        return {
+          color: '#1E8449',
+          ringColor: '#145A32',
+          ringIntensity: 0.9
+        };
+      }
+    }
+
+    // Priority 4: Check for Great Potential
+    if (hasYoYData) {
+      if (yoyChange > 30 && threeMonthChange > 20) {
+        return {
+          color: '#27AE60',
+          ringColor: '#1E8449',
+          ringIntensity: 0.85
+        };
+      }
+    } else {
+      if (threeMonthChange > 40) {
+        return {
+          color: '#27AE60',
+          ringColor: '#1E8449',
+          ringIntensity: 0.85
+        };
+      }
+    }
+
+    // Priority 5: Check for Hidden Gem (growth + low volume)
+    if (hasYoYData) {
+      if ((yoyChange > 30 || threeMonthChange > 30) && searchVolume < 15000) {
+        return {
+          color: '#F39C12',
+          ringColor: '#D68910',
+          ringIntensity: 0.75
+        };
+      }
+    } else {
+      if (threeMonthChange > 30 && searchVolume < 15000) {
+        return {
+          color: '#F39C12',
+          ringColor: '#D68910',
+          ringIntensity: 0.75
+        };
+      }
+    }
+
+    // Priority 6: Check for Has Potential (moderate growth)
+    if (threeMonthChange > 30) {
+      return {
+        color: '#16A085',
+        ringColor: '#138D75',
+        ringIntensity: 0.7
+      };
+    }
+
+    // Priority 7: Check for Seasonal Spike (only if not growing/declining)
+    if (monthlySearches.length > 0) {
+      const positiveSearches = monthlySearches.filter(v => v > 0);
+      if (positiveSearches.length > 0) {
+        const maxSearch = Math.max(...positiveSearches);
+        const minSearch = Math.min(...positiveSearches);
+        const peakVariance = minSearch > 0 ? ((maxSearch - minSearch) / minSearch) * 100 : 0;
+        if (peakVariance > 500) {
+          return {
+            color: '#9B59B6',
+            ringColor: '#8E44AD',
+            ringIntensity: 0.8
+          };
+        }
+      }
+    }
+
+    // Priority 8: Check for Solid Performer (stable, consistent)
     if (coefficientOfVariation < 40 && searchVolume >= 1000) {
       return {
         color: '#3498DB',
@@ -324,6 +324,7 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
       };
     }
 
+    // Default: Blue for neutral/unknown
     return { color: '#3498DB' };
   };
 
