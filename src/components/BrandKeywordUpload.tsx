@@ -246,13 +246,13 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light' }
           const cleanValue = value.replace(/%/g, '').trim();
           const parsedValue = parseFloat(cleanValue);
           if (!isNaN(parsedValue)) {
-            record['Three month change'] = parsedValue / 100;
+            record['Three month change'] = parsedValue;
           }
         } else if (header === 'YoY change') {
           const cleanValue = value.replace(/%/g, '').trim();
           const parsedValue = parseFloat(cleanValue);
           if (!isNaN(parsedValue)) {
-            record['YoY change'] = parsedValue / 100;
+            record['YoY change'] = parsedValue;
           }
         } else {
           record[header] = value;
