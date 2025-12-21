@@ -389,15 +389,8 @@ export default function BrandInsightPage() {
 
   const hasYoYData = availableMonthsCount >= 24;
 
-  const getFilteredTopics = () => {
-    return transformToTopics.filter(topic => {
-      const matchesSearch = !searchQuery || topic.name.toLowerCase().includes(searchQuery.toLowerCase());
-
-      if (performanceFilter === 'all') return matchesSearch;
-
-      const kwData = keywordPerformanceData.find(kw => kw.keyword === topic.name);
-      if (!kwData) return false;
-
+  const filteredTopics = useMemo(() => {
+    try {
       const parsePercentage = (value: any): number => {
         if (typeof value === 'number') return value;
         if (typeof value === 'string') {
@@ -407,6 +400,14 @@ export default function BrandInsightPage() {
         }
         return 0;
       };
+
+      return transformToTopics.filter(topic => {
+      const matchesSearch = !searchQuery || topic.name.toLowerCase().includes(searchQuery.toLowerCase());
+
+      if (performanceFilter === 'all') return matchesSearch;
+
+      const kwData = keywordPerformanceData.find(kw => kw.keyword === topic.name);
+      if (!kwData) return false;
 
       const threeMonthChange = parsePercentage(kwData.three_month_change);
       const yoyChange = parsePercentage(kwData.yoy_change);
@@ -448,8 +449,11 @@ export default function BrandInsightPage() {
         case 'hidden-gem':
           return threeMonthChange > 50 && searchVolume < 10000;
         case 'seasonal-spike':
-          const maxSearch = Math.max(...monthlySearches);
-          const minSearch = Math.min(...monthlySearches.filter(v => v > 0));
+          if (monthlySearches.length === 0) return false;
+          const positiveSearches = monthlySearches.filter(v => v > 0);
+          if (positiveSearches.length === 0) return false;
+          const maxSearch = Math.max(...positiveSearches);
+          const minSearch = Math.min(...positiveSearches);
           const peakVariance = minSearch > 0 ? ((maxSearch - minSearch) / minSearch) * 100 : 0;
           return peakVariance > 500;
         case 'recovery':
@@ -466,13 +470,18 @@ export default function BrandInsightPage() {
         default:
           return matchesSearch;
       }
-    }).filter(topic => {
-      const matchesSearch = !searchQuery || topic.name.toLowerCase().includes(searchQuery.toLowerCase());
-      return matchesSearch;
-    });
-  };
-
-  const filteredTopics = getFilteredTopics();
+      }).filter(topic => {
+        const matchesSearch = !searchQuery || topic.name.toLowerCase().includes(searchQuery.toLowerCase());
+        return matchesSearch;
+      });
+    } catch (error) {
+      console.error('Error filtering topics:', error);
+      return transformToTopics.filter(topic => {
+        const matchesSearch = !searchQuery || topic.name.toLowerCase().includes(searchQuery.toLowerCase());
+        return matchesSearch;
+      });
+    }
+  }, [transformToTopics, searchQuery, performanceFilter, keywordPerformanceData, hasYoYData]);
 
   console.log('BrandInsightPage - render state:', {
     viewMode,
