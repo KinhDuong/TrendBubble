@@ -298,7 +298,7 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
       };
     }
 
-    // Priority 7: Check for Seasonal Spike (only if not growing/declining)
+    // Priority 7: Check for Seasonal Spike (only if not growing/declining) - NO RINGS
     if (monthlySearches.length > 0) {
       const positiveSearches = monthlySearches.filter(v => v > 0);
       if (positiveSearches.length > 0) {
@@ -309,18 +309,18 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
           return {
             color: '#9B59B6',
             ringColor: '#8E44AD',
-            ringIntensity: 0.8
+            ringIntensity: 0
           };
         }
       }
     }
 
-    // Priority 8: Check for Solid Performer (stable, consistent)
+    // Priority 8: Check for Solid Performer (stable, consistent) - NO RINGS
     if (coefficientOfVariation < 40 && searchVolume >= 1000) {
       return {
         color: '#3498DB',
         ringColor: '#2E86C1',
-        ringIntensity: 0.6
+        ringIntensity: 0
       };
     }
 
@@ -1559,11 +1559,12 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
 
         const isMobile = window.innerWidth < 768;
 
-        // Skip rings for red bubbles (negative trends)
-        const isRedBubble = bubble.color === '#EF4444' || bubble.color === '#DC2626' ||
-                           bubble.ringColor === '#DC2626' || bubble.ringColor === '#B91C1C';
+        // Skip rings for declining bubbles (red/orange) and stable bubbles (blue/purple)
+        const shouldSkipRing = bubble.color === '#E74C3C' || bubble.color === '#E67E22' || // Red/Orange
+                               bubble.color === '#9B59B6' || bubble.color === '#3498DB' || // Purple/Blue
+                               bubble.ringIntensity === 0;
 
-        if (bubble.ringColor && bubble.ringIntensity && !isRedBubble) {
+        if (bubble.ringColor && bubble.ringIntensity && !shouldSkipRing) {
           const ringOpacity = Math.min(bubble.ringIntensity, 1);
           const baseRingLineWidth = 1;
           const ringRgb = bubble.ringColor.match(/\w\w/g)?.map(x => parseInt(x, 16)) || [59, 130, 246];
