@@ -42,6 +42,13 @@ export default function BubbleTooltip({
   cryptoTimeframe = '1h',
   keywordData
 }: BubbleTooltipProps) {
+  if (!topic) {
+    console.error('BubbleTooltip: topic is null or undefined');
+    return null;
+  }
+
+  console.log('BubbleTooltip: Rendering tooltip for:', topic.name);
+
   const isMobile = window.innerWidth < 768;
   const [isExpanded, setIsExpanded] = useState(!isMobile && !!keywordData);
   const [isAnimating, setIsAnimating] = useState(true);
@@ -113,29 +120,42 @@ export default function BubbleTooltip({
   };
 
   const getDisplayVolume = () => {
-    if (topic.crypto_data && topic.source === 'coingecko_crypto') {
-      const timeframeMap = {
-        '1h': topic.crypto_data.formatted.change_1h,
-        '24h': topic.crypto_data.formatted.change_24h,
-        '7d': topic.crypto_data.formatted.change_7d,
-        '30d': topic.crypto_data.formatted.change_30d,
-        '1y': topic.crypto_data.formatted.change_1y,
-      };
-      const timeframeLabel = {
-        '1h': '1h',
-        '24h': '24h',
-        '7d': '7d',
-        '30d': '30d',
-        '1y': '1y',
-      };
-      return `${timeframeMap[cryptoTimeframe]}% (${timeframeLabel[cryptoTimeframe]}) • ${topic.crypto_data.formatted.price} • ${topic.crypto_data.formatted.volume}`;
+    try {
+      if (topic.crypto_data && topic.source === 'coingecko_crypto') {
+        const timeframeMap = {
+          '1h': topic.crypto_data.formatted.change_1h,
+          '24h': topic.crypto_data.formatted.change_24h,
+          '7d': topic.crypto_data.formatted.change_7d,
+          '30d': topic.crypto_data.formatted.change_30d,
+          '1y': topic.crypto_data.formatted.change_1y,
+        };
+        const timeframeLabel = {
+          '1h': '1h',
+          '24h': '24h',
+          '7d': '7d',
+          '30d': '30d',
+          '1y': '1y',
+        };
+        return `${timeframeMap[cryptoTimeframe]}% (${timeframeLabel[cryptoTimeframe]}) • ${topic.crypto_data.formatted.price} • ${topic.crypto_data.formatted.volume}`;
+      }
+      const volumeStr = topic.searchVolumeRaw || topic.searchVolume?.toString() || '0';
+      return volumeStr.replace(/"/g, '');
+    } catch (error) {
+      console.error('Error getting display volume:', error);
+      return '0';
     }
-    return topic.searchVolumeRaw.replace(/"/g, '');
   };
 
   const formatMonthYear = (monthStr: string) => {
-    const date = new Date(monthStr);
-    return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+    try {
+      if (!monthStr) return 'N/A';
+      const date = new Date(monthStr);
+      if (isNaN(date.getTime())) return monthStr;
+      return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+    } catch (error) {
+      console.error('Error formatting month:', error);
+      return monthStr || 'N/A';
+    }
   };
 
   const getMonthlySearchColor = (volume: number, maxVolume: number) => {
@@ -285,7 +305,11 @@ export default function BubbleTooltip({
                 </h4>
                 <div className="flex flex-wrap gap-2">
                   {topic.monthlySearches.map((monthData, index) => {
-                    const maxVolume = Math.max(...topic.monthlySearches!.map(m => m.volume));
+                    if (!monthData || typeof monthData.volume !== 'number') {
+                      return null;
+                    }
+                    const volumes = topic.monthlySearches!.map(m => m?.volume || 0).filter(v => v > 0);
+                    const maxVolume = volumes.length > 0 ? Math.max(...volumes) : 1;
                     const color = getMonthlySearchColor(monthData.volume, maxVolume);
                     const size = 32 + (monthData.volume / maxVolume) * 24;
 
@@ -550,7 +574,11 @@ export default function BubbleTooltip({
             </h4>
             <div className={`flex flex-wrap gap-2 overflow-y-auto ${isExpanded ? 'max-h-48' : 'max-h-32'}`}>
               {topic.monthlySearches.map((monthData, index) => {
-                const maxVolume = Math.max(...topic.monthlySearches!.map(m => m.volume));
+                if (!monthData || typeof monthData.volume !== 'number') {
+                  return null;
+                }
+                const volumes = topic.monthlySearches!.map(m => m?.volume || 0).filter(v => v > 0);
+                const maxVolume = volumes.length > 0 ? Math.max(...volumes) : 1;
                 const color = getMonthlySearchColor(monthData.volume, maxVolume);
                 const size = 28 + (monthData.volume / maxVolume) * 20;
 
