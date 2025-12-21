@@ -470,31 +470,48 @@ export default function BrandInsightPage() {
       const variance = hasData ? monthlySearches.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / monthlySearches.length : 0;
       const stdDev = Math.sqrt(variance);
       const coefficientOfVariation = mean > 0 ? (stdDev / mean) * 100 : 0;
+      const competition = kwData.competition || 'N/A';
+      const competitionValue = typeof competition === 'string' ?
+        (competition.toLowerCase() === 'low' ? 0.3 : competition.toLowerCase() === 'medium' ? 0.6 : 0.9) :
+        competition;
 
       switch (performanceFilter) {
+        case 'ultra-high-growth':
+          if (hasYoYData) {
+            return yoyChange >= 100;
+          }
+          return threeMonthChange >= 80;
+        case 'high-growth':
+          if (hasYoYData) {
+            return yoyChange >= 50 && yoyChange < 100;
+          }
+          return threeMonthChange >= 60 && threeMonthChange < 80;
+        case 'rising-star':
+          if (hasYoYData) {
+            return yoyChange >= 40 && yoyChange < 50;
+          }
+          return threeMonthChange >= 40 && threeMonthChange < 60;
         case 'great-potential':
           if (hasYoYData) {
             return yoyChange > 30 && threeMonthChange > 20;
           }
           return threeMonthChange > 40;
-        case 'high-growth':
+        case 'steady-growth':
           if (hasYoYData) {
-            const result = yoyChange > 75;
-            if (result) {
-              console.log('BrandInsightPage - High Growth match:', {
-                keyword: topic.name,
-                yoyChange,
-                threeMonthChange,
-                rawYoY: kwData.yoy_change,
-                rawThreeMonth: kwData.three_month_change,
-                searchVolume
-              });
-            }
-            return result;
+            return yoyChange >= 15 && yoyChange < 30;
           }
-          return threeMonthChange > 60;
+          return threeMonthChange >= 15 && threeMonthChange <= 30;
         case 'has-potential':
           return threeMonthChange > 30;
+        case 'momentum-building':
+          if (!hasYoYData) return false;
+          return threeMonthChange > yoyChange + 20 && yoyChange >= 0;
+        case 'high-impact':
+          const hasGrowthImpact = hasYoYData ? (yoyChange > 20 || threeMonthChange > 20) : threeMonthChange > 15;
+          return searchVolume >= 25000 && searchVolume <= 100000 && hasGrowthImpact;
+        case 'quick-win':
+          const hasGrowthWin = hasYoYData ? (yoyChange > 15 || threeMonthChange > 15) : threeMonthChange > 15;
+          return searchVolume >= 1000 && searchVolume <= 5000 && competitionValue < 0.4 && hasGrowthWin;
         case 'start-declining':
           if (hasYoYData) {
             return yoyChange >= 0 && threeMonthChange < -5;
@@ -596,6 +613,10 @@ export default function BrandInsightPage() {
       const yoyChange = parsePercentage(kwData.yoy_change);
       const bidHigh = kwData.bid_high || 0;
       const searchVolume = kwData.searchVolume;
+      const competition = kwData.competition || 'N/A';
+      const competitionValue = typeof competition === 'string' ?
+        (competition.toLowerCase() === 'low' ? 0.3 : competition.toLowerCase() === 'medium' ? 0.6 : 0.9) :
+        competition;
 
       const monthlySearches = kwData.monthly_searches || [];
       const hasData = monthlySearches.length > 0;
@@ -604,23 +625,66 @@ export default function BrandInsightPage() {
       const stdDev = Math.sqrt(variance);
       const coefficientOfVariation = mean > 0 ? (stdDev / mean) * 100 : 0;
 
-      if (hasYoYData && yoyChange > 75) {
+      const hasGrowth = hasYoYData ? (yoyChange > 20 || threeMonthChange > 20) : threeMonthChange > 15;
+
+      if (hasYoYData && yoyChange >= 100) {
+        return { label: 'Ultra High Growth', emoji: '🚀', color: 'text-pink-500' };
+      }
+      if (!hasYoYData && threeMonthChange >= 80) {
+        return { label: 'Ultra High Growth', emoji: '🚀', color: 'text-pink-500' };
+      }
+
+      if (hasYoYData && yoyChange >= 50 && yoyChange < 100) {
         return { label: 'High Growth', emoji: '📈', color: 'text-green-500' };
       }
-      if (!hasYoYData && threeMonthChange > 60) {
+      if (!hasYoYData && threeMonthChange >= 60 && threeMonthChange < 80) {
         return { label: 'High Growth', emoji: '📈', color: 'text-green-500' };
       }
+
+      if (hasYoYData && yoyChange >= 40 && yoyChange < 50) {
+        return { label: 'Rising Star', emoji: '⭐', color: 'text-cyan-500' };
+      }
+      if (!hasYoYData && threeMonthChange >= 40 && threeMonthChange < 60) {
+        return { label: 'Rising Star', emoji: '⭐', color: 'text-cyan-500' };
+      }
+
       if (hasYoYData && yoyChange > 30 && threeMonthChange > 20) {
-        return { label: 'Great Potential', emoji: '🚀', color: 'text-blue-500' };
+        return { label: 'Great Potential', emoji: '🎯', color: 'text-blue-500' };
       }
-      if (!hasYoYData && threeMonthChange > 40) {
-        return { label: 'Great Potential', emoji: '🚀', color: 'text-blue-500' };
+
+      if (!hasYoYData && threeMonthChange > 30) {
+        const momentumBuilding = hasYoYData && threeMonthChange > yoyChange + 20;
+        if (momentumBuilding) {
+          return { label: 'Momentum Building', emoji: '📊', color: 'text-blue-400' };
+        }
+        return { label: 'Has Potential', emoji: '🌱', color: 'text-emerald-500' };
       }
+
+      if (hasYoYData && threeMonthChange > yoyChange + 20 && yoyChange >= 0) {
+        return { label: 'Momentum Building', emoji: '📊', color: 'text-blue-400' };
+      }
+
+      if (hasYoYData && yoyChange >= 15 && yoyChange < 30) {
+        return { label: 'Steady Growth', emoji: '🌿', color: 'text-teal-500' };
+      }
+      if (!hasYoYData && threeMonthChange >= 15 && threeMonthChange <= 30) {
+        return { label: 'Steady Growth', emoji: '🌿', color: 'text-teal-500' };
+      }
+
       if (threeMonthChange > 30) {
         return { label: 'Has Potential', emoji: '🌱', color: 'text-emerald-500' };
       }
+
+      if (searchVolume >= 25000 && searchVolume <= 100000 && hasGrowth) {
+        return { label: 'High Impact', emoji: '🎯', color: 'text-orange-400' };
+      }
+
+      if (searchVolume >= 1000 && searchVolume <= 5000 && competitionValue < 0.4 && hasGrowth) {
+        return { label: 'Quick Win', emoji: '⚡', color: 'text-yellow-400' };
+      }
+
       if (coefficientOfVariation < 40 && searchVolume >= 1000) {
-        return { label: 'Solid Performer', emoji: '⭐', color: 'text-yellow-500' };
+        return { label: 'Solid Performer', emoji: '✨', color: 'text-yellow-500' };
       }
       if ((hasYoYData && yoyChange > 30 || threeMonthChange > 30) && searchVolume < 15000) {
         return { label: 'Hidden Gem', emoji: '💎', color: 'text-purple-500' };
@@ -1135,16 +1199,22 @@ export default function BrandInsightPage() {
                       <div className="flex flex-wrap gap-2">
                         {[
                           { id: 'all', label: 'All Keywords', emoji: '', requiresYoY: false },
-                          { id: 'great-potential', label: 'Great Potential', emoji: '🚀', requiresYoY: false },
+                          { id: 'ultra-high-growth', label: 'Ultra High Growth', emoji: '🚀', requiresYoY: false },
                           { id: 'high-growth', label: 'High Growth', emoji: '📈', requiresYoY: false },
+                          { id: 'rising-star', label: 'Rising Star', emoji: '⭐', requiresYoY: false },
+                          { id: 'great-potential', label: 'Great Potential', emoji: '🎯', requiresYoY: false },
+                          { id: 'steady-growth', label: 'Steady Growth', emoji: '🌿', requiresYoY: false },
                           { id: 'has-potential', label: 'Has Potential', emoji: '🌱', requiresYoY: false },
-                          { id: 'solid-performer', label: 'Solid Performer', emoji: '⭐', requiresYoY: false },
+                          { id: 'momentum-building', label: 'Momentum Building', emoji: '📊', requiresYoY: true },
+                          { id: 'high-impact', label: 'High Impact', emoji: '🎯', requiresYoY: false },
+                          { id: 'quick-win', label: 'Quick Win', emoji: '⚡', requiresYoY: false },
+                          { id: 'solid-performer', label: 'Solid Performer', emoji: '✨', requiresYoY: false },
                           { id: 'hidden-gem', label: 'Hidden Gem', emoji: '💎', requiresYoY: false },
-                          { id: 'seasonal-spike', label: 'Seasonal Spike', emoji: '🎯', requiresYoY: false },
+                          { id: 'seasonal-spike', label: 'Seasonal Spike', emoji: '🔥', requiresYoY: false },
                           { id: 'recovery', label: 'Recovery', emoji: '🔄', requiresYoY: false },
                           { id: 'high-value', label: 'High Value', emoji: '👑', requiresYoY: false },
-                          { id: 'high-volume', label: 'High Volume Staples', emoji: '🏔️', requiresYoY: false },
-                          { id: 'cost-effective', label: 'Cost-Effective Ads', emoji: '💰', requiresYoY: false },
+                          { id: 'high-volume', label: 'High Volume', emoji: '🏔️', requiresYoY: false },
+                          { id: 'cost-effective', label: 'Cost-Effective', emoji: '💰', requiresYoY: false },
                           { id: 'start-declining', label: 'Start Declining', emoji: '⚠️', requiresYoY: false },
                           { id: 'declining', label: 'Declining', emoji: '📉', requiresYoY: false },
                         ].filter(filter => !filter.requiresYoY || hasYoYData).map((filter) => (
