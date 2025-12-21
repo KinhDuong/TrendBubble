@@ -165,24 +165,29 @@ export default function BubbleTooltip({
     return theme === 'dark' ? '#EF4444' : '#DC2626';
   };
 
-  const formatChange = (value: number | undefined) => {
+  const formatChange = (value: number | string | undefined) => {
     if (value === undefined || value === null) return 'N/A';
-    const formatted = value.toFixed(1);
-    return value >= 0 ? `+${formatted}%` : `${formatted}%`;
+    const numValue = typeof value === 'number' ? value : parseFloat(value);
+    if (isNaN(numValue)) return 'N/A';
+    const formatted = numValue.toFixed(1);
+    return numValue >= 0 ? `+${formatted}%` : `${formatted}%`;
   };
 
-  const getChangeColor = (value: number | undefined) => {
+  const getChangeColor = (value: number | string | undefined) => {
     if (value === undefined || value === null) return theme === 'dark' ? 'text-gray-400' : 'text-gray-600';
-    if (value >= 5) return 'text-green-500';
-    if (value >= 0) return 'text-green-400';
-    if (value >= -5) return 'text-red-400';
+    const numValue = typeof value === 'number' ? value : parseFloat(value);
+    if (isNaN(numValue)) return theme === 'dark' ? 'text-gray-400' : 'text-gray-600';
+    if (numValue >= 5) return 'text-green-500';
+    if (numValue >= 0) return 'text-green-400';
+    if (numValue >= -5) return 'text-red-400';
     return 'text-red-500';
   };
 
   const formatCompetition = (comp: string | number | undefined) => {
     if (comp === undefined || comp === null) return 'N/A';
-    if (typeof comp === 'number') return comp.toFixed(2);
-    return comp;
+    const numValue = typeof comp === 'number' ? comp : parseFloat(comp);
+    if (isNaN(numValue)) return comp?.toString() || 'N/A';
+    return numValue.toFixed(2);
   };
 
   const getCompetitionColor = (comp: string | number | undefined) => {
