@@ -286,45 +286,52 @@ export default function BrandInsightPage() {
 
   const transformToTopics = useMemo((): TrendingTopic[] => {
     try {
-      if (!monthlyData || monthlyData.length === 0) {
+      if (!keywordData || keywordData.length === 0) {
         return [];
       }
 
-      const keywordMonthlyMap = new Map<string, { volumes: Array<{ month: string; volume: number }>; maxVolume: number }>();
+      const monthColumns = [
+        'Searches: Dec 2021', 'Searches: Jan 2022', 'Searches: Feb 2022', 'Searches: Mar 2022',
+        'Searches: Apr 2022', 'Searches: May 2022', 'Searches: Jun 2022', 'Searches: Jul 2022',
+        'Searches: Aug 2022', 'Searches: Sep 2022', 'Searches: Oct 2022', 'Searches: Nov 2022',
+        'Searches: Dec 2022', 'Searches: Jan 2023', 'Searches: Feb 2023', 'Searches: Mar 2023',
+        'Searches: Apr 2023', 'Searches: May 2023', 'Searches: Jun 2023', 'Searches: Jul 2023',
+        'Searches: Aug 2023', 'Searches: Sep 2023', 'Searches: Oct 2023', 'Searches: Nov 2023',
+        'Searches: Dec 2023', 'Searches: Jan 2024', 'Searches: Feb 2024', 'Searches: Mar 2024',
+        'Searches: Apr 2024', 'Searches: May 2024', 'Searches: Jun 2024', 'Searches: Jul 2024',
+        'Searches: Aug 2024', 'Searches: Sep 2024', 'Searches: Oct 2024', 'Searches: Nov 2024',
+        'Searches: Dec 2024'
+      ];
 
-      monthlyData.forEach((monthData) => {
-        if (!monthData?.top_keywords) return;
-        monthData.top_keywords.forEach((kw) => {
-          if (!kw?.keyword) return;
-          if (!keywordMonthlyMap.has(kw.keyword)) {
-            keywordMonthlyMap.set(kw.keyword, { volumes: [], maxVolume: 0 });
-          }
-          const entry = keywordMonthlyMap.get(kw.keyword)!;
-          entry.volumes.push({ month: monthData.month, volume: kw.volume || 0 });
-          if ((kw.volume || 0) > entry.maxVolume) {
-            entry.maxVolume = kw.volume || 0;
+      const result = keywordData.map(kw => {
+        const monthlyVolumes: number[] = [];
+
+        monthColumns.forEach(col => {
+          if (kw[col] !== null && kw[col] !== undefined) {
+            monthlyVolumes.push(Number(kw[col]));
           }
         });
-      });
 
-      const result = Array.from(keywordMonthlyMap.entries()).map(([keyword, data]) => {
-        const sortedVolumes = data.volumes.sort((a, b) => new Date(a.month).getTime() - new Date(b.month).getTime());
+        const maxVolume = monthlyVolumes.length > 0 ? Math.max(...monthlyVolumes) : (kw['Avg. monthly searches'] || 0);
 
         return {
-          name: keyword,
-          searchVolume: data.maxVolume,
-          searchVolumeRaw: data.maxVolume.toLocaleString(),
+          name: kw.keyword,
+          searchVolume: maxVolume,
+          searchVolumeRaw: maxVolume.toLocaleString(),
           url: '',
-          createdAt: sortedVolumes[sortedVolumes.length - 1]?.month || '',
-          pubDate: sortedVolumes[sortedVolumes.length - 1]?.month || '',
-          category: monthlyData[0]?.brand || '',
+          createdAt: new Date().toISOString(),
+          pubDate: new Date().toISOString(),
+          category: kw.brand || '',
           source: 'brand_keywords',
-          monthlySearches: sortedVolumes
+          monthlySearches: monthlyVolumes.map((vol, idx) => ({
+            month: monthColumns[idx],
+            volume: vol
+          }))
         };
       }).sort((a, b) => b.searchVolume - a.searchVolume);
 
       console.log('BrandInsightPage - transformToTopics:', {
-        monthlyDataCount: monthlyData.length,
+        keywordDataCount: keywordData.length,
         resultCount: result.length,
         sampleData: result.slice(0, 3)
       });
@@ -333,7 +340,7 @@ export default function BrandInsightPage() {
       console.error('Error transforming topics:', error);
       return [];
     }
-  }, [monthlyData]);
+  }, [keywordData]);
 
   const keywordPerformanceData = useMemo(() => {
     try {
@@ -620,7 +627,7 @@ export default function BrandInsightPage() {
     );
   }
 
-  if (!monthlyData.length || !brandPageData) {
+  if (!keywordData.length || !brandPageData) {
     return (
       <>
         <Header
@@ -660,14 +667,30 @@ export default function BrandInsightPage() {
   }
 
   const decodedBrand = decodeURIComponent(brandName || '');
-  const avgKeywordCount = Math.round(
-    monthlyData.reduce((sum, d) => sum + d.keyword_count, 0) / monthlyData.length
-  );
-  const avgVolume = Math.round(
-    monthlyData.reduce((sum, d) => sum + d.total_volume, 0) / monthlyData.length
-  );
-  const totalMonths = monthlyData.length;
-  const lastUpdated = monthlyData.length > 0 ? new Date(monthlyData[monthlyData.length - 1].month) : new Date();
+
+  const monthColumns = [
+    'Searches: Dec 2021', 'Searches: Jan 2022', 'Searches: Feb 2022', 'Searches: Mar 2022',
+    'Searches: Apr 2022', 'Searches: May 2022', 'Searches: Jun 2022', 'Searches: Jul 2022',
+    'Searches: Aug 2022', 'Searches: Sep 2022', 'Searches: Oct 2022', 'Searches: Nov 2022',
+    'Searches: Dec 2022', 'Searches: Jan 2023', 'Searches: Feb 2023', 'Searches: Mar 2023',
+    'Searches: Apr 2023', 'Searches: May 2023', 'Searches: Jun 2023', 'Searches: Jul 2023',
+    'Searches: Aug 2023', 'Searches: Sep 2023', 'Searches: Oct 2023', 'Searches: Nov 2023',
+    'Searches: Dec 2023', 'Searches: Jan 2024', 'Searches: Feb 2024', 'Searches: Mar 2024',
+    'Searches: Apr 2024', 'Searches: May 2024', 'Searches: Jun 2024', 'Searches: Jul 2024',
+    'Searches: Aug 2024', 'Searches: Sep 2024', 'Searches: Oct 2024', 'Searches: Nov 2024',
+    'Searches: Dec 2024'
+  ];
+
+  const monthlyTotals = monthColumns.map(col => {
+    return keywordData.reduce((sum, kw) => sum + (Number(kw[col]) || 0), 0);
+  }).filter(total => total > 0);
+
+  const totalMonths = monthlyTotals.length;
+  const avgKeywordCount = keywordData.length;
+  const avgVolume = monthlyTotals.length > 0
+    ? Math.round(monthlyTotals.reduce((sum, vol) => sum + vol, 0) / monthlyTotals.length)
+    : 0;
+  const lastUpdated = new Date();
 
   const baseUrl = import.meta.env.VITE_BASE_URL || 'https://topbestcharts.com';
   const pageUrl = `${baseUrl}/insight/${encodeURIComponent(decodedBrand)}/`;
