@@ -40,12 +40,7 @@ export default function ToolSchema({
       "priceCurrency": offers.priceCurrency
     },
     "featureList": "Interactive visualization, Data analysis, Export functionality, Real-time updates",
-    ...(screenshot && { "screenshot": screenshot }),
-    "aggregateRating": {
-      "@type": "AggregateRating",
-      "ratingValue": "4.8",
-      "ratingCount": "127"
-    }
+    ...(screenshot && { "screenshot": screenshot })
   };
 
   return (
