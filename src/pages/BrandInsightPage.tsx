@@ -427,7 +427,11 @@ export default function BrandInsightPage() {
       if (performanceFilter === 'all') return matchesSearch;
 
       const kwData = keywordPerformanceData.find(kw => kw.keyword === topic.name);
-      if (!kwData) return false;
+      if (!kwData) {
+        console.log('BrandInsightPage - Keyword not found in performance data:', topic.name);
+        console.log('Available keywords sample:', keywordPerformanceData.slice(0, 5).map(k => k.keyword));
+        return false;
+      }
 
       const threeMonthChange = parsePercentage(kwData.three_month_change);
       const yoyChange = parsePercentage(kwData.yoy_change);
@@ -449,7 +453,18 @@ export default function BrandInsightPage() {
           return threeMonthChange > 40;
         case 'high-growth':
           if (hasYoYData) {
-            return yoyChange > 75;
+            const result = yoyChange > 75;
+            if (result) {
+              console.log('BrandInsightPage - High Growth match:', {
+                keyword: topic.name,
+                yoyChange,
+                threeMonthChange,
+                rawYoY: kwData.yoy_change,
+                rawThreeMonth: kwData.three_month_change,
+                searchVolume
+              });
+            }
+            return result;
           }
           return threeMonthChange > 60;
         case 'has-potential':
@@ -505,6 +520,15 @@ export default function BrandInsightPage() {
       });
     }
   }, [transformToTopics, searchQuery, performanceFilter, keywordPerformanceData, hasYoYData]);
+
+  console.log('BrandInsightPage - Filter Results:', {
+    performanceFilter,
+    hasYoYData,
+    transformToTopicsCount: transformToTopics.length,
+    keywordPerformanceDataCount: keywordPerformanceData.length,
+    filteredTopicsCount: filteredTopics.length,
+    availableMonthsCount
+  });
 
   console.log('BrandInsightPage - render state:', {
     viewMode,
