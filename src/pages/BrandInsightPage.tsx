@@ -628,10 +628,10 @@ export default function BrandInsightPage() {
       const hasGrowth = hasYoYData ? (yoyChange > 20 || threeMonthChange > 20) : threeMonthChange > 15;
 
       if (hasYoYData && yoyChange >= 100) {
-        return { label: 'Ultra High Growth', emoji: '🚀', color: 'text-pink-500' };
+        return { label: 'Extreme Growth', emoji: '🚀', color: 'text-pink-500' };
       }
       if (!hasYoYData && threeMonthChange >= 80) {
-        return { label: 'Ultra High Growth', emoji: '🚀', color: 'text-pink-500' };
+        return { label: 'Extreme Growth', emoji: '🚀', color: 'text-pink-500' };
       }
 
       if (hasYoYData && yoyChange >= 50 && yoyChange < 100) {
@@ -1199,7 +1199,7 @@ export default function BrandInsightPage() {
                       <div className="flex flex-wrap gap-2">
                         {[
                           { id: 'all', label: 'All Keywords', emoji: '', requiresYoY: false },
-                          { id: 'ultra-high-growth', label: 'Ultra High Growth', emoji: '🚀', requiresYoY: false },
+                          { id: 'ultra-high-growth', label: 'Extreme Growth', emoji: '🚀', requiresYoY: false },
                           { id: 'high-growth', label: 'High Growth', emoji: '📈', requiresYoY: false },
                           { id: 'rising-star', label: 'Rising Star', emoji: '⭐', requiresYoY: false },
                           { id: 'great-potential', label: 'Great Potential', emoji: '🎯', requiresYoY: false },
