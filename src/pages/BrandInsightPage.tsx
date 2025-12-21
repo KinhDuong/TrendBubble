@@ -360,6 +360,35 @@ export default function BrandInsightPage() {
     return result;
   }, [keywordData]);
 
+  const availableMonthsCount = useMemo(() => {
+    if (keywordData.length === 0) return 0;
+
+    const monthColumns = [
+      'Searches: Dec 2021', 'Searches: Jan 2022', 'Searches: Feb 2022', 'Searches: Mar 2022',
+      'Searches: Apr 2022', 'Searches: May 2022', 'Searches: Jun 2022', 'Searches: Jul 2022',
+      'Searches: Aug 2022', 'Searches: Sep 2022', 'Searches: Oct 2022', 'Searches: Nov 2022',
+      'Searches: Dec 2022', 'Searches: Jan 2023', 'Searches: Feb 2023', 'Searches: Mar 2023',
+      'Searches: Apr 2023', 'Searches: May 2023', 'Searches: Jun 2023', 'Searches: Jul 2023',
+      'Searches: Aug 2023', 'Searches: Sep 2023', 'Searches: Oct 2023', 'Searches: Nov 2023',
+      'Searches: Dec 2023', 'Searches: Jan 2024', 'Searches: Feb 2024', 'Searches: Mar 2024',
+      'Searches: Apr 2024', 'Searches: May 2024', 'Searches: Jun 2024', 'Searches: Jul 2024',
+      'Searches: Aug 2024', 'Searches: Sep 2024', 'Searches: Oct 2024', 'Searches: Nov 2024',
+      'Searches: Dec 2024'
+    ];
+
+    const sampleKeyword = keywordData[0];
+    let count = 0;
+    monthColumns.forEach(col => {
+      if (sampleKeyword[col] !== null && sampleKeyword[col] !== undefined) {
+        count++;
+      }
+    });
+
+    return count;
+  }, [keywordData]);
+
+  const hasYoYData = availableMonthsCount >= 24;
+
   const getFilteredTopics = () => {
     return transformToTopics.filter(topic => {
       const matchesSearch = !searchQuery || topic.name.toLowerCase().includes(searchQuery.toLowerCase());
@@ -383,28 +412,47 @@ export default function BrandInsightPage() {
 
       switch (performanceFilter) {
         case 'great-potential':
-          return yoyChange > 50 && threeMonthChange > 30;
+          if (hasYoYData) {
+            return yoyChange > 50 && threeMonthChange > 30;
+          }
+          return threeMonthChange > 50;
         case 'high-growth':
-          return yoyChange > 100 && threeMonthChange <= 30;
+          if (hasYoYData) {
+            return yoyChange > 100 && threeMonthChange <= 30;
+          }
+          return threeMonthChange > 80;
         case 'has-potential':
-          return yoyChange <= 50 && threeMonthChange > 50;
+          return threeMonthChange > 50;
         case 'start-declining':
-          return yoyChange >= 0 && threeMonthChange < -10;
+          if (hasYoYData) {
+            return yoyChange >= 0 && threeMonthChange < -10;
+          }
+          return threeMonthChange < -15;
         case 'declining':
-          return yoyChange < 0 && threeMonthChange < 0;
+          if (hasYoYData) {
+            return yoyChange < 0 && threeMonthChange < 0;
+          }
+          return threeMonthChange < -10;
         case 'solid-performer':
           return coefficientOfVariation < 40 && searchVolume >= 1000;
         case 'hidden-gem':
-          return (yoyChange > 50 || threeMonthChange > 50) && searchVolume < 10000;
+          return threeMonthChange > 50 && searchVolume < 10000;
         case 'seasonal-spike':
           const maxSearch = Math.max(...monthlySearches);
           const minSearch = Math.min(...monthlySearches.filter(v => v > 0));
           const peakVariance = minSearch > 0 ? ((maxSearch - minSearch) / minSearch) * 100 : 0;
           return peakVariance > 500;
         case 'recovery':
-          return yoyChange < 0 && threeMonthChange > 20;
+          if (hasYoYData) {
+            return yoyChange < 0 && threeMonthChange > 20;
+          }
+          return threeMonthChange > 30;
         case 'high-value':
           return bidHigh > 50;
+        case 'high-volume':
+          return searchVolume >= 100000;
+        case 'cost-effective':
+          return bidHigh < 5 && searchVolume >= 10000;
         default:
           return matchesSearch;
       }
@@ -797,23 +845,38 @@ export default function BrandInsightPage() {
                 <>
                   <div className="max-w-7xl mx-auto mb-6">
                     <div className={`${theme === 'dark' ? 'bg-gray-800/50' : 'bg-white/80'} rounded-lg p-4 backdrop-blur-sm`}>
-                      <h3 className={`text-sm font-semibold mb-3 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                        Filter by Performance
-                      </h3>
+                      <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+                        <h3 className={`text-sm font-semibold ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                          Filter by Performance
+                        </h3>
+                        <div className="flex items-center gap-2">
+                          <div className={`text-xs px-3 py-1 rounded-full ${theme === 'dark' ? 'bg-gray-700 text-gray-300' : 'bg-gray-200 text-gray-600'}`}>
+                            {availableMonthsCount} months of data
+                            {!hasYoYData && <span className="ml-1 text-amber-500">• Limited filters</span>}
+                          </div>
+                        </div>
+                      </div>
+                      {!hasYoYData && (
+                        <div className={`mb-3 text-xs px-3 py-2 rounded-lg ${theme === 'dark' ? 'bg-amber-900/20 text-amber-400 border border-amber-800/30' : 'bg-amber-50 text-amber-700 border border-amber-200'}`}>
+                          <strong>Note:</strong> Some filters use year-over-year comparisons and require 24+ months of data. With {availableMonthsCount} months available, filters are based on 3-month trends and performance patterns.
+                        </div>
+                      )}
                       <div className="flex flex-wrap gap-2">
                         {[
-                          { id: 'all', label: 'All Keywords', emoji: '' },
-                          { id: 'great-potential', label: 'Great Potential', emoji: '🚀' },
-                          { id: 'high-growth', label: 'High Growth', emoji: '📈' },
-                          { id: 'has-potential', label: 'Has Potential', emoji: '🌱' },
-                          { id: 'solid-performer', label: 'Solid Performer', emoji: '⭐' },
-                          { id: 'hidden-gem', label: 'Hidden Gem', emoji: '💎' },
-                          { id: 'seasonal-spike', label: 'Seasonal Spike', emoji: '🎯' },
-                          { id: 'recovery', label: 'Recovery', emoji: '🔄' },
-                          { id: 'high-value', label: 'High Value', emoji: '👑' },
-                          { id: 'start-declining', label: 'Start Declining', emoji: '⚠️' },
-                          { id: 'declining', label: 'Declining', emoji: '📉' },
-                        ].map((filter) => (
+                          { id: 'all', label: 'All Keywords', emoji: '', requiresYoY: false },
+                          { id: 'great-potential', label: 'Great Potential', emoji: '🚀', requiresYoY: false },
+                          { id: 'high-growth', label: 'High Growth', emoji: '📈', requiresYoY: false },
+                          { id: 'has-potential', label: 'Has Potential', emoji: '🌱', requiresYoY: false },
+                          { id: 'solid-performer', label: 'Solid Performer', emoji: '⭐', requiresYoY: false },
+                          { id: 'hidden-gem', label: 'Hidden Gem', emoji: '💎', requiresYoY: false },
+                          { id: 'seasonal-spike', label: 'Seasonal Spike', emoji: '🎯', requiresYoY: false },
+                          { id: 'recovery', label: 'Recovery', emoji: '🔄', requiresYoY: false },
+                          { id: 'high-value', label: 'High Value', emoji: '👑', requiresYoY: false },
+                          { id: 'high-volume', label: 'High Volume Staples', emoji: '🏔️', requiresYoY: false },
+                          { id: 'cost-effective', label: 'Cost-Effective Ads', emoji: '💰', requiresYoY: false },
+                          { id: 'start-declining', label: 'Start Declining', emoji: '⚠️', requiresYoY: false },
+                          { id: 'declining', label: 'Declining', emoji: '📉', requiresYoY: false },
+                        ].filter(filter => !filter.requiresYoY || hasYoYData).map((filter) => (
                           <button
                             key={filter.id}
                             onClick={() => setPerformanceFilter(filter.id)}
