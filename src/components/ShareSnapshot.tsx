@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Camera, Download, Share2, X, Twitter, Facebook, Linkedin, Link as LinkIcon } from 'lucide-react';
+import { Camera, Download, Share2, X, Twitter, Facebook, Linkedin, Link as LinkIcon, FileImage, FileType } from 'lucide-react';
 import html2canvas from 'html2canvas';
 
 interface ShareSnapshotProps {
@@ -12,6 +12,7 @@ export default function ShareSnapshot({ theme, canvasRef, variant = 'floating' }
   const [isCapturing, setIsCapturing] = useState(false);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [showShareMenu, setShowShareMenu] = useState(false);
+  const [downloadFormat, setDownloadFormat] = useState<'png' | 'svg'>('png');
 
   const captureSnapshot = async () => {
     if (!canvasRef.current) return;
@@ -76,6 +77,88 @@ export default function ShareSnapshot({ theme, canvasRef, variant = 'floating' }
     link.click();
     setShowShareMenu(false);
     setCapturedImage(null);
+  };
+
+  const downloadSvg = () => {
+    if (!canvasRef.current) return;
+
+    try {
+      const svgElement = canvasRef.current.querySelector('svg');
+      if (!svgElement) {
+        alert('No SVG chart found to download.');
+        return;
+      }
+
+      const clonedSvg = svgElement.cloneNode(true) as SVGElement;
+
+      const width = svgElement.clientWidth || parseInt(svgElement.getAttribute('width') || '800');
+      const height = svgElement.clientHeight || parseInt(svgElement.getAttribute('height') || '600');
+
+      clonedSvg.setAttribute('width', width.toString());
+      clonedSvg.setAttribute('height', height.toString());
+      clonedSvg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+
+      const watermarkGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      watermarkGroup.setAttribute('id', 'watermark');
+
+      const bgRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      bgRect.setAttribute('x', (width - 250).toString());
+      bgRect.setAttribute('y', (height - 80).toString());
+      bgRect.setAttribute('width', '240');
+      bgRect.setAttribute('height', '70');
+      bgRect.setAttribute('fill', theme === 'dark' ? 'rgba(0, 0, 0, 0.3)' : 'rgba(255, 255, 255, 0.3)');
+      bgRect.setAttribute('rx', '5');
+      watermarkGroup.appendChild(bgRect);
+
+      const watermarkText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      watermarkText.setAttribute('x', (width - 10).toString());
+      watermarkText.setAttribute('y', (height - 45).toString());
+      watermarkText.setAttribute('text-anchor', 'end');
+      watermarkText.setAttribute('font-family', 'sans-serif');
+      watermarkText.setAttribute('font-size', '20');
+      watermarkText.setAttribute('font-weight', 'bold');
+      watermarkText.setAttribute('fill', theme === 'dark' ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.7)');
+      watermarkText.textContent = 'topbestcharts.com';
+      watermarkGroup.appendChild(watermarkText);
+
+      const timeText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      timeText.setAttribute('x', (width - 10).toString());
+      timeText.setAttribute('y', (height - 20).toString());
+      timeText.setAttribute('text-anchor', 'end');
+      timeText.setAttribute('font-family', 'sans-serif');
+      timeText.setAttribute('font-size', '14');
+      timeText.setAttribute('fill', theme === 'dark' ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.5)');
+      timeText.textContent = new Date().toLocaleString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+      });
+      watermarkGroup.appendChild(timeText);
+
+      clonedSvg.appendChild(watermarkGroup);
+
+      const serializer = new XMLSerializer();
+      const svgString = serializer.serializeToString(clonedSvg);
+
+      const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+
+      const link = document.createElement('a');
+      const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+      link.download = `trending-topics-${timestamp}.svg`;
+      link.href = url;
+      link.click();
+
+      URL.revokeObjectURL(url);
+      setShowShareMenu(false);
+      setCapturedImage(null);
+    } catch (error) {
+      console.error('Error downloading SVG:', error);
+      alert('Failed to download SVG. Please try again.');
+    }
   };
 
   const copyToClipboard = async () => {
@@ -176,11 +259,43 @@ export default function ShareSnapshot({ theme, canvasRef, variant = 'floating' }
               <div className="space-y-4">
                 <div>
                   <h3 className={`text-lg font-semibold mb-3 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                    Download or Share
+                    Download Format
                   </h3>
+                  <div className="flex gap-2 mb-3">
+                    <button
+                      onClick={() => setDownloadFormat('png')}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
+                        downloadFormat === 'png'
+                          ? theme === 'dark'
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-blue-600 text-white'
+                          : theme === 'dark'
+                          ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                          : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                      }`}
+                    >
+                      <FileImage size={18} />
+                      PNG
+                    </button>
+                    <button
+                      onClick={() => setDownloadFormat('svg')}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
+                        downloadFormat === 'svg'
+                          ? theme === 'dark'
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-blue-600 text-white'
+                          : theme === 'dark'
+                          ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                          : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                      }`}
+                    >
+                      <FileType size={18} />
+                      SVG
+                    </button>
+                  </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <button
-                      onClick={downloadImage}
+                      onClick={downloadFormat === 'png' ? downloadImage : downloadSvg}
                       className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-medium transition-colors ${
                         theme === 'dark'
                           ? 'bg-green-600 hover:bg-green-700 text-white'
@@ -188,7 +303,7 @@ export default function ShareSnapshot({ theme, canvasRef, variant = 'floating' }
                       }`}
                     >
                       <Download size={20} />
-                      Download Image
+                      Download {downloadFormat.toUpperCase()}
                     </button>
 
                     <button
@@ -238,7 +353,7 @@ export default function ShareSnapshot({ theme, canvasRef, variant = 'floating' }
 
                 <div className={`mt-6 p-4 rounded-lg ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'}`}>
                   <p className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
-                    💡 <strong>Tip:</strong> Download the image first, then share it directly on social media with your own caption for maximum engagement!
+                    💡 <strong>Tip:</strong> Use PNG for social media posts and presentations. Use SVG for high-quality prints and designs that need to scale perfectly!
                   </p>
                 </div>
               </div>
