@@ -169,17 +169,19 @@ export default function BubbleTooltip({
     if (value === undefined || value === null) return 'N/A';
     const numValue = typeof value === 'number' ? value : parseFloat(value);
     if (isNaN(numValue)) return 'N/A';
-    const formatted = numValue.toFixed(1);
-    return numValue >= 0 ? `+${formatted}%` : `${formatted}%`;
+    const percentage = numValue * 100;
+    const formatted = percentage.toFixed(1);
+    return percentage >= 0 ? `+${formatted}%` : `${formatted}%`;
   };
 
   const getChangeColor = (value: number | string | undefined) => {
     if (value === undefined || value === null) return theme === 'dark' ? 'text-gray-400' : 'text-gray-600';
     const numValue = typeof value === 'number' ? value : parseFloat(value);
     if (isNaN(numValue)) return theme === 'dark' ? 'text-gray-400' : 'text-gray-600';
-    if (numValue >= 5) return 'text-green-500';
-    if (numValue >= 0) return 'text-green-400';
-    if (numValue >= -5) return 'text-red-400';
+    const percentage = numValue * 100;
+    if (percentage >= 5) return 'text-green-500';
+    if (percentage >= 0) return 'text-green-400';
+    if (percentage >= -5) return 'text-red-400';
     return 'text-red-500';
   };
 

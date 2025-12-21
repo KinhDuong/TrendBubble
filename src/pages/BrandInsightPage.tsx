@@ -420,11 +420,11 @@ export default function BrandInsightPage() {
   const filteredTopics = useMemo(() => {
     try {
       const parsePercentage = (value: any): number => {
-        if (typeof value === 'number') return value;
+        if (typeof value === 'number') return value * 100;
         if (typeof value === 'string') {
           const cleaned = value.replace('%', '').replace(',', '').trim();
           const parsed = parseFloat(cleaned);
-          return isNaN(parsed) ? 0 : parsed;
+          return isNaN(parsed) ? 0 : parsed * 100;
         }
         return 0;
       };
@@ -572,11 +572,11 @@ export default function BrandInsightPage() {
   const getKeywordCategory = (topicName: string): { label: string; emoji: string; color: string } => {
     try {
       const parsePercentage = (value: any): number => {
-        if (typeof value === 'number') return value;
+        if (typeof value === 'number') return value * 100;
         if (typeof value === 'string') {
           const cleaned = value.replace('%', '').replace(',', '').trim();
           const parsed = parseFloat(cleaned);
-          return isNaN(parsed) ? 0 : parsed;
+          return isNaN(parsed) ? 0 : parsed * 100;
         }
         return 0;
       };
@@ -651,11 +651,19 @@ export default function BrandInsightPage() {
       kw.keyword.toLowerCase().trim() === normalizedTopicName
     );
 
+    const formatPercentageDisplay = (value: any): string => {
+      if (value === undefined || value === null) return 'N/A';
+      const numValue = typeof value === 'number' ? value : parseFloat(value);
+      if (isNaN(numValue)) return 'N/A';
+      const percentage = numValue * 100;
+      return percentage >= 0 ? `+${percentage.toFixed(1)}%` : `${percentage.toFixed(1)}%`;
+    };
+
     return {
       ...topic,
       originalRank: index + 1,
-      threeMonthChange: kwData?.three_month_change || 'N/A',
-      yoyChange: kwData?.yoy_change || 'N/A',
+      threeMonthChange: formatPercentageDisplay(kwData?.three_month_change),
+      yoyChange: formatPercentageDisplay(kwData?.yoy_change),
       competition: kwData?.competition || 'N/A',
       bidHigh: kwData?.bid_high || 0,
       category: getKeywordCategory(topic.name)
