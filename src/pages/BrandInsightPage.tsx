@@ -476,6 +476,11 @@ export default function BrandInsightPage() {
         competition;
 
       switch (performanceFilter) {
+        case 'ultra-growth':
+          if (hasYoYData) {
+            return yoyChange > 1000;
+          }
+          return threeMonthChange > 1000;
         case 'ultra-high-growth':
           if (hasYoYData) {
             return yoyChange >= 100;
@@ -626,6 +631,13 @@ export default function BrandInsightPage() {
       const coefficientOfVariation = mean > 0 ? (stdDev / mean) * 100 : 0;
 
       const hasGrowth = hasYoYData ? (yoyChange > 20 || threeMonthChange > 20) : threeMonthChange > 15;
+
+      if (hasYoYData && yoyChange > 1000) {
+        return { label: 'Ultra Growth', emoji: '🔥', color: 'text-[#FF4500]' };
+      }
+      if (!hasYoYData && threeMonthChange > 1000) {
+        return { label: 'Ultra Growth', emoji: '🔥', color: 'text-[#FF4500]' };
+      }
 
       if (hasYoYData && yoyChange >= 100) {
         return { label: 'Extreme Growth', emoji: '🚀', color: 'text-pink-500' };
@@ -1199,6 +1211,7 @@ export default function BrandInsightPage() {
                       <div className="flex flex-wrap gap-2">
                         {[
                           { id: 'all', label: 'All Keywords', emoji: '', requiresYoY: false },
+                          { id: 'ultra-growth', label: 'Ultra Growth', emoji: '🔥', requiresYoY: false },
                           { id: 'ultra-high-growth', label: 'Extreme Growth', emoji: '🚀', requiresYoY: false },
                           { id: 'high-growth', label: 'High Growth', emoji: '📈', requiresYoY: false },
                           { id: 'rising-star', label: 'Rising Star', emoji: '⭐', requiresYoY: false },
@@ -1224,9 +1237,13 @@ export default function BrandInsightPage() {
                             className={`
                               px-3 py-1.5 rounded-lg text-sm font-medium transition-all
                               ${performanceFilter === filter.id
-                                ? theme === 'dark'
-                                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30'
-                                  : 'bg-blue-600 text-white shadow-md'
+                                ? filter.id === 'ultra-growth'
+                                  ? theme === 'dark'
+                                    ? 'bg-[#FF4500] text-white shadow-lg shadow-orange-500/30'
+                                    : 'bg-[#FF4500] text-white shadow-md shadow-orange-500/30'
+                                  : theme === 'dark'
+                                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30'
+                                    : 'bg-blue-600 text-white shadow-md'
                                 : theme === 'dark'
                                   ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
