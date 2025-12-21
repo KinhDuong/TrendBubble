@@ -52,8 +52,8 @@ export default function BubbleTooltip({
   }, []);
 
   // Desktop: small or expanded size
-  const tooltipWidth = !isMobile && isExpanded ? 480 : 280;
-  const tooltipHeight = !isMobile && isExpanded ? 600 : 200;
+  const tooltipWidth = !isMobile && isExpanded ? 600 : 380;
+  const tooltipHeight = !isMobile && isExpanded ? 700 : 280;
   const offset = 10;
   const padding = 20;
 
