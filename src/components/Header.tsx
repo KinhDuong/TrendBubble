@@ -114,25 +114,25 @@ export default function Header({ theme, isAdmin, onLoginClick, onLogout, title =
           {/* Desktop Navigation - Always visible on desktop for SEO */}
           <nav className="hidden lg:flex items-center gap-6" aria-label="Main navigation">
             <a
-              href="/trending-now"
+              href="/trending-now/"
               className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'} transition-colors`}
             >
               Trending Now
             </a>
             <a
-              href="/browse-topics"
+              href="/browse-topics/"
               className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'} transition-colors`}
             >
               Browse Topics
             </a>
             <a
-              href="/contact"
+              href="/contact/"
               className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'} transition-colors`}
             >
               Contact
             </a>
             <a
-              href="/about"
+              href="/about/"
               className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'} transition-colors`}
             >
               About
@@ -231,7 +231,7 @@ export default function Header({ theme, isAdmin, onLoginClick, onLogout, title =
                       <span>Home</span>
                     </a>
                     <a
-                      href="/trending-now"
+                      href="/trending-now/"
                       className={`flex items-center gap-3 px-6 py-3 ${theme === 'dark' ? 'text-gray-300 hover:bg-gray-700 hover:text-white' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'} transition-colors`}
                       onClick={() => setIsMenuOpen(false)}
                     >
@@ -239,7 +239,7 @@ export default function Header({ theme, isAdmin, onLoginClick, onLogout, title =
                       <span>Trending Now</span>
                     </a>
                     <a
-                      href="/browse-topics"
+                      href="/browse-topics/"
                       className={`flex items-center gap-3 px-6 py-3 ${theme === 'dark' ? 'text-gray-300 hover:bg-gray-700 hover:text-white' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'} transition-colors`}
                       onClick={() => setIsMenuOpen(false)}
                     >
@@ -247,7 +247,7 @@ export default function Header({ theme, isAdmin, onLoginClick, onLogout, title =
                       <span>Browse Topics</span>
                     </a>
                     <a
-                      href="/contact"
+                      href="/contact/"
                       className={`flex items-center gap-3 px-6 py-3 ${theme === 'dark' ? 'text-gray-300 hover:bg-gray-700 hover:text-white' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'} transition-colors`}
                       onClick={() => setIsMenuOpen(false)}
                     >
@@ -255,7 +255,7 @@ export default function Header({ theme, isAdmin, onLoginClick, onLogout, title =
                       <span>Contact</span>
                     </a>
                     <a
-                      href="/about"
+                      href="/about/"
                       className={`flex items-center gap-3 px-6 py-3 ${theme === 'dark' ? 'text-gray-300 hover:bg-gray-700 hover:text-white' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'} transition-colors`}
                       onClick={() => setIsMenuOpen(false)}
                     >

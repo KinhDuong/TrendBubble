@@ -377,7 +377,7 @@ export default function ExplorePage() {
             {/* View All Topics CTA Section */}
             <div className="mb-12">
               <Link
-                to="/browse-topics"
+                to="/browse-topics/"
                 className={`group relative block overflow-hidden rounded-none md:rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 ${
                   theme === 'dark' ? 'bg-gradient-to-br from-gray-800 via-gray-900 to-gray-800' : 'bg-gradient-to-br from-blue-50 via-white to-cyan-50'
                 }`}
