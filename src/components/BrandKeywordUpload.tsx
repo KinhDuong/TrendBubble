@@ -243,16 +243,18 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light' }
             record[header] = parsedValue;
           }
         } else if (header === 'Three month change') {
+          const hasPercent = value.includes('%');
           const cleanValue = value.replace(/%/g, '').trim();
           const parsedValue = parseFloat(cleanValue);
           if (!isNaN(parsedValue)) {
-            record['Three month change'] = parsedValue;
+            record['Three month change'] = hasPercent ? parsedValue / 100 : parsedValue;
           }
         } else if (header === 'YoY change') {
+          const hasPercent = value.includes('%');
           const cleanValue = value.replace(/%/g, '').trim();
           const parsedValue = parseFloat(cleanValue);
           if (!isNaN(parsedValue)) {
-            record['YoY change'] = parsedValue;
+            record['YoY change'] = hasPercent ? parsedValue / 100 : parsedValue;
           }
         } else {
           record[header] = value;
