@@ -16,6 +16,7 @@ import AnimationSelector, { AnimationStyle } from '../components/AnimationSelect
 import ComparisonPanel from '../components/ComparisonPanel';
 import BrandKeywordUpload from '../components/BrandKeywordUpload';
 import KeywordAnalysis from '../components/KeywordAnalysis';
+import ToolSchema from '../components/ToolSchema';
 import { TrendingTopic, FAQ } from '../types';
 import { TrendingUp, Download, ArrowLeft, Search, X, ChevronsLeft, ChevronsRight } from 'lucide-react';
 
@@ -808,6 +809,13 @@ export default function BrandInsightPage() {
           </script>
         )}
       </Helmet>
+
+      <ToolSchema
+        name={`${decodedBrand} Keyword Analysis Tool`}
+        description={`Interactive keyword research and SEO analysis tool for ${decodedBrand}. Visualize search trends, analyze keyword performance, and track search volume data.`}
+        url={pageUrl}
+        applicationCategory="BusinessApplication"
+      />
 
       <Header
         theme={theme}

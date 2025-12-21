@@ -8,6 +8,7 @@ import { useAuth } from '../hooks/useAuth';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import Login from '../components/Login';
+import ToolSchema from '../components/ToolSchema';
 
 interface FeaturedPage {
   id: string;
@@ -230,6 +231,13 @@ export default function ExplorePage() {
         <title>Top Best Charts - Interactive Charts & Top Rankings Made Easy</title>
         <meta name="description" content="Top Best Charts makes exploring rankings simple. Visualize data with Bubble, Bar, Donut, and Treemap charts, see trends at a glance, and uncover insights from the world's top lists" />
       </Helmet>
+
+      <ToolSchema
+        name="Top Best Charts - Interactive Data Visualization Tool"
+        description="Free interactive tool for visualizing trending topics and search data. Create bubble charts, bar charts, treemaps, and donut charts to explore rankings and insights."
+        url={`${import.meta.env.VITE_BASE_URL || 'https://topbestcharts.com'}/`}
+        applicationCategory="AnalysisApplication"
+      />
 
       <Header
         theme={theme}
