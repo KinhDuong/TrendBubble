@@ -151,7 +151,7 @@ export default function InsightPage() {
         <ToolSchema
           name="Brand Keyword Insights - SEO Analysis Tool"
           description="Analyze and visualize brand keyword search trends and SEO performance data. Track search volume, monitor keyword performance, and optimize your content strategy."
-          url={`${import.meta.env.VITE_BASE_URL || 'https://topbestcharts.com'}/insight`}
+          url={`${import.meta.env.VITE_BASE_URL || 'https://topbestcharts.com'}/insights`}
           applicationCategory="AnalysisApplication"
         />
 

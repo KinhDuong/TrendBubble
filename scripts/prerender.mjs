@@ -1070,17 +1070,17 @@ async function prerenderContactPage(baseHTML, distPath) {
 }
 
 async function prerenderInsightPage(baseHTML, distPath) {
-  console.log('Pre-rendering: /insight');
+  console.log('Pre-rendering: /insights');
 
   const insightMetaTags = `
     <title>Brand Keyword Insights - SEO Analysis Tool | Top Best Charts</title>
     <meta name="description" content="Upload and analyze brand keyword search volume data with interactive charts. Track SEO performance and keyword trends over time." data-prerendered />
     <meta name="keywords" content="keyword analysis, SEO tools, search volume, brand keywords, keyword tracking" data-prerendered />
     <meta name="robots" content="index, follow" />
-    <link rel="canonical" href="${BASE_URL}/insight/" />
+    <link rel="canonical" href="${BASE_URL}/insights/" />
 
     <meta property="og:type" content="website" data-prerendered />
-    <meta property="og:url" content="${BASE_URL}/insight/" data-prerendered />
+    <meta property="og:url" content="${BASE_URL}/insights/" data-prerendered />
     <meta property="og:title" content="Brand Keyword Insights - SEO Analysis Tool" data-prerendered />
     <meta property="og:description" content="Upload and analyze brand keyword search volume data with interactive charts" data-prerendered />
     <meta property="og:site_name" content="Top Best Charts" data-prerendered />
@@ -1101,7 +1101,7 @@ async function prerenderInsightPage(baseHTML, distPath) {
             <li><a href="${BASE_URL}/" style="color: #d1d5db; text-decoration: none;">Home</a></li>
             <li><a href="${BASE_URL}/browse-topics" style="color: #d1d5db; text-decoration: none;">Browse Topics</a></li>
             <li><a href="${BASE_URL}/trending-now" style="color: #d1d5db; text-decoration: none;">Trending Now</a></li>
-            <li><a href="${BASE_URL}/insight" style="color: #d1d5db; text-decoration: none;">Insights</a></li>
+            <li><a href="${BASE_URL}/insights" style="color: #d1d5db; text-decoration: none;">Insights</a></li>
             <li><a href="${BASE_URL}/contact" style="color: #d1d5db; text-decoration: none;">Contact</a></li>
             <li><a href="${BASE_URL}/about" style="color: #d1d5db; text-decoration: none;">About</a></li>
           </ul>
@@ -1140,10 +1140,10 @@ async function prerenderInsightPage(baseHTML, distPath) {
     .replace('<!-- PRERENDER_STRUCTURED_DATA -->', '')
     .replace('<div id="root"></div>', `<div id="root">${insightContentHTML}</div><div id="prerender-footer">${generateFooterHTML()}</div>`);
 
-  const outputDir = path.join(distPath, 'insight');
+  const outputDir = path.join(distPath, 'insights');
   fs.mkdirSync(outputDir, { recursive: true });
   fs.writeFileSync(path.join(outputDir, 'index.html'), html);
-  console.log('✓ Generated: /insight/index.html');
+  console.log('✓ Generated: /insights/index.html');
 }
 
 async function prerenderBrowseTopicsPage(baseHTML, distPath) {
@@ -1430,7 +1430,7 @@ async function prerenderInsightsMetaPage(baseHTML, distPath) {
             <li><a href="${BASE_URL}/" style="color: #d1d5db; text-decoration: none;">Home</a></li>
             <li><a href="${BASE_URL}/browse-topics" style="color: #d1d5db; text-decoration: none;">Browse Topics</a></li>
             <li><a href="${BASE_URL}/trending-now" style="color: #d1d5db; text-decoration: none;">Trending Now</a></li>
-            <li><a href="${BASE_URL}/insight" style="color: #d1d5db; text-decoration: none;">Insights</a></li>
+            <li><a href="${BASE_URL}/insights" style="color: #d1d5db; text-decoration: none;">Insights</a></li>
             <li><a href="${BASE_URL}/contact" style="color: #d1d5db; text-decoration: none;">Contact</a></li>
             <li><a href="${BASE_URL}/about" style="color: #d1d5db; text-decoration: none;">About</a></li>
           </ul>
@@ -1637,7 +1637,7 @@ async function generateSitemap(pages, distPath) {
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>${escapeXml(BASE_URL)}/insight/</loc>
+    <loc>${escapeXml(BASE_URL)}/insights/</loc>
     <lastmod>${today}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>

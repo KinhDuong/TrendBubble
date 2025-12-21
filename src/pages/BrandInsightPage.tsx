@@ -868,7 +868,7 @@ export default function BrandInsightPage() {
                 No keyword data found for "{brandName}". The brand may not have any data uploaded yet.
               </p>
               <button
-                onClick={() => navigate('/insight')}
+                onClick={() => navigate('/insights')}
                 className={`inline-flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-colors ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-600 hover:bg-blue-700 shadow-sm hover:shadow text-white'}`}
               >
                 <ArrowLeft className="w-5 h-5" />
@@ -915,7 +915,7 @@ export default function BrandInsightPage() {
   const lastUpdated = new Date();
 
   const baseUrl = import.meta.env.VITE_BASE_URL || 'https://topbestcharts.com';
-  const pageUrl = `${baseUrl}/insight/${encodeURIComponent(decodedBrand)}/`;
+  const pageUrl = `${baseUrl}/insights/${encodeURIComponent(decodedBrand)}/`;
   const topTopicNames = topTopics.slice(0, 5).map(t => t.name).join(', ');
   const keywords = topTopics.slice(0, 10).map(t => t.name).join(', ') + ', keyword trends, search volume, SEO insights, brand analysis';
 
@@ -985,7 +985,7 @@ export default function BrandInsightPage() {
                   "@type": "ListItem",
                   "position": 2,
                   "name": "Insights",
-                  "item": `${baseUrl}/insight/`
+                  "item": `${baseUrl}/insights/`
                 },
                 {
                   "@type": "ListItem",
@@ -1094,7 +1094,7 @@ export default function BrandInsightPage() {
                   <div className="flex items-center justify-between gap-4 mb-4">
                     <div className="flex-1">
                       <button
-                        onClick={() => navigate('/insight')}
+                        onClick={() => navigate('/insights')}
                         className={`inline-flex items-center gap-2 text-sm mb-2 transition-colors ${theme === 'dark' ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'}`}
                       >
                         <ArrowLeft className="w-4 h-4" />
@@ -1548,7 +1548,7 @@ export default function BrandInsightPage() {
                             {latestBrandPages.map((page) => (
                               <a
                                 key={page.id}
-                                href={`/insight/${encodeURIComponent(page.brand)}/`}
+                                href={`/insights/${encodeURIComponent(page.brand)}/`}
                                 className={`text-sm transition-colors hover:underline ${theme === 'dark' ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'}`}
                               >
                                 {page.meta_title}
@@ -1616,7 +1616,7 @@ export default function BrandInsightPage() {
                     {latestBrandPages.map((page) => (
                       <a
                         key={page.id}
-                        href={`/insight/${encodeURIComponent(page.brand)}/`}
+                        href={`/insights/${encodeURIComponent(page.brand)}/`}
                         className={`group block ${theme === 'dark' ? 'bg-gray-800 hover:bg-gray-750' : 'bg-white hover:bg-gray-50 border border-gray-200'} rounded-lg overflow-hidden shadow-md transition-all hover:shadow-lg h-full`}
                       >
                         <div className="flex flex-row h-full min-h-[180px]">

@@ -1645,7 +1645,7 @@ function HomePage() {
                       {topics.length} trending topics
                     </button>
                     <a
-                      href="/insight"
+                      href="/insights"
                       className={`px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer transition-all hover:scale-105 ${theme === 'dark' ? 'bg-green-600 text-white hover:bg-green-700' : 'bg-green-600 text-white hover:bg-green-700 shadow-sm'}`}
                     >
                       View Brand Insights
@@ -2201,12 +2201,12 @@ function App() {
         <Route path="/about/" element={<AboutPage />} />
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/contact/" element={<ContactPage />} />
-        <Route path="/insight" element={<InsightPage />} />
-        <Route path="/insight/" element={<InsightPage />} />
+        <Route path="/insights" element={<InsightPage />} />
+        <Route path="/insights/" element={<InsightPage />} />
         <Route path="/insights-meta" element={<InsightsMetaPage />} />
         <Route path="/insights-meta/" element={<InsightsMetaPage />} />
-        <Route path="/insight/:brandName" element={<BrandInsightPage />} />
-        <Route path="/insight/:brandName/" element={<BrandInsightPage />} />
+        <Route path="/insights/:brandName" element={<BrandInsightPage />} />
+        <Route path="/insights/:brandName/" element={<BrandInsightPage />} />
         <Route path="/upload" element={<UploadPage />} />
         <Route path="/upload/" element={<UploadPage />} />
         <Route path="/admin/pages" element={<AdminPages />} />

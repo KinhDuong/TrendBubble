@@ -325,7 +325,7 @@ export default function InsightsMetaPage() {
                       </td>
                       <td className="py-3 px-4 text-center">
                         <button
-                          onClick={() => navigate(`/insight/${encodeURIComponent(brand.brand)}`)}
+                          onClick={() => navigate(`/insights/${encodeURIComponent(brand.brand)}`)}
                           className={`inline-flex items-center gap-1 px-3 py-1.5 rounded text-sm font-medium transition-colors ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}
                         >
                           View
