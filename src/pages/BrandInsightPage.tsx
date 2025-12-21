@@ -569,10 +569,98 @@ export default function BrandInsightPage() {
            topic.category?.toLowerCase().includes(query);
   });
 
-  const topicsWithRanks = topTopics.map((topic, index) => ({
-    ...topic,
-    originalRank: index + 1
-  }));
+  const getKeywordCategory = (topicName: string): { label: string; emoji: string; color: string } => {
+    try {
+      const parsePercentage = (value: any): number => {
+        if (typeof value === 'number') return value;
+        if (typeof value === 'string') {
+          const cleaned = value.replace('%', '').replace(',', '').trim();
+          const parsed = parseFloat(cleaned);
+          return isNaN(parsed) ? 0 : parsed;
+        }
+        return 0;
+      };
+
+      const normalizedTopicName = topicName.toLowerCase().trim();
+      const kwData = keywordPerformanceData.find(kw =>
+        kw.keyword.toLowerCase().trim() === normalizedTopicName
+      );
+
+      if (!kwData) {
+        return { label: 'Standard', emoji: '📊', color: theme === 'dark' ? 'text-gray-400' : 'text-gray-600' };
+      }
+
+      const threeMonthChange = parsePercentage(kwData.three_month_change);
+      const yoyChange = parsePercentage(kwData.yoy_change);
+      const bidHigh = kwData.bid_high || 0;
+      const searchVolume = kwData.searchVolume;
+
+      const monthlySearches = kwData.monthly_searches || [];
+      const hasData = monthlySearches.length > 0;
+      const mean = hasData ? monthlySearches.reduce((a, b) => a + b, 0) / monthlySearches.length : 0;
+      const variance = hasData ? monthlySearches.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / monthlySearches.length : 0;
+      const stdDev = Math.sqrt(variance);
+      const coefficientOfVariation = mean > 0 ? (stdDev / mean) * 100 : 0;
+
+      if (hasYoYData && yoyChange > 75) {
+        return { label: 'High Growth', emoji: '📈', color: 'text-green-500' };
+      }
+      if (!hasYoYData && threeMonthChange > 60) {
+        return { label: 'High Growth', emoji: '📈', color: 'text-green-500' };
+      }
+      if (hasYoYData && yoyChange > 30 && threeMonthChange > 20) {
+        return { label: 'Great Potential', emoji: '🚀', color: 'text-blue-500' };
+      }
+      if (!hasYoYData && threeMonthChange > 40) {
+        return { label: 'Great Potential', emoji: '🚀', color: 'text-blue-500' };
+      }
+      if (threeMonthChange > 30) {
+        return { label: 'Has Potential', emoji: '🌱', color: 'text-emerald-500' };
+      }
+      if (coefficientOfVariation < 40 && searchVolume >= 1000) {
+        return { label: 'Solid Performer', emoji: '⭐', color: 'text-yellow-500' };
+      }
+      if ((hasYoYData && yoyChange > 30 || threeMonthChange > 30) && searchVolume < 15000) {
+        return { label: 'Hidden Gem', emoji: '💎', color: 'text-purple-500' };
+      }
+      if (bidHigh > 50) {
+        return { label: 'High Value', emoji: '👑', color: 'text-amber-500' };
+      }
+      if (searchVolume >= 100000) {
+        return { label: 'High Volume', emoji: '🏔️', color: 'text-indigo-500' };
+      }
+      if (hasYoYData && yoyChange >= 0 && threeMonthChange < -5) {
+        return { label: 'Start Declining', emoji: '⚠️', color: 'text-orange-500' };
+      }
+      if (hasYoYData && yoyChange < 0 && threeMonthChange < 0) {
+        return { label: 'Declining', emoji: '📉', color: 'text-red-500' };
+      }
+      if (!hasYoYData && threeMonthChange < -10) {
+        return { label: 'Declining', emoji: '📉', color: 'text-red-500' };
+      }
+
+      return { label: 'Standard', emoji: '📊', color: theme === 'dark' ? 'text-gray-400' : 'text-gray-600' };
+    } catch (error) {
+      return { label: 'Standard', emoji: '📊', color: theme === 'dark' ? 'text-gray-400' : 'text-gray-600' };
+    }
+  };
+
+  const topicsWithRanks = topTopics.map((topic, index) => {
+    const normalizedTopicName = topic.name.toLowerCase().trim();
+    const kwData = keywordPerformanceData.find(kw =>
+      kw.keyword.toLowerCase().trim() === normalizedTopicName
+    );
+
+    return {
+      ...topic,
+      originalRank: index + 1,
+      threeMonthChange: kwData?.three_month_change || 'N/A',
+      yoyChange: kwData?.yoy_change || 'N/A',
+      competition: kwData?.competition || 'N/A',
+      bidHigh: kwData?.bid_high || 0,
+      category: getKeywordCategory(topic.name)
+    };
+  });
 
   const totalPages = Math.ceil(topicsWithRanks.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -1147,24 +1235,75 @@ export default function BrandInsightPage() {
                               {displayTopics.map((topic, index) => (
                                 <li
                                   key={index}
-                                  className={`px-2 py-1.5 transition-colors ${index < displayTopics.length - 1 ? `border-b ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}` : ''} ${theme === 'dark' ? 'hover:bg-gray-700' : 'hover:bg-gray-50'}`}
+                                  className={`px-2 py-2.5 transition-colors ${index < displayTopics.length - 1 ? `border-b ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}` : ''} ${theme === 'dark' ? 'hover:bg-gray-700' : 'hover:bg-gray-50'}`}
                                   itemProp="itemListElement"
                                   itemScope
                                   itemType="https://schema.org/ListItem"
                                 >
                                   <meta itemProp="position" content={String(topic.originalRank)} />
                                   <article className="flex-1" itemProp="item" itemScope itemType="https://schema.org/Thing">
-                                    <div className="flex items-center gap-2 mb-0.5">
-                                      <div className="w-8 flex items-center justify-center flex-shrink-0" aria-label={`Rank ${topic.originalRank}`}>
-                                        <div className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                                    <div className="flex items-start gap-2">
+                                      <div className="w-8 flex items-center justify-center flex-shrink-0 pt-0.5" aria-label={`Rank ${topic.originalRank}`}>
+                                        <div className={`text-sm font-semibold ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
                                           {topic.originalRank}
                                         </div>
                                       </div>
-                                      <div className="flex items-center gap-2 flex-wrap flex-1">
-                                        <h3 className={`font-bold text-sm ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`} itemProp="name">{topic.name}</h3>
-                                        <span className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`} itemProp="description">
-                                          {topic.searchVolumeRaw}
-                                        </span>
+                                      <div className="flex-1 min-w-0">
+                                        <div className="flex items-center gap-2 flex-wrap mb-1.5">
+                                          <h3 className={`font-bold text-sm ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`} itemProp="name">{topic.name}</h3>
+                                          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium ${topic.category.color}`}>
+                                            <span>{topic.category.emoji}</span>
+                                            <span>{topic.category.label}</span>
+                                          </span>
+                                        </div>
+                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+                                          <div>
+                                            <span className={`${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>Volume: </span>
+                                            <span className={`font-semibold ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`} itemProp="description">
+                                              {topic.searchVolumeRaw}
+                                            </span>
+                                          </div>
+                                          <div>
+                                            <span className={`${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>3-Month: </span>
+                                            <span className={`font-semibold ${
+                                              topic.threeMonthChange === 'N/A'
+                                                ? theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                                                : topic.threeMonthChange.toString().startsWith('-')
+                                                  ? 'text-red-500'
+                                                  : 'text-green-500'
+                                            }`}>
+                                              {topic.threeMonthChange}
+                                            </span>
+                                          </div>
+                                          {hasYoYData && (
+                                            <div>
+                                              <span className={`${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>YoY: </span>
+                                              <span className={`font-semibold ${
+                                                topic.yoyChange === 'N/A'
+                                                  ? theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                                                  : topic.yoyChange.toString().startsWith('-')
+                                                    ? 'text-red-500'
+                                                    : 'text-green-500'
+                                              }`}>
+                                                {topic.yoyChange}
+                                              </span>
+                                            </div>
+                                          )}
+                                          <div>
+                                            <span className={`${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>Comp: </span>
+                                            <span className={`font-semibold ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'} capitalize`}>
+                                              {topic.competition}
+                                            </span>
+                                          </div>
+                                          {topic.bidHigh > 0 && (
+                                            <div>
+                                              <span className={`${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>Bid: </span>
+                                              <span className={`font-semibold ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                                                ${topic.bidHigh.toFixed(2)}
+                                              </span>
+                                            </div>
+                                          )}
+                                        </div>
                                       </div>
                                     </div>
                                   </article>
