@@ -403,13 +403,6 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
           event.preventDefault();
           event.stopPropagation();
           const rank = topics.findIndex(t => t.name === bubble.topic.name) + 1;
-          console.log('BubbleChart: Bubble clicked:', {
-            name: bubble.topic.name,
-            rank,
-            hasSearchVolumeRaw: !!bubble.topic.searchVolumeRaw,
-            hasMonthlySearches: !!bubble.topic.monthlySearches,
-            topic: bubble.topic
-          });
           setTooltipData({
             topic: bubble.topic,
             x: event.clientX,

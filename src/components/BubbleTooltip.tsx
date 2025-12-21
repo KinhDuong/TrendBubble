@@ -47,8 +47,6 @@ export default function BubbleTooltip({
     return null;
   }
 
-  console.log('BubbleTooltip: Rendering tooltip for:', topic.name);
-
   const isMobile = window.innerWidth < 768;
   const [isExpanded, setIsExpanded] = useState(!isMobile && !!keywordData);
   const [isAnimating, setIsAnimating] = useState(true);
@@ -394,7 +392,7 @@ export default function BubbleTooltip({
     );
   }
 
-  return (
+  return createPortal(
     <>
       <div
         className="fixed inset-0 z-40"
@@ -656,6 +654,7 @@ export default function BubbleTooltip({
         )}
       </div>
     </div>
-    </>
+    </>,
+    document.body
   );
 }
