@@ -420,14 +420,11 @@ export default function BrandInsightPage() {
   const filteredTopics = useMemo(() => {
     try {
       const parsePercentage = (value: any): number => {
-        if (typeof value === 'number') {
-          return value <= 1 ? value * 100 : value;
-        }
+        if (typeof value === 'number') return value * 100;
         if (typeof value === 'string') {
           const cleaned = value.replace('%', '').replace(',', '').trim();
           const parsed = parseFloat(cleaned);
-          if (isNaN(parsed)) return 0;
-          return parsed <= 1 ? parsed * 100 : parsed;
+          return isNaN(parsed) ? 0 : parsed * 100;
         }
         return 0;
       };
@@ -575,14 +572,11 @@ export default function BrandInsightPage() {
   const getKeywordCategory = (topicName: string): { label: string; emoji: string; color: string } => {
     try {
       const parsePercentage = (value: any): number => {
-        if (typeof value === 'number') {
-          return value <= 1 ? value * 100 : value;
-        }
+        if (typeof value === 'number') return value * 100;
         if (typeof value === 'string') {
           const cleaned = value.replace('%', '').replace(',', '').trim();
           const parsed = parseFloat(cleaned);
-          if (isNaN(parsed)) return 0;
-          return parsed <= 1 ? parsed * 100 : parsed;
+          return isNaN(parsed) ? 0 : parsed * 100;
         }
         return 0;
       };
@@ -661,7 +655,7 @@ export default function BrandInsightPage() {
       if (value === undefined || value === null) return 'N/A';
       const numValue = typeof value === 'number' ? value : parseFloat(value);
       if (isNaN(numValue)) return 'N/A';
-      const percentage = numValue <= 1 ? numValue * 100 : numValue;
+      const percentage = numValue * 100;
       return percentage >= 0 ? `+${percentage.toFixed(1)}%` : `${percentage.toFixed(1)}%`;
     };
 
