@@ -170,75 +170,68 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
       return { color: '#3B82F6' };
     }
 
-    const parsePercentage = (value: any): number => {
-      if (typeof value === 'number') return value;
-      if (typeof value === 'string') {
-        const cleaned = value.replace('%', '').replace(',', '').trim();
-        const parsed = parseFloat(cleaned);
-        return isNaN(parsed) ? 0 : parsed;
+    let threeMonthChange = perfData.three_month_change ?? 0;
+    let yoyChange = perfData.yoy_change ?? 0;
+
+    // Handle both decimal (0.05 = 5%) and whole number (5 = 5%) formats
+    // If values are greater than 1, they're likely whole percentages, so convert to decimal
+    if (Math.abs(threeMonthChange) > 1) {
+      threeMonthChange = threeMonthChange / 100;
+    }
+    if (Math.abs(yoyChange) > 1) {
+      yoyChange = yoyChange / 100;
+    }
+
+    console.log('Color calculation for', topicName, {
+      three_month_change: perfData.three_month_change,
+      yoy_change: perfData.yoy_change,
+      threeMonthChange,
+      yoyChange
+    });
+
+    const isYearRound = perfData.monthly_searches && perfData.monthly_searches.length >= 12
+      ? isYearRoundPerformer(perfData.monthly_searches)
+      : false;
+
+    if (isYearRound) {
+      return { color: '#A855F7' };
+    }
+
+    const significantThreshold = 0.05;
+
+    if (Math.abs(yoyChange) > significantThreshold) {
+      if (yoyChange > 0) {
+        const intensity = Math.min(Math.abs(yoyChange) * 100, 100) / 100;
+        return {
+          color: '#22C55E',
+          ringColor: '#16A34A',
+          ringIntensity: intensity
+        };
+      } else {
+        const intensity = Math.min(Math.abs(yoyChange) * 100, 100) / 100;
+        return {
+          color: '#EF4444',
+          ringColor: '#DC2626',
+          ringIntensity: intensity
+        };
       }
-      return 0;
-    };
-
-    const threeMonthChange = parsePercentage(perfData.three_month_change);
-    const yoyChange = parsePercentage(perfData.yoy_change);
-    const searchVolume = perfData.searchVolume || 0;
-    const monthlySearches = perfData.monthly_searches || [];
-
-    const hasData = monthlySearches.length > 0;
-    const mean = hasData ? monthlySearches.reduce((a, b) => a + b, 0) / monthlySearches.length : 0;
-    const variance = hasData ? monthlySearches.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / monthlySearches.length : 0;
-    const stdDev = Math.sqrt(variance);
-    const coefficientOfVariation = mean > 0 ? (stdDev / mean) * 100 : 0;
-
-    const hasYoYData = monthlySearches.length >= 24;
-
-    const positiveSearches = monthlySearches.filter(v => v > 0);
-    const maxSearch = positiveSearches.length > 0 ? Math.max(...positiveSearches) : 0;
-    const minSearch = positiveSearches.length > 0 ? Math.min(...positiveSearches) : 0;
-    const peakVariance = minSearch > 0 ? ((maxSearch - minSearch) / minSearch) * 100 : 0;
-
-    if (hasYoYData) {
-      if (yoyChange > 30 && threeMonthChange > 20) {
-        return { color: '#27AE60', ringColor: '#1E8B4F', ringIntensity: 0.8 };
-      }
-    } else if (threeMonthChange > 40) {
-      return { color: '#27AE60', ringColor: '#1E8B4F', ringIntensity: 0.8 };
     }
 
-    if (hasYoYData && yoyChange > 75) {
-      return { color: '#1E8449', ringColor: '#145A32', ringIntensity: 0.9 };
-    } else if (!hasYoYData && threeMonthChange > 60) {
-      return { color: '#1E8449', ringColor: '#145A32', ringIntensity: 0.9 };
-    }
-
-    if ((hasYoYData && (yoyChange > 30 || threeMonthChange > 30) && searchVolume < 15000) ||
-        (!hasYoYData && threeMonthChange > 30 && searchVolume < 15000)) {
-      return { color: '#F39C12', ringColor: '#D68910', ringIntensity: 0.7 };
-    }
-
-    if (threeMonthChange > 30) {
-      return { color: '#16A085', ringColor: '#138D75', ringIntensity: 0.7 };
-    }
-
-    if (peakVariance > 500) {
-      return { color: '#9B59B6', ringColor: '#7D3C98', ringIntensity: 0.6 };
-    }
-
-    if (coefficientOfVariation < 40 && searchVolume >= 1000) {
-      return { color: '#3498DB', ringColor: '#2874A6', ringIntensity: 0.5 };
-    }
-
-    if (hasYoYData) {
-      if (yoyChange >= 0 && threeMonthChange < -5) {
-        return { color: '#E67E22', ringColor: '#CA6F1E', ringIntensity: 0.6 };
-      }
-      if (yoyChange < 0 && threeMonthChange < 0) {
-        return { color: '#E74C3C', ringColor: '#C0392B', ringIntensity: 0.7 };
-      }
-    } else {
-      if (threeMonthChange < -10) {
-        return { color: '#E74C3C', ringColor: '#C0392B', ringIntensity: 0.7 };
+    if (Math.abs(threeMonthChange) > significantThreshold) {
+      if (threeMonthChange > 0) {
+        const intensity = Math.min(Math.abs(threeMonthChange) * 100, 100) / 100;
+        return {
+          color: '#84CC16',
+          ringColor: '#65A30D',
+          ringIntensity: intensity
+        };
+      } else {
+        const intensity = Math.min(Math.abs(threeMonthChange) * 100, 100) / 100;
+        return {
+          color: '#DC2626',
+          ringColor: '#B91C1C',
+          ringIntensity: intensity
+        };
       }
     }
 
