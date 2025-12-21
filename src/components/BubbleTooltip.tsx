@@ -149,15 +149,15 @@ export default function BubbleTooltip({
 
   const formatChange = (value: number | undefined) => {
     if (value === undefined || value === null) return 'N/A';
-    const formatted = (value * 100).toFixed(1);
+    const formatted = value.toFixed(1);
     return value >= 0 ? `+${formatted}%` : `${formatted}%`;
   };
 
   const getChangeColor = (value: number | undefined) => {
     if (value === undefined || value === null) return theme === 'dark' ? 'text-gray-400' : 'text-gray-600';
-    if (value >= 0.05) return 'text-green-500';
+    if (value >= 5) return 'text-green-500';
     if (value >= 0) return 'text-green-400';
-    if (value >= -0.05) return 'text-red-400';
+    if (value >= -5) return 'text-red-400';
     return 'text-red-500';
   };
 
