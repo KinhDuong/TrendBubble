@@ -449,16 +449,16 @@ export default function BrandInsightPage() {
           return threeMonthChange > 40;
         case 'high-growth':
           if (hasYoYData) {
-            return yoyChange > 75 && threeMonthChange <= 30;
+            return yoyChange > 75;
           }
           return threeMonthChange > 60;
         case 'has-potential':
           return threeMonthChange > 30;
         case 'start-declining':
           if (hasYoYData) {
-            return yoyChange >= 0 && threeMonthChange < -10;
+            return yoyChange >= 0 && threeMonthChange < -5;
           }
-          return threeMonthChange < -15;
+          return threeMonthChange < -10;
         case 'declining':
           if (hasYoYData) {
             return yoyChange < 0 && threeMonthChange < 0;
@@ -470,7 +470,7 @@ export default function BrandInsightPage() {
           if (hasYoYData) {
             return (yoyChange > 30 || threeMonthChange > 30) && searchVolume < 15000;
           }
-          return threeMonthChange > 40 && searchVolume < 15000;
+          return threeMonthChange > 30 && searchVolume < 15000;
         case 'seasonal-spike':
           if (monthlySearches.length === 0) return false;
           const positiveSearches = monthlySearches.filter(v => v > 0);
