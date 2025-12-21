@@ -386,30 +386,34 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
   };
 
   const handleCanvasClick = (event: MouseEvent) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+    try {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
 
-    const rect = canvas.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
+      const rect = canvas.getBoundingClientRect();
+      const x = event.clientX - rect.left;
+      const y = event.clientY - rect.top;
 
-    for (const bubble of bubblesRef.current) {
-      const dx = x - bubble.x;
-      const dy = y - bubble.y;
-      const distance = Math.sqrt(dx * dx + dy * dy);
+      for (const bubble of bubblesRef.current) {
+        const dx = x - bubble.x;
+        const dy = y - bubble.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
 
-      if (distance <= bubble.radius) {
-        event.preventDefault();
-        event.stopPropagation();
-        const rank = topics.findIndex(t => t.name === bubble.topic.name) + 1;
-        setTooltipData({
-          topic: bubble.topic,
-          x: event.clientX,
-          y: event.clientY,
-          rank
-        });
-        break;
+        if (distance <= bubble.radius) {
+          event.preventDefault();
+          event.stopPropagation();
+          const rank = topics.findIndex(t => t.name === bubble.topic.name) + 1;
+          setTooltipData({
+            topic: bubble.topic,
+            x: event.clientX,
+            y: event.clientY,
+            rank
+          });
+          break;
+        }
       }
+    } catch (error) {
+      console.error('Error handling canvas click:', error);
     }
   };
 
@@ -468,6 +472,13 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
+
+    if (!topics || topics.length === 0) {
+      console.warn('BubbleChart: No topics to display');
+      return;
+    }
+
+    console.log('BubbleChart: Initializing with', topics.length, 'topics');
 
     const updateCanvasSize = () => {
       const dpr = window.devicePixelRatio || 1;

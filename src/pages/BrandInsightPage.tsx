@@ -285,79 +285,99 @@ export default function BrandInsightPage() {
   };
 
   const transformToTopics = useMemo((): TrendingTopic[] => {
-    const keywordMonthlyMap = new Map<string, { volumes: Array<{ month: string; volume: number }>; maxVolume: number }>();
+    try {
+      if (!monthlyData || monthlyData.length === 0) {
+        return [];
+      }
 
-    monthlyData.forEach((monthData) => {
-      monthData.top_keywords.forEach((kw) => {
-        if (!keywordMonthlyMap.has(kw.keyword)) {
-          keywordMonthlyMap.set(kw.keyword, { volumes: [], maxVolume: 0 });
-        }
-        const entry = keywordMonthlyMap.get(kw.keyword)!;
-        entry.volumes.push({ month: monthData.month, volume: kw.volume });
-        if (kw.volume > entry.maxVolume) {
-          entry.maxVolume = kw.volume;
-        }
+      const keywordMonthlyMap = new Map<string, { volumes: Array<{ month: string; volume: number }>; maxVolume: number }>();
+
+      monthlyData.forEach((monthData) => {
+        if (!monthData?.top_keywords) return;
+        monthData.top_keywords.forEach((kw) => {
+          if (!kw?.keyword) return;
+          if (!keywordMonthlyMap.has(kw.keyword)) {
+            keywordMonthlyMap.set(kw.keyword, { volumes: [], maxVolume: 0 });
+          }
+          const entry = keywordMonthlyMap.get(kw.keyword)!;
+          entry.volumes.push({ month: monthData.month, volume: kw.volume || 0 });
+          if ((kw.volume || 0) > entry.maxVolume) {
+            entry.maxVolume = kw.volume || 0;
+          }
+        });
       });
-    });
 
-    const result = Array.from(keywordMonthlyMap.entries()).map(([keyword, data]) => {
-      const sortedVolumes = data.volumes.sort((a, b) => new Date(a.month).getTime() - new Date(b.month).getTime());
+      const result = Array.from(keywordMonthlyMap.entries()).map(([keyword, data]) => {
+        const sortedVolumes = data.volumes.sort((a, b) => new Date(a.month).getTime() - new Date(b.month).getTime());
 
-      return {
-        name: keyword,
-        searchVolume: data.maxVolume,
-        searchVolumeRaw: data.maxVolume.toLocaleString(),
-        url: '',
-        createdAt: sortedVolumes[sortedVolumes.length - 1]?.month || '',
-        pubDate: sortedVolumes[sortedVolumes.length - 1]?.month || '',
-        category: monthlyData[0]?.brand || '',
-        source: 'brand_keywords',
-        monthlySearches: sortedVolumes
-      };
-    }).sort((a, b) => b.searchVolume - a.searchVolume);
+        return {
+          name: keyword,
+          searchVolume: data.maxVolume,
+          searchVolumeRaw: data.maxVolume.toLocaleString(),
+          url: '',
+          createdAt: sortedVolumes[sortedVolumes.length - 1]?.month || '',
+          pubDate: sortedVolumes[sortedVolumes.length - 1]?.month || '',
+          category: monthlyData[0]?.brand || '',
+          source: 'brand_keywords',
+          monthlySearches: sortedVolumes
+        };
+      }).sort((a, b) => b.searchVolume - a.searchVolume);
 
-    console.log('BrandInsightPage - transformToTopics:', {
-      monthlyDataCount: monthlyData.length,
-      resultCount: result.length,
-      sampleData: result.slice(0, 3)
-    });
-    return result;
+      console.log('BrandInsightPage - transformToTopics:', {
+        monthlyDataCount: monthlyData.length,
+        resultCount: result.length,
+        sampleData: result.slice(0, 3)
+      });
+      return result;
+    } catch (error) {
+      console.error('Error transforming topics:', error);
+      return [];
+    }
   }, [monthlyData]);
 
   const keywordPerformanceData = useMemo(() => {
-    const result = keywordData.map(kw => {
-      const monthlySearches: number[] = [];
-      const monthColumns = [
-        'Searches: Dec 2021', 'Searches: Jan 2022', 'Searches: Feb 2022', 'Searches: Mar 2022',
-        'Searches: Apr 2022', 'Searches: May 2022', 'Searches: Jun 2022', 'Searches: Jul 2022',
-        'Searches: Aug 2022', 'Searches: Sep 2022', 'Searches: Oct 2022', 'Searches: Nov 2022',
-        'Searches: Dec 2022', 'Searches: Jan 2023', 'Searches: Feb 2023', 'Searches: Mar 2023',
-        'Searches: Apr 2023', 'Searches: May 2023', 'Searches: Jun 2023', 'Searches: Jul 2023',
-        'Searches: Aug 2023', 'Searches: Sep 2023', 'Searches: Oct 2023', 'Searches: Nov 2023',
-        'Searches: Dec 2023', 'Searches: Jan 2024', 'Searches: Feb 2024', 'Searches: Mar 2024',
-        'Searches: Apr 2024', 'Searches: May 2024', 'Searches: Jun 2024', 'Searches: Jul 2024',
-        'Searches: Aug 2024', 'Searches: Sep 2024', 'Searches: Oct 2024', 'Searches: Nov 2024',
-        'Searches: Dec 2024'
-      ];
+    try {
+      if (!keywordData || keywordData.length === 0) {
+        return [];
+      }
 
-      monthColumns.forEach(col => {
-        if (kw[col] !== null && kw[col] !== undefined) {
-          monthlySearches.push(Number(kw[col]));
-        }
+      const result = keywordData.map(kw => {
+        const monthlySearches: number[] = [];
+        const monthColumns = [
+          'Searches: Dec 2021', 'Searches: Jan 2022', 'Searches: Feb 2022', 'Searches: Mar 2022',
+          'Searches: Apr 2022', 'Searches: May 2022', 'Searches: Jun 2022', 'Searches: Jul 2022',
+          'Searches: Aug 2022', 'Searches: Sep 2022', 'Searches: Oct 2022', 'Searches: Nov 2022',
+          'Searches: Dec 2022', 'Searches: Jan 2023', 'Searches: Feb 2023', 'Searches: Mar 2023',
+          'Searches: Apr 2023', 'Searches: May 2023', 'Searches: Jun 2023', 'Searches: Jul 2023',
+          'Searches: Aug 2023', 'Searches: Sep 2023', 'Searches: Oct 2023', 'Searches: Nov 2023',
+          'Searches: Dec 2023', 'Searches: Jan 2024', 'Searches: Feb 2024', 'Searches: Mar 2024',
+          'Searches: Apr 2024', 'Searches: May 2024', 'Searches: Jun 2024', 'Searches: Jul 2024',
+          'Searches: Aug 2024', 'Searches: Sep 2024', 'Searches: Oct 2024', 'Searches: Nov 2024',
+          'Searches: Dec 2024'
+        ];
+
+        monthColumns.forEach(col => {
+          if (kw[col] !== null && kw[col] !== undefined) {
+            monthlySearches.push(Number(kw[col]));
+          }
+        });
+
+        return {
+          keyword: kw.keyword,
+          three_month_change: kw['Three month change'],
+          yoy_change: kw['YoY change'],
+          monthly_searches: monthlySearches,
+          bid_high: kw['Top of page bid (high range)'],
+          competition: kw.competition,
+          searchVolume: kw['Avg. monthly searches'] || 0
+        };
       });
-
-      return {
-        keyword: kw.keyword,
-        three_month_change: kw['Three month change'],
-        yoy_change: kw['YoY change'],
-        monthly_searches: monthlySearches,
-        bid_high: kw['Top of page bid (high range)'],
-        competition: kw.competition,
-        searchVolume: kw['Avg. monthly searches'] || 0
-      };
-    });
-    console.log('BrandInsightPage - keywordPerformanceData sample:', result.slice(0, 5));
-    return result;
+      console.log('BrandInsightPage - keywordPerformanceData sample:', result.slice(0, 5));
+      return result;
+    } catch (error) {
+      console.error('Error processing keyword performance data:', error);
+      return [];
+    }
   }, [keywordData]);
 
   const availableMonthsCount = useMemo(() => {
@@ -868,7 +888,7 @@ export default function BrandInsightPage() {
                 </div>
               )}
 
-              {transformToTopics.length > 0 && viewMode === 'bubble' && (
+              {transformToTopics.length > 0 && filteredTopics.length > 0 && viewMode === 'bubble' && (
                 <>
                   <div className="max-w-7xl mx-auto mb-6">
                     <div className={`${theme === 'dark' ? 'bg-gray-800/50' : 'bg-white/80'} rounded-lg p-4 backdrop-blur-sm`}>
@@ -947,6 +967,16 @@ export default function BrandInsightPage() {
                   />
                   </div>
                 </>
+              )}
+
+              {transformToTopics.length > 0 && filteredTopics.length === 0 && viewMode === 'bubble' && (
+                <div className="max-w-7xl mx-auto">
+                  <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-lg p-8 text-center`}>
+                    <p className={`text-lg ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                      No keywords match the selected filter. Try a different filter or reset to "All Keywords".
+                    </p>
+                  </div>
+                </div>
               )}
 
               {transformToTopics.length > 0 && viewMode === 'bar' && (
