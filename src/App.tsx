@@ -2178,11 +2178,17 @@ function App() {
         <Route path="/" element={<ExplorePage />} />
         <Route path="/explore" element={<Navigate to="/" replace />} />
         <Route path="/browse-topics" element={<BrowseTopicsPage />} />
+        <Route path="/browse-topics/" element={<BrowseTopicsPage />} />
         <Route path="/trending-now" element={<HomePage />} />
+        <Route path="/trending-now/" element={<HomePage />} />
         <Route path="/about" element={<AboutPage />} />
+        <Route path="/about/" element={<AboutPage />} />
         <Route path="/contact" element={<ContactPage />} />
+        <Route path="/contact/" element={<ContactPage />} />
         <Route path="/insight" element={<InsightPage />} />
+        <Route path="/insight/" element={<InsightPage />} />
         <Route path="/insight/:brandName" element={<BrandInsightPage />} />
+        <Route path="/insight/:brandName/" element={<BrandInsightPage />} />
         <Route path="/admin/pages" element={<AdminPages />} />
         <Route path="/admin/data" element={<AdminData />} />
         <Route path="/admin/brand-data" element={<BrandDataManager />} />
