@@ -23,6 +23,7 @@ import InsightPage from './pages/InsightPage';
 import BrandInsightPage from './pages/BrandInsightPage';
 import BrandDataManager from './pages/BrandDataManager';
 import InsightsMetaPage from './pages/InsightsMetaPage';
+import UploadPage from './pages/UploadPage';
 import { TrendingTopic } from './types';
 import { supabase } from './lib/supabase';
 import { useAuth } from './hooks/useAuth';
@@ -2192,6 +2193,8 @@ function App() {
         <Route path="/insights-meta/" element={<InsightsMetaPage />} />
         <Route path="/insight/:brandName" element={<BrandInsightPage />} />
         <Route path="/insight/:brandName/" element={<BrandInsightPage />} />
+        <Route path="/upload" element={<UploadPage />} />
+        <Route path="/upload/" element={<UploadPage />} />
         <Route path="/admin/pages" element={<AdminPages />} />
         <Route path="/admin/data" element={<AdminData />} />
         <Route path="/admin/brand-data" element={<BrandDataManager />} />

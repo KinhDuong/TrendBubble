@@ -1,4 +1,4 @@
-import { BarChart3, Menu, X, Home, Compass, BookOpen, Mail, Info, LogIn, LogOut, Search } from 'lucide-react';
+import { BarChart3, Menu, X, Home, Compass, BookOpen, Mail, Info, LogIn, LogOut, Search, Upload } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 
@@ -126,6 +126,12 @@ export default function Header({ theme, isAdmin, onLoginClick, onLogout, title =
               Browse Topics
             </a>
             <a
+              href="/upload/"
+              className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'} transition-colors`}
+            >
+              Create My Charts
+            </a>
+            <a
               href="/contact/"
               className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'} transition-colors`}
             >
@@ -245,6 +251,14 @@ export default function Header({ theme, isAdmin, onLoginClick, onLogout, title =
                     >
                       <BookOpen size={20} />
                       <span>Browse Topics</span>
+                    </a>
+                    <a
+                      href="/upload/"
+                      className={`flex items-center gap-3 px-6 py-3 ${theme === 'dark' ? 'text-gray-300 hover:bg-gray-700 hover:text-white' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'} transition-colors`}
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <Upload size={20} />
+                      <span>Create My Charts</span>
                     </a>
                     <a
                       href="/contact/"
