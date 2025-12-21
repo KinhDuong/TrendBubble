@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { TrendingUp, Download, Trash2, ExternalLink } from 'lucide-react';
+import { TrendingUp, Download, Trash2, ExternalLink, Database } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import BrandKeywordUpload from '../components/BrandKeywordUpload';
 import KeywordChart from '../components/KeywordChart';
@@ -19,6 +20,7 @@ interface MonthlyData {
 }
 
 export default function InsightPage() {
+  const navigate = useNavigate();
   const { user, isAdmin, logout } = useAuth();
   const [showLogin, setShowLogin] = useState(false);
   const [monthlyData, setMonthlyData] = useState<MonthlyData[]>([]);
@@ -183,8 +185,19 @@ export default function InsightPage() {
       <div className="min-h-screen bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Brand Keyword Insights</h1>
-            <p className="text-gray-600">Upload and analyze keyword search volume data for your brands</p>
+            <div className="flex items-center justify-between flex-wrap gap-4">
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">Brand Keyword Insights</h1>
+                <p className="text-gray-600">Upload and analyze keyword search volume data for your brands</p>
+              </div>
+              <button
+                onClick={() => navigate('/insights-meta')}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
+              >
+                <Database className="w-4 h-4" />
+                View All Brands
+              </button>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">

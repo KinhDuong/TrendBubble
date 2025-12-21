@@ -22,6 +22,7 @@ import ContactPage from './pages/ContactPage';
 import InsightPage from './pages/InsightPage';
 import BrandInsightPage from './pages/BrandInsightPage';
 import BrandDataManager from './pages/BrandDataManager';
+import InsightsMetaPage from './pages/InsightsMetaPage';
 import { TrendingTopic } from './types';
 import { supabase } from './lib/supabase';
 import { useAuth } from './hooks/useAuth';
@@ -2187,6 +2188,8 @@ function App() {
         <Route path="/contact/" element={<ContactPage />} />
         <Route path="/insight" element={<InsightPage />} />
         <Route path="/insight/" element={<InsightPage />} />
+        <Route path="/insights-meta" element={<InsightsMetaPage />} />
+        <Route path="/insights-meta/" element={<InsightsMetaPage />} />
         <Route path="/insight/:brandName" element={<BrandInsightPage />} />
         <Route path="/insight/:brandName/" element={<BrandInsightPage />} />
         <Route path="/admin/pages" element={<AdminPages />} />

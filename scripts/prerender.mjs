@@ -1398,6 +1398,92 @@ async function prerenderAboutPage(baseHTML, distPath) {
   console.log('✓ Generated: /about/index.html');
 }
 
+async function prerenderInsightsMetaPage(baseHTML, distPath) {
+  console.log('Pre-rendering: /insights-meta');
+
+  const insightsMetaMetaTags = `
+    <title>Brand Insights Metadata - Data Quality & Statistics | Top Best Charts</title>
+    <meta name="description" content="Browse metadata for all tracked brands. View data quality indicators, date ranges, and keyword statistics." data-prerendered />
+    <meta name="keywords" content="brand insights, keyword metadata, data quality, SEO statistics, brand analysis" data-prerendered />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="${BASE_URL}/insights-meta/" />
+
+    <meta property="og:type" content="website" data-prerendered />
+    <meta property="og:url" content="${BASE_URL}/insights-meta/" data-prerendered />
+    <meta property="og:title" content="Brand Insights Metadata - Top Best Charts" data-prerendered />
+    <meta property="og:description" content="Browse metadata for all tracked brands with data quality indicators" data-prerendered />
+    <meta property="og:site_name" content="Top Best Charts" data-prerendered />
+
+    <meta name="twitter:card" content="summary_large_image" data-prerendered />
+    <meta name="twitter:title" content="Brand Insights Metadata - Top Best Charts" data-prerendered />
+    <meta name="twitter:description" content="Browse metadata for all tracked brands with data quality indicators" data-prerendered />
+  `;
+
+  const insightsMetaContentHTML = `
+    <div class="insights-meta-page-content">
+      <header style="background-color: #111827; border-bottom: 1px solid #374151; padding: 0.5rem 1rem;">
+        <nav aria-label="Main navigation" style="max-width: 80rem; margin: 0 auto; display: flex; align-items: center; justify-content: space-between;">
+          <a href="${BASE_URL}/" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none;">
+            <span style="color: #2563eb; font-size: 1.5rem; font-weight: 700;">Top Best Charts</span>
+          </a>
+          <ul style="display: flex; gap: 1.5rem; list-style: none; margin: 0; padding: 0;">
+            <li><a href="${BASE_URL}/" style="color: #d1d5db; text-decoration: none;">Home</a></li>
+            <li><a href="${BASE_URL}/browse-topics" style="color: #d1d5db; text-decoration: none;">Browse Topics</a></li>
+            <li><a href="${BASE_URL}/trending-now" style="color: #d1d5db; text-decoration: none;">Trending Now</a></li>
+            <li><a href="${BASE_URL}/insight" style="color: #d1d5db; text-decoration: none;">Insights</a></li>
+            <li><a href="${BASE_URL}/contact" style="color: #d1d5db; text-decoration: none;">Contact</a></li>
+            <li><a href="${BASE_URL}/about" style="color: #d1d5db; text-decoration: none;">About</a></li>
+          </ul>
+        </nav>
+      </header>
+
+      <main style="max-width: 80rem; margin: 2rem auto; padding: 0 1rem;">
+        <article style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; padding: 2rem;">
+          <h1 style="font-size: 2.5rem; font-weight: 700; color: white; margin-bottom: 1rem;">Brand Insights Metadata</h1>
+          <p style="font-size: 1.125rem; line-height: 1.75; color: #d1d5db; margin-bottom: 2rem;">
+            Browse data quality indicators and statistics for all tracked brands. View available months of data, keyword counts, and performance metrics.
+          </p>
+
+          <div style="background-color: #374151; border-radius: 0.5rem; padding: 2rem; margin: 2rem 0;">
+            <h2 style="font-size: 1.5rem; font-weight: 700; color: white; margin-bottom: 1rem;">About This Data</h2>
+            <ul style="color: #d1d5db; font-size: 1rem; line-height: 1.75; list-style: disc; margin-left: 1.5rem;">
+              <li>View all brands with tracked keyword data</li>
+              <li>Data quality indicators (Full Data vs Limited)</li>
+              <li>Date ranges and available months</li>
+              <li>Total keywords and average search volume</li>
+              <li>Direct links to brand insight pages</li>
+            </ul>
+          </div>
+        </article>
+      </main>
+
+      ${generateFooterHTML()}
+    </div>
+  `;
+
+  const insightsMetaStructuredData = `
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "name": "Brand Insights Metadata",
+      "description": "Browse metadata for all tracked brands with data quality indicators",
+      "url": "${BASE_URL}/insights-meta/"
+    }
+    </script>
+  `;
+
+  let html = baseHTML
+    .replace('<title>Vite + React + TS</title>', insightsMetaMetaTags)
+    .replace('<div id="root"></div>', `<div id="root">${insightsMetaContentHTML}</div>`)
+    .replace('</head>', `${insightsMetaStructuredData}</head>`);
+
+  const insightsMetaDir = path.join(distPath, 'insights-meta');
+  fs.mkdirSync(insightsMetaDir, { recursive: true });
+  fs.writeFileSync(path.join(insightsMetaDir, 'index.html'), html);
+  console.log('✓ Generated: /insights-meta/index.html');
+}
+
 async function prerenderPages() {
   console.log('Starting pre-rendering process...');
 
@@ -1446,6 +1532,7 @@ async function prerenderPages() {
   await prerenderBrowseTopicsPage(baseHTML, distPath);
   await prerenderContactPage(baseHTML, distPath);
   await prerenderInsightPage(baseHTML, distPath);
+  await prerenderInsightsMetaPage(baseHTML, distPath);
   await prerenderAboutPage(baseHTML, distPath);
 
   // Create redirect from /explore to /
