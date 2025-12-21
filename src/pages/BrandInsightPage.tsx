@@ -891,7 +891,7 @@ export default function BrandInsightPage() {
                 </div>
               )}
 
-              {transformToTopics.length > 0 && filteredTopics.length > 0 && viewMode === 'bubble' && (
+              {transformToTopics.length > 0 && viewMode === 'bubble' && (
                 <>
                   <div className="max-w-7xl mx-auto mb-6">
                     <div className={`${theme === 'dark' ? 'bg-gray-800/50' : 'bg-white/80'} rounded-lg p-4 backdrop-blur-sm`}>
@@ -954,32 +954,33 @@ export default function BrandInsightPage() {
                       )}
                     </div>
                   </div>
-                  <div ref={bubbleChartRef} style={{ minHeight: '500px' }}>
-                    <BubbleChart
-                    topics={filteredTopics}
-                    maxDisplay={maxBubbles}
-                    theme={theme}
-                    layout={bubbleLayout}
-                    comparingTopics={comparingTopics}
-                    onComparingTopicsChange={setComparingTopics}
-                    useCryptoColors={false}
-                    cryptoTimeframe="24h"
-                    animationStyle={animationStyle}
-                    shape={shape as Shape}
-                    keywordPerformanceData={keywordPerformanceData}
-                  />
-                  </div>
-                </>
-              )}
 
-              {transformToTopics.length > 0 && filteredTopics.length === 0 && viewMode === 'bubble' && (
-                <div className="max-w-7xl mx-auto">
-                  <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-lg p-8 text-center`}>
-                    <p className={`text-lg ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                      No keywords match the selected filter. Try a different filter or reset to "All Keywords".
-                    </p>
-                  </div>
-                </div>
+                  {filteredTopics.length === 0 ? (
+                    <div className="max-w-7xl mx-auto">
+                      <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-lg p-8 text-center`}>
+                        <p className={`text-lg ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                          No keywords match the selected filter. Try a different filter or reset to "All Keywords".
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div ref={bubbleChartRef} style={{ minHeight: '500px' }}>
+                      <BubbleChart
+                      topics={filteredTopics}
+                      maxDisplay={maxBubbles}
+                      theme={theme}
+                      layout={bubbleLayout}
+                      comparingTopics={comparingTopics}
+                      onComparingTopicsChange={setComparingTopics}
+                      useCryptoColors={false}
+                      cryptoTimeframe="24h"
+                      animationStyle={animationStyle}
+                      shape={shape as Shape}
+                      keywordPerformanceData={keywordPerformanceData}
+                    />
+                    </div>
+                  )}
+                </>
               )}
 
               {transformToTopics.length > 0 && viewMode === 'bar' && (
