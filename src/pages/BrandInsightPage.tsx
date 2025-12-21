@@ -421,15 +421,31 @@ export default function BrandInsightPage() {
         return 0;
       };
 
+      console.log('BrandInsightPage - Filtering topics:', {
+        totalTopics: transformToTopics.length,
+        sampleTopicNames: transformToTopics.slice(0, 3).map(t => `"${t.name}"`),
+        totalPerformanceData: keywordPerformanceData.length,
+        samplePerformanceKeywords: keywordPerformanceData.slice(0, 3).map(k => `"${k.keyword}"`)
+      });
+
       return transformToTopics.filter(topic => {
       const matchesSearch = !searchQuery || topic.name.toLowerCase().includes(searchQuery.toLowerCase());
 
       if (performanceFilter === 'all') return matchesSearch;
 
-      const kwData = keywordPerformanceData.find(kw => kw.keyword === topic.name);
+      const normalizedTopicName = topic.name.toLowerCase().trim();
+      const kwData = keywordPerformanceData.find(kw =>
+        kw.keyword.toLowerCase().trim() === normalizedTopicName
+      );
+
       if (!kwData) {
-        console.log('BrandInsightPage - Keyword not found in performance data:', topic.name);
-        console.log('Available keywords sample:', keywordPerformanceData.slice(0, 5).map(k => k.keyword));
+        if (performanceFilter === 'high-growth') {
+          console.log('BrandInsightPage - Keyword not found:', {
+            topicName: `"${topic.name}"`,
+            normalized: `"${normalizedTopicName}"`,
+            searchVolume: topic.searchVolume
+          });
+        }
         return false;
       }
 
