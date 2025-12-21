@@ -353,7 +353,7 @@ export default function BrandInsightPage() {
         monthly_searches: monthlySearches,
         bid_high: kw['Top of page bid (high range)'],
         competition: kw.competition,
-        searchVolume: kw.search_volume
+        searchVolume: kw['Avg. monthly searches'] || 0
       };
     });
     console.log('BrandInsightPage - keywordPerformanceData sample:', result.slice(0, 5));
@@ -413,30 +413,30 @@ export default function BrandInsightPage() {
       switch (performanceFilter) {
         case 'great-potential':
           if (hasYoYData) {
-            return yoyChange > 50 && threeMonthChange > 30;
+            return yoyChange > 0.5 && threeMonthChange > 0.3;
           }
-          return threeMonthChange > 50;
+          return threeMonthChange > 0.5;
         case 'high-growth':
           if (hasYoYData) {
-            return yoyChange > 100 && threeMonthChange <= 30;
+            return yoyChange > 1.0 && threeMonthChange <= 0.3;
           }
-          return threeMonthChange > 80;
+          return threeMonthChange > 0.8;
         case 'has-potential':
-          return threeMonthChange > 50;
+          return threeMonthChange > 0.5;
         case 'start-declining':
           if (hasYoYData) {
-            return yoyChange >= 0 && threeMonthChange < -10;
+            return yoyChange >= 0 && threeMonthChange < -0.1;
           }
-          return threeMonthChange < -15;
+          return threeMonthChange < -0.15;
         case 'declining':
           if (hasYoYData) {
             return yoyChange < 0 && threeMonthChange < 0;
           }
-          return threeMonthChange < -10;
+          return threeMonthChange < -0.1;
         case 'solid-performer':
           return coefficientOfVariation < 40 && searchVolume >= 1000;
         case 'hidden-gem':
-          return threeMonthChange > 50 && searchVolume < 10000;
+          return threeMonthChange > 0.5 && searchVolume < 10000;
         case 'seasonal-spike':
           const maxSearch = Math.max(...monthlySearches);
           const minSearch = Math.min(...monthlySearches.filter(v => v > 0));
@@ -444,9 +444,9 @@ export default function BrandInsightPage() {
           return peakVariance > 500;
         case 'recovery':
           if (hasYoYData) {
-            return yoyChange < 0 && threeMonthChange > 20;
+            return yoyChange < 0 && threeMonthChange > 0.2;
           }
-          return threeMonthChange > 30;
+          return threeMonthChange > 0.3;
         case 'high-value':
           return bidHigh > 50;
         case 'high-volume':
@@ -499,14 +499,22 @@ export default function BrandInsightPage() {
         .from('brand_keyword_data')
         .select('*')
         .eq('brand', decodedBrand)
-        .order('month', { ascending: true });
+        .order('keyword', { ascending: true });
 
       if (error) throw error;
 
       const csv = [
-        ['Brand', 'Keyword', 'Search Volume', 'Month'].join(','),
+        ['Brand', 'Keyword', 'Avg. Monthly Searches', 'Three Month Change', 'YoY Change', 'Competition', 'Top of Page Bid (High)'].join(','),
         ...data.map(row =>
-          [row.brand, row.keyword, row.search_volume, row.month].join(',')
+          [
+            row.brand,
+            row.keyword,
+            row['Avg. monthly searches'] || 0,
+            row['Three month change'] || '',
+            row['YoY change'] || '',
+            row.competition || '',
+            row['Top of page bid (high range)'] || ''
+          ].join(',')
         )
       ].join('\n');
 
