@@ -10,6 +10,7 @@ import Header from '../components/Header';
 import FilterMenu, { BubbleLayout, ViewMode, Shape as FilterShape } from '../components/FilterMenu';
 import ComparisonPanel from '../components/ComparisonPanel';
 import ShareSnapshot from '../components/ShareSnapshot';
+import ToolSchema from '../components/ToolSchema';
 import AnimationSelector, { AnimationStyle } from '../components/AnimationSelector';
 import { TrendingTopic, CryptoTimeframe, FAQ } from '../types';
 import { supabase } from '../lib/supabase';
@@ -766,6 +767,14 @@ function DynamicPage() {
           </script>
         )}
       </Helmet>
+
+      <ToolSchema
+        name={pageData.meta_title}
+        description={pageData.meta_description}
+        url={pageUrl}
+        applicationCategory="AnalysisApplication"
+        screenshot={pageData.cover_image ? [pageData.cover_image] : undefined}
+      />
 
       <Header
         theme={theme}

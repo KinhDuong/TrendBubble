@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import BrandKeywordUpload from '../components/BrandKeywordUpload';
 import KeywordChart from '../components/KeywordChart';
+import ToolSchema from '../components/ToolSchema';
 import Header from '../components/Header';
 import UserLogin from '../components/UserLogin';
 import Footer from '../components/Footer';
@@ -146,6 +147,14 @@ export default function InsightPage() {
           <title>Brand Keyword Insights | SEO Analysis</title>
           <meta name="description" content="Analyze and visualize brand keyword search trends and SEO performance data" />
         </Helmet>
+
+        <ToolSchema
+          name="Brand Keyword Insights - SEO Analysis Tool"
+          description="Analyze and visualize brand keyword search trends and SEO performance data. Track search volume, monitor keyword performance, and optimize your content strategy."
+          url={`${import.meta.env.VITE_BASE_URL || 'https://topbestcharts.com'}/insight`}
+          applicationCategory="AnalysisApplication"
+        />
+
         <Header
           theme="light"
           isAdmin={isAdmin}
@@ -176,6 +185,14 @@ export default function InsightPage() {
         <title>Brand Keyword Insights | SEO Analysis</title>
         <meta name="description" content="Analyze and visualize brand keyword search trends and SEO performance data" />
       </Helmet>
+
+      <ToolSchema
+        name="Brand Keyword Insights - SEO Analysis Tool"
+        description="Analyze and visualize brand keyword search trends and SEO performance data. Track search volume, monitor keyword performance, and optimize your content strategy."
+        url={`${import.meta.env.VITE_BASE_URL || 'https://topbestcharts.com'}/insight`}
+        applicationCategory="AnalysisApplication"
+      />
+
       <Header
         theme="light"
         isAdmin={isAdmin}

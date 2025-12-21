@@ -12,6 +12,7 @@ import Header from './components/Header';
 import FilterMenu, { BubbleLayout, Shape as FilterShape } from './components/FilterMenu';
 import ComparisonPanel from './components/ComparisonPanel';
 import ShareSnapshot from './components/ShareSnapshot';
+import ToolSchema from './components/ToolSchema';
 import DynamicPage from './pages/DynamicPage';
 import AdminPages from './pages/AdminPages';
 import AdminData from './pages/AdminData';
@@ -857,6 +858,19 @@ function HomePage() {
         <meta property="og:description" content={`Live trending topics: ${topTopicNames || 'Track what\'s popular on Google right now'}. Interactive bubble chart visualization updated hourly.`} />
         <link rel="canonical" href={`${import.meta.env.VITE_BASE_URL}/`} />
       </Helmet>
+
+      <ToolSchema
+        name="Top Best Charts - Trending Topics & Data Visualization"
+        description="Free interactive tool for visualizing real-time trending topics from Google Trends and search data. Create bubble charts, bar charts, treemaps, and donut charts to explore rankings and insights."
+        url={`${import.meta.env.VITE_BASE_URL || 'https://topbestcharts.com'}/`}
+        applicationCategory="AnalysisApplication"
+        screenshot={[
+          `${import.meta.env.VITE_BASE_URL || 'https://topbestcharts.com'}/screenshots/bubble-chart.jpg`,
+          `${import.meta.env.VITE_BASE_URL || 'https://topbestcharts.com'}/screenshots/bar-chart.jpg`,
+          `${import.meta.env.VITE_BASE_URL || 'https://topbestcharts.com'}/screenshots/treemap.jpg`
+        ]}
+      />
+
       {isAdmin && (
         <header className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-b py-4 md:py-6 px-3 md:px-6 shadow-sm border-t-0`}>
           <div className="max-w-7xl mx-auto">

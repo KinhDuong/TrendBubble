@@ -6,6 +6,7 @@ import { supabase } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import ToolSchema from '../components/ToolSchema';
 import Login from '../components/Login';
 
 interface Page {
@@ -170,6 +171,13 @@ export default function BrowseTopicsPage() {
         <title>Browse Topics - Top Best Charts</title>
         <meta name="description" content="Browse all topics and categories on Top Best Charts. Explore rankings, trends, and insights across various categories including AI, Markets, Technology, and more." />
       </Helmet>
+
+      <ToolSchema
+        name="Browse Topics - Top Best Charts"
+        description="Browse all topics and categories on Top Best Charts. Explore rankings, trends, and insights across various categories including AI, Markets, Technology, and more."
+        url={`${import.meta.env.VITE_BASE_URL || 'https://topbestcharts.com'}/browse-topics`}
+        applicationCategory="AnalysisApplication"
+      />
 
       <Header
         theme={theme}
