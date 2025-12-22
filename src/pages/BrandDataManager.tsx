@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import { useAuth } from '../hooks/useAuth';
+import Header from '../components/Header';
+import Footer from '../components/Footer';
+import Login from '../components/Login';
 import { Trash2, Search, Download, RefreshCw, Filter, Sparkles } from 'lucide-react';
 
 interface BrandKeywordData {
@@ -29,6 +33,13 @@ interface BrandKeywordData {
 
 export default function BrandDataManager() {
   const { brandName } = useParams<{ brandName?: string }>();
+  const navigate = useNavigate();
+  const { isAdmin, logout } = useAuth();
+  const [theme, setTheme] = useState<'dark' | 'light'>(() => {
+    const savedTheme = localStorage.getItem('theme');
+    return (savedTheme === 'dark' || savedTheme === 'light') ? savedTheme : 'dark';
+  });
+  const [showLogin, setShowLogin] = useState(!isAdmin);
   const [data, setData] = useState<BrandKeywordData[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -40,7 +51,18 @@ export default function BrandDataManager() {
   const [aiMessage, setAiMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
   useEffect(() => {
-    fetchData();
+    if (!isAdmin) {
+      setShowLogin(true);
+    } else {
+      setShowLogin(false);
+      fetchData();
+    }
+  }, [isAdmin]);
+
+  useEffect(() => {
+    if (isAdmin) {
+      fetchData();
+    }
   }, []);
 
   useEffect(() => {
@@ -48,6 +70,20 @@ export default function BrandDataManager() {
       setSelectedBrand(decodeURIComponent(brandName));
     }
   }, [brandName]);
+
+  const handleLogin = () => {
+    setShowLogin(false);
+    window.location.reload();
+  };
+
+  if (!isAdmin && showLogin) {
+    return <Login onLogin={handleLogin} theme={theme} />;
+  }
+
+  if (!isAdmin) {
+    navigate('/');
+    return null;
+  }
 
   const fetchData = async () => {
     setLoading(true);
@@ -286,29 +322,47 @@ export default function BrandDataManager() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <RefreshCw className="w-8 h-8 animate-spin text-blue-600 mx-auto mb-2" />
-          <p className="text-gray-600">Loading data...</p>
+      <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'}`}>
+        <Header
+          theme={theme}
+          isAdmin={isAdmin}
+          onLoginClick={() => setShowLogin(true)}
+          onLogout={logout}
+          title="Brand Keyword Data Manager"
+        />
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <RefreshCw className="w-8 h-8 animate-spin text-blue-600 mx-auto mb-2" />
+            <p className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}>Loading data...</p>
+          </div>
         </div>
+        <Footer theme={theme} />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-[98%] mx-auto px-4">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Brand Keyword Data Manager</h1>
-          <p className="text-gray-600">
-            {brandName
-              ? `Viewing data for: ${selectedBrand}`
-              : 'View and manage all uploaded brand keyword data'}
-          </p>
-        </div>
+    <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'}`}>
+      <Header
+        theme={theme}
+        isAdmin={isAdmin}
+        onLoginClick={() => setShowLogin(true)}
+        onLogout={logout}
+        title="Brand Keyword Data Manager"
+      />
+      <div className="py-8">
+        <div className="max-w-[98%] mx-auto px-4">
+          <div className="mb-6">
+            <h1 className={`text-3xl font-bold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Brand Keyword Data Manager</h1>
+            <p className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}>
+              {brandName
+                ? `Viewing data for: ${selectedBrand}`
+                : 'View and manage all uploaded brand keyword data'}
+            </p>
+          </div>
 
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-          <div className={`grid grid-cols-1 gap-4 mb-4 ${brandName ? 'md:grid-cols-3' : 'md:grid-cols-4'}`}>
+          <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-sm p-6 mb-6`}>
+            <div className="grid grid-cols-1 gap-4 mb-4 md:grid-cols-4">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <input
@@ -489,7 +543,9 @@ export default function BrandDataManager() {
             </div>
           </div>
         </div>
+        </div>
       </div>
+      <Footer theme={theme} />
     </div>
   );
 }
