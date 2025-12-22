@@ -1747,10 +1747,15 @@ function HomePage() {
                       .map((topic, index) => (
                         <li
                           key={index}
-                          className={`px-6 py-4 flex items-center gap-4 ${theme === 'dark' ? 'hover:bg-gray-750' : 'hover:bg-gray-50'} transition-colors ${index < (showFullTop10 ? topics.length - 1 : 9) ? (theme === 'dark' ? 'border-b border-gray-700' : 'border-b border-gray-200') : ''}`}
+                          className={`px-6 py-4 flex items-center gap-4 cursor-pointer ${theme === 'dark' ? 'hover:bg-gray-750' : 'hover:bg-gray-50'} transition-colors ${index < (showFullTop10 ? topics.length - 1 : 9) ? (theme === 'dark' ? 'border-b border-gray-700' : 'border-b border-gray-200') : ''}`}
                           itemProp="itemListElement"
                           itemScope
                           itemType="https://schema.org/ListItem"
+                          onClick={() => {
+                            if (topic.url) {
+                              window.open(topic.url, '_blank', 'noopener,noreferrer');
+                            }
+                          }}
                         >
                           <meta itemProp="position" content={String(index + 1)} />
                           <div className={`w-12 flex items-center justify-center`} aria-label={`Rank ${index + 1}`}>
@@ -1839,10 +1844,15 @@ function HomePage() {
                       .map((topic, index) => (
                         <li
                           key={index}
-                          className={`px-6 py-4 flex items-center gap-4 ${theme === 'dark' ? 'hover:bg-gray-750' : 'hover:bg-gray-50'} transition-colors ${index < (showFullTop10 ? topics.length - 1 : 9) ? (theme === 'dark' ? 'border-b border-gray-700' : 'border-b border-gray-200') : ''}`}
+                          className={`px-6 py-4 flex items-center gap-4 cursor-pointer ${theme === 'dark' ? 'hover:bg-gray-750' : 'hover:bg-gray-50'} transition-colors ${index < (showFullTop10 ? topics.length - 1 : 9) ? (theme === 'dark' ? 'border-b border-gray-700' : 'border-b border-gray-200') : ''}`}
                           itemProp="itemListElement"
                           itemScope
                           itemType="https://schema.org/ListItem"
+                          onClick={() => {
+                            if (topic.url) {
+                              window.open(topic.url, '_blank', 'noopener,noreferrer');
+                            }
+                          }}
                         >
                           <meta itemProp="position" content={String(index + 1)} />
                           <div className={`w-12 flex items-center justify-center`} aria-label={`Rank ${index + 1}`}>
@@ -1937,10 +1947,15 @@ function HomePage() {
                       .map((topic, index) => (
                         <li
                           key={index}
-                          className={`px-6 py-4 flex items-center gap-4 ${theme === 'dark' ? 'hover:bg-gray-750' : 'hover:bg-gray-50'} transition-colors ${index < (showFullTop10 ? topics.length - 1 : 9) ? (theme === 'dark' ? 'border-b border-gray-700' : 'border-b border-gray-200') : ''}`}
+                          className={`px-6 py-4 flex items-center gap-4 cursor-pointer ${theme === 'dark' ? 'hover:bg-gray-750' : 'hover:bg-gray-50'} transition-colors ${index < (showFullTop10 ? topics.length - 1 : 9) ? (theme === 'dark' ? 'border-b border-gray-700' : 'border-b border-gray-200') : ''}`}
                           itemProp="itemListElement"
                           itemScope
                           itemType="https://schema.org/ListItem"
+                          onClick={() => {
+                            if (topic.url) {
+                              window.open(topic.url, '_blank', 'noopener,noreferrer');
+                            }
+                          }}
                         >
                           <meta itemProp="position" content={String(index + 1)} />
                           <div className={`w-12 flex items-center justify-center`} aria-label={`Rank ${index + 1}`}>

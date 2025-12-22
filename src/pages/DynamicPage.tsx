@@ -1030,10 +1030,15 @@ snapshotButton={null}
                             return (
                           <li
                             key={index}
-                            className={`px-2 py-1.5 transition-colors ${index < displayTopics.length - 1 ? `border-b ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}` : ''} ${theme === 'dark' ? 'hover:bg-gray-700' : 'hover:bg-gray-50'}`}
+                            className={`px-2 py-1.5 transition-colors cursor-pointer ${index < displayTopics.length - 1 ? `border-b ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}` : ''} ${theme === 'dark' ? 'hover:bg-gray-700' : 'hover:bg-gray-50'}`}
                             itemProp="itemListElement"
                             itemScope
                             itemType="https://schema.org/ListItem"
+                            onClick={() => {
+                              if (topic.url) {
+                                window.open(topic.url, '_blank', 'noopener,noreferrer');
+                              }
+                            }}
                           >
                             <meta itemProp="position" content={String(topic.originalRank)} />
                             <article className="flex-1" itemProp="item" itemScope itemType="https://schema.org/Thing">

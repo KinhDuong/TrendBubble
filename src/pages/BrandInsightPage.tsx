@@ -779,6 +779,7 @@ export default function BrandInsightPage() {
       yoyRaw: yoyRaw !== undefined && yoyRaw !== null ? (typeof yoyRaw === 'number' ? yoyRaw : parseFloat(yoyRaw)) : null,
       competition: kwData?.competition || 'N/A',
       bidHigh: kwData?.bid_high || 0,
+      brand: topic.category,
       category: getKeywordCategory(topic.name)
     };
   });
@@ -1459,12 +1460,16 @@ export default function BrandInsightPage() {
                                     e.stopPropagation();
                                     const topicData = transformToTopics.find(t => t.name === topic.name);
                                     if (topicData) {
-                                      setTooltipData({
-                                        topic: topicData,
-                                        x: e.clientX,
-                                        y: e.clientY,
-                                        rank: topic.originalRank || index + 1
-                                      });
+                                      if (topicData.url) {
+                                        window.open(topicData.url, '_blank', 'noopener,noreferrer');
+                                      } else {
+                                        setTooltipData({
+                                          topic: topicData,
+                                          x: e.clientX,
+                                          y: e.clientY,
+                                          rank: topic.originalRank || index + 1
+                                        });
+                                      }
                                     }
                                   }}
                                 >
