@@ -33,7 +33,20 @@ Deno.serve(async (req: Request) => {
   try {
     const openaiApiKey = Deno.env.get("OPENAI_API_KEY");
     if (!openaiApiKey) {
-      throw new Error("OPENAI_API_KEY environment variable is not set");
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "API key not configured. Please add OPENAI_API_KEY to your Supabase Edge Function environment variables.",
+          errorCode: "MISSING_API_KEY"
+        }),
+        {
+          status: 500,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        }
+      );
     }
 
     const requestData: AnalysisRequest = await req.json();
@@ -116,7 +129,37 @@ Provide a clear, well-structured analysis in markdown format with clear headings
 
     if (!openaiResponse.ok) {
       const errorData = await openaiResponse.json();
-      throw new Error(`OpenAI API error: ${errorData.error?.message || openaiResponse.statusText}`);
+      const errorMessage = errorData.error?.message || openaiResponse.statusText;
+
+      let userMessage = errorMessage;
+      let errorCode = "OPENAI_ERROR";
+
+      if (errorMessage.includes("quota") || errorMessage.includes("billing")) {
+        userMessage = "OpenAI API quota exceeded. Please check your OpenAI account billing and usage limits at platform.openai.com/account/billing";
+        errorCode = "QUOTA_EXCEEDED";
+      } else if (errorMessage.includes("invalid") && errorMessage.includes("key")) {
+        userMessage = "Invalid OpenAI API key. Please check your OPENAI_API_KEY environment variable.";
+        errorCode = "INVALID_API_KEY";
+      } else if (openaiResponse.status === 429) {
+        userMessage = "Rate limit exceeded. Please wait a moment and try again.";
+        errorCode = "RATE_LIMIT";
+      }
+
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: userMessage,
+          errorCode,
+          originalError: errorMessage
+        }),
+        {
+          status: openaiResponse.status,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        }
+      );
     }
 
     const openaiData = await openaiResponse.json();

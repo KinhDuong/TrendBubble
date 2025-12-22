@@ -70,6 +70,7 @@ export default function BrandInsightPage() {
   const [aiAnalysis, setAiAnalysis] = useState<string | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState<string | null>(null);
+  const [aiErrorCode, setAiErrorCode] = useState<string | null>(null);
 
   const getInitialMaxBubbles = () => {
     const topParam = searchParams.get('Top');
@@ -880,6 +881,7 @@ export default function BrandInsightPage() {
 
     setAiLoading(true);
     setAiError(null);
+    setAiErrorCode(null);
 
     try {
       const decodedBrand = decodeURIComponent(brandName);
@@ -908,20 +910,20 @@ export default function BrandInsightPage() {
         })
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to generate AI analysis');
-      }
-
       const result = await response.json();
 
       if (result.success && result.analysis) {
         setAiAnalysis(result.analysis);
+        setAiError(null);
+        setAiErrorCode(null);
       } else {
-        throw new Error(result.error || 'Failed to generate analysis');
+        setAiError(result.error || 'Failed to generate analysis');
+        setAiErrorCode(result.errorCode || 'UNKNOWN_ERROR');
       }
     } catch (error) {
       console.error('Error generating AI analysis:', error);
       setAiError(error instanceof Error ? error.message : 'Failed to generate AI analysis');
+      setAiErrorCode('NETWORK_ERROR');
     } finally {
       setAiLoading(false);
     }
@@ -1310,17 +1312,41 @@ export default function BrandInsightPage() {
                         </div>
 
                         {aiError && (
-                          <div className={`mb-4 p-4 rounded-lg border ${theme === 'dark' ? 'bg-red-900/20 border-red-800/30 text-red-400' : 'bg-red-50 border-red-200 text-red-700'}`}>
-                            <div className="flex items-start gap-2">
-                              <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
-                              <div>
-                                <p className="font-semibold mb-1">Analysis Failed</p>
-                                <p className="text-sm">{aiError}</p>
+                          <div className={`mb-4 p-4 rounded-lg border ${theme === 'dark' ? 'bg-red-900/20 border-red-800/30' : 'bg-red-50 border-red-200'}`}>
+                            <div className="flex items-start gap-3">
+                              <AlertCircle className={`w-5 h-5 flex-shrink-0 mt-0.5 ${theme === 'dark' ? 'text-red-400' : 'text-red-600'}`} />
+                              <div className="flex-1">
+                                <p className={`font-semibold mb-2 ${theme === 'dark' ? 'text-red-400' : 'text-red-700'}`}>
+                                  {aiErrorCode === 'MISSING_API_KEY' ? 'API Key Not Configured' :
+                                   aiErrorCode === 'QUOTA_EXCEEDED' ? 'Quota Exceeded' :
+                                   aiErrorCode === 'INVALID_API_KEY' ? 'Invalid API Key' :
+                                   'Analysis Failed'}
+                                </p>
+                                <p className={`text-sm mb-3 ${theme === 'dark' ? 'text-red-300' : 'text-red-600'}`}>{aiError}</p>
+
+                                {(aiErrorCode === 'MISSING_API_KEY' || aiErrorCode === 'INVALID_API_KEY' || aiErrorCode === 'QUOTA_EXCEEDED') && (
+                                  <div className={`mt-3 p-3 rounded-md text-sm ${theme === 'dark' ? 'bg-gray-800/50' : 'bg-white'}`}>
+                                    <p className={`font-semibold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Setup Instructions:</p>
+                                    <ol className={`list-decimal list-inside space-y-1 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                                      <li>Get an API key from <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer" className="underline hover:no-underline">platform.openai.com/api-keys</a></li>
+                                      <li>Go to your Supabase Dashboard → Project Settings → Edge Functions</li>
+                                      <li>Add environment variable: <code className={`px-1 py-0.5 rounded ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'}`}>OPENAI_API_KEY</code></li>
+                                      {aiErrorCode === 'QUOTA_EXCEEDED' && (
+                                        <li>Check billing at <a href="https://platform.openai.com/account/billing" target="_blank" rel="noopener noreferrer" className="underline hover:no-underline">platform.openai.com/account/billing</a></li>
+                                      )}
+                                    </ol>
+                                  </div>
+                                )}
+
                                 <button
                                   onClick={handleAIAnalysis}
-                                  className={`mt-2 text-sm underline hover:no-underline ${theme === 'dark' ? 'text-red-300' : 'text-red-600'}`}
+                                  className={`mt-3 text-sm px-3 py-1.5 rounded-md transition-colors ${
+                                    theme === 'dark'
+                                      ? 'bg-red-900/30 hover:bg-red-900/50 text-red-300'
+                                      : 'bg-red-100 hover:bg-red-200 text-red-700'
+                                  }`}
                                 >
-                                  Try again
+                                  Try Again
                                 </button>
                               </div>
                             </div>
