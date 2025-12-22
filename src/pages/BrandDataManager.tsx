@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { useAuth } from '../hooks/useAuth';
 import { Trash2, Search, Download, RefreshCw, Filter, Sparkles } from 'lucide-react';
 
 interface BrandKeywordData {
@@ -30,8 +29,6 @@ interface BrandKeywordData {
 
 export default function BrandDataManager() {
   const { brandName } = useParams<{ brandName?: string }>();
-  const navigate = useNavigate();
-  const { isAdmin } = useAuth();
   const [data, setData] = useState<BrandKeywordData[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -43,34 +40,14 @@ export default function BrandDataManager() {
   const [aiMessage, setAiMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
   useEffect(() => {
-    if (!isAdmin) {
-      navigate('/login');
-    }
-  }, [isAdmin, navigate]);
-
-  useEffect(() => {
-    if (isAdmin) {
-      fetchData();
-    }
-  }, [isAdmin]);
+    fetchData();
+  }, []);
 
   useEffect(() => {
     if (brandName) {
       setSelectedBrand(decodeURIComponent(brandName));
     }
   }, [brandName]);
-
-  useEffect(() => {
-    if (brandName && data.length > 0) {
-      const decodedBrand = decodeURIComponent(brandName);
-      const matchingBrands = data.filter(d =>
-        d.brand?.toLowerCase().trim() === decodedBrand.toLowerCase().trim()
-      );
-      console.log('Brand from URL:', decodedBrand);
-      console.log('Available brands:', [...new Set(data.map(d => d.brand))]);
-      console.log('Matching records:', matchingBrands.length);
-    }
-  }, [brandName, data]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -80,16 +57,11 @@ export default function BrandDataManager() {
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error('Error fetching data:', error);
-        throw error;
-      }
+      if (error) throw error;
 
-      console.log('Fetched data count:', keywordData?.length || 0);
       setData(keywordData || []);
 
       const uniqueBrands = Array.from(new Set(keywordData?.map(d => d.brand) || []));
-      console.log('Unique brands found:', uniqueBrands);
       setBrands(uniqueBrands);
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -223,8 +195,7 @@ export default function BrandDataManager() {
     let filtered = [...data];
 
     if (selectedBrand !== 'all') {
-      const brandLower = selectedBrand.toLowerCase().trim();
-      filtered = filtered.filter(d => d.brand?.toLowerCase().trim() === brandLower);
+      filtered = filtered.filter(d => d.brand === selectedBrand);
     }
 
     if (searchTerm) {
@@ -441,19 +412,7 @@ export default function BrandDataManager() {
 
         {filteredData.length === 0 ? (
           <div className="bg-white rounded-lg shadow-sm p-12 text-center">
-            <p className="text-gray-500 text-lg mb-4">No data found</p>
-            {brandName && data.length > 0 && (
-              <div className="text-sm text-gray-600">
-                <p className="mb-2">Looking for brand: <span className="font-semibold">{selectedBrand}</span></p>
-                <p className="mb-2">Available brands in database:</p>
-                <div className="max-h-48 overflow-y-auto bg-gray-50 p-4 rounded-lg">
-                  {brands.map(b => (
-                    <div key={b} className="text-left">{b}</div>
-                  ))}
-                </div>
-                <p className="mt-4 text-xs text-gray-500">Check the browser console for detailed debugging info</p>
-              </div>
-            )}
+            <p className="text-gray-500 text-lg">No data found</p>
           </div>
         ) : (
           <div className="bg-white rounded-lg shadow-sm overflow-hidden">
