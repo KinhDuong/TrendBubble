@@ -16,6 +16,7 @@ interface BrandKeywordData {
   created_at: string;
   competition: string | null;
   ai_category: string | null;
+  ai_insights: string | null;
   Currency: string | null;
   'Avg. monthly searches': number | null;
   'Three month change': string | null;
@@ -309,6 +310,7 @@ export default function BrandDataManager() {
       'brand',
       'keyword',
       'ai_category',
+      'ai_insights',
       'Currency',
       'Avg. monthly searches',
       'Three month change',
@@ -327,7 +329,7 @@ export default function BrandDataManager() {
       .filter(key =>
         !priorityColumns.includes(key) &&
         !monthColumns.includes(key) &&
-        !['id', 'user_id', 'created_at', 'search_volume', 'competition', 'ai_category'].includes(key)
+        !['id', 'user_id', 'created_at', 'search_volume', 'competition', 'ai_category', 'ai_insights'].includes(key)
       );
 
     return [...priorityColumns, ...monthColumns, ...otherColumns];
@@ -470,10 +472,11 @@ export default function BrandDataManager() {
                 <div className="flex items-start gap-3">
                   <Sparkles className="w-5 h-5 text-purple-600 mt-0.5 flex-shrink-0" />
                   <div className="flex-1">
-                    <h3 className="font-semibold text-purple-900 mb-1">AI Keyword Categorization</h3>
+                    <h3 className="font-semibold text-purple-900 mb-1">AI Keyword Categorization & Insights</h3>
                     <p className="text-sm text-purple-700 mb-3">
                       Use AI to analyze your keywords and assign growth categories based on Google Trends insights.
-                      The AI will categorize keywords into groups like "Explosive Growth", "Rising Star", "Steady Growth", etc.
+                      The AI will categorize keywords into groups like "Explosive Growth", "Rising Star", "Steady Growth", etc.,
+                      and provide strategic insights including growth opportunities, competitive positioning, and content recommendations.
                     </p>
                     <button
                       onClick={handleAICategorization}
@@ -538,7 +541,7 @@ export default function BrandDataManager() {
                         onClick={() => handleSort(column)}
                         className="px-4 py-3 text-left font-semibold text-gray-700 cursor-pointer hover:bg-gray-100 transition-colors"
                       >
-                        <div className="flex flex-col gap-1 min-w-[180px]">
+                        <div className={`flex flex-col gap-1 ${column === 'ai_insights' ? 'min-w-[400px]' : 'min-w-[180px]'}`}>
                           <div className="flex items-center gap-2">
                             <span className="whitespace-nowrap">{column}</span>
                             {sortColumn === column && (
@@ -568,7 +571,7 @@ export default function BrandDataManager() {
                         </button>
                       </td>
                       {columns.map(column => (
-                        <td key={column} className="px-4 py-3 text-gray-900 whitespace-nowrap">
+                        <td key={column} className={`px-4 py-3 text-gray-900 ${column === 'ai_insights' ? 'max-w-md' : 'whitespace-nowrap'}`}>
                           {formatValue(row[column])}
                         </td>
                       ))}
