@@ -53,18 +53,25 @@ export default function BrandDataManager() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const { data: keywordData, error } = await supabase
+      let query = supabase
         .from('brand_keyword_data')
         .select('*')
         .order('created_at', { ascending: false });
 
+      if (brandName) {
+        const decodedBrand = decodeURIComponent(brandName);
+        query = query.eq('brand', decodedBrand);
+      } else {
+        query = query.limit(50000);
+      }
+
+      const { data: keywordData, error } = await query;
+
       if (error) throw error;
 
       setData(keywordData || []);
-      console.log('Fetched data count:', keywordData?.length);
 
       const uniqueBrands = Array.from(new Set(keywordData?.map(d => d.brand) || []));
-      console.log('Unique brands found:', uniqueBrands);
       setBrands(uniqueBrands);
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -80,19 +87,11 @@ export default function BrandDataManager() {
       setShowLogin(false);
       fetchData();
     }
-  }, [isAdmin]);
+  }, [isAdmin, brandName]);
 
   useEffect(() => {
-    if (isAdmin) {
-      fetchData();
-    }
-  }, []);
-
-  useEffect(() => {
-    console.log('brandName from URL:', brandName);
     if (brandName) {
       const decoded = decodeURIComponent(brandName);
-      console.log('Setting selectedBrand to:', decoded);
       setSelectedBrand(decoded);
     }
   }, [brandName]);
@@ -235,11 +234,8 @@ export default function BrandDataManager() {
   const getFilteredData = () => {
     let filtered = [...data];
 
-    console.log('Filtering - selectedBrand:', selectedBrand, 'data length:', data.length);
-
     if (selectedBrand !== 'all') {
       filtered = filtered.filter(d => d.brand === selectedBrand);
-      console.log('After brand filter:', filtered.length, 'matching brand:', selectedBrand);
     }
 
     if (searchTerm) {
