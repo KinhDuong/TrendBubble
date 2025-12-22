@@ -136,11 +136,11 @@ ${keywordsSummary}
 
 **IMPORTANT INSTRUCTIONS:**
 1. You must categorize ALL ${Math.min(50, keywords.length)} keywords listed above
-2. Respond ONLY with a valid JSON array, no additional text
-3. Each object must have: keyword (exact match), category (one of the categories above), reasoning (brief 1-sentence explanation)
-4. Format: [{"keyword": "exact keyword text", "category": "Category Name", "reasoning": "Brief explanation"}]
+2. Respond with a JSON object containing a "categories" array
+3. Each object in the array must have: keyword (exact match), category (one of the categories above), reasoning (brief 1-sentence explanation)
+4. Format: {"categories": [{"keyword": "exact keyword text", "category": "Category Name", "reasoning": "Brief explanation"}]}
 
-Respond with the JSON array now:`;
+Respond with the JSON object now:`;
 
     console.log("Calling OpenAI API for categorization...");
 
@@ -197,14 +197,28 @@ Respond with the JSON array now:`;
     }
 
     console.log("Parsing AI response...");
-    
+
     let categorizations: CategoryResult[];
     try {
       const parsed = JSON.parse(rawContent);
-      categorizations = parsed.categories || parsed.keywords || parsed;
-      
+      console.log("Parsed object keys:", Object.keys(parsed));
+
+      // Try different possible keys
+      categorizations = parsed.categories || parsed.keywords || parsed.results || parsed.data;
+
+      // If still not an array, check if any value in the object is an array
       if (!Array.isArray(categorizations)) {
-        throw new Error("Response is not an array");
+        const arrayValues = Object.values(parsed).filter(v => Array.isArray(v));
+        if (arrayValues.length > 0) {
+          categorizations = arrayValues[0] as CategoryResult[];
+        } else {
+          console.error("Parsed object structure:", JSON.stringify(parsed, null, 2));
+          throw new Error("No array found in response. Expected structure: {categories: [...]}");
+        }
+      }
+
+      if (!Array.isArray(categorizations) || categorizations.length === 0) {
+        throw new Error("Response does not contain a valid array of categorizations");
       }
     } catch (parseError) {
       console.error("Failed to parse AI response:", rawContent);
