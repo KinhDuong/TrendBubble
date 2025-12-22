@@ -2227,6 +2227,7 @@ function App() {
         <Route path="/admin/pages" element={<AdminPages />} />
         <Route path="/admin/data" element={<AdminData />} />
         <Route path="/admin/brand-data" element={<BrandDataManager />} />
+        <Route path="/admin/brand-data/:brandName" element={<BrandDataManager />} />
         <Route path="*" element={<DynamicPage />} />
       </Routes>
     </BrowserRouter>

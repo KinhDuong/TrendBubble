@@ -333,7 +333,7 @@ export default function InsightsMetaPage() {
                             <ArrowRight className="w-3 h-3" />
                           </button>
                           <button
-                            onClick={() => navigate(`/admin/brand-data`)}
+                            onClick={() => navigate(`/admin/brand-data/${encodeURIComponent(brand.brand)}`)}
                             className={`inline-flex items-center gap-1 px-3 py-1.5 rounded text-sm font-medium transition-colors ${theme === 'dark' ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-green-600 hover:bg-green-700 text-white'}`}
                             title="View brand data"
                           >
