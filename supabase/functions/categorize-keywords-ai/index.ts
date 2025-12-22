@@ -103,7 +103,7 @@ Deno.serve(async (req: Request) => {
 
     console.log(`Found ${keywords.length} keywords. Processing in batches...`);
 
-    const BATCH_SIZE = 100;
+    const BATCH_SIZE = 25;
     const batches = [];
     for (let i = 0; i < keywords.length; i += BATCH_SIZE) {
       batches.push(keywords.slice(i, i + BATCH_SIZE));
@@ -111,10 +111,15 @@ Deno.serve(async (req: Request) => {
 
     console.log(`Created ${batches.length} batches of up to ${BATCH_SIZE} keywords each`);
 
+    const MAX_BATCHES_PER_RUN = 4;
+    const batchesToProcess = Math.min(batches.length, MAX_BATCHES_PER_RUN);
+
+    console.log(`Processing ${batchesToProcess} batches this run (max ${BATCH_SIZE * MAX_BATCHES_PER_RUN} keywords)`);
+
     let totalUpdated = 0;
     const allErrors = [];
 
-    for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
+    for (let batchIndex = 0; batchIndex < batchesToProcess; batchIndex++) {
       const batch = batches[batchIndex];
       console.log(`Processing batch ${batchIndex + 1}/${batches.length} (${batch.length} keywords)...`);
 
@@ -169,8 +174,8 @@ ${keywordsSummary}
    - keyword (exact match)
    - category (one of the categories above)
    - reasoning (brief 1-sentence explanation of why this category was chosen)
-   - insights (2-3 sentence strategic analysis: growth opportunities, competitive positioning, content recommendations, or market trends)
-4. Format: {"categories": [{"keyword": "exact keyword text", "category": "Category Name", "reasoning": "Brief explanation", "insights": "Strategic insights and recommendations"}]}
+   - insights (1-2 concise sentences with actionable strategic recommendations: growth opportunities, competitive positioning, or content strategy)
+4. Format: {"categories": [{"keyword": "exact keyword text", "category": "Category Name", "reasoning": "Brief explanation", "insights": "Concise strategic recommendations"}]}
 
 Respond with the JSON object now:`;
 
@@ -193,7 +198,7 @@ Respond with the JSON object now:`;
             }
           ],
           temperature: 0.3,
-          max_tokens: 8000,
+          max_tokens: 16000,
           response_format: { type: "json_object" }
         }),
       });
@@ -285,6 +290,8 @@ Respond with the JSON object now:`;
     console.log(`All batches complete. Successfully updated ${totalUpdated} out of ${keywords.length} keywords`);
 
     const alreadyCategorized = (totalCount || 0) - keywords.length;
+    const remainingUncategorized = keywords.length - totalUpdated;
+    const hasMoreToProcess = remainingUncategorized > 0;
 
     return new Response(
       JSON.stringify({
@@ -292,8 +299,13 @@ Respond with the JSON object now:`;
         updatedCount: totalUpdated,
         totalKeywords: totalCount || keywords.length,
         alreadyCategorized,
-        remainingUncategorized: keywords.length - totalUpdated,
-        batchesProcessed: batches.length,
+        remainingUncategorized,
+        batchesProcessed: batchesToProcess,
+        totalBatches: batches.length,
+        hasMoreToProcess,
+        message: hasMoreToProcess
+          ? `Processed ${totalUpdated} keywords. Run again to process ${remainingUncategorized} remaining keywords.`
+          : `All keywords processed successfully!`,
         errors: allErrors.length > 0 ? allErrors : undefined,
         timestamp: new Date().toISOString(),
       }),

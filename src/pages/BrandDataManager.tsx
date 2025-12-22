@@ -210,14 +210,14 @@ export default function BrandDataManager() {
         throw new Error(result.error || 'Failed to categorize keywords');
       }
 
-      setAiMessage({
-        type: 'success',
-        text: `Successfully categorized ${result.updatedCount} of ${result.totalKeywords} keywords!`
-      });
-
       await fetchData();
 
-      setTimeout(() => setAiMessage(null), 10000);
+      setAiMessage({
+        type: 'success',
+        text: result.message || `Successfully categorized ${result.updatedCount} of ${result.totalKeywords} keywords!${result.hasMoreToProcess ? ' Click again to continue processing.' : ''}`
+      });
+
+      setTimeout(() => setAiMessage(null), 15000);
     } catch (error: any) {
       console.error('Error during AI categorization:', error);
       setAiMessage({
