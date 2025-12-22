@@ -71,6 +71,7 @@ export default function BrandInsightPage() {
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState<string | null>(null);
   const [aiErrorCode, setAiErrorCode] = useState<string | null>(null);
+  const [aiAnalysisDate, setAiAnalysisDate] = useState<string | null>(null);
 
   const getInitialMaxBubbles = () => {
     const topParam = searchParams.get('Top');
@@ -148,7 +149,8 @@ export default function BrandInsightPage() {
       loadBrandData(),
       loadKeywordData(),
       loadBrandPageData(),
-      loadLatestBrandPages()
+      loadLatestBrandPages(),
+      loadAIAnalysis()
     ]);
     setLoading(false);
   };
@@ -278,6 +280,31 @@ export default function BrandInsightPage() {
       }
     } catch (error) {
       console.error('Error loading latest brand pages:', error);
+    }
+  };
+
+  const loadAIAnalysis = async () => {
+    if (!brandName) return;
+
+    try {
+      const decodedBrand = decodeURIComponent(brandName);
+
+      const { data, error } = await supabase
+        .from('brand_ai_analysis')
+        .select('*')
+        .eq('brand', decodedBrand)
+        .maybeSingle();
+
+      if (error) throw error;
+
+      if (data) {
+        setAiAnalysis(data.analysis);
+        setAiAnalysisDate(data.updated_at);
+        setAiError(null);
+        setAiErrorCode(null);
+      }
+    } catch (error) {
+      console.error('Error loading AI analysis:', error);
     }
   };
 
@@ -916,6 +943,25 @@ export default function BrandInsightPage() {
         setAiAnalysis(result.analysis);
         setAiError(null);
         setAiErrorCode(null);
+
+        const { error: saveError } = await supabase
+          .from('brand_ai_analysis')
+          .upsert({
+            brand: decodedBrand,
+            analysis: result.analysis,
+            keyword_count: keywordsForAnalysis.length,
+            total_months: availableMonthsCount,
+            avg_volume: avgVolume,
+            model: 'gpt-4o'
+          }, {
+            onConflict: 'brand'
+          });
+
+        if (saveError) {
+          console.error('Error saving AI analysis:', saveError);
+        } else {
+          await loadAIAnalysis();
+        }
       } else {
         setAiError(result.error || 'Failed to generate analysis');
         setAiErrorCode(result.errorCode || 'UNKNOWN_ERROR');
@@ -1278,7 +1324,7 @@ export default function BrandInsightPage() {
                     <div className="mt-8">
                       <div className={`${theme === 'dark' ? 'bg-gradient-to-br from-blue-900/30 to-purple-900/30 border-blue-700/50' : 'bg-gradient-to-br from-blue-50 to-purple-50 border-blue-200'} rounded-lg border p-6 shadow-md`}>
                         <div className="flex items-start justify-between mb-4">
-                          <div className="flex items-center gap-3">
+                          <div className="flex items-center gap-3 flex-1">
                             <div className={`p-2 rounded-lg ${theme === 'dark' ? 'bg-blue-600/20' : 'bg-blue-100'}`}>
                               <Sparkles className={`w-6 h-6 ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`} />
                             </div>
@@ -1287,28 +1333,30 @@ export default function BrandInsightPage() {
                                 AI-Powered Keyword Analysis
                               </h3>
                               <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                                Get intelligent insights and recommendations from GPT-4
+                                {aiAnalysisDate ? (
+                                  <>Generated {new Date(aiAnalysisDate).toLocaleDateString()} at {new Date(aiAnalysisDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</>
+                                ) : (
+                                  'Get intelligent insights and recommendations from GPT-4'
+                                )}
                               </p>
                             </div>
                           </div>
-                          {!aiAnalysis && (
-                            <button
-                              onClick={handleAIAnalysis}
-                              disabled={aiLoading}
-                              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all transform hover:scale-105 ${
-                                aiLoading
-                                  ? theme === 'dark'
-                                    ? 'bg-gray-700 text-gray-400 cursor-not-allowed'
-                                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                  : theme === 'dark'
-                                    ? 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg'
-                                    : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-md'
-                              }`}
-                            >
-                              <Sparkles className="w-4 h-4" />
-                              {aiLoading ? 'Analyzing...' : 'Generate AI Insights'}
-                            </button>
-                          )}
+                          <button
+                            onClick={handleAIAnalysis}
+                            disabled={aiLoading}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all transform hover:scale-105 whitespace-nowrap ${
+                              aiLoading
+                                ? theme === 'dark'
+                                  ? 'bg-gray-700 text-gray-400 cursor-not-allowed'
+                                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                : theme === 'dark'
+                                  ? 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg'
+                                  : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-md'
+                            }`}
+                          >
+                            <Sparkles className="w-4 h-4" />
+                            {aiLoading ? 'Analyzing...' : aiAnalysis ? 'Regenerate' : 'Generate AI Insights'}
+                          </button>
                         </div>
 
                         {aiError && (
