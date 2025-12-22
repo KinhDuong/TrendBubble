@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { Trash2, Search, Download, RefreshCw, Filter } from 'lucide-react';
+import { Trash2, Search, Download, RefreshCw, Filter, Sparkles } from 'lucide-react';
 
 interface BrandKeywordData {
   id: string;
@@ -10,6 +10,7 @@ interface BrandKeywordData {
   user_id: string;
   created_at: string;
   competition: string | null;
+  ai_category: string | null;
   Currency: string | null;
   'Avg. monthly searches': number | null;
   'Three month change': string | null;
@@ -33,6 +34,8 @@ export default function BrandDataManager() {
   const [brands, setBrands] = useState<string[]>([]);
   const [sortColumn, setSortColumn] = useState<string>('created_at');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  const [aiCategorizing, setAiCategorizing] = useState(false);
+  const [aiMessage, setAiMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
   useEffect(() => {
     fetchData();
@@ -97,6 +100,61 @@ export default function BrandDataManager() {
     } catch (error) {
       console.error('Error deleting brand:', error);
       alert('Failed to delete brand data');
+    }
+  };
+
+  const handleAICategorization = async () => {
+    if (selectedBrand === 'all') {
+      setAiMessage({ type: 'error', text: 'Please select a specific brand to categorize' });
+      setTimeout(() => setAiMessage(null), 5000);
+      return;
+    }
+
+    if (!confirm(`This will use AI to analyze and categorize all keywords for "${selectedBrand}". This may take a moment and will use OpenAI API credits. Continue?`)) {
+      return;
+    }
+
+    setAiCategorizing(true);
+    setAiMessage(null);
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('Not authenticated');
+
+      const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/categorize-keywords-ai`;
+
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ brand: selectedBrand })
+      });
+
+      const result = await response.json();
+
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to categorize keywords');
+      }
+
+      setAiMessage({
+        type: 'success',
+        text: `Successfully categorized ${result.updatedCount} of ${result.totalKeywords} keywords!`
+      });
+
+      await fetchData();
+
+      setTimeout(() => setAiMessage(null), 10000);
+    } catch (error: any) {
+      console.error('Error during AI categorization:', error);
+      setAiMessage({
+        type: 'error',
+        text: error.message || 'Failed to categorize keywords. Please check console for details.'
+      });
+      setTimeout(() => setAiMessage(null), 10000);
+    } finally {
+      setAiCategorizing(false);
     }
   };
 
@@ -179,6 +237,7 @@ export default function BrandDataManager() {
     const priorityColumns = [
       'brand',
       'keyword',
+      'ai_category',
       'Currency',
       'Avg. monthly searches',
       'Three month change',
@@ -197,7 +256,7 @@ export default function BrandDataManager() {
       .filter(key =>
         !priorityColumns.includes(key) &&
         !monthColumns.includes(key) &&
-        !['id', 'user_id', 'created_at', 'search_volume', 'competition'].includes(key)
+        !['id', 'user_id', 'created_at', 'search_volume', 'competition', 'ai_category'].includes(key)
       );
 
     return [...priorityColumns, ...monthColumns, ...otherColumns];
@@ -279,6 +338,45 @@ export default function BrandDataManager() {
               <Download className="w-5 h-5" />
               Export CSV
             </button>
+          </div>
+
+          {aiMessage && (
+            <div className={`mb-4 p-4 rounded-lg ${aiMessage.type === 'success' ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200'}`}>
+              {aiMessage.text}
+            </div>
+          )}
+
+          <div className="mb-4 p-4 bg-purple-50 border border-purple-200 rounded-lg">
+            <div className="flex items-start gap-3">
+              <Sparkles className="w-5 h-5 text-purple-600 mt-0.5 flex-shrink-0" />
+              <div className="flex-1">
+                <h3 className="font-semibold text-purple-900 mb-1">AI Keyword Categorization</h3>
+                <p className="text-sm text-purple-700 mb-3">
+                  Use AI to analyze your keywords and assign growth categories based on Google Trends insights.
+                  The AI will categorize keywords into groups like "Explosive Growth", "Rising Star", "Steady Growth", etc.
+                </p>
+                <button
+                  onClick={handleAICategorization}
+                  disabled={aiCategorizing || selectedBrand === 'all'}
+                  className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {aiCategorizing ? (
+                    <>
+                      <RefreshCw className="w-5 h-5 animate-spin" />
+                      Analyzing with AI...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-5 h-5" />
+                      Generate AI Categories
+                    </>
+                  )}
+                </button>
+                {selectedBrand === 'all' && (
+                  <p className="text-xs text-purple-600 mt-2">Select a specific brand to use AI categorization</p>
+                )}
+              </div>
+            </div>
           </div>
 
           <div className="flex items-center justify-between">
