@@ -50,6 +50,27 @@ export default function BrandDataManager() {
   const [aiCategorizing, setAiCategorizing] = useState(false);
   const [aiMessage, setAiMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const { data: keywordData, error } = await supabase
+        .from('brand_keyword_data')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      setData(keywordData || []);
+
+      const uniqueBrands = Array.from(new Set(keywordData?.map(d => d.brand) || []));
+      setBrands(uniqueBrands);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (!isAdmin) {
       setShowLogin(true);
@@ -84,27 +105,6 @@ export default function BrandDataManager() {
     navigate('/');
     return null;
   }
-
-  const fetchData = async () => {
-    setLoading(true);
-    try {
-      const { data: keywordData, error } = await supabase
-        .from('brand_keyword_data')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-
-      setData(keywordData || []);
-
-      const uniqueBrands = Array.from(new Set(keywordData?.map(d => d.brand) || []));
-      setBrands(uniqueBrands);
-    } catch (error) {
-      console.error('Error fetching data:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this record?')) return;
