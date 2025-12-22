@@ -50,29 +50,40 @@ export default function BrandDataManager() {
   const [aiCategorizing, setAiCategorizing] = useState(false);
   const [aiMessage, setAiMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
+  const fetchBrands = async () => {
+    try {
+      const { data: keywordData, error } = await supabase
+        .from('brand_keyword_data')
+        .select('brand');
+
+      if (error) throw error;
+
+      const uniqueBrands = Array.from(new Set(keywordData?.map(d => d.brand) || []));
+      setBrands(uniqueBrands.sort());
+    } catch (error) {
+      console.error('Error fetching brands:', error);
+    }
+  };
+
   const fetchData = async () => {
+    if (!brandName) {
+      setData([]);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     try {
-      let query = supabase
+      const decodedBrand = decodeURIComponent(brandName);
+      const { data: keywordData, error } = await supabase
         .from('brand_keyword_data')
         .select('*')
+        .eq('brand', decodedBrand)
         .order('created_at', { ascending: false });
-
-      if (brandName) {
-        const decodedBrand = decodeURIComponent(brandName);
-        query = query.eq('brand', decodedBrand);
-      } else {
-        query = query.limit(50000);
-      }
-
-      const { data: keywordData, error } = await query;
 
       if (error) throw error;
 
       setData(keywordData || []);
-
-      const uniqueBrands = Array.from(new Set(keywordData?.map(d => d.brand) || []));
-      setBrands(uniqueBrands);
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
@@ -85,6 +96,7 @@ export default function BrandDataManager() {
       setShowLogin(true);
     } else {
       setShowLogin(false);
+      fetchBrands();
       fetchData();
     }
   }, [isAdmin, brandName]);
@@ -93,6 +105,8 @@ export default function BrandDataManager() {
     if (brandName) {
       const decoded = decodeURIComponent(brandName);
       setSelectedBrand(decoded);
+    } else {
+      setSelectedBrand('all');
     }
   }, [brandName]);
 
@@ -357,12 +371,28 @@ export default function BrandDataManager() {
       <div className="py-8">
         <div className="max-w-[98%] mx-auto px-4">
           <div className="mb-6">
-            <h1 className={`text-3xl font-bold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Brand Keyword Data Manager</h1>
-            <p className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}>
-              {brandName
-                ? `Viewing data for: ${selectedBrand}`
-                : 'View and manage all uploaded brand keyword data'}
-            </p>
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className={`text-3xl font-bold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Brand Keyword Data Manager</h1>
+                <p className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}>
+                  {brandName
+                    ? `Viewing data for: ${selectedBrand}`
+                    : 'View and manage all uploaded brand keyword data'}
+                </p>
+              </div>
+              {brandName && (
+                <button
+                  onClick={() => navigate('/admin/brand-data')}
+                  className={`px-4 py-2 rounded-lg transition-colors ${
+                    theme === 'dark'
+                      ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  }`}
+                >
+                  ← Back to Brands
+                </button>
+              )}
+            </div>
           </div>
 
           <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-sm p-6 mb-6`}>
@@ -383,10 +413,15 @@ export default function BrandDataManager() {
                 <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <select
                   value={selectedBrand}
-                  onChange={(e) => setSelectedBrand(e.target.value)}
+                  onChange={(e) => {
+                    const brand = e.target.value;
+                    if (brand !== 'all') {
+                      navigate(`/admin/brand-data/${encodeURIComponent(brand)}`);
+                    }
+                  }}
                   className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none"
                 >
-                  <option value="all">All Brands</option>
+                  <option value="all">Select a Brand...</option>
                   {brands.map(brand => (
                     <option key={brand} value={brand}>{brand}</option>
                   ))}
@@ -394,17 +429,19 @@ export default function BrandDataManager() {
               </div>
             )}
 
-            <button
-              onClick={fetchData}
-              className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              <RefreshCw className="w-5 h-5" />
-              Refresh
-            </button>
+            {brandName && (
+              <button
+                onClick={fetchData}
+                className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                <RefreshCw className="w-5 h-5" />
+                Refresh
+              </button>
+            )}
 
             <button
               onClick={exportToCSV}
-              disabled={filteredData.length === 0}
+              disabled={!brandName || filteredData.length === 0}
               className="flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Download className="w-5 h-5" />
@@ -412,65 +449,70 @@ export default function BrandDataManager() {
             </button>
           </div>
 
-          {aiMessage && (
-            <div className={`mb-4 p-4 rounded-lg ${aiMessage.type === 'success' ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200'}`}>
-              {aiMessage.text}
-            </div>
-          )}
+          {brandName && (
+            <>
+              {aiMessage && (
+                <div className={`mb-4 p-4 rounded-lg ${aiMessage.type === 'success' ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200'}`}>
+                  {aiMessage.text}
+                </div>
+              )}
 
-          <div className="mb-4 p-4 bg-purple-50 border border-purple-200 rounded-lg">
-            <div className="flex items-start gap-3">
-              <Sparkles className="w-5 h-5 text-purple-600 mt-0.5 flex-shrink-0" />
-              <div className="flex-1">
-                <h3 className="font-semibold text-purple-900 mb-1">AI Keyword Categorization</h3>
-                <p className="text-sm text-purple-700 mb-3">
-                  Use AI to analyze your keywords and assign growth categories based on Google Trends insights.
-                  The AI will categorize keywords into groups like "Explosive Growth", "Rising Star", "Steady Growth", etc.
-                </p>
-                <button
-                  onClick={handleAICategorization}
-                  disabled={aiCategorizing || selectedBrand === 'all'}
-                  className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {aiCategorizing ? (
-                    <>
-                      <RefreshCw className="w-5 h-5 animate-spin" />
-                      Analyzing with AI...
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="w-5 h-5" />
-                      Generate AI Categories
-                    </>
-                  )}
-                </button>
-                {selectedBrand === 'all' && (
-                  <p className="text-xs text-purple-600 mt-2">Select a specific brand to use AI categorization</p>
-                )}
+              <div className="mb-4 p-4 bg-purple-50 border border-purple-200 rounded-lg">
+                <div className="flex items-start gap-3">
+                  <Sparkles className="w-5 h-5 text-purple-600 mt-0.5 flex-shrink-0" />
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-purple-900 mb-1">AI Keyword Categorization</h3>
+                    <p className="text-sm text-purple-700 mb-3">
+                      Use AI to analyze your keywords and assign growth categories based on Google Trends insights.
+                      The AI will categorize keywords into groups like "Explosive Growth", "Rising Star", "Steady Growth", etc.
+                    </p>
+                    <button
+                      onClick={handleAICategorization}
+                      disabled={aiCategorizing}
+                      className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {aiCategorizing ? (
+                        <>
+                          <RefreshCw className="w-5 h-5 animate-spin" />
+                          Analyzing with AI...
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="w-5 h-5" />
+                          Generate AI Categories
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
 
-          <div className="flex items-center justify-between">
-            <p className="text-sm text-gray-600">
-              Showing <span className="font-semibold">{filteredData.length}</span> of <span className="font-semibold">{data.length}</span> records
-            </p>
+              <div className="flex items-center justify-between">
+                <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                  Showing <span className="font-semibold">{filteredData.length}</span> of <span className="font-semibold">{data.length}</span> records
+                </p>
 
-            {selectedBrand !== 'all' && (
-              <button
-                onClick={() => handleDeleteBrand(selectedBrand)}
-                className="flex items-center gap-2 px-3 py-1.5 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-              >
-                <Trash2 className="w-4 h-4" />
-                Delete All {selectedBrand} Data
-              </button>
-            )}
-          </div>
+                <button
+                  onClick={() => handleDeleteBrand(selectedBrand)}
+                  className="flex items-center gap-2 px-3 py-1.5 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  Delete All {selectedBrand} Data
+                </button>
+              </div>
+            </>
+          )}
         </div>
 
-        {filteredData.length === 0 ? (
-          <div className="bg-white rounded-lg shadow-sm p-12 text-center">
-            <p className="text-gray-500 text-lg">No data found</p>
+        {!brandName ? (
+          <div className={`${theme === 'dark' ? 'bg-gray-800 text-gray-300' : 'bg-white text-gray-600'} rounded-lg shadow-sm p-12 text-center`}>
+            <Filter className="w-16 h-16 mx-auto mb-4 text-gray-400" />
+            <p className="text-lg font-medium mb-2">Select a Brand to View Data</p>
+            <p className="text-sm">Choose a brand from the dropdown above to load and manage keyword data.</p>
+          </div>
+        ) : filteredData.length === 0 ? (
+          <div className={`${theme === 'dark' ? 'bg-gray-800 text-gray-300' : 'bg-white text-gray-600'} rounded-lg shadow-sm p-12 text-center`}>
+            <p className="text-lg">No data found</p>
           </div>
         ) : (
           <div className="bg-white rounded-lg shadow-sm overflow-hidden">
