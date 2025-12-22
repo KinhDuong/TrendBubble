@@ -267,17 +267,53 @@ export default function BrandInsightPage() {
 
   const loadLatestBrandPages = async () => {
     try {
-      const { data, error } = await supabase
-        .from('brand_pages')
-        .select('id, brand, meta_title, meta_description, created_at')
-        .order('created_at', { ascending: false })
-        .limit(10);
+      // Get distinct brands from brand_keyword_monthly_data
+      const { data: monthlyData, error: monthlyError } = await supabase
+        .from('brand_keyword_monthly_data')
+        .select('brand, created_at')
+        .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (monthlyError) throw monthlyError;
 
-      if (data) {
-        setLatestBrandPages(data);
-      }
+      // Get unique brands and their latest upload date
+      const brandMap = new Map<string, { brand: string; created_at: string }>();
+
+      monthlyData?.forEach((item) => {
+        if (!brandMap.has(item.brand) || item.created_at > brandMap.get(item.brand)!.created_at) {
+          brandMap.set(item.brand, item);
+        }
+      });
+
+      // Convert to array and sort by date
+      const uniqueBrands = Array.from(brandMap.values())
+        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+        .slice(0, 10);
+
+      // Try to get metadata from brand_pages if it exists, otherwise use default
+      const brandsWithMetadata = await Promise.all(
+        uniqueBrands.map(async (item) => {
+          const { data: pageData } = await supabase
+            .from('brand_pages')
+            .select('id, brand, meta_title, meta_description, created_at')
+            .eq('brand', item.brand)
+            .maybeSingle();
+
+          if (pageData) {
+            return pageData;
+          }
+
+          // If no page metadata exists, create a default entry
+          return {
+            id: `default-${item.brand}`,
+            brand: item.brand,
+            meta_title: `${item.brand} Keyword Insights`,
+            meta_description: `Explore search trends and keyword analysis for ${item.brand}`,
+            created_at: item.created_at
+          };
+        })
+      );
+
+      setLatestBrandPages(brandsWithMetadata);
     } catch (error) {
       console.error('Error loading latest brand pages:', error);
     }
