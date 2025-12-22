@@ -194,9 +194,18 @@ export default function BrandDataManager() {
         body: JSON.stringify({ brand: selectedBrand })
       });
 
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Response error:', errorText);
+        throw new Error(`HTTP ${response.status}: ${errorText || 'Failed to categorize keywords'}`);
+      }
+
       const result = await response.json();
 
       if (!result.success) {
+        if (result.errorCode === 'MISSING_API_KEY') {
+          throw new Error('OpenAI API key not configured. Please add OPENAI_API_KEY to your Supabase Edge Function secrets.');
+        }
         throw new Error(result.error || 'Failed to categorize keywords');
       }
 
