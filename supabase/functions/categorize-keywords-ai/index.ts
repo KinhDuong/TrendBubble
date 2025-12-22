@@ -90,7 +90,7 @@ Deno.serve(async (req: Request) => {
 
     console.log(`Found ${keywords.length} keywords. Processing in batches...`);
 
-    const BATCH_SIZE = 50;
+    const BATCH_SIZE = 100;
     const batches = [];
     for (let i = 0; i < keywords.length; i += BATCH_SIZE) {
       batches.push(keywords.slice(i, i + BATCH_SIZE));
@@ -176,14 +176,21 @@ Respond with the JSON object now:`;
             }
           ],
           temperature: 0.3,
-          max_tokens: 4000,
+          max_tokens: 8000,
           response_format: { type: "json_object" }
         }),
       });
 
+      console.log(`Batch ${batchIndex + 1}: OpenAI request completed`);
+
       if (!openaiResponse.ok) {
-        const errorData = await openaiResponse.json();
-        const errorMessage = errorData.error?.message || openaiResponse.statusText;
+        let errorMessage = openaiResponse.statusText;
+        try {
+          const errorData = await openaiResponse.json();
+          errorMessage = errorData.error?.message || errorMessage;
+        } catch (e) {
+          // If we can't parse error, use status text
+        }
         console.error(`OpenAI API error on batch ${batchIndex + 1}:`, errorMessage);
         allErrors.push({ batch: batchIndex + 1, error: errorMessage });
         continue; // Skip this batch but continue with others
