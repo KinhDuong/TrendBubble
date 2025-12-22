@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import { useAuth } from '../hooks/useAuth';
 import { Trash2, Search, Download, RefreshCw, Filter, Sparkles } from 'lucide-react';
 
 interface BrandKeywordData {
@@ -29,6 +30,8 @@ interface BrandKeywordData {
 
 export default function BrandDataManager() {
   const { brandName } = useParams<{ brandName?: string }>();
+  const navigate = useNavigate();
+  const { isAdmin } = useAuth();
   const [data, setData] = useState<BrandKeywordData[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -40,8 +43,16 @@ export default function BrandDataManager() {
   const [aiMessage, setAiMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    if (!isAdmin) {
+      navigate('/login');
+    }
+  }, [isAdmin, navigate]);
+
+  useEffect(() => {
+    if (isAdmin) {
+      fetchData();
+    }
+  }, [isAdmin]);
 
   useEffect(() => {
     if (brandName) {
@@ -69,11 +80,16 @@ export default function BrandDataManager() {
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching data:', error);
+        throw error;
+      }
 
+      console.log('Fetched data count:', keywordData?.length || 0);
       setData(keywordData || []);
 
       const uniqueBrands = Array.from(new Set(keywordData?.map(d => d.brand) || []));
+      console.log('Unique brands found:', uniqueBrands);
       setBrands(uniqueBrands);
     } catch (error) {
       console.error('Error fetching data:', error);
