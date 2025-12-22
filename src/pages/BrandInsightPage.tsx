@@ -351,7 +351,7 @@ export default function BrandInsightPage() {
           name: kw.keyword,
           searchVolume: maxVolume,
           searchVolumeRaw: maxVolume.toLocaleString(),
-          url: `https://www.google.com/search?q=${encodeURIComponent(kw.keyword)}`,
+          url: '',
           createdAt: new Date().toISOString(),
           pubDate: new Date().toISOString(),
           category: kw.brand || '',
@@ -1456,10 +1456,20 @@ export default function BrandInsightPage() {
                                   itemProp="itemListElement"
                                   itemScope
                                   itemType="https://schema.org/ListItem"
-                                  onClick={() => {
+                                  onClick={(e) => {
+                                    e.stopPropagation();
                                     const topicData = transformToTopics.find(t => t.name === topic.name);
-                                    if (topicData?.url) {
-                                      window.open(topicData.url, '_blank', 'noopener,noreferrer');
+                                    if (topicData) {
+                                      if (topicData.url) {
+                                        window.open(topicData.url, '_blank', 'noopener,noreferrer');
+                                      } else {
+                                        setTooltipData({
+                                          topic: topicData,
+                                          x: e.clientX,
+                                          y: e.clientY,
+                                          rank: topic.originalRank || index + 1
+                                        });
+                                      }
                                     }
                                   }}
                                 >
