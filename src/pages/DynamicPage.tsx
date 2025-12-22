@@ -12,6 +12,7 @@ import ComparisonPanel from '../components/ComparisonPanel';
 import ShareSnapshot from '../components/ShareSnapshot';
 import ToolSchema from '../components/ToolSchema';
 import AnimationSelector, { AnimationStyle } from '../components/AnimationSelector';
+import BubbleTooltip from '../components/BubbleTooltip';
 import { TrendingTopic, CryptoTimeframe, FAQ } from '../types';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
@@ -93,6 +94,7 @@ function DynamicPage() {
   const [animationStyle, setAnimationStyle] = useState<AnimationStyle>('default');
   const [topSearchQuery, setTopSearchQuery] = useState<string>('');
   const [faqs, setFaqs] = useState<FAQ[]>([]);
+  const [listTooltipData, setListTooltipData] = useState<{ topic: TrendingTopic; x: number; y: number; rank: number } | null>(null);
 
   const itemsPerPage = 10;
 
@@ -1034,10 +1036,14 @@ snapshotButton={null}
                             itemProp="itemListElement"
                             itemScope
                             itemType="https://schema.org/ListItem"
-                            onClick={() => {
-                              if (topic.url) {
-                                window.open(topic.url, '_blank', 'noopener,noreferrer');
-                              }
+                            onClick={(e) => {
+                              const rect = e.currentTarget.getBoundingClientRect();
+                              setListTooltipData({
+                                topic,
+                                x: rect.left + rect.width / 2,
+                                y: rect.top,
+                                rank: topic.originalRank
+                              });
                             }}
                           >
                             <meta itemProp="position" content={String(topic.originalRank)} />
@@ -1141,7 +1147,16 @@ snapshotButton={null}
                               return (
                                 <li
                                   key={index}
-                                  className={`px-2 py-1.5 transition-colors ${index < topGainers.length - 1 ? `border-b ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}` : ''} ${theme === 'dark' ? 'hover:bg-gray-700' : 'hover:bg-gray-50'}`}
+                                  className={`px-2 py-1.5 transition-colors cursor-pointer ${index < topGainers.length - 1 ? `border-b ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}` : ''} ${theme === 'dark' ? 'hover:bg-gray-700' : 'hover:bg-gray-50'}`}
+                                  onClick={(e) => {
+                                    const rect = e.currentTarget.getBoundingClientRect();
+                                    setListTooltipData({
+                                      topic,
+                                      x: rect.left + rect.width / 2,
+                                      y: rect.top,
+                                      rank: topic.originalRank
+                                    });
+                                  }}
                                 >
                                   <div className="flex-1">
                                     <div className="flex items-center gap-2 mb-0.5">
@@ -1181,7 +1196,16 @@ snapshotButton={null}
                               return (
                                 <li
                                   key={index}
-                                  className={`px-2 py-1.5 transition-colors ${index < topLosers.length - 1 ? `border-b ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}` : ''} ${theme === 'dark' ? 'hover:bg-gray-700' : 'hover:bg-gray-50'}`}
+                                  className={`px-2 py-1.5 transition-colors cursor-pointer ${index < topLosers.length - 1 ? `border-b ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}` : ''} ${theme === 'dark' ? 'hover:bg-gray-700' : 'hover:bg-gray-50'}`}
+                                  onClick={(e) => {
+                                    const rect = e.currentTarget.getBoundingClientRect();
+                                    setListTooltipData({
+                                      topic,
+                                      x: rect.left + rect.width / 2,
+                                      y: rect.top,
+                                      rank: topic.originalRank
+                                    });
+                                  }}
                                 >
                                   <div className="flex-1">
                                     <div className="flex items-center gap-2 mb-0.5">
@@ -1490,6 +1514,22 @@ snapshotButton={null}
           });
         }}
       />
+
+      {listTooltipData && (
+        <BubbleTooltip
+          topic={listTooltipData.topic}
+          x={listTooltipData.x}
+          y={listTooltipData.y}
+          rank={listTooltipData.rank}
+          theme={theme}
+          isPinned={false}
+          onTogglePin={() => {}}
+          onCompare={() => {}}
+          isComparing={false}
+          onClose={() => setListTooltipData(null)}
+          cryptoTimeframe={cryptoTimeframe}
+        />
+      )}
 
       <Footer key={`footer-${theme}`} theme={theme} />
     </>
