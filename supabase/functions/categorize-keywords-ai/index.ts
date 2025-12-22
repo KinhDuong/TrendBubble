@@ -117,6 +117,7 @@ Deno.serve(async (req: Request) => {
 
 **Available Categories:**
 - "Explosive Growth" - Keywords with exceptional growth (typically >500% YoY or >200% 3-month)
+- "High Potential" - Keywords showing acceleration patterns and breakout signals. Look for: strong 3-month growth outpacing YoY (indicates recent momentum), increasing velocity, patterns similar to past viral trends, or early signals that suggest imminent explosion
 - "Rising Star" - Keywords with strong upward momentum (100-500% YoY or 50-200% 3-month)
 - "Steady Growth" - Keywords with consistent positive growth (20-100% YoY or 10-50% 3-month)
 - "Stable" - Keywords with minimal change (-20% to +20%)
@@ -127,9 +128,10 @@ Deno.serve(async (req: Request) => {
 **Additional Context:**
 When categorizing, consider:
 1. Use your knowledge of Google Trends to understand if these keywords align with broader trending topics
-2. Consider seasonality and industry-specific patterns
-3. Look at the combination of volume, growth rate, and competition
-4. High competition + high growth often indicates a hot trend
+2. For "High Potential": Look for ACCELERATION not just growth. Compare 3-month vs YoY to spot recent momentum shifts. Use your Google Trends knowledge to identify patterns similar to keywords that became breakout hits
+3. Consider seasonality and industry-specific patterns
+4. Look at the combination of volume, growth rate, and competition
+5. High competition + accelerating growth often indicates a keyword about to explode
 
 **Keywords to Categorize (Top 50 by volume):**
 ${keywordsSummary}
