@@ -17,6 +17,7 @@ import ComparisonPanel from '../components/ComparisonPanel';
 import BrandKeywordUpload from '../components/BrandKeywordUpload';
 import KeywordAnalysis from '../components/KeywordAnalysis';
 import ToolSchema from '../components/ToolSchema';
+import BubbleTooltip from '../components/BubbleTooltip';
 import { TrendingTopic, FAQ } from '../types';
 import { TrendingUp, Download, ArrowLeft, Search, X, ChevronsLeft, ChevronsRight, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 
@@ -88,6 +89,8 @@ export default function BrandInsightPage() {
   const [rankingSortField, setRankingSortField] = useState<SortField>('rank');
   const [rankingSortDirection, setRankingSortDirection] = useState<SortDirection>('asc');
   const [comparingTopics, setComparingTopics] = useState<Set<string>>(new Set());
+  const [pinnedTopics, setPinnedTopics] = useState<Set<string>>(new Set());
+  const [tooltipData, setTooltipData] = useState<{ topic: TrendingTopic; x: number; y: number; rank: number } | null>(null);
   const [bubbleLayout, setBubbleLayout] = useState<BubbleLayout>('force');
   const [shape, setShape] = useState<FilterShape>('bubble');
   const [animationStyle, setAnimationStyle] = useState<AnimationStyle>('default');
@@ -285,6 +288,33 @@ export default function BrandInsightPage() {
     const newSearchParams = new URLSearchParams(searchParams);
     newSearchParams.set('Top', newMax.toString());
     setSearchParams(newSearchParams, { replace: true });
+  };
+
+  const handleTogglePin = (topicName: string) => {
+    setPinnedTopics(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(topicName)) {
+        newSet.delete(topicName);
+      } else {
+        newSet.add(topicName);
+      }
+      return newSet;
+    });
+  };
+
+  const handleToggleCompare = (topicName: string) => {
+    setComparingTopics(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(topicName)) {
+        newSet.delete(topicName);
+      } else {
+        if (newSet.size >= 5) {
+          return prev;
+        }
+        newSet.add(topicName);
+      }
+      return newSet;
+    });
   };
 
   const transformToTopics = useMemo((): TrendingTopic[] => {
@@ -1421,10 +1451,18 @@ export default function BrandInsightPage() {
                               {displayTopics.map((topic, index) => (
                                 <li
                                   key={index}
-                                  className={`px-2 py-2.5 transition-colors ${index < displayTopics.length - 1 ? `border-b ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}` : ''} ${theme === 'dark' ? 'hover:bg-gray-700' : 'hover:bg-gray-50'}`}
+                                  className={`px-2 py-2.5 transition-colors cursor-pointer ${index < displayTopics.length - 1 ? `border-b ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}` : ''} ${theme === 'dark' ? 'hover:bg-gray-700' : 'hover:bg-gray-50'}`}
                                   itemProp="itemListElement"
                                   itemScope
                                   itemType="https://schema.org/ListItem"
+                                  onClick={(e) => {
+                                    setTooltipData({
+                                      topic: topic as TrendingTopic,
+                                      x: e.clientX,
+                                      y: e.clientY,
+                                      rank: topic.originalRank
+                                    });
+                                  }}
                                 >
                                   <meta itemProp="position" content={String(topic.originalRank)} />
                                   <article className="flex-1" itemProp="item" itemScope itemType="https://schema.org/Thing">
@@ -1688,6 +1726,23 @@ export default function BrandInsightPage() {
           });
         }}
       />
+
+      {tooltipData && (
+        <BubbleTooltip
+          topic={tooltipData.topic}
+          x={tooltipData.x}
+          y={tooltipData.y}
+          rank={tooltipData.rank}
+          theme={theme}
+          isPinned={pinnedTopics.has(tooltipData.topic.name)}
+          onTogglePin={() => handleTogglePin(tooltipData.topic.name)}
+          onCompare={() => handleToggleCompare(tooltipData.topic.name)}
+          isComparing={comparingTopics.has(tooltipData.topic.name)}
+          onClose={() => setTooltipData(null)}
+          cryptoTimeframe="24h"
+          keywordData={keywordPerformanceData.find(kw => kw.keyword.toLowerCase().trim() === tooltipData.topic.name.toLowerCase().trim())}
+        />
+      )}
 
       <Footer key={`footer-${theme}`} theme={theme} />
     </>
