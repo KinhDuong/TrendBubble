@@ -88,30 +88,45 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    console.log(`Found ${keywords.length} keywords. Preparing for AI analysis...`);
+    console.log(`Found ${keywords.length} keywords. Processing in batches...`);
 
-    const keywordsSummary = keywords.slice(0, 50).map((kw, idx) => {
-      const parts = [
-        `${idx + 1}. "${kw.keyword}"`,
-        `Volume: ${(kw['Avg. monthly searches'] || 0).toLocaleString()}`
-      ];
+    const BATCH_SIZE = 50;
+    const batches = [];
+    for (let i = 0; i < keywords.length; i += BATCH_SIZE) {
+      batches.push(keywords.slice(i, i + BATCH_SIZE));
+    }
 
-      if (kw['Three month change'] !== undefined && kw['Three month change'] !== null) {
-        parts.push(`3-mo: ${kw['Three month change']}`);
-      }
+    console.log(`Created ${batches.length} batches of up to ${BATCH_SIZE} keywords each`);
 
-      if (kw['YoY change'] !== undefined && kw['YoY change'] !== null) {
-        parts.push(`YoY: ${kw['YoY change']}`);
-      }
+    let totalUpdated = 0;
+    const allErrors = [];
 
-      if (kw.competition) {
-        parts.push(`Comp: ${kw.competition}`);
-      }
+    for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
+      const batch = batches[batchIndex];
+      console.log(`Processing batch ${batchIndex + 1}/${batches.length} (${batch.length} keywords)...`);
 
-      return parts.join(' | ');
-    }).join('\n');
+      const keywordsSummary = batch.map((kw, idx) => {
+        const parts = [
+          `${idx + 1}. "${kw.keyword}"`,
+          `Volume: ${(kw['Avg. monthly searches'] || 0).toLocaleString()}`
+        ];
 
-    const prompt = `You are an expert SEO analyst with access to Google Trends data. Analyze the following keyword data for the brand "${brand}" and categorize EACH keyword into ONE of these growth categories:
+        if (kw['Three month change'] !== undefined && kw['Three month change'] !== null) {
+          parts.push(`3-mo: ${kw['Three month change']}`);
+        }
+
+        if (kw['YoY change'] !== undefined && kw['YoY change'] !== null) {
+          parts.push(`YoY: ${kw['YoY change']}`);
+        }
+
+        if (kw.competition) {
+          parts.push(`Comp: ${kw.competition}`);
+        }
+
+        return parts.join(' | ');
+      }).join('\n');
+
+      const prompt = `You are an expert SEO analyst with access to Google Trends data. Analyze the following keyword data for the brand "${brand}" and categorize EACH keyword into ONE of these growth categories:
 
 **Available Categories:**
 - "Explosive Growth" - Keywords with exceptional growth (typically >500% YoY or >200% 3-month)
@@ -131,141 +146,126 @@ When categorizing, consider:
 4. Look at the combination of volume, growth rate, and competition
 5. High competition + accelerating growth often indicates a keyword about to explode
 
-**Keywords to Categorize (Top 50 by volume):**
+**Keywords to Categorize:**
 ${keywordsSummary}
 
 **IMPORTANT INSTRUCTIONS:**
-1. You must categorize ALL ${Math.min(50, keywords.length)} keywords listed above
+1. You must categorize ALL ${batch.length} keywords listed above
 2. Respond with a JSON object containing a "categories" array
 3. Each object in the array must have: keyword (exact match), category (one of the categories above), reasoning (brief 1-sentence explanation)
 4. Format: {"categories": [{"keyword": "exact keyword text", "category": "Category Name", "reasoning": "Brief explanation"}]}
 
 Respond with the JSON object now:`;
 
-    console.log("Calling OpenAI API for categorization...");
-
-    const openaiResponse = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${openaiApiKey}`,
-      },
-      body: JSON.stringify({
-        model: "gpt-4o",
-        messages: [
-          {
-            role: "system",
-            content: "You are an expert SEO analyst who categorizes keywords based on growth patterns and Google Trends insights. You always respond with valid JSON arrays only, with no additional text or markdown formatting."
-          },
-          {
-            role: "user",
-            content: prompt
-          }
-        ],
-        temperature: 0.3,
-        max_tokens: 4000,
-        response_format: { type: "json_object" }
-      }),
-    });
-
-    if (!openaiResponse.ok) {
-      const errorData = await openaiResponse.json();
-      const errorMessage = errorData.error?.message || openaiResponse.statusText;
-      console.error("OpenAI API error:", errorMessage);
-
-      return new Response(
-        JSON.stringify({
-          success: false,
-          error: errorMessage,
-          errorCode: "OPENAI_ERROR"
+      const openaiResponse = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${openaiApiKey}`,
+        },
+        body: JSON.stringify({
+          model: "gpt-4o",
+          messages: [
+            {
+              role: "system",
+              content: "You are an expert SEO analyst who categorizes keywords based on growth patterns and Google Trends insights. You always respond with valid JSON objects only, with no additional text or markdown formatting."
+            },
+            {
+              role: "user",
+              content: prompt
+            }
+          ],
+          temperature: 0.3,
+          max_tokens: 4000,
+          response_format: { type: "json_object" }
         }),
-        {
-          status: openaiResponse.status,
-          headers: {
-            ...corsHeaders,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-    }
+      });
 
-    const openaiData = await openaiResponse.json();
-    const rawContent = openaiData.choices[0]?.message?.content;
-
-    if (!rawContent) {
-      throw new Error("No categorization returned from OpenAI");
-    }
-
-    console.log("Parsing AI response...");
-
-    let categorizations: CategoryResult[];
-    try {
-      const parsed = JSON.parse(rawContent);
-      console.log("Parsed object keys:", Object.keys(parsed));
-
-      // Try different possible keys
-      categorizations = parsed.categories || parsed.keywords || parsed.results || parsed.data;
-
-      // If still not an array, check if any value in the object is an array
-      if (!Array.isArray(categorizations)) {
-        const arrayValues = Object.values(parsed).filter(v => Array.isArray(v));
-        if (arrayValues.length > 0) {
-          categorizations = arrayValues[0] as CategoryResult[];
-        } else {
-          console.error("Parsed object structure:", JSON.stringify(parsed, null, 2));
-          throw new Error("No array found in response. Expected structure: {categories: [...]}");
-        }
+      if (!openaiResponse.ok) {
+        const errorData = await openaiResponse.json();
+        const errorMessage = errorData.error?.message || openaiResponse.statusText;
+        console.error(`OpenAI API error on batch ${batchIndex + 1}:`, errorMessage);
+        allErrors.push({ batch: batchIndex + 1, error: errorMessage });
+        continue; // Skip this batch but continue with others
       }
 
-      if (!Array.isArray(categorizations) || categorizations.length === 0) {
-        throw new Error("Response does not contain a valid array of categorizations");
-      }
-    } catch (parseError) {
-      console.error("Failed to parse AI response:", rawContent);
-      throw new Error(`Failed to parse AI categorization: ${parseError.message}`);
-    }
+      const openaiData = await openaiResponse.json();
+      const rawContent = openaiData.choices[0]?.message?.content;
 
-    console.log(`Parsed ${categorizations.length} categorizations. Updating database...`);
-
-    let updatedCount = 0;
-    const errors = [];
-
-    for (const cat of categorizations) {
-      if (!cat.keyword || !cat.category) {
-        console.warn("Skipping invalid categorization:", cat);
+      if (!rawContent) {
+        console.error(`No categorization returned for batch ${batchIndex + 1}`);
+        allErrors.push({ batch: batchIndex + 1, error: "No categorization returned" });
         continue;
       }
 
-      const matchingKeyword = keywords.find(
-        kw => kw.keyword.toLowerCase().trim() === cat.keyword.toLowerCase().trim()
-      );
+      let categorizations: CategoryResult[];
+      try {
+        const parsed = JSON.parse(rawContent);
 
-      if (matchingKeyword) {
-        const { error: updateError } = await supabaseClient
-          .from("brand_keyword_data")
-          .update({ ai_category: cat.category })
-          .eq("id", matchingKeyword.id);
+        // Try different possible keys
+        categorizations = parsed.categories || parsed.keywords || parsed.results || parsed.data;
 
-        if (updateError) {
-          console.error(`Failed to update keyword "${cat.keyword}":`, updateError);
-          errors.push({ keyword: cat.keyword, error: updateError.message });
-        } else {
-          updatedCount++;
+        // If still not an array, check if any value in the object is an array
+        if (!Array.isArray(categorizations)) {
+          const arrayValues = Object.values(parsed).filter(v => Array.isArray(v));
+          if (arrayValues.length > 0) {
+            categorizations = arrayValues[0] as CategoryResult[];
+          } else {
+            console.error(`Parsed object structure for batch ${batchIndex + 1}:`, JSON.stringify(parsed, null, 2));
+            throw new Error("No array found in response");
+          }
         }
-      } else {
-        console.warn(`No match found for keyword: "${cat.keyword}"`);
+
+        if (!Array.isArray(categorizations) || categorizations.length === 0) {
+          throw new Error("Response does not contain a valid array of categorizations");
+        }
+      } catch (parseError) {
+        console.error(`Failed to parse AI response for batch ${batchIndex + 1}:`, rawContent);
+        allErrors.push({ batch: batchIndex + 1, error: `Parse error: ${parseError.message}` });
+        continue;
       }
+
+      console.log(`Batch ${batchIndex + 1}: Parsed ${categorizations.length} categorizations. Updating database...`);
+
+      for (const cat of categorizations) {
+        if (!cat.keyword || !cat.category) {
+          console.warn("Skipping invalid categorization:", cat);
+          continue;
+        }
+
+        const matchingKeyword = batch.find(
+          kw => kw.keyword.toLowerCase().trim() === cat.keyword.toLowerCase().trim()
+        );
+
+        if (matchingKeyword) {
+          const { error: updateError } = await supabaseClient
+            .from("brand_keyword_data")
+            .update({ ai_category: cat.category })
+            .eq("id", matchingKeyword.id);
+
+          if (updateError) {
+            console.error(`Failed to update keyword "${cat.keyword}":`, updateError);
+            allErrors.push({ keyword: cat.keyword, error: updateError.message });
+          } else {
+            totalUpdated++;
+          }
+        } else {
+          console.warn(`No match found for keyword: "${cat.keyword}"`);
+        }
+      }
+
+      console.log(`Batch ${batchIndex + 1} complete. ${totalUpdated} keywords updated so far.`);
     }
 
-    console.log(`Successfully updated ${updatedCount} keywords`);
+    console.log(`All batches complete. Successfully updated ${totalUpdated} out of ${keywords.length} keywords`);
 
     return new Response(
       JSON.stringify({
         success: true,
-        updatedCount,
+        updatedCount: totalUpdated,
         totalKeywords: keywords.length,
-        categorizations: categorizations.slice(0, 10),
-        errors: errors.length > 0 ? errors : undefined,
+        batchesProcessed: batches.length,
+        errors: allErrors.length > 0 ? allErrors : undefined,
         timestamp: new Date().toISOString(),
       }),
       {
