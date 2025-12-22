@@ -20,6 +20,7 @@ interface CategoryResult {
   keyword: string;
   category: string;
   reasoning: string;
+  insights: string;
 }
 
 Deno.serve(async (req: Request) => {
@@ -164,8 +165,12 @@ ${keywordsSummary}
 **IMPORTANT INSTRUCTIONS:**
 1. You must categorize ALL ${batch.length} keywords listed above
 2. Respond with a JSON object containing a "categories" array
-3. Each object in the array must have: keyword (exact match), category (one of the categories above), reasoning (brief 1-sentence explanation)
-4. Format: {"categories": [{"keyword": "exact keyword text", "category": "Category Name", "reasoning": "Brief explanation"}]}
+3. Each object in the array must have:
+   - keyword (exact match)
+   - category (one of the categories above)
+   - reasoning (brief 1-sentence explanation of why this category was chosen)
+   - insights (2-3 sentence strategic analysis: growth opportunities, competitive positioning, content recommendations, or market trends)
+4. Format: {"categories": [{"keyword": "exact keyword text", "category": "Category Name", "reasoning": "Brief explanation", "insights": "Strategic insights and recommendations"}]}
 
 Respond with the JSON object now:`;
 
@@ -180,7 +185,7 @@ Respond with the JSON object now:`;
           messages: [
             {
               role: "system",
-              content: "You are an expert SEO analyst who categorizes keywords based on growth patterns and Google Trends insights. You always respond with valid JSON objects only, with no additional text or markdown formatting."
+              content: "You are an expert SEO analyst who categorizes keywords based on growth patterns and Google Trends insights, and provides strategic insights for each keyword. You always respond with valid JSON objects only, with no additional text or markdown formatting."
             },
             {
               role: "user",
@@ -257,7 +262,10 @@ Respond with the JSON object now:`;
         if (matchingKeyword) {
           const { error: updateError } = await supabaseClient
             .from("brand_keyword_data")
-            .update({ ai_category: cat.category })
+            .update({
+              ai_category: cat.category,
+              ai_insights: cat.insights || null
+            })
             .eq("id", matchingKeyword.id);
 
           if (updateError) {
