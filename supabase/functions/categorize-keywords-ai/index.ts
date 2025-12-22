@@ -60,12 +60,21 @@ Deno.serve(async (req: Request) => {
       throw new Error("Brand name is required");
     }
 
-    console.log(`Fetching keywords for brand: ${brand}`);
+    console.log(`Fetching keyword counts for brand: ${brand}`);
+
+    const { count: totalCount } = await supabaseClient
+      .from("brand_keyword_data")
+      .select("*", { count: "exact", head: true })
+      .eq("brand", brand);
+
+    console.log(`Total keywords for ${brand}: ${totalCount}`);
+    console.log(`Fetching uncategorized keywords for brand: ${brand}`);
 
     const { data: keywords, error: fetchError } = await supabaseClient
       .from("brand_keyword_data")
       .select('id, keyword, "Avg. monthly searches", "Three month change", "YoY change", competition')
       .eq("brand", brand)
+      .is("ai_category", null)
       .order('"Avg. monthly searches"', { ascending: false });
 
     if (fetchError) {
@@ -75,11 +84,14 @@ Deno.serve(async (req: Request) => {
     if (!keywords || keywords.length === 0) {
       return new Response(
         JSON.stringify({
-          success: false,
-          error: "No keywords found for this brand",
+          success: true,
+          message: "All keywords already categorized",
+          updatedCount: 0,
+          totalKeywords: totalCount || 0,
+          alreadyCategorized: totalCount || 0,
         }),
         {
-          status: 404,
+          status: 200,
           headers: {
             ...corsHeaders,
             "Content-Type": "application/json",
@@ -193,7 +205,7 @@ Respond with the JSON object now:`;
         }
         console.error(`OpenAI API error on batch ${batchIndex + 1}:`, errorMessage);
         allErrors.push({ batch: batchIndex + 1, error: errorMessage });
-        continue; // Skip this batch but continue with others
+        continue;
       }
 
       const openaiData = await openaiResponse.json();
@@ -209,10 +221,8 @@ Respond with the JSON object now:`;
       try {
         const parsed = JSON.parse(rawContent);
 
-        // Try different possible keys
         categorizations = parsed.categories || parsed.keywords || parsed.results || parsed.data;
 
-        // If still not an array, check if any value in the object is an array
         if (!Array.isArray(categorizations)) {
           const arrayValues = Object.values(parsed).filter(v => Array.isArray(v));
           if (arrayValues.length > 0) {
@@ -266,11 +276,15 @@ Respond with the JSON object now:`;
 
     console.log(`All batches complete. Successfully updated ${totalUpdated} out of ${keywords.length} keywords`);
 
+    const alreadyCategorized = (totalCount || 0) - keywords.length;
+
     return new Response(
       JSON.stringify({
         success: true,
         updatedCount: totalUpdated,
-        totalKeywords: keywords.length,
+        totalKeywords: totalCount || keywords.length,
+        alreadyCategorized,
+        remainingUncategorized: keywords.length - totalUpdated,
         batchesProcessed: batches.length,
         errors: allErrors.length > 0 ? allErrors : undefined,
         timestamp: new Date().toISOString(),
