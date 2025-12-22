@@ -49,6 +49,18 @@ export default function BrandDataManager() {
     }
   }, [brandName]);
 
+  useEffect(() => {
+    if (brandName && data.length > 0) {
+      const decodedBrand = decodeURIComponent(brandName);
+      const matchingBrands = data.filter(d =>
+        d.brand?.toLowerCase().trim() === decodedBrand.toLowerCase().trim()
+      );
+      console.log('Brand from URL:', decodedBrand);
+      console.log('Available brands:', [...new Set(data.map(d => d.brand))]);
+      console.log('Matching records:', matchingBrands.length);
+    }
+  }, [brandName, data]);
+
   const fetchData = async () => {
     setLoading(true);
     try {
@@ -195,7 +207,8 @@ export default function BrandDataManager() {
     let filtered = [...data];
 
     if (selectedBrand !== 'all') {
-      filtered = filtered.filter(d => d.brand === selectedBrand);
+      const brandLower = selectedBrand.toLowerCase().trim();
+      filtered = filtered.filter(d => d.brand?.toLowerCase().trim() === brandLower);
     }
 
     if (searchTerm) {
@@ -412,7 +425,19 @@ export default function BrandDataManager() {
 
         {filteredData.length === 0 ? (
           <div className="bg-white rounded-lg shadow-sm p-12 text-center">
-            <p className="text-gray-500 text-lg">No data found</p>
+            <p className="text-gray-500 text-lg mb-4">No data found</p>
+            {brandName && data.length > 0 && (
+              <div className="text-sm text-gray-600">
+                <p className="mb-2">Looking for brand: <span className="font-semibold">{selectedBrand}</span></p>
+                <p className="mb-2">Available brands in database:</p>
+                <div className="max-h-48 overflow-y-auto bg-gray-50 p-4 rounded-lg">
+                  {brands.map(b => (
+                    <div key={b} className="text-left">{b}</div>
+                  ))}
+                </div>
+                <p className="mt-4 text-xs text-gray-500">Check the browser console for detailed debugging info</p>
+              </div>
+            )}
           </div>
         ) : (
           <div className="bg-white rounded-lg shadow-sm overflow-hidden">
