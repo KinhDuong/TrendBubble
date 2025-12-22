@@ -1456,12 +1456,16 @@ export default function BrandInsightPage() {
                                   itemScope
                                   itemType="https://schema.org/ListItem"
                                   onClick={(e) => {
-                                    setTooltipData({
-                                      topic: topic as TrendingTopic,
-                                      x: e.clientX,
-                                      y: e.clientY,
-                                      rank: topic.originalRank
-                                    });
+                                    e.stopPropagation();
+                                    const topicData = transformToTopics.find(t => t.name === topic.name);
+                                    if (topicData) {
+                                      setTooltipData({
+                                        topic: topicData,
+                                        x: e.clientX,
+                                        y: e.clientY,
+                                        rank: topic.originalRank || index + 1
+                                      });
+                                    }
                                   }}
                                 >
                                   <meta itemProp="position" content={String(topic.originalRank)} />
