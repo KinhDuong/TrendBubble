@@ -61,8 +61,10 @@ export default function BrandDataManager() {
       if (error) throw error;
 
       setData(keywordData || []);
+      console.log('Fetched data count:', keywordData?.length);
 
       const uniqueBrands = Array.from(new Set(keywordData?.map(d => d.brand) || []));
+      console.log('Unique brands found:', uniqueBrands);
       setBrands(uniqueBrands);
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -87,8 +89,11 @@ export default function BrandDataManager() {
   }, []);
 
   useEffect(() => {
+    console.log('brandName from URL:', brandName);
     if (brandName) {
-      setSelectedBrand(decodeURIComponent(brandName));
+      const decoded = decodeURIComponent(brandName);
+      console.log('Setting selectedBrand to:', decoded);
+      setSelectedBrand(decoded);
     }
   }, [brandName]);
 
@@ -230,8 +235,11 @@ export default function BrandDataManager() {
   const getFilteredData = () => {
     let filtered = [...data];
 
+    console.log('Filtering - selectedBrand:', selectedBrand, 'data length:', data.length);
+
     if (selectedBrand !== 'all') {
       filtered = filtered.filter(d => d.brand === selectedBrand);
+      console.log('After brand filter:', filtered.length, 'matching brand:', selectedBrand);
     }
 
     if (searchTerm) {
