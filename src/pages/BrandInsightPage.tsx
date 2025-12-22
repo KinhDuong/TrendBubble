@@ -19,7 +19,7 @@ import KeywordAnalysis from '../components/KeywordAnalysis';
 import ToolSchema from '../components/ToolSchema';
 import BubbleTooltip from '../components/BubbleTooltip';
 import { TrendingTopic, FAQ } from '../types';
-import { TrendingUp, Download, ArrowLeft, Search, X, ChevronsLeft, ChevronsRight, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { TrendingUp, Download, ArrowLeft, Search, X, ChevronsLeft, ChevronsRight, ArrowUpDown, ArrowUp, ArrowDown, Sparkles, AlertCircle } from 'lucide-react';
 
 type SortField = 'name' | 'searchVolume' | 'rank' | 'month' | 'threeMonth' | 'yoy';
 type SortDirection = 'asc' | 'desc';
@@ -67,6 +67,9 @@ export default function BrandInsightPage() {
   const [latestBrandPages, setLatestBrandPages] = useState<LatestBrandPage[]>([]);
   const [faqs, setFaqs] = useState<FAQ[]>([]);
   const [loading, setLoading] = useState(true);
+  const [aiAnalysis, setAiAnalysis] = useState<string | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
 
   const getInitialMaxBubbles = () => {
     const topParam = searchParams.get('Top');
@@ -872,6 +875,58 @@ export default function BrandInsightPage() {
     }
   };
 
+  const handleAIAnalysis = async () => {
+    if (!brandName || keywordPerformanceData.length === 0) return;
+
+    setAiLoading(true);
+    setAiError(null);
+
+    try {
+      const decodedBrand = decodeURIComponent(brandName);
+
+      const keywordsForAnalysis = keywordPerformanceData.slice(0, 50).map(kw => ({
+        keyword: kw.keyword,
+        searchVolume: kw.searchVolume || 0,
+        threeMonthChange: kw.three_month_change,
+        yoyChange: kw.yoy_change,
+        competition: kw.competition,
+        bidHigh: kw.bid_high
+      }));
+
+      const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/analyze-keywords-ai`;
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          brand: decodedBrand,
+          keywords: keywordsForAnalysis,
+          totalMonths: availableMonthsCount,
+          avgVolume
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate AI analysis');
+      }
+
+      const result = await response.json();
+
+      if (result.success && result.analysis) {
+        setAiAnalysis(result.analysis);
+      } else {
+        throw new Error(result.error || 'Failed to generate analysis');
+      }
+    } catch (error) {
+      console.error('Error generating AI analysis:', error);
+      setAiError(error instanceof Error ? error.message : 'Failed to generate AI analysis');
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className={`min-h-screen flex items-center justify-center ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'}`}>
@@ -1214,6 +1269,121 @@ export default function BrandInsightPage() {
                   {keywordData.length > 0 && (
                     <div className="mt-8">
                       <KeywordAnalysis keywords={keywordData} theme={theme} />
+                    </div>
+                  )}
+
+                  {keywordData.length > 0 && (
+                    <div className="mt-8">
+                      <div className={`${theme === 'dark' ? 'bg-gradient-to-br from-blue-900/30 to-purple-900/30 border-blue-700/50' : 'bg-gradient-to-br from-blue-50 to-purple-50 border-blue-200'} rounded-lg border p-6 shadow-md`}>
+                        <div className="flex items-start justify-between mb-4">
+                          <div className="flex items-center gap-3">
+                            <div className={`p-2 rounded-lg ${theme === 'dark' ? 'bg-blue-600/20' : 'bg-blue-100'}`}>
+                              <Sparkles className={`w-6 h-6 ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`} />
+                            </div>
+                            <div>
+                              <h3 className={`text-xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                                AI-Powered Keyword Analysis
+                              </h3>
+                              <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                                Get intelligent insights and recommendations from GPT-4
+                              </p>
+                            </div>
+                          </div>
+                          {!aiAnalysis && (
+                            <button
+                              onClick={handleAIAnalysis}
+                              disabled={aiLoading}
+                              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all transform hover:scale-105 ${
+                                aiLoading
+                                  ? theme === 'dark'
+                                    ? 'bg-gray-700 text-gray-400 cursor-not-allowed'
+                                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                  : theme === 'dark'
+                                    ? 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg'
+                                    : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-md'
+                              }`}
+                            >
+                              <Sparkles className="w-4 h-4" />
+                              {aiLoading ? 'Analyzing...' : 'Generate AI Insights'}
+                            </button>
+                          )}
+                        </div>
+
+                        {aiError && (
+                          <div className={`mb-4 p-4 rounded-lg border ${theme === 'dark' ? 'bg-red-900/20 border-red-800/30 text-red-400' : 'bg-red-50 border-red-200 text-red-700'}`}>
+                            <div className="flex items-start gap-2">
+                              <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                              <div>
+                                <p className="font-semibold mb-1">Analysis Failed</p>
+                                <p className="text-sm">{aiError}</p>
+                                <button
+                                  onClick={handleAIAnalysis}
+                                  className={`mt-2 text-sm underline hover:no-underline ${theme === 'dark' ? 'text-red-300' : 'text-red-600'}`}
+                                >
+                                  Try again
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {aiLoading && (
+                          <div className="flex flex-col items-center justify-center py-12">
+                            <div className="relative">
+                              <div className={`w-16 h-16 rounded-full border-4 ${theme === 'dark' ? 'border-blue-900' : 'border-blue-200'}`}></div>
+                              <div className={`absolute top-0 left-0 w-16 h-16 rounded-full border-4 border-t-blue-600 animate-spin ${theme === 'dark' ? 'border-blue-900' : 'border-blue-200'}`}></div>
+                            </div>
+                            <p className={`mt-4 text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                              Analyzing your keyword data with AI...
+                            </p>
+                            <p className={`mt-1 text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>
+                              This may take 10-30 seconds
+                            </p>
+                          </div>
+                        )}
+
+                        {aiAnalysis && !aiLoading && (
+                          <div>
+                            <div className="flex items-center justify-between mb-4">
+                              <div className={`text-xs px-3 py-1 rounded-full ${theme === 'dark' ? 'bg-green-900/30 text-green-400' : 'bg-green-100 text-green-700'}`}>
+                                Analysis Complete
+                              </div>
+                              <button
+                                onClick={handleAIAnalysis}
+                                className={`text-sm px-3 py-1 rounded-lg transition-colors ${theme === 'dark' ? 'text-blue-400 hover:bg-blue-900/30' : 'text-blue-600 hover:bg-blue-100'}`}
+                              >
+                                Regenerate
+                              </button>
+                            </div>
+                            <div
+                              className={`prose prose-sm max-w-none ${
+                                theme === 'dark'
+                                  ? 'prose-invert prose-headings:text-white prose-p:text-gray-300 prose-strong:text-white prose-li:text-gray-300'
+                                  : 'prose-headings:text-gray-900 prose-p:text-gray-700 prose-strong:text-gray-900 prose-li:text-gray-700'
+                              }`}
+                              dangerouslySetInnerHTML={{
+                                __html: aiAnalysis
+                                  .replace(/^### /gm, '<h3 class="font-bold text-lg mt-6 mb-3">')
+                                  .replace(/^## /gm, '<h2 class="font-bold text-xl mt-6 mb-4">')
+                                  .replace(/^# /gm, '<h1 class="font-bold text-2xl mt-6 mb-4">')
+                                  .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+                                  .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+                                  .replace(/^- /gm, '<li>')
+                                  .replace(/\n\n/g, '</p><p>')
+                                  .replace(/^(?!<[h|l|p])/gm, '<p>')
+                                  .replace(/(?<![>])$/gm, '</p>')
+                              }}
+                            />
+                          </div>
+                        )}
+
+                        {!aiAnalysis && !aiLoading && !aiError && (
+                          <div className={`text-center py-8 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                            <p className="mb-2">Click the button above to generate AI-powered insights about your keyword data.</p>
+                            <p className="text-sm">Our AI will analyze trends, identify opportunities, and provide strategic recommendations.</p>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   )}
                 </div>
