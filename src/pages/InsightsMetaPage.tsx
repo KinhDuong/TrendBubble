@@ -5,7 +5,7 @@ import { supabase } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import { TrendingUp, Calendar, Database, BarChart3, AlertCircle, CheckCircle, ArrowRight } from 'lucide-react';
+import { TrendingUp, Calendar, Database, BarChart3, AlertCircle, CheckCircle, ArrowRight, Table } from 'lucide-react';
 
 interface BrandMetadata {
   brand: string;
@@ -324,13 +324,23 @@ export default function InsightsMetaPage() {
                         </div>
                       </td>
                       <td className="py-3 px-4 text-center">
-                        <button
-                          onClick={() => navigate(`/insights/${encodeURIComponent(brand.brand)}`)}
-                          className={`inline-flex items-center gap-1 px-3 py-1.5 rounded text-sm font-medium transition-colors ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}
-                        >
-                          View
-                          <ArrowRight className="w-3 h-3" />
-                        </button>
+                        <div className="flex items-center justify-center gap-2">
+                          <button
+                            onClick={() => navigate(`/insights/${encodeURIComponent(brand.brand)}`)}
+                            className={`inline-flex items-center gap-1 px-3 py-1.5 rounded text-sm font-medium transition-colors ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}
+                          >
+                            View
+                            <ArrowRight className="w-3 h-3" />
+                          </button>
+                          <button
+                            onClick={() => navigate(`/admin/brand-data`)}
+                            className={`inline-flex items-center gap-1 px-3 py-1.5 rounded text-sm font-medium transition-colors ${theme === 'dark' ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-green-600 hover:bg-green-700 text-white'}`}
+                            title="View brand data"
+                          >
+                            <Table className="w-3 h-3" />
+                            Data
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
