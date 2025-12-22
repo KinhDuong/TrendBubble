@@ -10,9 +10,9 @@ const corsHeaders = {
 interface KeywordForCategorization {
   id: number;
   keyword: string;
-  avg_monthly_searches?: number;
-  three_month_change?: number;
-  year_over_year_change?: number;
+  'Avg. monthly searches'?: number;
+  'Three month change'?: string;
+  'YoY change'?: string;
   competition?: string;
 }
 
@@ -64,9 +64,9 @@ Deno.serve(async (req: Request) => {
 
     const { data: keywords, error: fetchError } = await supabaseClient
       .from("brand_keyword_data")
-      .select("id, keyword, avg_monthly_searches, three_month_change, year_over_year_change, competition")
+      .select('id, keyword, "Avg. monthly searches", "Three month change", "YoY change", competition')
       .eq("brand", brand)
-      .order("avg_monthly_searches", { ascending: false });
+      .order('"Avg. monthly searches"', { ascending: false });
 
     if (fetchError) {
       throw new Error(`Failed to fetch keywords: ${fetchError.message}`);
@@ -93,23 +93,21 @@ Deno.serve(async (req: Request) => {
     const keywordsSummary = keywords.slice(0, 50).map((kw, idx) => {
       const parts = [
         `${idx + 1}. "${kw.keyword}"`,
-        `Volume: ${(kw.avg_monthly_searches || 0).toLocaleString()}`
+        `Volume: ${(kw['Avg. monthly searches'] || 0).toLocaleString()}`
       ];
-      
-      if (kw.three_month_change !== undefined && kw.three_month_change !== null) {
-        const change = (kw.three_month_change * 100).toFixed(1);
-        parts.push(`3-mo: ${change}%`);
+
+      if (kw['Three month change'] !== undefined && kw['Three month change'] !== null) {
+        parts.push(`3-mo: ${kw['Three month change']}`);
       }
-      
-      if (kw.year_over_year_change !== undefined && kw.year_over_year_change !== null) {
-        const change = (kw.year_over_year_change * 100).toFixed(1);
-        parts.push(`YoY: ${change}%`);
+
+      if (kw['YoY change'] !== undefined && kw['YoY change'] !== null) {
+        parts.push(`YoY: ${kw['YoY change']}`);
       }
-      
+
       if (kw.competition) {
         parts.push(`Comp: ${kw.competition}`);
       }
-      
+
       return parts.join(' | ');
     }).join('\n');
 
