@@ -480,7 +480,8 @@ export default function BrandInsightPage() {
 
   const hasYoYData = availableMonthsCount >= 24;
 
-  const filteredTopics = useMemo(() => {
+  // Helper function to get the exact category for a keyword (hierarchical, mutually exclusive)
+  const getKeywordCategoryLabel = (topicName: string): string => {
     try {
       const parsePercentage = (value: any): number => {
         if (typeof value === 'number') return value * 100;
@@ -492,6 +493,127 @@ export default function BrandInsightPage() {
         return 0;
       };
 
+      const normalizedTopicName = topicName.toLowerCase().trim();
+      const kwData = keywordPerformanceData.find(kw =>
+        kw.keyword.toLowerCase().trim() === normalizedTopicName
+      );
+
+      if (!kwData) {
+        return 'Standard';
+      }
+
+      const threeMonthChange = parsePercentage(kwData.three_month_change);
+      const yoyChange = parsePercentage(kwData.yoy_change);
+      const bidHigh = kwData.bid_high || 0;
+      const searchVolume = kwData.searchVolume;
+      const competition = kwData.competition || 'N/A';
+      const competitionValue = typeof competition === 'string' ?
+        (competition.toLowerCase() === 'low' ? 0.3 : competition.toLowerCase() === 'medium' ? 0.6 : 0.9) :
+        competition;
+
+      const monthlySearches = kwData.monthly_searches || [];
+      const hasData = monthlySearches.length > 0;
+      const mean = hasData ? monthlySearches.reduce((a, b) => a + b, 0) / monthlySearches.length : 0;
+      const variance = hasData ? monthlySearches.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / monthlySearches.length : 0;
+      const stdDev = Math.sqrt(variance);
+      const coefficientOfVariation = mean > 0 ? (stdDev / mean) * 100 : 0;
+
+      const hasGrowth = hasYoYData ? (yoyChange > 20 || threeMonthChange > 20) : threeMonthChange > 15;
+
+      // Hierarchical categorization with early returns (mutually exclusive)
+      if (hasYoYData && yoyChange > 1000) {
+        return 'Ultra Growth';
+      }
+      if (!hasYoYData && threeMonthChange > 1000) {
+        return 'Ultra Growth';
+      }
+
+      if (hasYoYData && yoyChange >= 100) {
+        return 'Extreme Growth';
+      }
+      if (!hasYoYData && threeMonthChange >= 80) {
+        return 'Extreme Growth';
+      }
+
+      if (hasYoYData && yoyChange >= 50 && yoyChange < 100) {
+        return 'High Growth';
+      }
+      if (!hasYoYData && threeMonthChange >= 60 && threeMonthChange < 80) {
+        return 'High Growth';
+      }
+
+      if (hasYoYData && yoyChange >= 40 && yoyChange < 50) {
+        return 'Rising Star';
+      }
+      if (!hasYoYData && threeMonthChange >= 40 && threeMonthChange < 60) {
+        return 'Rising Star';
+      }
+
+      if (hasYoYData && yoyChange > 30 && threeMonthChange > 20) {
+        return 'Great Potential';
+      }
+
+      if (!hasYoYData && threeMonthChange > 30) {
+        const momentumBuilding = hasYoYData && threeMonthChange > yoyChange + 20;
+        if (momentumBuilding) {
+          return 'Momentum Building';
+        }
+        return 'Has Potential';
+      }
+
+      if (hasYoYData && threeMonthChange > yoyChange + 20 && yoyChange >= 0) {
+        return 'Momentum Building';
+      }
+
+      if (hasYoYData && yoyChange >= 15 && yoyChange < 30) {
+        return 'Steady Growth';
+      }
+      if (!hasYoYData && threeMonthChange >= 15 && threeMonthChange <= 30) {
+        return 'Steady Growth';
+      }
+
+      if (threeMonthChange > 30) {
+        return 'Has Potential';
+      }
+
+      if (searchVolume >= 25000 && searchVolume <= 100000 && hasGrowth) {
+        return 'High Impact';
+      }
+
+      if (searchVolume >= 1000 && searchVolume <= 5000 && competitionValue < 0.4 && hasGrowth) {
+        return 'Quick Win';
+      }
+
+      if (coefficientOfVariation < 40 && searchVolume >= 1000) {
+        return 'Solid Performer';
+      }
+      if ((hasYoYData && yoyChange > 30 || threeMonthChange > 30) && searchVolume < 15000) {
+        return 'Hidden Gem';
+      }
+      if (bidHigh > 50) {
+        return 'High Value';
+      }
+      if (searchVolume >= 100000) {
+        return 'High Volume';
+      }
+      if (hasYoYData && yoyChange >= 0 && threeMonthChange < -5) {
+        return 'Start Declining';
+      }
+      if (hasYoYData && yoyChange < 0 && threeMonthChange < 0) {
+        return 'Declining';
+      }
+      if (!hasYoYData && threeMonthChange < -10) {
+        return 'Declining';
+      }
+
+      return 'Standard';
+    } catch (error) {
+      return 'Standard';
+    }
+  };
+
+  const filteredTopics = useMemo(() => {
+    try {
       console.log('BrandInsightPage - Filtering topics:', {
         totalTopics: transformToTopics.length,
         sampleTopicNames: transformToTopics.slice(0, 3).map(t => `"${t.name}"`),
@@ -504,119 +626,33 @@ export default function BrandInsightPage() {
 
       if (performanceFilter === 'all') return matchesSearch;
 
-      const normalizedTopicName = topic.name.toLowerCase().trim();
-      const kwData = keywordPerformanceData.find(kw =>
-        kw.keyword.toLowerCase().trim() === normalizedTopicName
-      );
+      // Get the exact category for this keyword
+      const categoryLabel = getKeywordCategoryLabel(topic.name);
 
-      if (!kwData) {
-        if (performanceFilter === 'high-growth') {
-          console.log('BrandInsightPage - Keyword not found:', {
-            topicName: `"${topic.name}"`,
-            normalized: `"${normalizedTopicName}"`,
-            searchVolume: topic.searchVolume
-          });
-        }
-        return false;
-      }
+      // Map filter values to category labels
+      const filterToCategoryMap: { [key: string]: string } = {
+        'ultra-growth': 'Ultra Growth',
+        'ultra-high-growth': 'Extreme Growth',
+        'high-growth': 'High Growth',
+        'rising-star': 'Rising Star',
+        'great-potential': 'Great Potential',
+        'steady-growth': 'Steady Growth',
+        'has-potential': 'Has Potential',
+        'momentum-building': 'Momentum Building',
+        'high-impact': 'High Impact',
+        'quick-win': 'Quick Win',
+        'start-declining': 'Start Declining',
+        'declining': 'Declining',
+        'solid-performer': 'Solid Performer',
+        'hidden-gem': 'Hidden Gem',
+        'high-value': 'High Value',
+        'high-volume': 'High Volume'
+      };
 
-      const threeMonthChange = parsePercentage(kwData.three_month_change);
-      const yoyChange = parsePercentage(kwData.yoy_change);
-      const bidHigh = kwData.bid_high || 0;
-      const searchVolume = kwData.searchVolume || topic.searchVolume;
+      const targetCategory = filterToCategoryMap[performanceFilter];
 
-      const monthlySearches = kwData.monthly_searches || [];
-      const hasData = monthlySearches.length > 0;
-      const mean = hasData ? monthlySearches.reduce((a, b) => a + b, 0) / monthlySearches.length : 0;
-      const variance = hasData ? monthlySearches.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / monthlySearches.length : 0;
-      const stdDev = Math.sqrt(variance);
-      const coefficientOfVariation = mean > 0 ? (stdDev / mean) * 100 : 0;
-      const competition = kwData.competition || 'N/A';
-      const competitionValue = typeof competition === 'string' ?
-        (competition.toLowerCase() === 'low' ? 0.3 : competition.toLowerCase() === 'medium' ? 0.6 : 0.9) :
-        competition;
-
-      switch (performanceFilter) {
-        case 'ultra-growth':
-          if (hasYoYData) {
-            return yoyChange > 1000;
-          }
-          return threeMonthChange > 1000;
-        case 'ultra-high-growth':
-          if (hasYoYData) {
-            return yoyChange >= 100;
-          }
-          return threeMonthChange >= 80;
-        case 'high-growth':
-          if (hasYoYData) {
-            return yoyChange >= 50 && yoyChange < 100;
-          }
-          return threeMonthChange >= 60 && threeMonthChange < 80;
-        case 'rising-star':
-          if (hasYoYData) {
-            return yoyChange >= 40 && yoyChange < 50;
-          }
-          return threeMonthChange >= 40 && threeMonthChange < 60;
-        case 'great-potential':
-          if (hasYoYData) {
-            return yoyChange > 30 && threeMonthChange > 20;
-          }
-          return threeMonthChange > 40;
-        case 'steady-growth':
-          if (hasYoYData) {
-            return yoyChange >= 15 && yoyChange < 30;
-          }
-          return threeMonthChange >= 15 && threeMonthChange <= 30;
-        case 'has-potential':
-          return threeMonthChange > 30;
-        case 'momentum-building':
-          if (!hasYoYData) return false;
-          return threeMonthChange > yoyChange + 20 && yoyChange >= 0;
-        case 'high-impact':
-          const hasGrowthImpact = hasYoYData ? (yoyChange > 20 || threeMonthChange > 20) : threeMonthChange > 15;
-          return searchVolume >= 25000 && searchVolume <= 100000 && hasGrowthImpact;
-        case 'quick-win':
-          const hasGrowthWin = hasYoYData ? (yoyChange > 15 || threeMonthChange > 15) : threeMonthChange > 15;
-          return searchVolume >= 1000 && searchVolume <= 5000 && competitionValue < 0.4 && hasGrowthWin;
-        case 'start-declining':
-          if (hasYoYData) {
-            return yoyChange >= 0 && threeMonthChange < -5;
-          }
-          return threeMonthChange < -10;
-        case 'declining':
-          if (hasYoYData) {
-            return yoyChange < 0 && threeMonthChange < 0;
-          }
-          return threeMonthChange < -10;
-        case 'solid-performer':
-          return coefficientOfVariation < 40 && searchVolume >= 1000;
-        case 'hidden-gem':
-          if (hasYoYData) {
-            return (yoyChange > 30 || threeMonthChange > 30) && searchVolume < 15000;
-          }
-          return threeMonthChange > 30 && searchVolume < 15000;
-        case 'seasonal-spike':
-          if (monthlySearches.length === 0) return false;
-          const positiveSearches = monthlySearches.filter(v => v > 0);
-          if (positiveSearches.length === 0) return false;
-          const maxSearch = Math.max(...positiveSearches);
-          const minSearch = Math.min(...positiveSearches);
-          const peakVariance = minSearch > 0 ? ((maxSearch - minSearch) / minSearch) * 100 : 0;
-          return peakVariance > 500;
-        case 'recovery':
-          if (hasYoYData) {
-            return yoyChange < 0 && threeMonthChange > 20;
-          }
-          return threeMonthChange > 30;
-        case 'high-value':
-          return bidHigh > 50;
-        case 'high-volume':
-          return searchVolume >= 100000;
-        case 'cost-effective':
-          return bidHigh < 5 && searchVolume >= 10000;
-        default:
-          return matchesSearch;
-      }
+      // Only show keywords that exactly match this category (mutually exclusive)
+      return matchesSearch && categoryLabel === targetCategory;
       }).filter(topic => {
         const matchesSearch = !searchQuery || topic.name.toLowerCase().includes(searchQuery.toLowerCase());
         return matchesSearch;
