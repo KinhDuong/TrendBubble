@@ -564,7 +564,7 @@ export default function BubbleTooltip({
             }}
           >
             <h4 className={`text-sm font-semibold mb-3 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-              Keyword Performance Metrics
+              Performance Metrics
             </h4>
             <div className="grid grid-cols-2 gap-3">
               <div className={`${theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-50'} rounded-lg p-3`}>
