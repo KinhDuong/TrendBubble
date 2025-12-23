@@ -2220,8 +2220,8 @@ function App() {
         <Route path="/insights/" element={<InsightPage />} />
         <Route path="/insights-meta" element={<InsightsMetaPage />} />
         <Route path="/insights-meta/" element={<InsightsMetaPage />} />
-        <Route path="/insights/:brandName" element={<BrandInsightPage />} />
-        <Route path="/insights/:brandName/" element={<BrandInsightPage />} />
+        <Route path="/insights/:username/:brandName" element={<BrandInsightPage />} />
+        <Route path="/insights/:username/:brandName/" element={<BrandInsightPage />} />
         <Route path="/upload" element={<UploadPage />} />
         <Route path="/upload/" element={<UploadPage />} />
         <Route path="/admin/pages" element={<AdminPages />} />

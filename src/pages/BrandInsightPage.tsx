@@ -55,7 +55,7 @@ interface LatestBrandPage {
 }
 
 export default function BrandInsightPage() {
-  const { brandName } = useParams<{ brandName: string }>();
+  const { username, brandName } = useParams<{ username: string; brandName: string }>();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { isAdmin, logout } = useAuth();
@@ -68,6 +68,7 @@ export default function BrandInsightPage() {
   const [latestBrandPages, setLatestBrandPages] = useState<LatestBrandPage[]>([]);
   const [faqs, setFaqs] = useState<FAQ[]>([]);
   const [loading, setLoading] = useState(true);
+  const [pageOwnerId, setPageOwnerId] = useState<string | null>(null);
   const [aiAnalysis, setAiAnalysis] = useState<string | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState<string | null>(null);
@@ -129,10 +130,10 @@ export default function BrandInsightPage() {
   }, [searchParams]);
 
   useEffect(() => {
-    if (brandName) {
+    if (brandName && username) {
       loadAllData();
     }
-  }, [brandName]);
+  }, [brandName, username]);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -146,11 +147,11 @@ export default function BrandInsightPage() {
 
   const loadAllData = async () => {
     setLoading(true);
+    await loadBrandPageData();
     await Promise.all([
       loadMonthColumns(),
       loadBrandData(),
       loadKeywordData(),
-      loadBrandPageData(),
       loadLatestBrandPages(),
       loadAIAnalysis()
     ]);
@@ -206,7 +207,7 @@ export default function BrandInsightPage() {
   };
 
   const loadBrandData = async () => {
-    if (!brandName) return;
+    if (!brandName || !pageOwnerId) return;
 
     try {
       const decodedBrand = decodeURIComponent(brandName);
@@ -215,6 +216,7 @@ export default function BrandInsightPage() {
         .from('brand_keyword_monthly_data')
         .select('*')
         .eq('brand', decodedBrand)
+        .eq('user_id', pageOwnerId)
         .order('month', { ascending: true });
 
       if (error) throw error;
@@ -231,7 +233,7 @@ export default function BrandInsightPage() {
   };
 
   const loadKeywordData = async () => {
-    if (!brandName) return;
+    if (!brandName || !pageOwnerId) return;
 
     try {
       const decodedBrand = decodeURIComponent(brandName);
@@ -239,7 +241,8 @@ export default function BrandInsightPage() {
       const { data, error } = await supabase
         .from('brand_keyword_data')
         .select('*')
-        .eq('brand', decodedBrand);
+        .eq('brand', decodedBrand)
+        .eq('user_id', pageOwnerId);
 
       if (error) throw error;
 
@@ -255,14 +258,29 @@ export default function BrandInsightPage() {
   };
 
   const loadBrandPageData = async () => {
-    if (!brandName) return;
+    if (!brandName || !username) return;
 
     try {
       const decodedBrand = decodeURIComponent(brandName);
+      const decodedUsername = decodeURIComponent(username);
+
+      const { data: profileData, error: profileError } = await supabase
+        .from('user_profiles')
+        .select('id, username')
+        .eq('username', decodedUsername)
+        .maybeSingle();
+
+      if (profileError) throw profileError;
+      if (!profileData) {
+        throw new Error('User profile not found');
+      }
+
+      setPageOwnerId(profileData.id);
 
       const { data, error } = await supabase
         .from('brand_pages')
         .select('*')
+        .eq('username', decodedUsername)
         .eq('brand', decodedBrand)
         .maybeSingle();
 
@@ -316,16 +334,17 @@ export default function BrandInsightPage() {
   };
 
   const loadLatestBrandPages = async () => {
+    if (!pageOwnerId) return;
+
     try {
-      // Get distinct brands from brand_keyword_monthly_data
       const { data: monthlyData, error: monthlyError } = await supabase
         .from('brand_keyword_monthly_data')
         .select('brand, created_at')
+        .eq('user_id', pageOwnerId)
         .order('created_at', { ascending: false });
 
       if (monthlyError) throw monthlyError;
 
-      // Get unique brands and their latest upload date
       const brandMap = new Map<string, { brand: string; created_at: string }>();
 
       monthlyData?.forEach((item) => {
@@ -334,17 +353,16 @@ export default function BrandInsightPage() {
         }
       });
 
-      // Convert to array and sort by date
       const uniqueBrands = Array.from(brandMap.values())
         .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
         .slice(0, 10);
 
-      // Try to get metadata from brand_pages if it exists, otherwise use default
       const brandsWithMetadata = await Promise.all(
         uniqueBrands.map(async (item) => {
           const { data: pageData } = await supabase
             .from('brand_pages')
             .select('id, brand, meta_title, meta_description, created_at')
+            .eq('user_id', pageOwnerId)
             .eq('brand', item.brand)
             .maybeSingle();
 
@@ -352,7 +370,6 @@ export default function BrandInsightPage() {
             return pageData;
           }
 
-          // If no page metadata exists, create a default entry
           return {
             id: `default-${item.brand}`,
             brand: item.brand,
@@ -370,7 +387,7 @@ export default function BrandInsightPage() {
   };
 
   const loadAIAnalysis = async () => {
-    if (!brandName) return;
+    if (!brandName || !pageOwnerId) return;
 
     try {
       const decodedBrand = decodeURIComponent(brandName);
@@ -379,6 +396,7 @@ export default function BrandInsightPage() {
         .from('brand_ai_analysis')
         .select('*')
         .eq('brand', decodedBrand)
+        .eq('user_id', pageOwnerId)
         .maybeSingle();
 
       if (error) throw error;
@@ -1123,7 +1141,7 @@ export default function BrandInsightPage() {
   const lastUpdated = new Date();
 
   const baseUrl = import.meta.env.VITE_BASE_URL || 'https://topbestcharts.com';
-  const pageUrl = `${baseUrl}/insights/${encodeURIComponent(decodedBrand)}/`;
+  const pageUrl = username ? `${baseUrl}/insights/${encodeURIComponent(username)}/${encodeURIComponent(decodedBrand)}/` : `${baseUrl}/insights/`;
   const topTopicNames = topTopics.slice(0, 5).map(t => t.name).join(', ');
   const keywords = topTopics.slice(0, 10).map(t => t.name).join(', ') + ', keyword trends, search volume, SEO insights, brand analysis';
 
@@ -1940,7 +1958,7 @@ export default function BrandInsightPage() {
                             {latestBrandPages.map((page) => (
                               <a
                                 key={page.id}
-                                href={`/insights/${encodeURIComponent(page.brand)}/`}
+                                href={username ? `/insights/${encodeURIComponent(username)}/${encodeURIComponent(page.brand)}/` : '#'}
                                 className={`text-sm transition-colors hover:underline ${theme === 'dark' ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'}`}
                               >
                                 {page.meta_title}
@@ -2008,7 +2026,7 @@ export default function BrandInsightPage() {
                     {latestBrandPages.map((page) => (
                       <a
                         key={page.id}
-                        href={`/insights/${encodeURIComponent(page.brand)}/`}
+                        href={username ? `/insights/${encodeURIComponent(username)}/${encodeURIComponent(page.brand)}/` : '#'}
                         className={`group block ${theme === 'dark' ? 'bg-gray-800 hover:bg-gray-750' : 'bg-white hover:bg-gray-50 border border-gray-200'} rounded-lg overflow-hidden shadow-md transition-all hover:shadow-lg h-full`}
                       >
                         <div className="flex flex-row h-full min-h-[180px]">

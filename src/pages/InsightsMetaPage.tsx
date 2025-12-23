@@ -9,6 +9,7 @@ import { TrendingUp, Calendar, Database, BarChart3, AlertCircle, CheckCircle, Ar
 
 interface BrandMetadata {
   brand: string;
+  username: string | null;
   keyword_count: number;
   total_volume: number;
   available_months: number;
@@ -55,7 +56,7 @@ export default function InsightsMetaPage() {
 
       const { data: brandPages, error: pagesError } = await supabase
         .from('brand_pages')
-        .select('brand');
+        .select('brand, username');
 
       if (pagesError) throw pagesError;
 
@@ -65,6 +66,7 @@ export default function InsightsMetaPage() {
         if (!brandMap.has(row.brand)) {
           brandMap.set(row.brand, {
             brand: row.brand,
+            username: null,
             keyword_count: 0,
             total_volume: 0,
             available_months: 0,
@@ -95,7 +97,9 @@ export default function InsightsMetaPage() {
 
       brandPages?.forEach((page) => {
         if (brandMap.has(page.brand)) {
-          brandMap.get(page.brand)!.has_page = true;
+          const metadata = brandMap.get(page.brand)!;
+          metadata.has_page = true;
+          metadata.username = page.username;
         }
       });
 
@@ -326,8 +330,15 @@ export default function InsightsMetaPage() {
                       <td className="py-3 px-4 text-center">
                         <div className="flex items-center justify-center gap-2">
                           <button
-                            onClick={() => navigate(`/insights/${encodeURIComponent(brand.brand)}`)}
-                            className={`inline-flex items-center gap-1 px-3 py-1.5 rounded text-sm font-medium transition-colors ${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}
+                            onClick={() => brand.username && navigate(`/insights/${encodeURIComponent(brand.username)}/${encodeURIComponent(brand.brand)}`)}
+                            disabled={!brand.username}
+                            className={`inline-flex items-center gap-1 px-3 py-1.5 rounded text-sm font-medium transition-colors ${
+                              !brand.username
+                                ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                                : theme === 'dark'
+                                ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                                : 'bg-blue-600 hover:bg-blue-700 text-white'
+                            }`}
                           >
                             View
                             <ArrowRight className="w-3 h-3" />
