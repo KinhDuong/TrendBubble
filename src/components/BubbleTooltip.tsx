@@ -271,19 +271,9 @@ export default function BubbleTooltip({
                 <h3 className={`font-bold text-xl flex-1 ${
                   theme === 'dark' ? 'text-white' : 'text-gray-900'
                 }`}>
-                  {topic.name.replace(/"/g, '')}
+                  {topic.category && <span>{topic.category} </span>}{topic.name.replace(/"/g, '')}
                 </h3>
               </div>
-              {topic.category && (
-                <div className="flex items-center gap-1">
-                  <Tag size={14} className={theme === 'dark' ? 'text-gray-400' : 'text-gray-500'} />
-                  <span className={`text-sm ${
-                    theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-                  }`}>
-                    {topic.category}
-                  </span>
-                </div>
-              )}
             </div>
 
             <div className={`border-t ${
@@ -344,12 +334,6 @@ export default function BubbleTooltip({
               <div className={`border-t ${
                 theme === 'dark' ? 'border-gray-700' : 'border-gray-200'
               } pt-4`}>
-                <h4 className={`text-sm font-semibold mb-2 flex items-center gap-1.5 ${
-                  theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
-                }`}>
-                  <span className="text-base">✨</span>
-                  AI Insight
-                </h4>
                 <p className={`text-sm leading-relaxed ${
                   theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
                 } whitespace-pre-wrap`}>
@@ -523,17 +507,9 @@ export default function BubbleTooltip({
               {rank}
             </div>
             <h3 className={`font-bold text-lg ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-              {topic.name.replace(/"/g, '')}
+              {topic.category && <span>{topic.category} </span>}{topic.name.replace(/"/g, '')}
             </h3>
           </div>
-          {topic.category && (
-            <div className="flex items-center gap-1 mb-2">
-              <Tag size={14} className={theme === 'dark' ? 'text-gray-400' : 'text-gray-500'} />
-              <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                {topic.category}
-              </span>
-            </div>
-          )}
         </div>
 
         <div className={`border-t ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'} pt-3 space-y-2`}>
@@ -558,9 +534,6 @@ export default function BubbleTooltip({
 
         {keywordData?.ai_insights && (
           <div>
-            <h4 className={`text-sm font-semibold mb-3 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-              AI Insight
-            </h4>
             <p className={`text-sm leading-relaxed ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'} whitespace-pre-wrap`}>
               {keywordData.ai_insights}
             </p>
