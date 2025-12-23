@@ -1512,11 +1512,6 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
               ctx.shadowColor = bubble.color;
               let shadowBlur = Math.max(8, displayRadius / 8) * colorIntensity;
 
-              if (bubble.badges?.opportunityScore && bubble.badges.opportunityScore >= 70) {
-                ctx.shadowColor = '#10B981';
-                shadowBlur *= 1.8;
-              }
-
               ctx.shadowBlur = shadowBlur;
             }
 
@@ -1682,64 +1677,6 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
             ctx.fillText(cleanVolume, bubble.x, volumeY);
           }
 
-          if (bubble.badges && displayRadius > 30) {
-            const badgeSize = Math.min(displayRadius * 0.2, 14);
-            const badgeY = bubble.y - displayRadius + badgeSize / 2;
-            let badgeX = bubble.x - displayRadius + badgeSize;
-
-            if (bubble.badges.isSeasonal) {
-              ctx.save();
-              ctx.font = `${badgeSize}px sans-serif`;
-              ctx.fillStyle = '#FFEB3B';
-              ctx.shadowColor = 'rgba(255, 235, 59, 0.8)';
-              ctx.shadowBlur = 6;
-              ctx.fillText('☀️', badgeX, badgeY);
-              ctx.shadowBlur = 0;
-              ctx.restore();
-              badgeX += badgeSize * 1.5;
-            }
-
-            if (bubble.badges.isHighValue) {
-              ctx.save();
-              ctx.font = `${badgeSize}px sans-serif`;
-              ctx.fillStyle = '#FFD700';
-              ctx.shadowColor = 'rgba(255, 215, 0, 0.8)';
-              ctx.shadowBlur = 6;
-              ctx.fillText('💎', badgeX, badgeY);
-              ctx.shadowBlur = 0;
-              ctx.restore();
-              badgeX += badgeSize * 1.5;
-            }
-
-            if (bubble.badges.opportunityScore && bubble.badges.opportunityScore >= 70) {
-              ctx.save();
-              ctx.beginPath();
-              ctx.arc(bubble.x + displayRadius - badgeSize, bubble.y + displayRadius - badgeSize, badgeSize * 0.6, 0, Math.PI * 2);
-              const gradient = ctx.createRadialGradient(
-                bubble.x + displayRadius - badgeSize,
-                bubble.y + displayRadius - badgeSize,
-                0,
-                bubble.x + displayRadius - badgeSize,
-                bubble.y + displayRadius - badgeSize,
-                badgeSize * 0.6
-              );
-              gradient.addColorStop(0, '#10B981');
-              gradient.addColorStop(1, '#059669');
-              ctx.fillStyle = gradient;
-              ctx.fill();
-              ctx.shadowColor = 'rgba(16, 185, 129, 0.8)';
-              ctx.shadowBlur = 8;
-              ctx.stroke();
-              ctx.shadowBlur = 0;
-
-              ctx.font = `bold ${badgeSize * 0.7}px sans-serif`;
-              ctx.fillStyle = '#FFFFFF';
-              ctx.textAlign = 'center';
-              ctx.textBaseline = 'middle';
-              ctx.fillText('⭐', bubble.x + displayRadius - badgeSize, bubble.y + displayRadius - badgeSize);
-              ctx.restore();
-            }
-          }
 
           ctx.globalAlpha = 1;
         }
