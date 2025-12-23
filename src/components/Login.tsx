@@ -1,13 +1,13 @@
 import { useState } from 'react';
-import { LogIn, Loader2 } from 'lucide-react';
+import { LogIn, Loader2, X } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 interface LoginProps {
-  onLogin: () => void;
+  onClose: () => void;
   theme: 'dark' | 'light';
 }
 
-export default function Login({ onLogin, theme }: LoginProps) {
+export default function Login({ onClose, theme }: LoginProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -40,7 +40,7 @@ export default function Login({ onLogin, theme }: LoginProps) {
           throw new Error('Access denied. You are not authorized as an admin.');
         }
 
-        onLogin();
+        onClose();
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to login');
@@ -50,10 +50,22 @@ export default function Login({ onLogin, theme }: LoginProps) {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4">
-      <div className={`w-full max-w-md p-8 rounded-2xl shadow-xl ${
-        theme === 'dark' ? 'bg-gray-800' : 'bg-white'
-      }`}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center px-4 bg-black/50" onClick={onClose}>
+      <div
+        className={`w-full max-w-md p-8 rounded-2xl shadow-xl relative ${
+          theme === 'dark' ? 'bg-gray-800' : 'bg-white'
+        }`}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button
+          onClick={onClose}
+          className={`absolute top-4 right-4 p-2 rounded-lg transition-colors ${
+            theme === 'dark' ? 'hover:bg-gray-700 text-gray-400 hover:text-white' : 'hover:bg-gray-100 text-gray-600 hover:text-gray-900'
+          }`}
+        >
+          <X size={20} />
+        </button>
+
         <div className="flex items-center justify-center mb-8">
           <LogIn className={`mr-3 ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`} size={32} />
           <h1 className={`text-3xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>

@@ -16,7 +16,7 @@ export default function UserProfilePage() {
     setShowLogin(true);
   };
 
-  const handleLoginSuccess = () => {
+  const handleLoginClose = () => {
     setShowLogin(false);
   };
 
@@ -68,7 +68,7 @@ export default function UserProfilePage() {
 
                 {showLogin && (
                   <div className="max-w-md mx-auto">
-                    <UserLogin onSuccess={handleLoginSuccess} />
+                    <UserLogin onClose={handleLoginClose} theme="light" />
                   </div>
                 )}
               </div>

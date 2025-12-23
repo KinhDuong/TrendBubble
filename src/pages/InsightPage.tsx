@@ -120,7 +120,7 @@ export default function InsightPage() {
     }
   };
 
-  const handleLoginSuccess = () => {
+  const handleLoginClose = () => {
     setShowLogin(false);
     loadData();
   };
@@ -135,7 +135,7 @@ export default function InsightPage() {
           onLoginClick={() => setShowLogin(true)}
           onLogout={logout}
         />
-        <UserLogin onLogin={handleLoginSuccess} theme="light" />
+        <UserLogin onClose={handleLoginClose} theme="light" />
         <Footer theme="light" />
       </>
     );
