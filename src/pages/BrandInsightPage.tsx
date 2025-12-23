@@ -476,7 +476,8 @@ export default function BrandInsightPage() {
           monthly_searches: monthlySearches,
           bid_high: kw['Top of page bid (high range)'],
           competition: kw.competition,
-          searchVolume: kw['Avg. monthly searches'] || 0
+          searchVolume: kw['Avg. monthly searches'] || 0,
+          ai_insights: kw.ai_insights
         };
       });
       console.log('BrandInsightPage - keywordPerformanceData sample:', result.slice(0, 5));

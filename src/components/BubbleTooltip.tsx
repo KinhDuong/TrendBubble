@@ -11,6 +11,7 @@ interface KeywordPerformanceData {
   bid_high?: number;
   competition?: string | number;
   searchVolume?: number;
+  ai_insights?: string;
 }
 
 interface BubbleTooltipProps {
@@ -299,6 +300,24 @@ export default function BubbleTooltip({
               )}
             </div>
 
+            {keywordData?.ai_insights && (
+              <div className={`border-t ${
+                theme === 'dark' ? 'border-gray-700' : 'border-gray-200'
+              } pt-4`}>
+                <h4 className={`text-sm font-semibold mb-2 flex items-center gap-1.5 ${
+                  theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                }`}>
+                  <span className="text-base">✨</span>
+                  AI Insight
+                </h4>
+                <p className={`text-sm leading-relaxed ${
+                  theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                } whitespace-pre-wrap`}>
+                  {keywordData.ai_insights}
+                </p>
+              </div>
+            )}
+
             {topic.monthlySearches && topic.monthlySearches.length > 0 && (
               <div className={`border-t ${
                 theme === 'dark' ? 'border-gray-700' : 'border-gray-200'
@@ -569,6 +588,23 @@ export default function BubbleTooltip({
                 </p>
               </div>
             </div>
+          </div>
+        )}
+
+        {keywordData?.ai_insights && (
+          <div
+            className={`border-t ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'} pt-3`}
+            style={{
+              animation: isExpanded ? 'slideDown 0.35s cubic-bezier(0.4, 0, 0.2, 1)' : 'none',
+            }}
+          >
+            <h4 className={`text-sm font-semibold mb-2 flex items-center gap-1.5 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+              <span className="text-base">✨</span>
+              AI Insight
+            </h4>
+            <p className={`text-sm leading-relaxed ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'} whitespace-pre-wrap`}>
+              {keywordData.ai_insights}
+            </p>
           </div>
         )}
 
