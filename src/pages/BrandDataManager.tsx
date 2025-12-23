@@ -17,6 +17,7 @@ interface BrandKeywordData {
   competition: string | null;
   ai_category: string | null;
   ai_insights: string | null;
+  sentiment: number | null;
   Currency: string | null;
   'Avg. monthly searches': number | null;
   'Three month change': string | null;
@@ -49,6 +50,7 @@ export default function BrandDataManager() {
   const [sortColumn, setSortColumn] = useState<string>('created_at');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [aiCategorizing, setAiCategorizing] = useState(false);
+  const [aiAnalyzingSentiment, setAiAnalyzingSentiment] = useState(false);
   const [aiMessage, setAiMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
   const fetchBrands = async () => {
@@ -230,6 +232,70 @@ export default function BrandDataManager() {
     }
   };
 
+  const handleSentimentAnalysis = async () => {
+    if (selectedBrand === 'all') {
+      setAiMessage({ type: 'error', text: 'Please select a specific brand to analyze' });
+      setTimeout(() => setAiMessage(null), 5000);
+      return;
+    }
+
+    if (!confirm(`This will use AI to analyze the sentiment of all keywords for "${selectedBrand}". This may take a moment and will use OpenAI API credits. Continue?`)) {
+      return;
+    }
+
+    setAiAnalyzingSentiment(true);
+    setAiMessage(null);
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('Not authenticated');
+
+      const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/analyze-sentiment-ai`;
+
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ brand: selectedBrand })
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Response error:', errorText);
+        throw new Error(`HTTP ${response.status}: ${errorText || 'Failed to analyze sentiment'}`);
+      }
+
+      const result = await response.json();
+
+      if (!result.success) {
+        if (result.errorCode === 'MISSING_API_KEY') {
+          throw new Error('OpenAI API key not configured. Please add OPENAI_API_KEY to your Supabase Edge Function secrets.');
+        }
+        throw new Error(result.error || 'Failed to analyze sentiment');
+      }
+
+      await fetchData();
+
+      setAiMessage({
+        type: 'success',
+        text: result.message || `Successfully analyzed ${result.updatedCount} of ${result.totalKeywords} keywords!${result.hasMoreToProcess ? ' Click again to continue processing.' : ''}`
+      });
+
+      setTimeout(() => setAiMessage(null), 15000);
+    } catch (error: any) {
+      console.error('Error during sentiment analysis:', error);
+      setAiMessage({
+        type: 'error',
+        text: error.message || 'Failed to analyze sentiment. Please check console for details.'
+      });
+      setTimeout(() => setAiMessage(null), 10000);
+    } finally {
+      setAiAnalyzingSentiment(false);
+    }
+  };
+
   const exportToCSV = () => {
     const filteredData = getFilteredData();
     if (filteredData.length === 0) return;
@@ -310,6 +376,7 @@ export default function BrandDataManager() {
       'brand',
       'keyword',
       'ai_category',
+      'sentiment',
       'ai_insights',
       'Currency',
       'Avg. monthly searches',
@@ -329,14 +396,20 @@ export default function BrandDataManager() {
       .filter(key =>
         !priorityColumns.includes(key) &&
         !monthColumns.includes(key) &&
-        !['id', 'user_id', 'created_at', 'search_volume', 'competition', 'ai_category', 'ai_insights'].includes(key)
+        !['id', 'user_id', 'created_at', 'search_volume', 'competition', 'ai_category', 'ai_insights', 'sentiment'].includes(key)
       );
 
     return [...priorityColumns, ...monthColumns, ...otherColumns];
   };
 
-  const formatValue = (value: any): string => {
+  const formatValue = (value: any, column: string): string => {
     if (value === null || value === undefined) return '-';
+
+    if (column === 'sentiment' && typeof value === 'number') {
+      const percentage = Math.round(((value + 1) / 2) * 100);
+      return `${percentage}%`;
+    }
+
     if (typeof value === 'number') {
       if (value >= 1000) {
         return value.toLocaleString();
@@ -344,6 +417,18 @@ export default function BrandDataManager() {
       return value.toString();
     }
     return String(value);
+  };
+
+  const getSentimentColor = (sentiment: number | null): string => {
+    if (sentiment === null || sentiment === undefined) return 'bg-gray-200';
+
+    const percentage = ((sentiment + 1) / 2) * 100;
+
+    if (percentage >= 70) return 'bg-green-500';
+    if (percentage >= 55) return 'bg-green-400';
+    if (percentage >= 45) return 'bg-yellow-400';
+    if (percentage >= 30) return 'bg-orange-400';
+    return 'bg-red-500';
   };
 
   const filteredData = getFilteredData();
@@ -472,29 +557,48 @@ export default function BrandDataManager() {
                 <div className="flex items-start gap-3">
                   <Sparkles className="w-5 h-5 text-purple-600 mt-0.5 flex-shrink-0" />
                   <div className="flex-1">
-                    <h3 className="font-semibold text-purple-900 mb-1">AI Keyword Categorization & Insights</h3>
+                    <h3 className="font-semibold text-purple-900 mb-1">AI Keyword Analysis</h3>
                     <p className="text-sm text-purple-700 mb-3">
-                      Use AI to analyze your keywords and assign growth categories based on Google Trends insights.
-                      The AI will categorize keywords into groups like "Explosive Growth", "Rising Star", "Steady Growth", etc.,
-                      and provide strategic insights including growth opportunities, competitive positioning, and content recommendations.
+                      Use AI to analyze your keywords. Categorization assigns growth categories based on Google Trends insights
+                      (Explosive Growth, Rising Star, etc.) with strategic insights. Sentiment Analysis evaluates keyword sentiment
+                      from negative to positive as a percentage.
                     </p>
-                    <button
-                      onClick={handleAICategorization}
-                      disabled={aiCategorizing}
-                      className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {aiCategorizing ? (
-                        <>
-                          <RefreshCw className="w-5 h-5 animate-spin" />
-                          Analyzing with AI...
-                        </>
-                      ) : (
-                        <>
-                          <Sparkles className="w-5 h-5" />
-                          Generate AI Categories
-                        </>
-                      )}
-                    </button>
+                    <div className="flex gap-3">
+                      <button
+                        onClick={handleAICategorization}
+                        disabled={aiCategorizing || aiAnalyzingSentiment}
+                        className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {aiCategorizing ? (
+                          <>
+                            <RefreshCw className="w-5 h-5 animate-spin" />
+                            Analyzing with AI...
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="w-5 h-5" />
+                            Generate AI Categories
+                          </>
+                        )}
+                      </button>
+                      <button
+                        onClick={handleSentimentAnalysis}
+                        disabled={aiCategorizing || aiAnalyzingSentiment}
+                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {aiAnalyzingSentiment ? (
+                          <>
+                            <RefreshCw className="w-5 h-5 animate-spin" />
+                            Analyzing Sentiment...
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="w-5 h-5" />
+                            Sentiment Analysis
+                          </>
+                        )}
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -572,7 +676,19 @@ export default function BrandDataManager() {
                       </td>
                       {columns.map(column => (
                         <td key={column} className={`px-4 py-3 text-gray-900 ${column === 'ai_insights' ? 'max-w-md' : 'whitespace-nowrap'}`}>
-                          {formatValue(row[column])}
+                          {column === 'sentiment' && row[column] !== null && row[column] !== undefined ? (
+                            <div className="flex items-center gap-2">
+                              <div className="w-24 h-6 bg-gray-200 rounded-full overflow-hidden">
+                                <div
+                                  className={`h-full ${getSentimentColor(row[column])} transition-all`}
+                                  style={{ width: `${Math.round(((row[column] + 1) / 2) * 100)}%` }}
+                                />
+                              </div>
+                              <span className="text-sm font-medium">{formatValue(row[column], column)}</span>
+                            </div>
+                          ) : (
+                            formatValue(row[column], column)
+                          )}
                         </td>
                       ))}
                     </tr>
