@@ -9,7 +9,7 @@ import { TrendingUp, Calendar, Database, BarChart3, AlertCircle, CheckCircle, Ar
 
 interface BrandMetadata {
   brand: string;
-  username: string | null;
+  user_id: string | null;
   keyword_count: number;
   total_volume: number;
   available_months: number;
@@ -56,7 +56,7 @@ export default function InsightsMetaPage() {
 
       const { data: brandPages, error: pagesError } = await supabase
         .from('brand_pages')
-        .select('brand, username');
+        .select('brand, user_id');
 
       if (pagesError) throw pagesError;
 
@@ -66,7 +66,7 @@ export default function InsightsMetaPage() {
         if (!brandMap.has(row.brand)) {
           brandMap.set(row.brand, {
             brand: row.brand,
-            username: null,
+            user_id: null,
             keyword_count: 0,
             total_volume: 0,
             available_months: 0,
@@ -99,7 +99,7 @@ export default function InsightsMetaPage() {
         if (brandMap.has(page.brand)) {
           const metadata = brandMap.get(page.brand)!;
           metadata.has_page = true;
-          metadata.username = page.username;
+          metadata.user_id = page.user_id;
         }
       });
 
@@ -330,10 +330,10 @@ export default function InsightsMetaPage() {
                       <td className="py-3 px-4 text-center">
                         <div className="flex items-center justify-center gap-2">
                           <button
-                            onClick={() => brand.username && navigate(`/insights/${encodeURIComponent(brand.username)}/${encodeURIComponent(brand.brand)}`)}
-                            disabled={!brand.username}
+                            onClick={() => brand.user_id && navigate(`/insights/${encodeURIComponent(brand.user_id)}/${encodeURIComponent(brand.brand)}`)}
+                            disabled={!brand.user_id}
                             className={`inline-flex items-center gap-1 px-3 py-1.5 rounded text-sm font-medium transition-colors ${
-                              !brand.username
+                              !brand.user_id
                                 ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
                                 : theme === 'dark'
                                 ? 'bg-blue-600 hover:bg-blue-700 text-white'

@@ -55,7 +55,7 @@ interface LatestBrandPage {
 }
 
 export default function BrandInsightPage() {
-  const { username, brandName } = useParams<{ username: string; brandName: string }>();
+  const { userId, brandName } = useParams<{ userId: string; brandName: string }>();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { isAdmin, logout } = useAuth();
@@ -130,10 +130,10 @@ export default function BrandInsightPage() {
   }, [searchParams]);
 
   useEffect(() => {
-    if (brandName && username) {
+    if (brandName && userId) {
       loadAllData();
     }
-  }, [brandName, username]);
+  }, [brandName, userId]);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -258,29 +258,18 @@ export default function BrandInsightPage() {
   };
 
   const loadBrandPageData = async () => {
-    if (!brandName || !username) return;
+    if (!brandName || !userId) return;
 
     try {
       const decodedBrand = decodeURIComponent(brandName);
-      const decodedUsername = decodeURIComponent(username);
+      const decodedUserId = decodeURIComponent(userId);
 
-      const { data: profileData, error: profileError } = await supabase
-        .from('user_profiles')
-        .select('id, username')
-        .eq('username', decodedUsername)
-        .maybeSingle();
-
-      if (profileError) throw profileError;
-      if (!profileData) {
-        throw new Error('User profile not found');
-      }
-
-      setPageOwnerId(profileData.id);
+      setPageOwnerId(decodedUserId);
 
       const { data, error } = await supabase
         .from('brand_pages')
         .select('*')
-        .eq('username', decodedUsername)
+        .eq('user_id', decodedUserId)
         .eq('brand', decodedBrand)
         .maybeSingle();
 
@@ -1141,7 +1130,7 @@ export default function BrandInsightPage() {
   const lastUpdated = new Date();
 
   const baseUrl = import.meta.env.VITE_BASE_URL || 'https://topbestcharts.com';
-  const pageUrl = username ? `${baseUrl}/insights/${encodeURIComponent(username)}/${encodeURIComponent(decodedBrand)}/` : `${baseUrl}/insights/`;
+  const pageUrl = userId ? `${baseUrl}/insights/${encodeURIComponent(userId)}/${encodeURIComponent(decodedBrand)}/` : `${baseUrl}/insights/`;
   const topTopicNames = topTopics.slice(0, 5).map(t => t.name).join(', ');
   const keywords = topTopics.slice(0, 10).map(t => t.name).join(', ') + ', keyword trends, search volume, SEO insights, brand analysis';
 
@@ -1958,7 +1947,7 @@ export default function BrandInsightPage() {
                             {latestBrandPages.map((page) => (
                               <a
                                 key={page.id}
-                                href={username ? `/insights/${encodeURIComponent(username)}/${encodeURIComponent(page.brand)}/` : '#'}
+                                href={userId ? `/insights/${encodeURIComponent(userId)}/${encodeURIComponent(page.brand)}/` : '#'}
                                 className={`text-sm transition-colors hover:underline ${theme === 'dark' ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'}`}
                               >
                                 {page.meta_title}
@@ -2026,7 +2015,7 @@ export default function BrandInsightPage() {
                     {latestBrandPages.map((page) => (
                       <a
                         key={page.id}
-                        href={username ? `/insights/${encodeURIComponent(username)}/${encodeURIComponent(page.brand)}/` : '#'}
+                        href={userId ? `/insights/${encodeURIComponent(userId)}/${encodeURIComponent(page.brand)}/` : '#'}
                         className={`group block ${theme === 'dark' ? 'bg-gray-800 hover:bg-gray-750' : 'bg-white hover:bg-gray-50 border border-gray-200'} rounded-lg overflow-hidden shadow-md transition-all hover:shadow-lg h-full`}
                       >
                         <div className="flex flex-row h-full min-h-[180px]">
