@@ -1,5 +1,5 @@
 import { TrendingTopic, CryptoTimeframe } from '../types';
-import { TrendingUp, Tag, Pin, X, DollarSign, Target, TrendingDown, BarChart3, Maximize2 } from 'lucide-react';
+import { TrendingUp, Tag, Pin, X, DollarSign, Target, TrendingDown, BarChart3 } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { useState, useEffect } from 'react';
 
@@ -268,11 +268,20 @@ export default function BubbleTooltip({
                 >
                   {rank}
                 </div>
-                <h3 className={`font-bold text-xl flex-1 ${
-                  theme === 'dark' ? 'text-white' : 'text-gray-900'
-                }`}>
-                  {topic.category && <span>{topic.category} </span>}{topic.name.replace(/"/g, '')}
-                </h3>
+                <div className="flex items-center justify-between flex-1 gap-2">
+                  <h3 className={`font-bold text-xl ${
+                    theme === 'dark' ? 'text-white' : 'text-gray-900'
+                  }`}>
+                    {topic.name.replace(/"/g, '')}
+                  </h3>
+                  {topic.category && (
+                    <span className={`font-bold text-xl ${
+                      theme === 'dark' ? 'text-white' : 'text-gray-900'
+                    }`}>
+                      {topic.category}
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -467,22 +476,6 @@ export default function BubbleTooltip({
         }}
       >
         <div className="absolute top-2 right-2 flex gap-1">
-          {keywordData && !isMobile && (
-            <button
-              onClick={() => setIsExpanded(!isExpanded)}
-              className={`p-1 rounded-full ${
-                theme === 'dark' ? 'hover:bg-gray-700' : 'hover:bg-gray-100'
-              } transition-colors`}
-              title={isExpanded ? 'Collapse' : 'Expand details'}
-            >
-              <Maximize2
-                size={16}
-                className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} transition-transform ${
-                  isExpanded ? 'rotate-180' : ''
-                }`}
-              />
-            </button>
-          )}
           <button
             onClick={onClose}
             className={`p-1 rounded-full ${
@@ -506,9 +499,16 @@ export default function BubbleTooltip({
             >
               {rank}
             </div>
-            <h3 className={`font-bold text-lg ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-              {topic.category && <span>{topic.category} </span>}{topic.name.replace(/"/g, '')}
-            </h3>
+            <div className="flex items-center justify-between flex-1 gap-2">
+              <h3 className={`font-bold text-lg ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                {topic.name.replace(/"/g, '')}
+              </h3>
+              {topic.category && (
+                <span className={`font-bold text-lg ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                  {topic.category}
+                </span>
+              )}
+            </div>
           </div>
         </div>
 
