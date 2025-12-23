@@ -359,19 +359,17 @@ export default function BubbleTooltip({
               <div className={`border-t ${
                 theme === 'dark' ? 'border-gray-700' : 'border-gray-200'
               } pt-4`}>
-                <div className={`${theme === 'dark' ? 'bg-gradient-to-r from-purple-900/30 to-blue-900/30 border-purple-500/30' : 'bg-gradient-to-r from-purple-50 to-blue-50 border-purple-200'} rounded-lg p-3 border`}>
-                  <h4 className={`text-sm font-bold mb-2 flex items-center gap-1.5 ${
-                    theme === 'dark' ? 'text-purple-300' : 'text-purple-900'
-                  }`}>
-                    <span className="text-base">✨</span>
-                    AI Insight
-                  </h4>
-                  <p className={`text-sm leading-relaxed ${
-                    theme === 'dark' ? 'text-gray-200' : 'text-gray-800'
-                  } whitespace-pre-wrap`}>
-                    {keywordData.ai_insights}
-                  </p>
-                </div>
+                <h4 className={`text-sm font-semibold mb-2 flex items-center gap-1.5 ${
+                  theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                }`}>
+                  <span className="text-base">✨</span>
+                  AI Insight
+                </h4>
+                <p className={`text-sm leading-relaxed ${
+                  theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                } whitespace-pre-wrap`}>
+                  {keywordData.ai_insights}
+                </p>
               </div>
             )}
 
@@ -679,15 +677,13 @@ export default function BubbleTooltip({
 
         {keywordData?.ai_insights && (
           <div className={`border-t ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'} pt-3`}>
-            <div className={`${theme === 'dark' ? 'bg-gradient-to-r from-purple-900/30 to-blue-900/30 border-purple-500/30' : 'bg-gradient-to-r from-purple-50 to-blue-50 border-purple-200'} rounded-lg p-3 border`}>
-              <h4 className={`text-sm font-bold mb-2 flex items-center gap-1.5 ${theme === 'dark' ? 'text-purple-300' : 'text-purple-900'}`}>
-                <span className="text-base">✨</span>
-                AI Insight
-              </h4>
-              <p className={`text-sm leading-relaxed ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'} whitespace-pre-wrap`}>
-                {keywordData.ai_insights}
-              </p>
-            </div>
+            <h4 className={`text-sm font-semibold mb-2 flex items-center gap-1.5 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+              <span className="text-base">✨</span>
+              AI Insight
+            </h4>
+            <p className={`text-sm leading-relaxed ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'} whitespace-pre-wrap`}>
+              {keywordData.ai_insights}
+            </p>
           </div>
         )}
 
