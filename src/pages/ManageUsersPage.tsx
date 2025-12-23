@@ -34,26 +34,25 @@ export default function ManageUsersPage() {
     try {
       setIsLoading(true);
 
-      const { data: { users: authUsers }, error: authError } = await supabase.auth.admin.listUsers();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error('No active session');
+      }
 
-      if (authError) throw authError;
+      const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/manage-users/list`;
+      const response = await fetch(apiUrl, {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+      });
 
-      const { data: adminUsers, error: adminError } = await supabase
-        .from('admin_users')
-        .select('id');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to load users');
+      }
 
-      if (adminError) throw adminError;
-
-      const adminIds = new Set(adminUsers?.map(a => a.id) || []);
-
-      const formattedUsers: UserData[] = (authUsers || []).map(u => ({
-        id: u.id,
-        email: u.email || 'No email',
-        created_at: u.created_at,
-        last_sign_in_at: u.last_sign_in_at,
-        is_admin: adminIds.has(u.id)
-      }));
-
+      const { users: formattedUsers } = await response.json();
       setUsers(formattedUsers);
     } catch (error: any) {
       console.error('Error loading users:', error);
@@ -70,23 +69,27 @@ export default function ManageUsersPage() {
 
   const toggleAdmin = async (userId: string, currentIsAdmin: boolean) => {
     try {
-      if (currentIsAdmin) {
-        const { error } = await supabase
-          .from('admin_users')
-          .delete()
-          .eq('id', userId);
-
-        if (error) throw error;
-        showMessage('success', 'Admin privileges removed');
-      } else {
-        const { error } = await supabase
-          .from('admin_users')
-          .insert({ id: userId, email: users.find(u => u.id === userId)?.email });
-
-        if (error) throw error;
-        showMessage('success', 'Admin privileges granted');
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error('No active session');
       }
 
+      const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/manage-users/toggle-admin`;
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userId, isAdmin: currentIsAdmin }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to update admin status');
+      }
+
+      showMessage('success', currentIsAdmin ? 'Admin privileges removed' : 'Admin privileges granted');
       await loadUsers();
     } catch (error: any) {
       console.error('Error toggling admin:', error);
@@ -105,9 +108,25 @@ export default function ManageUsersPage() {
     }
 
     try {
-      const { error } = await supabase.auth.admin.deleteUser(userId);
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error('No active session');
+      }
 
-      if (error) throw error;
+      const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/manage-users/delete`;
+      const response = await fetch(apiUrl, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userId }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to delete user');
+      }
 
       showMessage('success', `User ${email} deleted successfully`);
       await loadUsers();
