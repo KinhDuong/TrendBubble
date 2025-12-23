@@ -61,8 +61,8 @@ export default function BubbleTooltip({
   // Desktop: small or expanded size
   // Increase height when AI insights are available
   const hasAIInsights = keywordData?.ai_insights ? true : false;
-  const tooltipWidth = !isMobile && isExpanded ? 600 : 380;
-  const tooltipHeight = !isMobile && isExpanded ? 700 : (hasAIInsights ? 420 : 280);
+  const tooltipWidth = !isMobile && isExpanded ? 700 : 450;
+  const tooltipHeight = !isMobile && isExpanded ? 800 : (hasAIInsights ? 480 : 320);
   const offset = 10;
   const padding = 20;
 
@@ -556,6 +556,18 @@ export default function BubbleTooltip({
           )}
         </div>
 
+        {keywordData?.ai_insights && (
+          <div className={`border-t ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'} pt-3`}>
+            <h4 className={`text-sm font-semibold mb-2 flex items-center gap-1.5 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+              <span className="text-base">✨</span>
+              AI Insight
+            </h4>
+            <p className={`text-sm leading-relaxed ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'} whitespace-pre-wrap`}>
+              {keywordData.ai_insights}
+            </p>
+          </div>
+        )}
+
         {isExpanded && keywordData && (
           <div
             className={`border-t ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'} pt-3`}
@@ -644,18 +656,6 @@ export default function BubbleTooltip({
                 </div>
               )}
             </div>
-          </div>
-        )}
-
-        {keywordData?.ai_insights && (
-          <div className={`border-t ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'} pt-3`}>
-            <h4 className={`text-sm font-semibold mb-2 flex items-center gap-1.5 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-              <span className="text-base">✨</span>
-              AI Insight
-            </h4>
-            <p className={`text-sm leading-relaxed ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'} whitespace-pre-wrap`}>
-              {keywordData.ai_insights}
-            </p>
           </div>
         )}
 
