@@ -63,6 +63,7 @@ export default function BrandInsightPage() {
 
   const [monthlyData, setMonthlyData] = useState<MonthlyData[]>([]);
   const [keywordData, setKeywordData] = useState<any[]>([]);
+  const [monthColumns, setMonthColumns] = useState<string[]>([]);
   const [brandPageData, setBrandPageData] = useState<BrandPageData | null>(null);
   const [latestBrandPages, setLatestBrandPages] = useState<LatestBrandPage[]>([]);
   const [faqs, setFaqs] = useState<FAQ[]>([]);
@@ -146,6 +147,7 @@ export default function BrandInsightPage() {
   const loadAllData = async () => {
     setLoading(true);
     await Promise.all([
+      loadMonthColumns(),
       loadBrandData(),
       loadKeywordData(),
       loadBrandPageData(),
@@ -153,6 +155,54 @@ export default function BrandInsightPage() {
       loadAIAnalysis()
     ]);
     setLoading(false);
+  };
+
+  const loadMonthColumns = async () => {
+    try {
+      // Fetch one row to get all column names
+      const { data, error } = await supabase
+        .from('brand_keyword_data')
+        .select('*')
+        .limit(1)
+        .maybeSingle();
+
+      if (error) {
+        console.error('Error loading month columns:', error);
+        return;
+      }
+
+      if (data) {
+        // Extract all column names that start with "Searches:"
+        const searchColumns = Object.keys(data).filter(key => key.startsWith('Searches:'));
+
+        // Sort columns chronologically
+        const sortedColumns = searchColumns.sort((a, b) => {
+          const monthOrder: { [key: string]: number } = {
+            'Jan': 1, 'Feb': 2, 'Mar': 3, 'Apr': 4, 'May': 5, 'Jun': 6,
+            'Jul': 7, 'Aug': 8, 'Sep': 9, 'Oct': 10, 'Nov': 11, 'Dec': 12
+          };
+
+          const parseColumn = (col: string) => {
+            const parts = col.replace('Searches: ', '').split(' ');
+            const month = parts[0];
+            const year = parseInt(parts[1]);
+            return { year, month: monthOrder[month] || 0 };
+          };
+
+          const aData = parseColumn(a);
+          const bData = parseColumn(b);
+
+          if (aData.year !== bData.year) {
+            return aData.year - bData.year;
+          }
+          return aData.month - bData.month;
+        });
+
+        setMonthColumns(sortedColumns);
+      }
+    } catch (error) {
+      console.error('Error loading month columns:', error);
+    }
   };
 
   const loadBrandData = async () => {
@@ -386,24 +436,9 @@ export default function BrandInsightPage() {
 
   const transformToTopics = useMemo((): TrendingTopic[] => {
     try {
-      if (!keywordData || keywordData.length === 0) {
+      if (!keywordData || keywordData.length === 0 || monthColumns.length === 0) {
         return [];
       }
-
-      const monthColumns = [
-        'Searches: Dec 2021', 'Searches: Jan 2022', 'Searches: Feb 2022', 'Searches: Mar 2022',
-        'Searches: Apr 2022', 'Searches: May 2022', 'Searches: Jun 2022', 'Searches: Jul 2022',
-        'Searches: Aug 2022', 'Searches: Sep 2022', 'Searches: Oct 2022', 'Searches: Nov 2022',
-        'Searches: Dec 2022', 'Searches: Jan 2023', 'Searches: Feb 2023', 'Searches: Mar 2023',
-        'Searches: Apr 2023', 'Searches: May 2023', 'Searches: Jun 2023', 'Searches: Jul 2023',
-        'Searches: Aug 2023', 'Searches: Sep 2023', 'Searches: Oct 2023', 'Searches: Nov 2023',
-        'Searches: Dec 2023', 'Searches: Jan 2024', 'Searches: Feb 2024', 'Searches: Mar 2024',
-        'Searches: Apr 2024', 'Searches: May 2024', 'Searches: Jun 2024', 'Searches: Jul 2024',
-        'Searches: Aug 2024', 'Searches: Sep 2024', 'Searches: Oct 2024', 'Searches: Nov 2024',
-        'Searches: Dec 2024', 'Searches: Jan 2025', 'Searches: Feb 2025', 'Searches: Mar 2025',
-        'Searches: Apr 2025', 'Searches: May 2025', 'Searches: Jun 2025', 'Searches: Jul 2025',
-        'Searches: Aug 2025', 'Searches: Sep 2025', 'Searches: Oct 2025', 'Searches: Nov 2025'
-      ];
 
       const result = keywordData.map(kw => {
         const monthlyVolumes: number[] = [];
@@ -442,30 +477,16 @@ export default function BrandInsightPage() {
       console.error('Error transforming topics:', error);
       return [];
     }
-  }, [keywordData]);
+  }, [keywordData, monthColumns]);
 
   const keywordPerformanceData = useMemo(() => {
     try {
-      if (!keywordData || keywordData.length === 0) {
+      if (!keywordData || keywordData.length === 0 || monthColumns.length === 0) {
         return [];
       }
 
       const result = keywordData.map(kw => {
         const monthlySearches: number[] = [];
-        const monthColumns = [
-          'Searches: Dec 2021', 'Searches: Jan 2022', 'Searches: Feb 2022', 'Searches: Mar 2022',
-          'Searches: Apr 2022', 'Searches: May 2022', 'Searches: Jun 2022', 'Searches: Jul 2022',
-          'Searches: Aug 2022', 'Searches: Sep 2022', 'Searches: Oct 2022', 'Searches: Nov 2022',
-          'Searches: Dec 2022', 'Searches: Jan 2023', 'Searches: Feb 2023', 'Searches: Mar 2023',
-          'Searches: Apr 2023', 'Searches: May 2023', 'Searches: Jun 2023', 'Searches: Jul 2023',
-          'Searches: Aug 2023', 'Searches: Sep 2023', 'Searches: Oct 2023', 'Searches: Nov 2023',
-          'Searches: Dec 2023', 'Searches: Jan 2024', 'Searches: Feb 2024', 'Searches: Mar 2024',
-          'Searches: Apr 2024', 'Searches: May 2024', 'Searches: Jun 2024', 'Searches: Jul 2024',
-          'Searches: Aug 2024', 'Searches: Sep 2024', 'Searches: Oct 2024', 'Searches: Nov 2024',
-          'Searches: Dec 2024', 'Searches: Jan 2025', 'Searches: Feb 2025', 'Searches: Mar 2025',
-          'Searches: Apr 2025', 'Searches: May 2025', 'Searches: Jun 2025', 'Searches: Jul 2025',
-          'Searches: Aug 2025', 'Searches: Sep 2025', 'Searches: Oct 2025', 'Searches: Nov 2025'
-        ];
 
         monthColumns.forEach(col => {
           if (kw[col] !== null && kw[col] !== undefined) {
@@ -491,23 +512,10 @@ export default function BrandInsightPage() {
       console.error('Error processing keyword performance data:', error);
       return [];
     }
-  }, [keywordData]);
+  }, [keywordData, monthColumns]);
 
   const availableMonthsCount = useMemo(() => {
-    if (keywordData.length === 0) return 0;
-
-    const monthColumns = [
-      'Searches: Dec 2021', 'Searches: Jan 2022', 'Searches: Feb 2022', 'Searches: Mar 2022',
-      'Searches: Apr 2022', 'Searches: May 2022', 'Searches: Jun 2022', 'Searches: Jul 2022',
-      'Searches: Aug 2022', 'Searches: Sep 2022', 'Searches: Oct 2022', 'Searches: Nov 2022',
-      'Searches: Dec 2022', 'Searches: Jan 2023', 'Searches: Feb 2023', 'Searches: Mar 2023',
-      'Searches: Apr 2023', 'Searches: May 2023', 'Searches: Jun 2023', 'Searches: Jul 2023',
-      'Searches: Aug 2023', 'Searches: Sep 2023', 'Searches: Oct 2023', 'Searches: Nov 2023',
-      'Searches: Dec 2023', 'Searches: Jan 2024', 'Searches: Feb 2024', 'Searches: Mar 2024',
-      'Searches: Apr 2024', 'Searches: May 2024', 'Searches: Jun 2024', 'Searches: Jul 2024',
-      'Searches: Aug 2024', 'Searches: Sep 2024', 'Searches: Oct 2024', 'Searches: Nov 2024',
-      'Searches: Dec 2024'
-    ];
+    if (keywordData.length === 0 || monthColumns.length === 0) return 0;
 
     const sampleKeyword = keywordData[0];
     let count = 0;
@@ -518,7 +526,7 @@ export default function BrandInsightPage() {
     });
 
     return count;
-  }, [keywordData]);
+  }, [keywordData, monthColumns]);
 
   const hasYoYData = availableMonthsCount >= 24;
 
@@ -1102,19 +1110,6 @@ export default function BrandInsightPage() {
   }
 
   const decodedBrand = decodeURIComponent(brandName || '');
-
-  const monthColumns = [
-    'Searches: Dec 2021', 'Searches: Jan 2022', 'Searches: Feb 2022', 'Searches: Mar 2022',
-    'Searches: Apr 2022', 'Searches: May 2022', 'Searches: Jun 2022', 'Searches: Jul 2022',
-    'Searches: Aug 2022', 'Searches: Sep 2022', 'Searches: Oct 2022', 'Searches: Nov 2022',
-    'Searches: Dec 2022', 'Searches: Jan 2023', 'Searches: Feb 2023', 'Searches: Mar 2023',
-    'Searches: Apr 2023', 'Searches: May 2023', 'Searches: Jun 2023', 'Searches: Jul 2023',
-    'Searches: Aug 2023', 'Searches: Sep 2023', 'Searches: Oct 2023', 'Searches: Nov 2023',
-    'Searches: Dec 2023', 'Searches: Jan 2024', 'Searches: Feb 2024', 'Searches: Mar 2024',
-    'Searches: Apr 2024', 'Searches: May 2024', 'Searches: Jun 2024', 'Searches: Jul 2024',
-    'Searches: Aug 2024', 'Searches: Sep 2024', 'Searches: Oct 2024', 'Searches: Nov 2024',
-    'Searches: Dec 2024'
-  ];
 
   const monthlyTotals = monthColumns.map(col => {
     return keywordData.reduce((sum, kw) => sum + (Number(kw[col]) || 0), 0);
