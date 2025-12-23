@@ -477,7 +477,8 @@ export default function BrandInsightPage() {
           bid_high: kw['Top of page bid (high range)'],
           competition: kw.competition,
           searchVolume: kw['Avg. monthly searches'] || 0,
-          ai_insights: kw.ai_insights
+          ai_insights: kw.ai_insights,
+          sentiment: kw.sentiment
         };
       });
       console.log('BrandInsightPage - keywordPerformanceData sample:', result.slice(0, 5));
@@ -884,7 +885,8 @@ export default function BrandInsightPage() {
       competition: kwData?.competition || 'N/A',
       bidHigh: kwData?.bid_high || 0,
       brand: topic.category,
-      category: getKeywordCategory(topic.name)
+      category: getKeywordCategory(topic.name),
+      sentiment: kwData?.sentiment
     };
   });
 
@@ -1851,6 +1853,33 @@ export default function BrandInsightPage() {
                                               <span className={`font-semibold ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
                                                 ${topic.bidHigh.toFixed(2)}
                                               </span>
+                                            </div>
+                                          )}
+                                          {topic.sentiment !== undefined && topic.sentiment !== null && (
+                                            <div className="col-span-2 md:col-span-1">
+                                              <div className="flex items-center gap-1.5">
+                                                <span className={`${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'} text-xs`}>Sentiment:</span>
+                                                <div className="flex-1 min-w-[60px]">
+                                                  <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
+                                                    <div
+                                                      className={`h-full transition-all ${
+                                                        (() => {
+                                                          const percentage = ((topic.sentiment + 1) / 2) * 100;
+                                                          if (percentage >= 70) return 'bg-green-500';
+                                                          if (percentage >= 55) return 'bg-green-400';
+                                                          if (percentage >= 45) return 'bg-yellow-400';
+                                                          if (percentage >= 30) return 'bg-orange-400';
+                                                          return 'bg-red-500';
+                                                        })()
+                                                      }`}
+                                                      style={{ width: `${Math.round(((topic.sentiment + 1) / 2) * 100)}%` }}
+                                                    />
+                                                  </div>
+                                                </div>
+                                                <span className={`font-semibold text-xs ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'} whitespace-nowrap`}>
+                                                  {Math.round(((topic.sentiment + 1) / 2) * 100)}%
+                                                </span>
+                                              </div>
                                             </div>
                                           )}
                                         </div>

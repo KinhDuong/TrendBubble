@@ -12,6 +12,7 @@ interface KeywordPerformanceData {
   competition?: string | number;
   searchVolume?: number;
   ai_insights?: string;
+  sentiment?: number;
 }
 
 interface BubbleTooltipProps {
@@ -202,6 +203,32 @@ export default function BubbleTooltip({
     return 'text-green-500';
   };
 
+  const formatSentiment = (sentiment: number | undefined) => {
+    if (sentiment === undefined || sentiment === null) return 'N/A';
+    const percentage = Math.round(((sentiment + 1) / 2) * 100);
+    return `${percentage}%`;
+  };
+
+  const getSentimentColor = (sentiment: number | undefined): string => {
+    if (sentiment === undefined || sentiment === null) return 'bg-gray-400';
+    const percentage = ((sentiment + 1) / 2) * 100;
+    if (percentage >= 70) return 'bg-green-500';
+    if (percentage >= 55) return 'bg-green-400';
+    if (percentage >= 45) return 'bg-yellow-400';
+    if (percentage >= 30) return 'bg-orange-400';
+    return 'bg-red-500';
+  };
+
+  const getSentimentLabel = (sentiment: number | undefined): string => {
+    if (sentiment === undefined || sentiment === null) return 'Unknown';
+    const percentage = ((sentiment + 1) / 2) * 100;
+    if (percentage >= 70) return 'Positive';
+    if (percentage >= 55) return 'Somewhat Positive';
+    if (percentage >= 45) return 'Neutral';
+    if (percentage >= 30) return 'Somewhat Negative';
+    return 'Negative';
+  };;
+
   if (isMobile) {
     return createPortal(
       <>
@@ -297,6 +324,32 @@ export default function BubbleTooltip({
                 }`}>
                   <span className="font-bold">Note:</span> {topic.note}
                 </p>
+              )}
+
+              {keywordData?.sentiment !== undefined && keywordData?.sentiment !== null && (
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                      Sentiment
+                    </span>
+                    <span className={`text-sm font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                      {getSentimentLabel(keywordData.sentiment)}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1">
+                      <div className="w-full h-6 bg-gray-200 rounded-full overflow-hidden">
+                        <div
+                          className={`h-full ${getSentimentColor(keywordData.sentiment)} transition-all`}
+                          style={{ width: `${Math.round(((keywordData.sentiment + 1) / 2) * 100)}%` }}
+                        />
+                      </div>
+                    </div>
+                    <span className={`text-base font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                      {formatSentiment(keywordData.sentiment)}
+                    </span>
+                  </div>
+                </div>
               )}
             </div>
 
@@ -587,6 +640,35 @@ export default function BubbleTooltip({
                   {formatCompetition(keywordData.competition)}
                 </p>
               </div>
+
+              {keywordData.sentiment !== undefined && keywordData.sentiment !== null && (
+                <div className={`${theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-50'} rounded-lg p-3 col-span-2`}>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-sm">😊</span>
+                    <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                      Sentiment
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="flex-1">
+                      <div className="w-full h-6 bg-gray-200 rounded-full overflow-hidden">
+                        <div
+                          className={`h-full ${getSentimentColor(keywordData.sentiment)} transition-all`}
+                          style={{ width: `${Math.round(((keywordData.sentiment + 1) / 2) * 100)}%` }}
+                        />
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-end">
+                      <span className={`text-lg font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                        {formatSentiment(keywordData.sentiment)}
+                      </span>
+                      <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                        {getSentimentLabel(keywordData.sentiment)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}
