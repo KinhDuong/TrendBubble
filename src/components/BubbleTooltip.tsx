@@ -635,7 +635,7 @@ export default function BubbleTooltip({
             <h4 className={`text-sm font-semibold mb-3 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
               Monthly Search Volumes
             </h4>
-            <div className={`flex flex-wrap gap-2 overflow-y-auto ${isExpanded ? 'max-h-48' : 'max-h-32'}`}>
+            <div className={`flex flex-wrap gap-2 overflow-y-auto ${isExpanded ? 'max-h-60' : 'max-h-44'}`}>
               {topic.monthlySearches.map((monthData, index) => {
                 if (!monthData || typeof monthData.volume !== 'number') {
                   return null;
