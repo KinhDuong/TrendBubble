@@ -537,16 +537,14 @@ export default function BubbleTooltip({
         </div>
 
         <div className={`border-t ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'} pt-3 space-y-2`}>
-          <div className="flex items-center justify-between">
-            <span className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-              Search Volume
+          <h4 className={`text-sm font-semibold mb-3 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+            Search Volume
+          </h4>
+          <div className="flex items-center gap-1 -mt-1">
+            <TrendingUp size={14} className="text-blue-500" />
+            <span className={`font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+              {getDisplayVolume()}
             </span>
-            <div className="flex items-center gap-1">
-              <TrendingUp size={14} className="text-blue-500" />
-              <span className={`font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                {getDisplayVolume()}
-              </span>
-            </div>
           </div>
 
           {topic.note && (
@@ -558,7 +556,7 @@ export default function BubbleTooltip({
 
         {keywordData?.ai_insights && (
           <div className={`border-t ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'} pt-3`}>
-            <h4 className={`text-sm font-semibold mb-2 flex items-center gap-1.5 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+            <h4 className={`text-sm font-semibold mb-3 flex items-center gap-1.5 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
               <span className="text-base">✨</span>
               AI Insight
             </h4>
@@ -661,7 +659,7 @@ export default function BubbleTooltip({
 
         {topic.monthlySearches && topic.monthlySearches.length > 0 && (
           <div className={`border-t ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'} pt-3`}>
-            <h4 className={`text-xs font-semibold mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+            <h4 className={`text-sm font-semibold mb-3 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
               Monthly Search Volumes
             </h4>
             <div className={`flex flex-wrap gap-2 overflow-y-auto ${isExpanded ? 'max-h-48' : 'max-h-32'}`}>
