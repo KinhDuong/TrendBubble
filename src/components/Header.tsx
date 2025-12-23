@@ -143,6 +143,12 @@ export default function Header({ theme, isAdmin, onLoginClick, onLogout, title =
             >
               About
             </a>
+            <a
+              href="/profile/"
+              className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'} transition-colors`}
+            >
+              User Profile
+            </a>
           </nav>
 
           <div className={`flex items-center gap-2 ${isSearchExpanded ? 'flex-1 md:flex-none' : ''}`}>
