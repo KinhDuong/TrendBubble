@@ -44,13 +44,13 @@ export default function InsightsMetaPage() {
     try {
       const { data: monthlyData, error: monthlyError } = await supabase
         .from('brand_keyword_monthly_data')
-        .select('brand, month, keyword_count, total_volume');
+        .select('brand, month, keyword_count, total_volume, user_id');
 
       if (monthlyError) throw monthlyError;
 
       const { data: keywordData, error: keywordError } = await supabase
         .from('brand_keyword_data')
-        .select('brand, keyword');
+        .select('brand, keyword, user_id');
 
       if (keywordError) throw keywordError;
 
@@ -63,10 +63,11 @@ export default function InsightsMetaPage() {
       const brandMap = new Map<string, BrandMetadata>();
 
       monthlyData?.forEach((row) => {
-        if (!brandMap.has(row.brand)) {
-          brandMap.set(row.brand, {
+        const key = `${row.user_id}:${row.brand}`;
+        if (!brandMap.has(key)) {
+          brandMap.set(key, {
             brand: row.brand,
-            user_id: null,
+            user_id: row.user_id,
             keyword_count: 0,
             total_volume: 0,
             available_months: 0,
@@ -77,7 +78,7 @@ export default function InsightsMetaPage() {
           });
         }
 
-        const metadata = brandMap.get(row.brand)!;
+        const metadata = brandMap.get(key)!;
         metadata.available_months++;
         metadata.total_volume += row.total_volume;
 
@@ -90,16 +91,17 @@ export default function InsightsMetaPage() {
       });
 
       keywordData?.forEach((row) => {
-        if (brandMap.has(row.brand)) {
-          brandMap.get(row.brand)!.keyword_count++;
+        const key = `${row.user_id}:${row.brand}`;
+        if (brandMap.has(key)) {
+          brandMap.get(key)!.keyword_count++;
         }
       });
 
       brandPages?.forEach((page) => {
-        if (brandMap.has(page.brand)) {
-          const metadata = brandMap.get(page.brand)!;
+        const key = `${page.user_id}:${page.brand}`;
+        if (brandMap.has(key)) {
+          const metadata = brandMap.get(key)!;
           metadata.has_page = true;
-          metadata.user_id = page.user_id;
         }
       });
 
