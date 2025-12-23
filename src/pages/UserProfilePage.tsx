@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { User as UserIcon, Mail, Calendar, LogOut, LogIn } from 'lucide-react';
+import { User as UserIcon, Mail, Calendar, LogOut, LogIn, Users } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { useAuth } from '../hooks/useAuth';
@@ -120,13 +121,24 @@ export default function UserProfilePage() {
 
                 {isAdmin && (
                   <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                    <div className="flex items-center gap-2 text-blue-800">
-                      <UserIcon size={20} />
-                      <span className="font-semibold">Admin Account</span>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="flex items-center gap-2 text-blue-800">
+                          <UserIcon size={20} />
+                          <span className="font-semibold">Admin Account</span>
+                        </div>
+                        <p className="text-blue-700 text-sm mt-1">
+                          You have administrator privileges on this site.
+                        </p>
+                      </div>
+                      <Link
+                        to="/admin/users"
+                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-md hover:shadow-lg whitespace-nowrap"
+                      >
+                        <Users size={18} />
+                        <span>Manage Users</span>
+                      </Link>
                     </div>
-                    <p className="text-blue-700 text-sm mt-1">
-                      You have administrator privileges on this site.
-                    </p>
                   </div>
                 )}
 

@@ -26,6 +26,7 @@ import BrandDataManager from './pages/BrandDataManager';
 import InsightsMetaPage from './pages/InsightsMetaPage';
 import UploadPage from './pages/UploadPage';
 import UserProfilePage from './pages/UserProfilePage';
+import ManageUsersPage from './pages/ManageUsersPage';
 import { TrendingTopic } from './types';
 import { supabase } from './lib/supabase';
 import { useAuth } from './hooks/useAuth';
@@ -2231,6 +2232,7 @@ function App() {
         <Route path="/admin/data" element={<AdminData />} />
         <Route path="/admin/brand-data" element={<BrandDataManager />} />
         <Route path="/admin/brand-data/:brandName" element={<BrandDataManager />} />
+        <Route path="/admin/users" element={<ManageUsersPage />} />
         <Route path="*" element={<DynamicPage />} />
       </Routes>
     </BrowserRouter>
