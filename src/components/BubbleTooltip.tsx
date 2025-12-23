@@ -305,21 +305,6 @@ export default function BubbleTooltip({
                 </div>
               </div>
 
-              <div className="flex items-center justify-between">
-                <span className={`text-sm ${
-                  theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-                }`}>
-                  Source
-                </span>
-                <span className={`text-sm font-medium px-2 py-1 rounded ${
-                  topic.source === 'user_upload'
-                    ? theme === 'dark' ? 'bg-green-900/30 text-green-400' : 'bg-green-100 text-green-700'
-                    : theme === 'dark' ? 'bg-blue-900/30 text-blue-400' : 'bg-blue-100 text-blue-700'
-                }`}>
-                  {getSourceLabel(topic.source)}
-                </span>
-              </div>
-
               {topic.note && (
                 <p className={`text-sm leading-relaxed ${
                   theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
@@ -562,19 +547,6 @@ export default function BubbleTooltip({
                 {getDisplayVolume()}
               </span>
             </div>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <span className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-              Source
-            </span>
-            <span className={`text-sm font-medium px-2 py-0.5 rounded ${
-              topic.source === 'user_upload'
-                ? theme === 'dark' ? 'bg-green-900/30 text-green-400' : 'bg-green-100 text-green-700'
-                : theme === 'dark' ? 'bg-blue-900/30 text-blue-400' : 'bg-blue-100 text-blue-700'
-            }`}>
-              {getSourceLabel(topic.source)}
-            </span>
           </div>
 
           {topic.note && (
