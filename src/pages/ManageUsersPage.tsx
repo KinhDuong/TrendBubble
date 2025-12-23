@@ -16,19 +16,28 @@ interface UserData {
 }
 
 export default function ManageUsersPage() {
-  const { user, isAdmin, logout } = useAuth();
+  const { user, isAdmin, logout, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [users, setUsers] = useState<UserData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
   useEffect(() => {
+    console.log('ManageUsersPage mounted. isAdmin:', isAdmin, 'user:', user, 'authLoading:', authLoading);
+
+    if (authLoading) {
+      console.log('Auth still loading, waiting...');
+      return;
+    }
+
     if (!isAdmin) {
+      console.log('User is not admin, redirecting to profile');
       navigate('/profile');
       return;
     }
+    console.log('User is admin, loading users');
     loadUsers();
-  }, [isAdmin, navigate]);
+  }, [isAdmin, authLoading, navigate]);
 
   const loadUsers = async () => {
     try {
@@ -144,6 +153,17 @@ export default function ManageUsersPage() {
       day: 'numeric'
     });
   };
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="text-gray-600 mt-4">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!isAdmin) {
     return null;
