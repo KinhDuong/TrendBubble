@@ -2,7 +2,7 @@ import { createClient } from 'npm:@supabase/supabase-js@2';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
+  'Access-Control-Allow-Methods': 'GET, POST, DELETE, PUT, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Client-Info, Apikey',
 };
 
@@ -180,6 +180,55 @@ Deno.serve(async (req: Request) => {
 
       return new Response(
         JSON.stringify({ success: true }),
+        {
+          status: 200,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      );
+    }
+
+    // Create user
+    if (req.method === 'POST' && path.includes('/create')) {
+      const { email, password, isAdmin } = await req.json();
+
+      if (!email || !password) {
+        return new Response(
+          JSON.stringify({ error: 'Email and password are required' }),
+          {
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          }
+        );
+      }
+
+      if (password.length < 6) {
+        return new Response(
+          JSON.stringify({ error: 'Password must be at least 6 characters' }),
+          {
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          }
+        );
+      }
+
+      const { data: newUser, error: createError } = await supabase.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true,
+      });
+
+      if (createError) throw createError;
+
+      if (isAdmin && newUser.user) {
+        const { error: adminError } = await supabase
+          .from('admin_users')
+          .insert({ id: newUser.user.id, email: newUser.user.email });
+
+        if (adminError) throw adminError;
+      }
+
+      return new Response(
+        JSON.stringify({ success: true, user: newUser.user }),
         {
           status: 200,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },

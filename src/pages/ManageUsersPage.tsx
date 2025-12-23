@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Users, Shield, Trash2, UserPlus, AlertCircle, CheckCircle } from 'lucide-react';
+import { Users, Shield, Trash2, UserPlus, AlertCircle, CheckCircle, X } from 'lucide-react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { useAuth } from '../hooks/useAuth';
@@ -21,21 +21,21 @@ export default function ManageUsersPage() {
   const [users, setUsers] = useState<UserData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [newUserEmail, setNewUserEmail] = useState('');
+  const [newUserPassword, setNewUserPassword] = useState('');
+  const [newUserIsAdmin, setNewUserIsAdmin] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
 
   useEffect(() => {
-    console.log('ManageUsersPage mounted. isAdmin:', isAdmin, 'user:', user, 'authLoading:', authLoading);
-
     if (authLoading) {
-      console.log('Auth still loading, waiting...');
       return;
     }
 
     if (!isAdmin) {
-      console.log('User is not admin, redirecting to profile');
       navigate('/profile');
       return;
     }
-    console.log('User is admin, loading users');
     loadUsers();
   }, [isAdmin, authLoading, navigate]);
 
@@ -145,6 +145,60 @@ export default function ManageUsersPage() {
     }
   };
 
+  const createUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!newUserEmail || !newUserPassword) {
+      showMessage('error', 'Email and password are required');
+      return;
+    }
+
+    if (newUserPassword.length < 6) {
+      showMessage('error', 'Password must be at least 6 characters');
+      return;
+    }
+
+    try {
+      setIsCreating(true);
+
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error('No active session');
+      }
+
+      const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/manage-users/create`;
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: newUserEmail,
+          password: newUserPassword,
+          isAdmin: newUserIsAdmin,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create user');
+      }
+
+      showMessage('success', `User ${newUserEmail} created successfully`);
+      setShowCreateModal(false);
+      setNewUserEmail('');
+      setNewUserPassword('');
+      setNewUserIsAdmin(false);
+      await loadUsers();
+    } catch (error: any) {
+      console.error('Error creating user:', error);
+      showMessage('error', error.message || 'Failed to create user');
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
   const formatDate = (dateString: string | null) => {
     if (!dateString) return 'Never';
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -224,6 +278,13 @@ export default function ManageUsersPage() {
                   <p className="text-gray-600">
                     Total users: <span className="font-semibold text-gray-900">{users.length}</span>
                   </p>
+                  <button
+                    onClick={() => setShowCreateModal(true)}
+                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-md hover:shadow-lg"
+                  >
+                    <UserPlus size={18} />
+                    <span>Add User</span>
+                  </button>
                 </div>
 
                 <div className="overflow-x-auto">
@@ -314,6 +375,97 @@ export default function ManageUsersPage() {
           </div>
         </div>
       </main>
+
+      {showCreateModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 relative">
+            <button
+              onClick={() => {
+                setShowCreateModal(false);
+                setNewUserEmail('');
+                setNewUserPassword('');
+                setNewUserIsAdmin(false);
+              }}
+              className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors"
+              disabled={isCreating}
+            >
+              <X size={20} />
+            </button>
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Create New User</h2>
+
+            <form onSubmit={createUser} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  value={newUserEmail}
+                  onChange={(e) => setNewUserEmail(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="user@example.com"
+                  required
+                  disabled={isCreating}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Password
+                </label>
+                <input
+                  type="password"
+                  value={newUserPassword}
+                  onChange={(e) => setNewUserPassword(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Minimum 6 characters"
+                  required
+                  minLength={6}
+                  disabled={isCreating}
+                />
+                <p className="text-xs text-gray-500 mt-1">Minimum 6 characters</p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="isAdmin"
+                  checked={newUserIsAdmin}
+                  onChange={(e) => setNewUserIsAdmin(e.target.checked)}
+                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  disabled={isCreating}
+                />
+                <label htmlFor="isAdmin" className="text-sm font-medium text-gray-700">
+                  Grant admin privileges
+                </label>
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowCreateModal(false);
+                    setNewUserEmail('');
+                    setNewUserPassword('');
+                    setNewUserIsAdmin(false);
+                  }}
+                  className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+                  disabled={isCreating}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={isCreating}
+                >
+                  {isCreating ? 'Creating...' : 'Create User'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       <Footer />
     </div>
