@@ -22,7 +22,7 @@ interface MonthlyData {
 
 export default function InsightPage() {
   const navigate = useNavigate();
-  const { user, isAdmin, logout } = useAuth();
+  const { user, isAdmin, logout, isLoading: authLoading } = useAuth();
   const [showLogin, setShowLogin] = useState(false);
   const [monthlyData, setMonthlyData] = useState<MonthlyData[]>([]);
   const [brands, setBrands] = useState<string[]>([]);
@@ -30,12 +30,15 @@ export default function InsightPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (authLoading) {
+      return;
+    }
     if (user) {
       loadData();
     } else {
       setLoading(false);
     }
-  }, [user]);
+  }, [user, authLoading]);
 
   const loadData = async () => {
     setLoading(true);
@@ -124,6 +127,24 @@ export default function InsightPage() {
     setShowLogin(false);
     loadData();
   };
+
+  if (authLoading) {
+    return (
+      <>
+        <Header
+          theme="light"
+          isAdmin={isAdmin}
+          isLoggedIn={!!user}
+          onLoginClick={() => setShowLogin(true)}
+          onLogout={logout}
+        />
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        </div>
+        <Footer theme="light" />
+      </>
+    );
+  }
 
   if (showLogin && !user) {
     return (

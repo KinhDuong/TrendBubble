@@ -8,21 +8,24 @@ import { supabase } from '../lib/supabase';
 import Login from '../components/Login';
 
 export default function AdminPages() {
-  const { isAdmin, user, logout } = useAuth();
+  const { isAdmin, user, logout, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     const savedTheme = localStorage.getItem('theme');
     return (savedTheme === 'dark' || savedTheme === 'light') ? savedTheme : 'dark';
   });
-  const [showLogin, setShowLogin] = useState(!isAdmin);
+  const [showLogin, setShowLogin] = useState(false);
 
   useEffect(() => {
+    if (authLoading) {
+      return;
+    }
     if (!isAdmin) {
       setShowLogin(true);
     } else {
       setShowLogin(false);
     }
-  }, [isAdmin]);
+  }, [isAdmin, authLoading]);
 
   const handleThemeChange = (newTheme: 'dark' | 'light') => {
     setTheme(newTheme);
@@ -34,8 +37,26 @@ export default function AdminPages() {
     window.location.reload();
   };
 
+  if (authLoading) {
+    return (
+      <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'}`}>
+        <Header
+          theme={theme}
+          isAdmin={isAdmin}
+          isLoggedIn={!!user}
+          onThemeChange={handleThemeChange}
+          onLoginClick={() => {}}
+          onLogout={logout}
+        />
+        <div className="flex items-center justify-center py-24">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        </div>
+      </div>
+    );
+  }
+
   if (!isAdmin && showLogin) {
-    return <Login onLogin={handleLogin} theme={theme} />;
+    return <Login onClose={handleLogin} theme={theme} />;
   }
 
   if (!isAdmin) {

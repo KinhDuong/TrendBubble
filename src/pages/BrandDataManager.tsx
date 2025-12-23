@@ -36,12 +36,12 @@ interface BrandKeywordData {
 export default function BrandDataManager() {
   const { brandName } = useParams<{ brandName?: string }>();
   const navigate = useNavigate();
-  const { isAdmin, user, logout } = useAuth();
+  const { isAdmin, user, logout, isLoading: authLoading } = useAuth();
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     const savedTheme = localStorage.getItem('theme');
     return (savedTheme === 'dark' || savedTheme === 'light') ? savedTheme : 'dark';
   });
-  const [showLogin, setShowLogin] = useState(!isAdmin);
+  const [showLogin, setShowLogin] = useState(false);
   const [data, setData] = useState<BrandKeywordData[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -95,6 +95,9 @@ export default function BrandDataManager() {
   };
 
   useEffect(() => {
+    if (authLoading) {
+      return;
+    }
     if (!isAdmin) {
       setShowLogin(true);
     } else {
@@ -102,7 +105,7 @@ export default function BrandDataManager() {
       fetchBrands();
       fetchData();
     }
-  }, [isAdmin, brandName]);
+  }, [isAdmin, brandName, authLoading]);
 
   useEffect(() => {
     if (brandName) {
@@ -118,8 +121,25 @@ export default function BrandDataManager() {
     window.location.reload();
   };
 
+  if (authLoading) {
+    return (
+      <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'}`}>
+        <Header
+          theme={theme}
+          isAdmin={isAdmin}
+          isLoggedIn={!!user}
+          onLoginClick={() => {}}
+          onLogout={logout}
+        />
+        <div className="flex items-center justify-center py-24">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        </div>
+      </div>
+    );
+  }
+
   if (!isAdmin && showLogin) {
-    return <Login onLogin={handleLogin} theme={theme} />;
+    return <Login onClose={handleLogin} theme={theme} />;
   }
 
   if (!isAdmin) {

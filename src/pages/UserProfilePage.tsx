@@ -8,8 +8,8 @@ import { useAuth } from '../hooks/useAuth';
 import UserLogin from '../components/UserLogin';
 
 export default function UserProfilePage() {
-  const { isAdmin, user, logout } = useAuth();
-  const [showLogin, setShowLogin] = useState(!user);
+  const { isAdmin, user, logout, isLoading } = useAuth();
+  const [showLogin, setShowLogin] = useState(false);
 
   const handleLogout = async () => {
     await logout();
@@ -27,6 +27,35 @@ export default function UserProfilePage() {
       day: 'numeric'
     });
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+        <Helmet>
+          <title>User Profile - Top Best Charts</title>
+          <meta name="description" content="Manage your user profile and account settings" />
+        </Helmet>
+
+        <Header
+          theme="light"
+          isAdmin={isAdmin}
+          isLoggedIn={!!user}
+          onLoginClick={() => setShowLogin(true)}
+          onLogout={handleLogout}
+        />
+
+        <main className="max-w-4xl mx-auto px-4 py-12">
+          <div className="bg-white rounded-2xl shadow-xl overflow-hidden p-8">
+            <div className="flex items-center justify-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            </div>
+          </div>
+        </main>
+
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
