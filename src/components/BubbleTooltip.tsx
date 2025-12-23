@@ -557,7 +557,7 @@ export default function BubbleTooltip({
         </div>
 
         {keywordData?.ai_insights && (
-          <div className="pt-3">
+          <div>
             <h4 className={`text-sm font-semibold mb-3 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
               AI Insight
             </h4>
@@ -569,7 +569,6 @@ export default function BubbleTooltip({
 
         {isExpanded && keywordData && (
           <div
-            className={`border-t ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'} pt-3`}
             style={{
               animation: 'slideDown 0.35s cubic-bezier(0.4, 0, 0.2, 1)',
             }}
@@ -659,7 +658,7 @@ export default function BubbleTooltip({
         )}
 
         {topic.monthlySearches && topic.monthlySearches.length > 0 && (
-          <div className={`border-t ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'} pt-3`}>
+          <div>
             <h4 className={`text-sm font-semibold mb-3 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
               Monthly Search Volumes
             </h4>
