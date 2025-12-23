@@ -59,8 +59,10 @@ export default function BubbleTooltip({
   }, []);
 
   // Desktop: small or expanded size
+  // Increase height when AI insights are available
+  const hasAIInsights = keywordData?.ai_insights ? true : false;
   const tooltipWidth = !isMobile && isExpanded ? 600 : 380;
-  const tooltipHeight = !isMobile && isExpanded ? 700 : 280;
+  const tooltipHeight = !isMobile && isExpanded ? 700 : (hasAIInsights ? 420 : 280);
   const offset = 10;
   const padding = 20;
 
@@ -357,17 +359,19 @@ export default function BubbleTooltip({
               <div className={`border-t ${
                 theme === 'dark' ? 'border-gray-700' : 'border-gray-200'
               } pt-4`}>
-                <h4 className={`text-sm font-semibold mb-2 flex items-center gap-1.5 ${
-                  theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
-                }`}>
-                  <span className="text-base">✨</span>
-                  AI Insight
-                </h4>
-                <p className={`text-sm leading-relaxed ${
-                  theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
-                } whitespace-pre-wrap`}>
-                  {keywordData.ai_insights}
-                </p>
+                <div className={`${theme === 'dark' ? 'bg-gradient-to-r from-purple-900/30 to-blue-900/30 border-purple-500/30' : 'bg-gradient-to-r from-purple-50 to-blue-50 border-purple-200'} rounded-lg p-3 border`}>
+                  <h4 className={`text-sm font-bold mb-2 flex items-center gap-1.5 ${
+                    theme === 'dark' ? 'text-purple-300' : 'text-purple-900'
+                  }`}>
+                    <span className="text-base">✨</span>
+                    AI Insight
+                  </h4>
+                  <p className={`text-sm leading-relaxed ${
+                    theme === 'dark' ? 'text-gray-200' : 'text-gray-800'
+                  } whitespace-pre-wrap`}>
+                    {keywordData.ai_insights}
+                  </p>
+                </div>
               </div>
             )}
 
@@ -674,19 +678,16 @@ export default function BubbleTooltip({
         )}
 
         {keywordData?.ai_insights && (
-          <div
-            className={`border-t ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'} pt-3`}
-            style={{
-              animation: isExpanded ? 'slideDown 0.35s cubic-bezier(0.4, 0, 0.2, 1)' : 'none',
-            }}
-          >
-            <h4 className={`text-sm font-semibold mb-2 flex items-center gap-1.5 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-              <span className="text-base">✨</span>
-              AI Insight
-            </h4>
-            <p className={`text-sm leading-relaxed ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'} whitespace-pre-wrap`}>
-              {keywordData.ai_insights}
-            </p>
+          <div className={`border-t ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'} pt-3`}>
+            <div className={`${theme === 'dark' ? 'bg-gradient-to-r from-purple-900/30 to-blue-900/30 border-purple-500/30' : 'bg-gradient-to-r from-purple-50 to-blue-50 border-purple-200'} rounded-lg p-3 border`}>
+              <h4 className={`text-sm font-bold mb-2 flex items-center gap-1.5 ${theme === 'dark' ? 'text-purple-300' : 'text-purple-900'}`}>
+                <span className="text-base">✨</span>
+                AI Insight
+              </h4>
+              <p className={`text-sm leading-relaxed ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'} whitespace-pre-wrap`}>
+                {keywordData.ai_insights}
+              </p>
+            </div>
           </div>
         )}
 
