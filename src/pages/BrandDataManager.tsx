@@ -36,7 +36,7 @@ interface BrandKeywordData {
 export default function BrandDataManager() {
   const { brandName } = useParams<{ brandName?: string }>();
   const navigate = useNavigate();
-  const { isAdmin, logout } = useAuth();
+  const { isAdmin, user, logout } = useAuth();
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     const savedTheme = localStorage.getItem('theme');
     return (savedTheme === 'dark' || savedTheme === 'light') ? savedTheme : 'dark';
@@ -440,6 +440,7 @@ export default function BrandDataManager() {
         <Header
           theme={theme}
           isAdmin={isAdmin}
+          isLoggedIn={!!user}
           onLoginClick={() => setShowLogin(true)}
           onLogout={logout}
           title="Brand Keyword Data Manager"
@@ -460,6 +461,7 @@ export default function BrandDataManager() {
       <Header
         theme={theme}
         isAdmin={isAdmin}
+        isLoggedIn={!!user}
         onLoginClick={() => setShowLogin(true)}
         onLogout={logout}
         title="Brand Keyword Data Manager"

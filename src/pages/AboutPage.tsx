@@ -7,7 +7,7 @@ import Footer from '../components/Footer';
 import Login from '../components/Login';
 
 export default function AboutPage() {
-  const { isAdmin, logout } = useAuth();
+  const { isAdmin, user, logout } = useAuth();
   const [showLogin, setShowLogin] = useState(false);
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     const savedTheme = localStorage.getItem('theme');
@@ -35,6 +35,7 @@ export default function AboutPage() {
       <Header
         theme={theme}
         isAdmin={isAdmin}
+        isLoggedIn={!!user}
         onLoginClick={() => setShowLogin(true)}
         onLogout={logout}
         useH1={false}

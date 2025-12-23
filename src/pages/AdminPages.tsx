@@ -8,7 +8,7 @@ import { supabase } from '../lib/supabase';
 import Login from '../components/Login';
 
 export default function AdminPages() {
-  const { isAdmin, logout } = useAuth();
+  const { isAdmin, user, logout } = useAuth();
   const navigate = useNavigate();
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     const savedTheme = localStorage.getItem('theme');
@@ -48,6 +48,7 @@ export default function AdminPages() {
       <Header
         theme={theme}
         isAdmin={isAdmin}
+        isLoggedIn={!!user}
         onLoginClick={() => setShowLogin(true)}
         onLogout={logout}
         title="Page Manager"

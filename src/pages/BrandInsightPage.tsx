@@ -58,7 +58,7 @@ export default function BrandInsightPage() {
   const { userId, brandName } = useParams<{ userId: string; brandName: string }>();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { isAdmin, logout } = useAuth();
+  const { isAdmin, user, logout } = useAuth();
   const isMobile = window.innerWidth < 768;
 
   const [monthlyData, setMonthlyData] = useState<MonthlyData[]>([]);
@@ -1095,6 +1095,7 @@ export default function BrandInsightPage() {
         <Header
           theme={theme}
           isAdmin={isAdmin}
+          isLoggedIn={!!user}
           onLoginClick={() => {}}
           onLogout={logout}
           title="Top Best Charts"
@@ -1273,6 +1274,7 @@ export default function BrandInsightPage() {
       <Header
         theme={theme}
         isAdmin={isAdmin}
+        isLoggedIn={!!user}
         onLoginClick={() => {}}
         onLogout={logout}
         title="Top Best Charts"

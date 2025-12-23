@@ -25,7 +25,7 @@ interface CategoryGroup {
 }
 
 export default function BrowseTopicsPage() {
-  const { isAdmin, logout } = useAuth();
+  const { isAdmin, user, logout } = useAuth();
   const [showLogin, setShowLogin] = useState(false);
   const [categoryGroups, setCategoryGroups] = useState<CategoryGroup[]>([]);
   const [loading, setLoading] = useState(true);
@@ -127,6 +127,7 @@ export default function BrowseTopicsPage() {
         <Header
           theme={theme}
           isAdmin={isAdmin}
+          isLoggedIn={!!user}
           onLoginClick={() => setShowLogin(true)}
           onLogout={logout}
         />
@@ -182,6 +183,7 @@ export default function BrowseTopicsPage() {
       <Header
         theme={theme}
         isAdmin={isAdmin}
+        isLoggedIn={!!user}
         onLoginClick={() => setShowLogin(true)}
         onLogout={logout}
       />

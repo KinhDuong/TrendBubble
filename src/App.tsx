@@ -36,7 +36,7 @@ type SortField = 'name' | 'category' | 'searchVolume' | 'rank' | 'pubDate' | 'cr
 type SortDirection = 'asc' | 'desc';
 
 function HomePage() {
-  const { isAdmin, logout } = useAuth();
+  const { isAdmin, user, logout } = useAuth();
   const location = useLocation();
   const [topics, setTopics] = useState<TrendingTopic[]>([]);
   const isMobile = window.innerWidth < 768;
@@ -1036,6 +1036,7 @@ function HomePage() {
       <Header
         theme={theme}
         isAdmin={isAdmin}
+        isLoggedIn={!!user}
         onLoginClick={() => setShowLogin(true)}
         onLogout={logout}
         useH1={false}

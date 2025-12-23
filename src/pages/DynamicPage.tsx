@@ -39,7 +39,7 @@ function DynamicPage() {
   const { '*': urlPath } = useParams();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { isAdmin, logout } = useAuth();
+  const { isAdmin, user, logout } = useAuth();
   const [pageData, setPageData] = useState<PageData | null>(null);
   const [topics, setTopics] = useState<TrendingTopic[]>([]);
   const isMobile = window.innerWidth < 768;
@@ -539,6 +539,7 @@ function DynamicPage() {
         <Header
           theme={theme}
           isAdmin={isAdmin}
+          isLoggedIn={!!user}
           onLoginClick={() => {}}
           onLogout={logout}
           title="Top Best Charts"
@@ -781,6 +782,7 @@ function DynamicPage() {
       <Header
         theme={theme}
         isAdmin={isAdmin}
+        isLoggedIn={!!user}
         onLoginClick={() => {}}
         onLogout={logout}
         title="Top Best Charts"

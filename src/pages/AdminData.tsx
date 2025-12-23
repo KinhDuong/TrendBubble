@@ -9,7 +9,7 @@ import Login from '../components/Login';
 import { Database, Tag } from 'lucide-react';
 
 export default function AdminData() {
-  const { isAdmin, logout } = useAuth();
+  const { isAdmin, user, logout } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
@@ -51,6 +51,7 @@ export default function AdminData() {
       <Header
         theme={theme}
         isAdmin={isAdmin}
+        isLoggedIn={!!user}
         onLoginClick={() => setShowLogin(true)}
         onLogout={logout}
         title="Data Manager"

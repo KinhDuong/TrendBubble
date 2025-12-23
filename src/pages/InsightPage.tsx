@@ -131,6 +131,7 @@ export default function InsightPage() {
         <Header
           theme="light"
           isAdmin={isAdmin}
+          isLoggedIn={!!user}
           onLoginClick={() => setShowLogin(true)}
           onLogout={logout}
         />
@@ -158,6 +159,7 @@ export default function InsightPage() {
         <Header
           theme="light"
           isAdmin={isAdmin}
+          isLoggedIn={!!user}
           onLoginClick={() => setShowLogin(true)}
           onLogout={logout}
         />
@@ -196,6 +198,7 @@ export default function InsightPage() {
       <Header
         theme="light"
         isAdmin={isAdmin}
+        isLoggedIn={!!user}
         onLoginClick={() => setShowLogin(true)}
         onLogout={logout}
       />

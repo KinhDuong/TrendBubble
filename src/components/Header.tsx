@@ -5,6 +5,7 @@ import { supabase } from '../lib/supabase';
 interface HeaderProps {
   theme: 'dark' | 'light';
   isAdmin: boolean;
+  isLoggedIn?: boolean;
   onLoginClick: () => void;
   onLogout?: () => void;
   title?: string;
@@ -20,7 +21,7 @@ interface Page {
   source: string;
 }
 
-export default function Header({ theme, isAdmin, onLoginClick, onLogout, title = 'Top Best Charts', useH1 = false, snapshotButton }: HeaderProps) {
+export default function Header({ theme, isAdmin, isLoggedIn = false, onLoginClick, onLogout, title = 'Top Best Charts', useH1 = false, snapshotButton }: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Page[]>([]);
@@ -143,12 +144,22 @@ export default function Header({ theme, isAdmin, onLoginClick, onLogout, title =
             >
               About
             </a>
-            <a
-              href="/profile/"
-              className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'} transition-colors`}
-            >
-              User Profile
-            </a>
+            {isLoggedIn ? (
+              <a
+                href="/profile/"
+                className="flex items-center justify-center w-10 h-10 bg-blue-600 rounded-full hover:bg-blue-700 transition-colors"
+                title="User Profile"
+              >
+                <User size={20} className="text-white" />
+              </a>
+            ) : (
+              <button
+                onClick={handleLogin}
+                className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'} transition-colors`}
+              >
+                Login
+              </button>
+            )}
           </nav>
 
           <div className={`flex items-center gap-2 ${isSearchExpanded ? 'flex-1 md:flex-none' : ''}`}>

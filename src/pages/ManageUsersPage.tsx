@@ -16,7 +16,7 @@ interface UserData {
 }
 
 export default function ManageUsersPage() {
-  const { user, isAdmin, logout, isLoading: authLoading } = useAuth();
+  const { isAdmin, user, logout, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [users, setUsers] = useState<UserData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -233,6 +233,7 @@ export default function ManageUsersPage() {
       <Header
         theme="light"
         isAdmin={isAdmin}
+        isLoggedIn={!!user}
         onLoginClick={() => {}}
         onLogout={logout}
       />

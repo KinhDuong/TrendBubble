@@ -21,7 +21,7 @@ interface BrandMetadata {
 
 export default function InsightsMetaPage() {
   const navigate = useNavigate();
-  const { isAdmin, logout } = useAuth();
+  const { isAdmin, user, logout } = useAuth();
   const [brandMetadata, setBrandMetadata] = useState<BrandMetadata[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -171,6 +171,7 @@ export default function InsightsMetaPage() {
       <Header
         theme={theme}
         isAdmin={isAdmin}
+        isLoggedIn={!!user}
         onLoginClick={() => {}}
         onLogout={logout}
         title="Top Best Charts"

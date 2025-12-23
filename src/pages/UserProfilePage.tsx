@@ -8,7 +8,7 @@ import { useAuth } from '../hooks/useAuth';
 import UserLogin from '../components/UserLogin';
 
 export default function UserProfilePage() {
-  const { user, isAdmin, logout } = useAuth();
+  const { isAdmin, user, logout } = useAuth();
   const [showLogin, setShowLogin] = useState(!user);
 
   const handleLogout = async () => {
@@ -38,6 +38,7 @@ export default function UserProfilePage() {
       <Header
         theme="light"
         isAdmin={isAdmin}
+        isLoggedIn={!!user}
         onLoginClick={() => setShowLogin(true)}
         onLogout={handleLogout}
       />

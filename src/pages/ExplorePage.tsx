@@ -22,7 +22,7 @@ interface FeaturedPage {
 }
 
 export default function ExplorePage() {
-  const { isAdmin, logout } = useAuth();
+  const { isAdmin, user, logout } = useAuth();
   const [showLogin, setShowLogin] = useState(false);
   const [latestTopics, setLatestTopics] = useState<TrendingTopic[]>([]);
   const [heroPage, setHeroPage] = useState<FeaturedPage | null>(null);
@@ -176,6 +176,7 @@ export default function ExplorePage() {
         <Header
           theme={theme}
           isAdmin={isAdmin}
+          isLoggedIn={!!user}
           onLoginClick={() => setShowLogin(true)}
           onLogout={logout}
           useH1={true}
@@ -247,6 +248,7 @@ export default function ExplorePage() {
       <Header
         theme={theme}
         isAdmin={isAdmin}
+        isLoggedIn={!!user}
         onLoginClick={() => setShowLogin(true)}
         onLogout={logout}
         useH1={true}
