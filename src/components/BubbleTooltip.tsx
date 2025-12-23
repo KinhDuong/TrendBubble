@@ -275,8 +275,8 @@ export default function BubbleTooltip({
                     {topic.name.replace(/"/g, '')}
                   </h3>
                   {topic.category && (
-                    <span className={`font-bold text-lg ${
-                      theme === 'dark' ? 'text-white' : 'text-gray-900'
+                    <span className={`text-lg ${
+                      theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
                     }`}>
                       {topic.category}
                     </span>
@@ -504,7 +504,7 @@ export default function BubbleTooltip({
                 {topic.name.replace(/"/g, '')}
               </h3>
               {topic.category && (
-                <span className={`font-bold text-lg ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                <span className={`text-lg ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
                   {topic.category}
                 </span>
               )}
