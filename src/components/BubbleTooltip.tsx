@@ -269,13 +269,13 @@ export default function BubbleTooltip({
                   {rank}
                 </div>
                 <div className="flex items-center justify-between flex-1 gap-2">
-                  <h3 className={`font-bold text-xl ${
+                  <h3 className={`font-bold text-lg ${
                     theme === 'dark' ? 'text-white' : 'text-gray-900'
                   }`}>
                     {topic.name.replace(/"/g, '')}
                   </h3>
                   {topic.category && (
-                    <span className={`font-bold text-xl ${
+                    <span className={`font-bold text-lg ${
                       theme === 'dark' ? 'text-white' : 'text-gray-900'
                     }`}>
                       {topic.category}
