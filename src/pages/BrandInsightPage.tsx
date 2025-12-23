@@ -147,13 +147,21 @@ export default function BrandInsightPage() {
 
   const loadAllData = async () => {
     setLoading(true);
+    if (!userId) {
+      setLoading(false);
+      return;
+    }
+
+    const decodedUserId = decodeURIComponent(userId);
+    setPageOwnerId(decodedUserId);
+
     await loadBrandPageData();
     await Promise.all([
       loadMonthColumns(),
-      loadBrandData(),
-      loadKeywordData(),
-      loadLatestBrandPages(),
-      loadAIAnalysis()
+      loadBrandData(decodedUserId),
+      loadKeywordData(decodedUserId),
+      loadLatestBrandPages(decodedUserId),
+      loadAIAnalysis(decodedUserId)
     ]);
     setLoading(false);
   };
@@ -206,8 +214,9 @@ export default function BrandInsightPage() {
     }
   };
 
-  const loadBrandData = async () => {
-    if (!brandName || !pageOwnerId) return;
+  const loadBrandData = async (ownerUserId?: string) => {
+    const userIdToUse = ownerUserId || pageOwnerId;
+    if (!brandName || !userIdToUse) return;
 
     try {
       const decodedBrand = decodeURIComponent(brandName);
@@ -216,7 +225,7 @@ export default function BrandInsightPage() {
         .from('brand_keyword_monthly_data')
         .select('*')
         .eq('brand', decodedBrand)
-        .eq('user_id', pageOwnerId)
+        .eq('user_id', userIdToUse)
         .order('month', { ascending: true });
 
       if (error) throw error;
@@ -232,8 +241,9 @@ export default function BrandInsightPage() {
     }
   };
 
-  const loadKeywordData = async () => {
-    if (!brandName || !pageOwnerId) return;
+  const loadKeywordData = async (ownerUserId?: string) => {
+    const userIdToUse = ownerUserId || pageOwnerId;
+    if (!brandName || !userIdToUse) return;
 
     try {
       const decodedBrand = decodeURIComponent(brandName);
@@ -242,7 +252,7 @@ export default function BrandInsightPage() {
         .from('brand_keyword_data')
         .select('*')
         .eq('brand', decodedBrand)
-        .eq('user_id', pageOwnerId);
+        .eq('user_id', userIdToUse);
 
       if (error) throw error;
 
@@ -322,14 +332,15 @@ export default function BrandInsightPage() {
     }
   };
 
-  const loadLatestBrandPages = async () => {
-    if (!pageOwnerId) return;
+  const loadLatestBrandPages = async (ownerUserId?: string) => {
+    const userIdToUse = ownerUserId || pageOwnerId;
+    if (!userIdToUse) return;
 
     try {
       const { data: monthlyData, error: monthlyError } = await supabase
         .from('brand_keyword_monthly_data')
         .select('brand, created_at')
-        .eq('user_id', pageOwnerId)
+        .eq('user_id', userIdToUse)
         .order('created_at', { ascending: false });
 
       if (monthlyError) throw monthlyError;
@@ -351,7 +362,7 @@ export default function BrandInsightPage() {
           const { data: pageData } = await supabase
             .from('brand_pages')
             .select('id, brand, meta_title, meta_description, created_at')
-            .eq('user_id', pageOwnerId)
+            .eq('user_id', userIdToUse)
             .eq('brand', item.brand)
             .maybeSingle();
 
@@ -375,8 +386,9 @@ export default function BrandInsightPage() {
     }
   };
 
-  const loadAIAnalysis = async () => {
-    if (!brandName || !pageOwnerId) return;
+  const loadAIAnalysis = async (ownerUserId?: string) => {
+    const userIdToUse = ownerUserId || pageOwnerId;
+    if (!brandName || !userIdToUse) return;
 
     try {
       const decodedBrand = decodeURIComponent(brandName);
@@ -385,7 +397,7 @@ export default function BrandInsightPage() {
         .from('brand_ai_analysis')
         .select('*')
         .eq('brand', decodedBrand)
-        .eq('user_id', pageOwnerId)
+        .eq('user_id', userIdToUse)
         .maybeSingle();
 
       if (error) throw error;
