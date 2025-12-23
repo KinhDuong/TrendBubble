@@ -1,4 +1,4 @@
-import { BarChart3, Menu, X, Home, Compass, BookOpen, Mail, Info, LogIn, LogOut, Search, Upload } from 'lucide-react';
+import { BarChart3, Menu, X, Home, Compass, BookOpen, Mail, Info, LogIn, LogOut, Search, Upload, User } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 
@@ -277,6 +277,14 @@ export default function Header({ theme, isAdmin, onLoginClick, onLogout, title =
                       <span>About</span>
                     </a>
                     <div className={`border-t ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'} my-2`}></div>
+                    <a
+                      href="/profile/"
+                      className={`flex items-center gap-3 px-6 py-3 ${theme === 'dark' ? 'text-gray-300 hover:bg-gray-700 hover:text-white' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'} transition-colors`}
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <User size={20} />
+                      <span>User Profile</span>
+                    </a>
                     {isAdmin ? (
                       <button
                         onClick={handleLogout}

@@ -25,6 +25,7 @@ import BrandInsightPage from './pages/BrandInsightPage';
 import BrandDataManager from './pages/BrandDataManager';
 import InsightsMetaPage from './pages/InsightsMetaPage';
 import UploadPage from './pages/UploadPage';
+import UserProfilePage from './pages/UserProfilePage';
 import { TrendingTopic } from './types';
 import { supabase } from './lib/supabase';
 import { useAuth } from './hooks/useAuth';
@@ -2224,6 +2225,8 @@ function App() {
         <Route path="/insights/:userId/:brandName/" element={<BrandInsightPage />} />
         <Route path="/upload" element={<UploadPage />} />
         <Route path="/upload/" element={<UploadPage />} />
+        <Route path="/profile" element={<UserProfilePage />} />
+        <Route path="/profile/" element={<UserProfilePage />} />
         <Route path="/admin/pages" element={<AdminPages />} />
         <Route path="/admin/data" element={<AdminData />} />
         <Route path="/admin/brand-data" element={<BrandDataManager />} />
