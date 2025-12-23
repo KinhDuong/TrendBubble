@@ -537,14 +537,16 @@ export default function BubbleTooltip({
         </div>
 
         <div className={`border-t ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'} pt-3 space-y-2`}>
-          <h4 className={`text-sm font-semibold mb-3 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-            Search Volume
-          </h4>
-          <div className="flex items-center gap-1 -mt-1">
-            <TrendingUp size={14} className="text-blue-500" />
-            <span className={`font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-              {getDisplayVolume()}
-            </span>
+          <div className="flex items-center justify-between">
+            <h4 className={`text-sm font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+              Search Volume
+            </h4>
+            <div className="flex items-center gap-1">
+              <TrendingUp size={14} className="text-blue-500" />
+              <span className={`font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                {getDisplayVolume()}
+              </span>
+            </div>
           </div>
 
           {topic.note && (
@@ -555,9 +557,8 @@ export default function BubbleTooltip({
         </div>
 
         {keywordData?.ai_insights && (
-          <div className={`border-t ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'} pt-3`}>
-            <h4 className={`text-sm font-semibold mb-3 flex items-center gap-1.5 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-              <span className="text-base">✨</span>
+          <div className="pt-3">
+            <h4 className={`text-sm font-semibold mb-3 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
               AI Insight
             </h4>
             <p className={`text-sm leading-relaxed ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'} whitespace-pre-wrap`}>
