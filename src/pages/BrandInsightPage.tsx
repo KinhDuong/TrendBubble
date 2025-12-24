@@ -102,6 +102,7 @@ export default function BrandInsightPage() {
   const [shape, setShape] = useState<FilterShape>('bubble');
   const [animationStyle, setAnimationStyle] = useState<AnimationStyle>('default');
   const [performanceFilter, setPerformanceFilter] = useState<string>('all');
+  const [rankingListFilter, setRankingListFilter] = useState<string>('all');
 
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     const savedTheme = localStorage.getItem('theme');
@@ -783,6 +784,80 @@ export default function BrandInsightPage() {
     loading
   });
 
+  // Separate filtering for ranking list
+  const rankingFilteredTopics = useMemo(() => {
+    try {
+      // Handle top-per-category filter
+      if (rankingListFilter === 'top-per-category') {
+        const matchingTopics = transformToTopics.filter(topic => {
+          const matchesSearch = !topSearchQuery || topic.name.toLowerCase().includes(topSearchQuery.toLowerCase());
+          return matchesSearch;
+        });
+
+        // Group topics by their category
+        const categoryGroups = new Map<string, TrendingTopic[]>();
+        matchingTopics.forEach(topic => {
+          const categoryLabel = getKeywordCategoryLabel(topic.name);
+          if (!categoryGroups.has(categoryLabel)) {
+            categoryGroups.set(categoryLabel, []);
+          }
+          categoryGroups.get(categoryLabel)!.push(topic);
+        });
+
+        // Get top 10 from each category
+        const result: TrendingTopic[] = [];
+        categoryGroups.forEach((topics) => {
+          const topFromCategory = topics
+            .sort((a, b) => b.searchVolume - a.searchVolume)
+            .slice(0, 10);
+          result.push(...topFromCategory);
+        });
+
+        return result.sort((a, b) => b.searchVolume - a.searchVolume);
+      }
+
+      return transformToTopics.filter(topic => {
+        const matchesSearch = !topSearchQuery || topic.name.toLowerCase().includes(topSearchQuery.toLowerCase());
+
+        if (rankingListFilter === 'all') return matchesSearch;
+
+        // Get the exact category for this keyword
+        const categoryLabel = getKeywordCategoryLabel(topic.name);
+
+        // Map filter values to category labels
+        const filterToCategoryMap: { [key: string]: string } = {
+          'ultra-growth': 'Ultra Growth',
+          'ultra-high-growth': 'Extreme Growth',
+          'high-growth': 'High Growth',
+          'rising-star': 'Rising Star',
+          'great-potential': 'Great Potential',
+          'steady-growth': 'Steady Growth',
+          'has-potential': 'Has Potential',
+          'momentum-building': 'Momentum Building',
+          'high-impact': 'High Impact',
+          'quick-win': 'Quick Win',
+          'start-declining': 'Start Declining',
+          'declining': 'Declining',
+          'solid-performer': 'Solid Performer',
+          'hidden-gem': 'Hidden Gem',
+          'high-value': 'High Value',
+          'high-volume': 'High Volume'
+        };
+
+        const targetCategory = filterToCategoryMap[rankingListFilter];
+
+        // Only show keywords that exactly match this category
+        return matchesSearch && categoryLabel === targetCategory;
+      });
+    } catch (error) {
+      console.error('Error filtering ranking list topics:', error);
+      return transformToTopics.filter(topic => {
+        const matchesSearch = !topSearchQuery || topic.name.toLowerCase().includes(topSearchQuery.toLowerCase());
+        return matchesSearch;
+      });
+    }
+  }, [transformToTopics, topSearchQuery, rankingListFilter, keywordPerformanceData, hasYoYData]);
+
   const topTopics = filteredTopics.filter(topic => {
     if (!topSearchQuery.trim()) return true;
     const query = topSearchQuery.toLowerCase();
@@ -920,7 +995,7 @@ export default function BrandInsightPage() {
     }
   };
 
-  const topicsWithRanks = topTopics.map((topic, index) => {
+  const topicsWithRanks = rankingFilteredTopics.map((topic, index) => {
     const normalizedTopicName = topic.name.toLowerCase().trim();
     const kwData = keywordPerformanceData.find(kw =>
       kw.keyword.toLowerCase().trim() === normalizedTopicName
@@ -1735,7 +1810,7 @@ export default function BrandInsightPage() {
                     <section className="flex-1 lg:w-[65%]" aria-labelledby="top-keywords-heading">
                       <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-lg border p-6 shadow-md`}>
                         <h2 id="top-keywords-heading" className={`text-xl md:text-2xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                          Top {topTopics.length} Keywords for {decodedBrand}
+                          Top {rankingFilteredTopics.length} Keywords for {decodedBrand}
                         </h2>
                         {brandPageData.intro_text && (
                           <div
@@ -1745,6 +1820,76 @@ export default function BrandInsightPage() {
                             }}
                           />
                         )}
+
+                        <div className={`${theme === 'dark' ? 'bg-gray-800/50' : 'bg-white/80'} rounded-lg p-4 backdrop-blur-sm mb-4`}>
+                          <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+                            <h3 className={`text-sm font-semibold ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                              Filter by Performance
+                            </h3>
+                            <div className="flex items-center gap-2">
+                              <div className={`text-xs px-3 py-1 rounded-full ${theme === 'dark' ? 'bg-gray-700 text-gray-300' : 'bg-gray-200 text-gray-600'}`}>
+                                {availableMonthsCount} months of data
+                                {!hasYoYData && <span className="ml-1 text-amber-500">• Limited filters</span>}
+                              </div>
+                            </div>
+                          </div>
+                          {!hasYoYData && (
+                            <div className={`mb-3 text-xs px-3 py-2 rounded-lg ${theme === 'dark' ? 'bg-amber-900/20 text-amber-400 border border-amber-800/30' : 'bg-amber-50 text-amber-700 border border-amber-200'}`}>
+                              <strong>Note:</strong> Some filters use year-over-year comparisons and require 24+ months of data. With {availableMonthsCount} months available, filters are based on 3-month trends and performance patterns.
+                            </div>
+                          )}
+                          <div className="flex flex-wrap gap-2">
+                            {[
+                              { id: 'all', label: 'All Keywords', emoji: '', requiresYoY: false },
+                              { id: 'top-per-category', label: 'Top 10 per Category', emoji: '🎯', requiresYoY: false },
+                              { id: 'ultra-growth', label: 'Ultra Growth', emoji: '🔥', requiresYoY: false },
+                              { id: 'ultra-high-growth', label: 'Extreme Growth', emoji: '🚀', requiresYoY: false },
+                              { id: 'high-growth', label: 'High Growth', emoji: '📈', requiresYoY: false },
+                              { id: 'rising-star', label: 'Rising Star', emoji: '⭐', requiresYoY: false },
+                              { id: 'great-potential', label: 'Great Potential', emoji: '🎯', requiresYoY: false },
+                              { id: 'steady-growth', label: 'Steady Growth', emoji: '🌿', requiresYoY: false },
+                              { id: 'has-potential', label: 'Has Potential', emoji: '🌱', requiresYoY: false },
+                              { id: 'momentum-building', label: 'Momentum Building', emoji: '📊', requiresYoY: true },
+                              { id: 'high-impact', label: 'High Impact', emoji: '🎯', requiresYoY: false },
+                              { id: 'quick-win', label: 'Quick Win', emoji: '⚡', requiresYoY: false },
+                              { id: 'solid-performer', label: 'Solid Performer', emoji: '✨', requiresYoY: false },
+                              { id: 'hidden-gem', label: 'Hidden Gem', emoji: '💎', requiresYoY: false },
+                              { id: 'high-value', label: 'High Value', emoji: '👑', requiresYoY: false },
+                              { id: 'high-volume', label: 'High Volume', emoji: '🏔️', requiresYoY: false },
+                              { id: 'start-declining', label: 'Start Declining', emoji: '⚠️', requiresYoY: false },
+                              { id: 'declining', label: 'Declining', emoji: '📉', requiresYoY: false },
+                            ].filter(filter => !filter.requiresYoY || hasYoYData).map((filter) => (
+                              <button
+                                key={filter.id}
+                                onClick={() => setRankingListFilter(filter.id)}
+                                className={`
+                                  px-3 py-1.5 rounded-lg text-sm font-medium transition-all
+                                  ${rankingListFilter === filter.id
+                                    ? filter.id === 'ultra-growth'
+                                      ? theme === 'dark'
+                                        ? 'bg-[#FF4500] text-white shadow-lg shadow-orange-500/30'
+                                        : 'bg-[#FF4500] text-white shadow-md shadow-orange-500/30'
+                                      : theme === 'dark'
+                                        ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30'
+                                        : 'bg-blue-600 text-white shadow-md'
+                                    : theme === 'dark'
+                                      ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                  }
+                                `}
+                              >
+                                {filter.emoji && <span className="mr-1.5">{filter.emoji}</span>}
+                                {filter.label}
+                              </button>
+                            ))}
+                          </div>
+                          {rankingListFilter !== 'all' && (
+                            <div className={`mt-3 text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                              Showing {rankingFilteredTopics.length} keywords
+                            </div>
+                          )}
+                        </div>
+
                         <div className="relative mb-4">
                           <Search className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`} />
                           <input
@@ -1765,7 +1910,7 @@ export default function BrandInsightPage() {
                           )}
                         </div>
 
-                        {topTopics.length === 0 && topSearchQuery ? (
+                        {rankingFilteredTopics.length === 0 && topSearchQuery ? (
                           <div className={`rounded-lg p-8 text-center border ${theme === 'dark' ? 'bg-gray-700 text-gray-300 border-gray-600' : 'bg-gray-50 text-gray-600 border-gray-200'}`}>
                             <p className="text-lg">No keywords found matching "{topSearchQuery}"</p>
                             <button
