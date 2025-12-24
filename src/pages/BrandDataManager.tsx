@@ -18,6 +18,7 @@ interface BrandKeywordData {
   ai_category: string | null;
   ai_insights: string | null;
   sentiment: number | null;
+  is_branded: string | null;
   Currency: string | null;
   'Avg. monthly searches': number | null;
   'Three month change': string | null;
@@ -51,6 +52,7 @@ export default function BrandDataManager() {
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [aiCategorizing, setAiCategorizing] = useState(false);
   const [aiAnalyzingSentiment, setAiAnalyzingSentiment] = useState(false);
+  const [aiAnalyzingBranded, setAiAnalyzingBranded] = useState(false);
   const [aiMessage, setAiMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
   const fetchBrands = async () => {
@@ -317,6 +319,70 @@ export default function BrandDataManager() {
     }
   };
 
+  const handleBrandedAnalysis = async () => {
+    if (selectedBrand === 'all') {
+      setAiMessage({ type: 'error', text: 'Please select a specific brand to analyze' });
+      setTimeout(() => setAiMessage(null), 5000);
+      return;
+    }
+
+    if (!confirm(`This will use AI to determine which keywords are branded vs non-branded for "${selectedBrand}". This may take a moment and will use OpenAI API credits. Continue?`)) {
+      return;
+    }
+
+    setAiAnalyzingBranded(true);
+    setAiMessage(null);
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('Not authenticated');
+
+      const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/categorize-branded-keywords`;
+
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ brand: selectedBrand })
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Response error:', errorText);
+        throw new Error(`HTTP ${response.status}: ${errorText || 'Failed to analyze branded keywords'}`);
+      }
+
+      const result = await response.json();
+
+      if (!result.success) {
+        if (result.errorCode === 'MISSING_API_KEY') {
+          throw new Error('OpenAI API key not configured. Please add OPENAI_API_KEY to your Supabase Edge Function secrets.');
+        }
+        throw new Error(result.error || 'Failed to analyze branded keywords');
+      }
+
+      await fetchData();
+
+      setAiMessage({
+        type: 'success',
+        text: result.message || `Successfully analyzed ${result.updatedCount} of ${result.totalKeywords} keywords!${result.hasMoreToProcess ? ' Click again to continue processing.' : ''}`
+      });
+
+      setTimeout(() => setAiMessage(null), 15000);
+    } catch (error: any) {
+      console.error('Error during branded analysis:', error);
+      setAiMessage({
+        type: 'error',
+        text: error.message || 'Failed to analyze branded keywords. Please check console for details.'
+      });
+      setTimeout(() => setAiMessage(null), 10000);
+    } finally {
+      setAiAnalyzingBranded(false);
+    }
+  };
+
   const exportToCSV = () => {
     const filteredData = getFilteredData();
     if (filteredData.length === 0) return;
@@ -397,6 +463,7 @@ export default function BrandDataManager() {
       'brand',
       'keyword',
       'ai_category',
+      'is_branded',
       'sentiment',
       'ai_insights',
       'Currency',
@@ -417,7 +484,7 @@ export default function BrandDataManager() {
       .filter(key =>
         !priorityColumns.includes(key) &&
         !monthColumns.includes(key) &&
-        !['id', 'user_id', 'created_at', 'search_volume', 'competition', 'ai_category', 'ai_insights', 'sentiment'].includes(key)
+        !['id', 'user_id', 'created_at', 'search_volume', 'competition', 'ai_category', 'ai_insights', 'sentiment', 'is_branded'].includes(key)
       );
 
     return [...priorityColumns, ...monthColumns, ...otherColumns];
@@ -584,12 +651,12 @@ export default function BrandDataManager() {
                     <p className="text-sm text-purple-700 mb-3">
                       Use AI to analyze your keywords. Categorization assigns growth categories based on Google Trends insights
                       (Explosive Growth, Rising Star, etc.) with strategic insights. Sentiment Analysis evaluates keyword sentiment
-                      from negative to positive as a percentage.
+                      from negative to positive as a percentage. Is Brand determines if keywords are branded or non-branded.
                     </p>
-                    <div className="flex gap-3">
+                    <div className="flex flex-wrap gap-3">
                       <button
                         onClick={handleAICategorization}
-                        disabled={aiCategorizing || aiAnalyzingSentiment}
+                        disabled={aiCategorizing || aiAnalyzingSentiment || aiAnalyzingBranded}
                         className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {aiCategorizing ? (
@@ -606,7 +673,7 @@ export default function BrandDataManager() {
                       </button>
                       <button
                         onClick={handleSentimentAnalysis}
-                        disabled={aiCategorizing || aiAnalyzingSentiment}
+                        disabled={aiCategorizing || aiAnalyzingSentiment || aiAnalyzingBranded}
                         className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {aiAnalyzingSentiment ? (
@@ -618,6 +685,23 @@ export default function BrandDataManager() {
                           <>
                             <Sparkles className="w-5 h-5" />
                             Sentiment Analysis
+                          </>
+                        )}
+                      </button>
+                      <button
+                        onClick={handleBrandedAnalysis}
+                        disabled={aiCategorizing || aiAnalyzingSentiment || aiAnalyzingBranded}
+                        className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {aiAnalyzingBranded ? (
+                          <>
+                            <RefreshCw className="w-5 h-5 animate-spin" />
+                            Analyzing Branded...
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="w-5 h-5" />
+                            Is Brand
                           </>
                         )}
                       </button>
@@ -709,6 +793,14 @@ export default function BrandDataManager() {
                               </div>
                               <span className="text-sm font-medium">{formatValue(row[column], column)}</span>
                             </div>
+                          ) : column === 'is_branded' && row[column] ? (
+                            <span className={`inline-flex px-3 py-1 rounded-full text-xs font-semibold ${
+                              row[column] === 'branded'
+                                ? 'bg-green-100 text-green-800'
+                                : 'bg-gray-100 text-gray-800'
+                            }`}>
+                              {row[column] === 'branded' ? 'Branded' : 'Non-Branded'}
+                            </span>
                           ) : (
                             formatValue(row[column], column)
                           )}
