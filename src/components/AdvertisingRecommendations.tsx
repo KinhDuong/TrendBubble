@@ -164,19 +164,62 @@ export default function AdvertisingRecommendations({ keywordData, brandName, the
       return 0.50 * kw.normalizedVolume + 0.30 * kw.normalizedCPC + 0.20 * kw.normalizedInvertedCompetition;
     };
 
+    const isSuspiciouslyBranded = (kw: ScoredKeyword): boolean => {
+      const hasHighVolume = kw.searchVolume > 100000;
+      const hasLowCompetition = (kw.competitionIndexed || 0) < 33;
+      const hasLowCPC = kw.avgCPC < 1;
+      const hasTitleCase = /[A-Z][a-z]+/.test(kw.keyword);
+
+      return (hasHighVolume && hasLowCompetition && hasLowCPC) || hasTitleCase;
+    };
+
+    const isUltraBroad = (kw: ScoredKeyword): boolean => {
+      const volumes = processedData.map(k => k.searchVolume).sort((a, b) => b - a);
+      const top1PercentThreshold = volumes[Math.floor(volumes.length * 0.01)] || 5000000;
+
+      if (kw.searchVolume > Math.max(5000000, top1PercentThreshold)) {
+        return true;
+      }
+
+      const wordCount = kw.keyword.split(' ').length;
+      const kwLower = kw.keyword.toLowerCase();
+      const commercialModifiers = ['buy', 'purchase', 'best', 'top', 'cheap', 'near me', 'price', 'cost', 'deal', 'discount', 'review'];
+      const hasCommercialModifier = commercialModifiers.some(mod => kwLower.includes(mod));
+
+      return wordCount < 3 && !hasCommercialModifier;
+    };
+
+    const hasLowIntent = (kw: ScoredKeyword): boolean => {
+      const kwLower = kw.keyword.toLowerCase();
+      const transactionalWords = ['buy', 'purchase', 'price', 'cost', 'cheap', 'deal', 'discount', 'order', 'shop', 'sale', 'subscription', 'sign up'];
+      const commercialWords = ['best', 'top', 'review', 'compare', 'vs', 'alternative'];
+      const localWords = ['near me', 'near', 'nearby', 'location'];
+
+      const hasTransactional = transactionalWords.some(word => kwLower.includes(word));
+      const hasCommercial = commercialWords.some(word => kwLower.includes(word));
+      const hasLocal = localWords.some(word => kwLower.includes(word));
+
+      return !hasTransactional && !hasCommercial && !hasLocal;
+    };
+
     const calculateBestValue = (kw: ScoredKeyword): number => {
       const normInvertedCPC = 1 - kw.normalizedCPC;
       let intentBoost = 0;
 
       const kwLower = kw.keyword.toLowerCase();
-      const commercialKeywords = ['buy', 'purchase', 'price', 'cost', 'cheap', 'deal', 'discount', 'order', 'shop', 'sale', 'best', 'review', 'compare', 'vs', 'alternative'];
-      const hasCommercialIntent = commercialKeywords.some(word => kwLower.includes(word));
+      const transactionalWords = ['buy', 'purchase', 'order', 'shop', 'sale', 'subscription', 'sign up'];
+      const commercialWords = ['price', 'cost', 'cheap', 'deal', 'discount', 'best', 'top', 'review', 'compare', 'vs', 'alternative'];
 
-      if (hasCommercialIntent) {
+      const hasTransactional = transactionalWords.some(word => kwLower.includes(word));
+      const hasCommercial = commercialWords.some(word => kwLower.includes(word));
+
+      if (hasTransactional) {
+        intentBoost = 0.5;
+      } else if (hasCommercial) {
         intentBoost = 0.3;
       }
 
-      return 0.40 * kw.normalizedVolume + 0.30 * normInvertedCPC + 0.20 * kw.normalizedInvertedCompetition + 0.10 * intentBoost;
+      return 0.35 * kw.normalizedVolume + 0.35 * normInvertedCPC + 0.20 * kw.normalizedInvertedCompetition + 0.10 * intentBoost;
     };
 
     const highValueKeywords = scoredKeywords
@@ -219,7 +262,15 @@ export default function AdvertisingRecommendations({ keywordData, brandName, the
       .slice(0, 10);
 
     const bestValueKeywords = scoredKeywords
-      .filter(kw => kw.avgCPC > 0)
+      .filter(kw => {
+        if (kw.avgCPC <= 0) return false;
+        if (kw.avgCPC < 0.50) return false;
+        if (isUltraBroad(kw)) return false;
+        if (hasLowIntent(kw)) return false;
+        if (isSuspiciouslyBranded(kw)) return false;
+
+        return true;
+      })
       .map(kw => ({ ...kw, score: calculateBestValue(kw) }))
       .sort((a, b) => b.score - a.score)
       .slice(0, 10);
@@ -243,7 +294,7 @@ export default function AdvertisingRecommendations({ keywordData, brandName, the
       {
         name: 'Highest ROI Potential',
         icon: <TrendingDown className="w-5 h-5" />,
-        description: 'Best cost-to-benefit ratio for PPC: high commercial intent + decent volume + low CPC + achievable competition',
+        description: 'Efficiency-focused keywords: strong commercial/transactional intent + low CPC (min $0.50) + achievable competition. Excludes ultra-broad terms, navigational/branded misspellings, and low-intent searches',
         keywords: bestValueKeywords,
         color: theme === 'dark' ? 'bg-emerald-900/30 border-emerald-700' : 'bg-emerald-50 border-emerald-300',
       },
