@@ -690,6 +690,35 @@ export default function BrandInsightPage() {
         samplePerformanceKeywords: keywordPerformanceData.slice(0, 3).map(k => `"${k.keyword}"`)
       });
 
+      // Handle top-per-category filter
+      if (performanceFilter === 'top-per-category') {
+        const matchingTopics = transformToTopics.filter(topic => {
+          const matchesSearch = !searchQuery || topic.name.toLowerCase().includes(searchQuery.toLowerCase());
+          return matchesSearch;
+        });
+
+        // Group topics by their category
+        const categoryGroups = new Map<string, TrendingTopic[]>();
+        matchingTopics.forEach(topic => {
+          const categoryLabel = getKeywordCategoryLabel(topic.name);
+          if (!categoryGroups.has(categoryLabel)) {
+            categoryGroups.set(categoryLabel, []);
+          }
+          categoryGroups.get(categoryLabel)!.push(topic);
+        });
+
+        // Get top 10 from each category
+        const result: TrendingTopic[] = [];
+        categoryGroups.forEach((topics) => {
+          const topFromCategory = topics
+            .sort((a, b) => b.searchVolume - a.searchVolume)
+            .slice(0, 10);
+          result.push(...topFromCategory);
+        });
+
+        return result.sort((a, b) => b.searchVolume - a.searchVolume);
+      }
+
       return transformToTopics.filter(topic => {
       const matchesSearch = !searchQuery || topic.name.toLowerCase().includes(searchQuery.toLowerCase());
 
@@ -1581,6 +1610,7 @@ export default function BrandInsightPage() {
                       <div className="flex flex-wrap gap-2">
                         {[
                           { id: 'all', label: 'All Keywords', emoji: '', requiresYoY: false },
+                          { id: 'top-per-category', label: 'Top 10 per Category', emoji: '🎯', requiresYoY: false },
                           { id: 'ultra-growth', label: 'Ultra Growth', emoji: '🔥', requiresYoY: false },
                           { id: 'ultra-high-growth', label: 'Extreme Growth', emoji: '🚀', requiresYoY: false },
                           { id: 'high-growth', label: 'High Growth', emoji: '📈', requiresYoY: false },
