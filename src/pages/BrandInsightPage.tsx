@@ -5,7 +5,6 @@ import { supabase } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import KeywordChart from '../components/KeywordChart';
 import BubbleChart, { Shape } from '../components/BubbleChart';
 import BarChart from '../components/BarChart';
 import Treemap from '../components/Treemap';
@@ -15,7 +14,6 @@ import ShareSnapshot from '../components/ShareSnapshot';
 import AnimationSelector, { AnimationStyle } from '../components/AnimationSelector';
 import ComparisonPanel from '../components/ComparisonPanel';
 import BrandKeywordUpload from '../components/BrandKeywordUpload';
-import KeywordAnalysis from '../components/KeywordAnalysis';
 import ToolSchema from '../components/ToolSchema';
 import BubbleTooltip from '../components/BubbleTooltip';
 import { TrendingTopic, FAQ } from '../types';
@@ -1581,14 +1579,6 @@ export default function BrandInsightPage() {
                       </p>
                     </div>
                   </div>
-
-                  <KeywordChart data={monthlyData} selectedBrand={decodedBrand} />
-
-                  {keywordData.length > 0 && (
-                    <div className="mt-8">
-                      <KeywordAnalysis keywords={keywordData} theme={theme} brandName={decodedBrand} />
-                    </div>
-                  )}
 
                   {keywordData.length > 0 && (
                     <div className="mt-8">
