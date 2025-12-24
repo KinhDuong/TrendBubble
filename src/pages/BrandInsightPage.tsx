@@ -816,6 +816,14 @@ export default function BrandInsightPage() {
       return transformToTopics.length;
     }
 
+    if (filterId === 'top-15-percent') {
+      // Count keywords in top 15% by composite score
+      const topKeywords = transformToTopics.filter(topic =>
+        isInTopPercentile(topic.name, keywordPerformanceData, 15)
+      );
+      return topKeywords.length;
+    }
+
     if (filterId === 'top-per-category') {
       // Count top 10 from each category
       const categoryGroups = new Map<string, number>();
@@ -857,6 +865,15 @@ export default function BrandInsightPage() {
   // Separate filtering for ranking list
   const rankingFilteredTopics = useMemo(() => {
     try {
+      // Handle top 15% filter
+      if (rankingListFilter === 'top-15-percent') {
+        return transformToTopics.filter(topic => {
+          const matchesSearch = !topSearchQuery || topic.name.toLowerCase().includes(topSearchQuery.toLowerCase());
+          if (!matchesSearch) return false;
+          return isInTopPercentile(topic.name, keywordPerformanceData, 15);
+        });
+      }
+
       // Handle top-per-category filter
       if (rankingListFilter === 'top-per-category') {
         const matchingTopics = transformToTopics.filter(topic => {
