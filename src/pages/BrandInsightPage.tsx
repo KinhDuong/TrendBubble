@@ -696,12 +696,32 @@ export default function BrandInsightPage() {
 
       // Handle top 15% filter using composite score
       if (performanceFilter === 'top-15-percent') {
+        console.log('BrandInsightPage - Top 15% filter active, checking keywordPerformanceData:', {
+          perfDataLength: keywordPerformanceData.length,
+          samplePerfData: keywordPerformanceData.slice(0, 3).map(k => ({
+            keyword: k.keyword,
+            three_month_change: k.three_month_change,
+            yoy_change: k.yoy_change
+          })),
+          topicsLength: transformToTopics.length,
+          sampleTopics: transformToTopics.slice(0, 3).map(t => t.name)
+        });
+
         const matchingTopics = transformToTopics.filter(topic => {
           const matchesSearch = !searchQuery || topic.name.toLowerCase().includes(searchQuery.toLowerCase());
           if (!matchesSearch) return false;
 
           // Check if this keyword is in the top 15% by composite score
-          return isInTopPercentile(topic.name, keywordPerformanceData, 15);
+          const isInTop = isInTopPercentile(topic.name, keywordPerformanceData, 15);
+          if (isInTop) {
+            console.log(`Keyword "${topic.name}" IS in top 15%`);
+          }
+          return isInTop;
+        });
+
+        console.log('BrandInsightPage - Top 15% filter results:', {
+          matchingCount: matchingTopics.length,
+          matchingKeywords: matchingTopics.slice(0, 5).map(t => t.name)
         });
 
         return matchingTopics.sort((a, b) => b.searchVolume - a.searchVolume);

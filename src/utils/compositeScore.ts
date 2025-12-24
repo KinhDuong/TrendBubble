@@ -41,6 +41,8 @@ function calculateZScore(value: number, values: number[]): number {
  * Uses weighted z-scores: 60% YoY (long-term) + 40% 3-month (recent momentum)
  */
 export function calculateCompositeScores(keywords: KeywordWithPerformance[]): KeywordWithScore[] {
+  console.log('calculateCompositeScores: Processing', keywords.length, 'keywords');
+
   // Filter keywords with valid performance data
   const validKeywords = keywords.filter(
     k => k.yoy_change !== null &&
@@ -49,13 +51,25 @@ export function calculateCompositeScores(keywords: KeywordWithPerformance[]): Ke
          k.three_month_change !== undefined
   );
 
+  console.log('calculateCompositeScores: Valid keywords:', validKeywords.length, 'Sample data:', validKeywords.slice(0, 3).map(k => ({
+    keyword: k.keyword,
+    yoy_change: k.yoy_change,
+    three_month_change: k.three_month_change
+  })));
+
   if (validKeywords.length === 0) {
+    console.warn('calculateCompositeScores: No valid keywords found');
     return keywords.map(k => ({ ...k, compositeScore: 0 }));
   }
 
   // Extract and parse values
   const yoyValues = validKeywords.map(k => parsePercentage(k.yoy_change));
   const threeMonthValues = validKeywords.map(k => parsePercentage(k.three_month_change));
+
+  console.log('calculateCompositeScores: Parsed values sample:', {
+    yoyValues: yoyValues.slice(0, 5),
+    threeMonthValues: threeMonthValues.slice(0, 5)
+  });
 
   // Calculate composite scores
   const scoredKeywords = validKeywords.map((keyword, index) => {
@@ -67,6 +81,13 @@ export function calculateCompositeScores(keywords: KeywordWithPerformance[]): Ke
 
     return { ...keyword, compositeScore };
   });
+
+  console.log('calculateCompositeScores: Top 5 by score:',
+    scoredKeywords
+      .sort((a, b) => b.compositeScore - a.compositeScore)
+      .slice(0, 5)
+      .map(k => ({ keyword: k.keyword, score: k.compositeScore.toFixed(3) }))
+  );
 
   // Add 0 scores for keywords without valid data
   const invalidKeywords = keywords.filter(
@@ -107,6 +128,22 @@ export function isInTopPercentile(
   allKeywords: KeywordWithPerformance[],
   percentile: number = 15
 ): boolean {
+  if (allKeywords.length === 0) {
+    console.warn('isInTopPercentile called with empty allKeywords array');
+    return false;
+  }
+
   const topKeywords = getTopPercentByCompositeScore(allKeywords, percentile);
+
+  console.log('isInTopPercentile Debug:', {
+    searchingFor: keyword,
+    totalKeywords: allKeywords.length,
+    topKeywordsCount: topKeywords.length,
+    topKeywordsSample: topKeywords.slice(0, 5).map(k => ({
+      keyword: k.keyword,
+      compositeScore: k.compositeScore.toFixed(3)
+    }))
+  });
+
   return topKeywords.some(k => k.keyword.toLowerCase().trim() === keyword.toLowerCase().trim());
 }
