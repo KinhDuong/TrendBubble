@@ -4,7 +4,6 @@ import BubbleTooltip from './BubbleTooltip';
 import { supabase } from '../lib/supabase';
 import { BubbleLayout } from './FilterMenu';
 import { X } from 'lucide-react';
-import { isInTopPercentile } from '../utils/compositeScore';
 
 export type AnimationStyle = 'default' | 'bounce' | 'elastic' | 'spiral' | 'drop' | 'pulse' | 'shimmer';
 
@@ -194,15 +193,6 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
     const coefficientOfVariation = mean > 0 ? (stdDev / mean) * 100 : 0;
 
     const hasYoYData = monthlySearches.length >= 24;
-
-    // Priority 0: Check if keyword is in top 15% by composite score - highest priority
-    if (isInTopPercentile(topicName, keywordPerformanceData, 15)) {
-      return {
-        color: '#FFD700',
-        ringColor: '#FFA500',
-        ringIntensity: 1.0
-      };
-    }
 
     // Priority 1: Check for Declining trends first (no rings for these)
     if (hasYoYData) {

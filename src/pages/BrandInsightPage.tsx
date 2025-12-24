@@ -20,7 +20,6 @@ import ToolSchema from '../components/ToolSchema';
 import BubbleTooltip from '../components/BubbleTooltip';
 import { TrendingTopic, FAQ } from '../types';
 import { TrendingUp, Download, ArrowLeft, Search, X, ChevronsLeft, ChevronsRight, ArrowUpDown, ArrowUp, ArrowDown, Sparkles, AlertCircle } from 'lucide-react';
-import { isInTopPercentile, calculateCompositeScores } from '../utils/compositeScore';
 
 type SortField = 'name' | 'searchVolume' | 'rank' | 'month' | 'threeMonth' | 'yoy';
 type SortDirection = 'asc' | 'desc';
@@ -142,18 +141,12 @@ export default function BrandInsightPage() {
   }, [searchQuery, topSearchQuery]);
 
   useEffect(() => {
-    // Don't auto-change filter if user has manually selected top-15-percent
-    if (performanceFilter === 'top-15-percent') {
-      return;
-    }
-
-    // Auto-set optimal defaults when switching view modes
-    if (viewMode === 'bubble' && performanceFilter !== 'top-per-category') {
+    if (viewMode === 'bubble') {
       setPerformanceFilter('top-per-category');
-    } else if (viewMode === 'ranking' && performanceFilter === 'top-per-category') {
+    } else {
       setPerformanceFilter('all');
     }
-  }, [viewMode, performanceFilter]);
+  }, [viewMode]);
 
   const loadAllData = async () => {
     setLoading(true);
@@ -700,19 +693,6 @@ export default function BrandInsightPage() {
         samplePerformanceKeywords: keywordPerformanceData.slice(0, 3).map(k => `"${k.keyword}"`)
       });
 
-      // Handle top 15% filter using composite score
-      if (performanceFilter === 'top-15-percent') {
-        const matchingTopics = transformToTopics.filter(topic => {
-          const matchesSearch = !searchQuery || topic.name.toLowerCase().includes(searchQuery.toLowerCase());
-          if (!matchesSearch) return false;
-
-          // Check if this keyword is in the top 15% by composite score
-          return isInTopPercentile(topic.name, keywordPerformanceData, 15);
-        });
-
-        return matchingTopics.sort((a, b) => b.searchVolume - a.searchVolume);
-      }
-
       // Handle top-per-category filter
       if (performanceFilter === 'top-per-category') {
         const matchingTopics = transformToTopics.filter(topic => {
@@ -743,37 +723,40 @@ export default function BrandInsightPage() {
       }
 
       return transformToTopics.filter(topic => {
+      const matchesSearch = !searchQuery || topic.name.toLowerCase().includes(searchQuery.toLowerCase());
+
+      if (performanceFilter === 'all') return matchesSearch;
+
+      // Get the exact category for this keyword
+      const categoryLabel = getKeywordCategoryLabel(topic.name);
+
+      // Map filter values to category labels
+      const filterToCategoryMap: { [key: string]: string } = {
+        'ultra-growth': 'Ultra Growth',
+        'ultra-high-growth': 'Extreme Growth',
+        'high-growth': 'High Growth',
+        'rising-star': 'Rising Star',
+        'great-potential': 'Great Potential',
+        'steady-growth': 'Steady Growth',
+        'has-potential': 'Has Potential',
+        'momentum-building': 'Momentum Building',
+        'high-impact': 'High Impact',
+        'quick-win': 'Quick Win',
+        'start-declining': 'Start Declining',
+        'declining': 'Declining',
+        'solid-performer': 'Solid Performer',
+        'hidden-gem': 'Hidden Gem',
+        'high-value': 'High Value',
+        'high-volume': 'High Volume'
+      };
+
+      const targetCategory = filterToCategoryMap[performanceFilter];
+
+      // Only show keywords that exactly match this category (mutually exclusive)
+      return matchesSearch && categoryLabel === targetCategory;
+      }).filter(topic => {
         const matchesSearch = !searchQuery || topic.name.toLowerCase().includes(searchQuery.toLowerCase());
-
-        if (performanceFilter === 'all') return matchesSearch;
-
-        // Get the exact category for this keyword
-        const categoryLabel = getKeywordCategoryLabel(topic.name);
-
-        // Map filter values to category labels
-        const filterToCategoryMap: { [key: string]: string } = {
-          'ultra-growth': 'Ultra Growth',
-          'ultra-high-growth': 'Extreme Growth',
-          'high-growth': 'High Growth',
-          'rising-star': 'Rising Star',
-          'great-potential': 'Great Potential',
-          'steady-growth': 'Steady Growth',
-          'has-potential': 'Has Potential',
-          'momentum-building': 'Momentum Building',
-          'high-impact': 'High Impact',
-          'quick-win': 'Quick Win',
-          'start-declining': 'Start Declining',
-          'declining': 'Declining',
-          'solid-performer': 'Solid Performer',
-          'hidden-gem': 'Hidden Gem',
-          'high-value': 'High Value',
-          'high-volume': 'High Volume'
-        };
-
-        const targetCategory = filterToCategoryMap[performanceFilter];
-
-        // Only show keywords that exactly match this category (mutually exclusive)
-        return matchesSearch && categoryLabel === targetCategory;
+        return matchesSearch;
       });
     } catch (error) {
       console.error('Error filtering topics:', error);
@@ -819,14 +802,6 @@ export default function BrandInsightPage() {
       return transformToTopics.length;
     }
 
-    if (filterId === 'top-15-percent') {
-      // Count keywords in top 15% by composite score
-      const topKeywords = transformToTopics.filter(topic =>
-        isInTopPercentile(topic.name, keywordPerformanceData, 15)
-      );
-      return topKeywords.length;
-    }
-
     if (filterId === 'top-per-category') {
       // Count top 10 from each category
       const categoryGroups = new Map<string, number>();
@@ -868,15 +843,6 @@ export default function BrandInsightPage() {
   // Separate filtering for ranking list
   const rankingFilteredTopics = useMemo(() => {
     try {
-      // Handle top 15% filter
-      if (rankingListFilter === 'top-15-percent') {
-        return transformToTopics.filter(topic => {
-          const matchesSearch = !topSearchQuery || topic.name.toLowerCase().includes(topSearchQuery.toLowerCase());
-          if (!matchesSearch) return false;
-          return isInTopPercentile(topic.name, keywordPerformanceData, 15);
-        });
-      }
-
       // Handle top-per-category filter
       if (rankingListFilter === 'top-per-category') {
         const matchingTopics = transformToTopics.filter(topic => {
@@ -1777,7 +1743,6 @@ export default function BrandInsightPage() {
                       <div className="flex flex-wrap gap-2">
                         {[
                           { id: 'all', label: 'All Keywords', emoji: '', requiresYoY: false },
-                          { id: 'top-15-percent', label: 'Top 15%', emoji: '⭐', requiresYoY: false },
                           { id: 'top-per-category', label: 'Top 10 per Category', emoji: '🎯', requiresYoY: false },
                           { id: 'ultra-growth', label: 'Ultra Growth', emoji: '🔥', requiresYoY: false },
                           { id: 'ultra-high-growth', label: 'Extreme Growth', emoji: '🚀', requiresYoY: false },
