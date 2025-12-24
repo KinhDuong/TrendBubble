@@ -17,7 +17,7 @@ import ComparisonPanel from '../components/ComparisonPanel';
 import BrandKeywordUpload from '../components/BrandKeywordUpload';
 import ToolSchema from '../components/ToolSchema';
 import BubbleTooltip from '../components/BubbleTooltip';
-import KeywordAnalysis from '../components/KeywordAnalysis';
+import AdvertisingRecommendations from '../components/AdvertisingRecommendations';
 import { TrendingTopic, FAQ } from '../types';
 import { TrendingUp, Download, ArrowLeft, Search, X, ChevronsLeft, ChevronsRight, ArrowUpDown, ArrowUp, ArrowDown, Sparkles, AlertCircle } from 'lucide-react';
 
@@ -1745,10 +1745,10 @@ export default function BrandInsightPage() {
 
                   {keywordData.length > 0 && (
                     <div className="mt-8">
-                      <KeywordAnalysis
-                        keywords={keywordData}
-                        theme={theme}
+                      <AdvertisingRecommendations
+                        keywordData={keywordData}
                         brandName={decodedBrand}
+                        theme={theme}
                       />
                     </div>
                   )}
