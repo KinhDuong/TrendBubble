@@ -101,7 +101,7 @@ export default function BrandInsightPage() {
   const [bubbleLayout, setBubbleLayout] = useState<BubbleLayout>('force');
   const [shape, setShape] = useState<FilterShape>('bubble');
   const [animationStyle, setAnimationStyle] = useState<AnimationStyle>('default');
-  const [performanceFilter, setPerformanceFilter] = useState<string>('all');
+  const [performanceFilter, setPerformanceFilter] = useState<string>('top-per-category');
 
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     const savedTheme = localStorage.getItem('theme');
