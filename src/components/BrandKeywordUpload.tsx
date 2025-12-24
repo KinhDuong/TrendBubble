@@ -188,8 +188,16 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light' }
       throw new Error('CSV must have at least 3 rows (title, date, headers, data)');
     }
 
-    const rawHeaders = lines[2].split('\t').map(h => h.trim());
+    const detectDelimiter = (line: string): string => {
+      const tabCount = (line.match(/\t/g) || []).length;
+      const commaCount = (line.match(/,/g) || []).length;
+      return tabCount > commaCount ? '\t' : ',';
+    };
 
+    const delimiter = detectDelimiter(lines[2]);
+    const rawHeaders = lines[2].split(delimiter).map(h => h.trim());
+
+    console.log('CSV Delimiter:', delimiter === '\t' ? 'TAB' : 'COMMA');
     console.log('CSV Headers:', rawHeaders);
 
     if (rawHeaders.length === 0) {
@@ -199,7 +207,7 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light' }
     const keywordIndex = rawHeaders.findIndex(h => h.toLowerCase() === 'keyword');
 
     if (keywordIndex === -1) {
-      throw new Error('CSV must contain a "Keyword" column');
+      throw new Error(`CSV must contain a "Keyword" column. Found columns: ${rawHeaders.join(', ')}`);
     }
 
     const results: Array<Record<string, any>> = [];
@@ -207,7 +215,7 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light' }
     lines.slice(3).forEach((line, lineNum) => {
       if (!line.trim()) return;
 
-      const values = line.split('\t').map(v => v.trim());
+      const values = line.split(delimiter).map(v => v.trim());
       const keyword = values[keywordIndex];
 
       if (!keyword) return;
