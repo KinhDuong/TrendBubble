@@ -83,7 +83,7 @@ export default function BrandInsightPage() {
         return parsed;
       }
     }
-    return isMobile ? 40 : 100;
+    return 1000;
   };
 
   const [maxBubbles, setMaxBubbles] = useState<number>(getInitialMaxBubbles());
