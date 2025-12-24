@@ -215,18 +215,6 @@ export default function KeywordChart({ data, selectedBrand }: KeywordChartProps)
         ></svg>
       </div>
 
-      {selectedBrand && (
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <h3 className="text-lg font-semibold mb-4">Top Keywords - {selectedBrand}</h3>
-          <svg
-            ref={keywordsRef}
-            className="w-full"
-            aria-label={generateKeywordsAriaLabel()}
-            title={`Top keywords for ${selectedBrand}`}
-            role="img"
-          ></svg>
-        </div>
-      )}
     </div>
   );
 }
