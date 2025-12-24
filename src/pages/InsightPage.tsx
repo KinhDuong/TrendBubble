@@ -73,7 +73,8 @@ export default function InsightPage() {
         .from('brand_keyword_data')
         .select('*')
         .eq('brand', selectedBrand)
-        .order('month', { ascending: true });
+        .order('month', { ascending: true })
+        .limit(5000);
 
       if (error) throw error;
 

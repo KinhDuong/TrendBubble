@@ -82,7 +82,8 @@ export default function BrandDataManager() {
         .from('brand_keyword_data')
         .select('*')
         .eq('brand', decodedBrand)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .limit(5000);
 
       if (error) throw error;
 

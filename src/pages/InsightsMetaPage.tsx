@@ -58,7 +58,8 @@ export default function InsightsMetaPage() {
       const { data: keywordData, error: keywordError } = await supabase
         .from('brand_keyword_data')
         .select('brand, keyword, user_id')
-        .eq('user_id', user.id);
+        .eq('user_id', user.id)
+        .limit(5000);
 
       if (keywordError) throw keywordError;
 

@@ -256,7 +256,8 @@ export default function BrandInsightPage() {
         .from('brand_keyword_data')
         .select('*')
         .eq('brand', decodedBrand)
-        .eq('user_id', userIdToUse);
+        .eq('user_id', userIdToUse)
+        .limit(5000);
 
       if (error) throw error;
 
@@ -1141,7 +1142,8 @@ export default function BrandInsightPage() {
         .from('brand_keyword_data')
         .select('*')
         .eq('brand', decodedBrand)
-        .order('keyword', { ascending: true });
+        .order('keyword', { ascending: true })
+        .limit(5000);
 
       if (error) throw error;
 
