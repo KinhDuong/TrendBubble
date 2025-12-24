@@ -1581,7 +1581,7 @@ export default function BrandInsightPage() {
 
                   {keywordData.length > 0 && (
                     <div className="mt-8">
-                      <KeywordAnalysis keywords={keywordData} theme={theme} />
+                      <KeywordAnalysis keywords={keywordData} theme={theme} brandName={decodedBrand} />
                     </div>
                   )}
 

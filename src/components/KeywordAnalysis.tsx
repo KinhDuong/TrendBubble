@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { AlertCircle, TrendingUp, TrendingDown, Minus, Target, Award, Zap } from 'lucide-react';
+import AdvertisingRecommendations from './AdvertisingRecommendations';
 
 interface KeywordData {
   keyword: string;
@@ -13,6 +14,7 @@ interface KeywordData {
 interface KeywordAnalysisProps {
   keywords: KeywordData[];
   theme?: 'dark' | 'light';
+  brandName?: string;
 }
 
 interface DuplicateGroup {
@@ -35,7 +37,7 @@ interface VolumeSegment {
   avgVolume: number;
 }
 
-export default function KeywordAnalysis({ keywords, theme = 'light' }: KeywordAnalysisProps) {
+export default function KeywordAnalysis({ keywords, theme = 'light', brandName = '' }: KeywordAnalysisProps) {
   const analysis = useMemo(() => {
     if (!keywords.length) return null;
 
@@ -415,6 +417,12 @@ export default function KeywordAnalysis({ keywords, theme = 'light' }: KeywordAn
           ))}
         </div>
       </div>
+
+      <AdvertisingRecommendations
+        keywordData={keywords}
+        brandName={brandName}
+        theme={theme}
+      />
     </div>
   );
 }
