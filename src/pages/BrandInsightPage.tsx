@@ -1749,7 +1749,7 @@ export default function BrandInsightPage() {
               {transformToTopics.length > 0 && viewMode === 'bubble' && (
                 <>
                   <div className="max-w-7xl mx-auto mb-6">
-                    <div className={`${theme === 'dark' ? 'bg-gray-800/50' : 'bg-white/80'} rounded-lg p-4 backdrop-blur-sm`}>
+                    <div>
                       <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
                         <h3 className={`text-sm font-semibold ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
                           Filter by Performance
@@ -1906,7 +1906,7 @@ export default function BrandInsightPage() {
                           />
                         )}
 
-                        <div className={`${theme === 'dark' ? 'bg-gray-800/50' : 'bg-white/80'} rounded-lg p-4 backdrop-blur-sm mb-4`}>
+                        <div className="mb-4">
                           <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
                             <h3 className={`text-sm font-semibold ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
                               Filter by Performance
