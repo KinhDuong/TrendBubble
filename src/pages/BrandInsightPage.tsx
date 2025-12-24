@@ -84,7 +84,7 @@ export default function BrandInsightPage() {
         return parsed;
       }
     }
-    return 1000;
+    return 999999;
   };
 
   const [maxBubbles, setMaxBubbles] = useState<number>(getInitialMaxBubbles());
