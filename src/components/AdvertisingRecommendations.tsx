@@ -488,13 +488,13 @@ export default function AdvertisingRecommendations({ keywordData, brandName, the
   }
 
   return (
-    <div className="mt-6">
+    <div className={`rounded-lg p-6 ${theme === 'dark' ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-200'}`}>
       <button
         onClick={() => setShowRecommendations(!showRecommendations)}
-        className={`w-full px-4 py-3 rounded-lg font-semibold text-sm transition-all flex items-center justify-center gap-2 ${
+        className={`w-full px-4 py-3 rounded-lg font-semibold transition-all flex items-center justify-center gap-2 ${
           theme === 'dark'
-            ? 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white'
-            : 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white'
+            ? 'bg-gray-700 hover:bg-gray-600 text-white border border-gray-600'
+            : 'bg-white hover:bg-gray-50 text-gray-900 border border-gray-300'
         }`}
       >
         {showRecommendations ? (
@@ -512,11 +512,11 @@ export default function AdvertisingRecommendations({ keywordData, brandName, the
 
       {showRecommendations && (
         <div className="mt-6 space-y-4">
-          <div className={`p-4 rounded-lg border ${theme === 'dark' ? 'bg-gray-700/50 border-gray-600' : 'bg-gray-50 border-gray-200'}`}>
-            <h3 className={`text-lg font-bold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+          <div>
+            <h3 className={`text-lg font-semibold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
               Advertising Keyword Recommendations
             </h3>
-            <p className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+            <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
               Based on search volume, CPC, competition, and growth trends, here are the top 5 keywords for each advertising category.
             </p>
           </div>
@@ -524,12 +524,12 @@ export default function AdvertisingRecommendations({ keywordData, brandName, the
           {categoryResults.map((category) => (
             <div
               key={category.name}
-              className={`border rounded-lg overflow-hidden ${category.color}`}
+              className={`border rounded-lg overflow-hidden ${theme === 'dark' ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`}
             >
               <button
                 onClick={() => setExpandedCategory(expandedCategory === category.name ? null : category.name)}
                 className={`w-full px-4 py-3 flex items-center justify-between transition-colors ${
-                  theme === 'dark' ? 'hover:bg-gray-700/50' : 'hover:bg-white/50'
+                  theme === 'dark' ? 'hover:bg-gray-600' : 'hover:bg-gray-100'
                 }`}
               >
                 <div className="flex items-center gap-3">
@@ -537,10 +537,10 @@ export default function AdvertisingRecommendations({ keywordData, brandName, the
                     {category.icon}
                   </div>
                   <div className="text-left">
-                    <h4 className={`font-bold text-base ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                    <h4 className={`font-semibold text-base ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                       {category.name}
                     </h4>
-                    <p className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                    <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
                       {category.description}
                     </p>
                   </div>
