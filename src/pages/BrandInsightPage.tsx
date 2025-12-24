@@ -1817,11 +1817,6 @@ export default function BrandInsightPage() {
                           </button>
                         ))}
                       </div>
-                      {performanceFilter !== 'all' && (
-                        <div className={`mt-3 text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                          Showing {filteredTopics.length} keywords
-                        </div>
-                      )}
                     </div>
                   </div>
 
@@ -1971,11 +1966,6 @@ export default function BrandInsightPage() {
                               </button>
                             ))}
                           </div>
-                          {rankingListFilter !== 'all' && (
-                            <div className={`mt-3 text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                              Showing {rankingFilteredTopics.length} keywords
-                            </div>
-                          )}
                         </div>
 
                         <div className="relative mb-4">
