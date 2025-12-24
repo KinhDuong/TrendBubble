@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { ChevronDown, ChevronUp, TrendingUp, Zap, Target, Shield, Award } from 'lucide-react';
+import { ChevronDown, ChevronUp, TrendingUp, Zap, Target, Shield, Award, DollarSign, Hash, Flame } from 'lucide-react';
 
 interface KeywordData {
   keyword: string;
@@ -142,6 +142,28 @@ export default function AdvertisingRecommendations({ keywordData, brandName, the
       return 0.50 * kw.normalizedVolume + 0.30 * kw.normalizedCPC + 0.20 * kw.normalizedInvertedCompetition;
     };
 
+    const calculateBudgetFriendly = (kw: ScoredKeyword): number => {
+      const lowCPCScore = 1 - kw.normalizedCPC;
+      return 0.50 * kw.normalizedVolume + 0.35 * lowCPCScore + 0.15 * kw.normalizedInvertedCompetition;
+    };
+
+    const calculateLongTail = (kw: ScoredKeyword): number => {
+      const wordCount = kw.keyword.split(' ').length;
+      const longTailBonus = wordCount >= 4 ? 1 : 0;
+      return 0.40 * longTailBonus + 0.30 * kw.normalizedInvertedCompetition + 0.20 * kw.normalizedVolume + 0.10 * kw.normalizedCPC;
+    };
+
+    const isBrandKeyword = (kw: ScoredKeyword): boolean => {
+      if (!brandName) return false;
+      const kwLower = kw.keyword.toLowerCase();
+      const brandLower = brandName.toLowerCase();
+      return kwLower.includes(brandLower);
+    };
+
+    const calculateBrandKeyword = (kw: ScoredKeyword): number => {
+      return 0.50 * kw.normalizedVolume + 0.30 * kw.normalizedCPC + 0.20 * kw.normalizedInvertedCompetition;
+    };
+
     const highValueKeywords = scoredKeywords
       .map(kw => ({ ...kw, score: calculateHighValue(kw) }))
       .sort((a, b) => b.score - a.score)
@@ -160,6 +182,24 @@ export default function AdvertisingRecommendations({ keywordData, brandName, the
     const defensiveKeywords = scoredKeywords
       .filter(kw => isDefensiveKeyword(kw))
       .map(kw => ({ ...kw, score: calculateDefensive(kw) }))
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 5);
+
+    const budgetFriendlyKeywords = scoredKeywords
+      .filter(kw => kw.avgCPC > 0)
+      .map(kw => ({ ...kw, score: calculateBudgetFriendly(kw) }))
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 5);
+
+    const longTailKeywords = scoredKeywords
+      .filter(kw => kw.keyword.split(' ').length >= 4)
+      .map(kw => ({ ...kw, score: calculateLongTail(kw) }))
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 5);
+
+    const brandKeywords = scoredKeywords
+      .filter(kw => isBrandKeyword(kw))
+      .map(kw => ({ ...kw, score: calculateBrandKeyword(kw) }))
       .sort((a, b) => b.score - a.score)
       .slice(0, 5);
 
@@ -208,14 +248,35 @@ export default function AdvertisingRecommendations({ keywordData, brandName, the
         color: theme === 'dark' ? 'bg-red-900/30 border-red-700' : 'bg-red-50 border-red-300',
       },
       {
+        name: 'Budget-Friendly',
+        icon: <DollarSign className="w-5 h-5" />,
+        description: 'High volume keywords with low CPC, maximize ROI on limited budgets',
+        keywords: budgetFriendlyKeywords,
+        color: theme === 'dark' ? 'bg-teal-900/30 border-teal-700' : 'bg-teal-50 border-teal-300',
+      },
+      {
+        name: 'Long-Tail',
+        icon: <Hash className="w-5 h-5" />,
+        description: 'Specific 4+ word phrases with targeted intent and lower competition',
+        keywords: longTailKeywords,
+        color: theme === 'dark' ? 'bg-orange-900/30 border-orange-700' : 'bg-orange-50 border-orange-300',
+      },
+      {
+        name: 'Brand Protection',
+        icon: <Flame className="w-5 h-5" />,
+        description: 'Keywords containing your brand name to protect brand presence',
+        keywords: brandKeywords,
+        color: theme === 'dark' ? 'bg-pink-900/30 border-pink-700' : 'bg-pink-50 border-pink-300',
+      },
+      {
         name: 'Best Overall',
         icon: <Target className="w-5 h-5" />,
         description: 'Balanced keywords across all metrics for optimal performance',
         keywords: bestOverallKeywords,
-        color: theme === 'dark' ? 'bg-purple-900/30 border-purple-700' : 'bg-purple-50 border-purple-300',
+        color: theme === 'dark' ? 'bg-slate-900/30 border-slate-700' : 'bg-slate-50 border-slate-300',
       },
     ];
-  }, [processedData, theme]);
+  }, [processedData, theme, brandName]);
 
   const formatNumber = (num: number): string => {
     if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
