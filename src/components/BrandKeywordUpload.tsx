@@ -182,7 +182,9 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light' }
   };
 
   const parseCSV = (text: string): Array<Record<string, any>> => {
-    const lines = text.split('\n').filter(line => line.trim());
+    // Strip UTF-8 BOM if present
+    const cleanText = text.replace(/^\uFEFF/, '');
+    const lines = cleanText.split('\n').filter(line => line.trim());
 
     if (lines.length < 1) {
       throw new Error('CSV file is empty');
@@ -200,7 +202,7 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light' }
 
     for (let i = 0; i < Math.min(5, lines.length); i++) {
       delimiter = detectDelimiter(lines[i]);
-      const potentialHeaders = lines[i].split(delimiter).map(h => h.trim());
+      const potentialHeaders = lines[i].split(delimiter).map(h => h.replace(/^\uFEFF/, '').trim());
       const keywordIdx = potentialHeaders.findIndex(h => h.toLowerCase() === 'keyword');
 
       if (keywordIdx !== -1) {
@@ -213,7 +215,7 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light' }
     if (headerLineIndex === -1) {
       const firstFewLines = lines.slice(0, 5).map((line, idx) => {
         const d = detectDelimiter(line);
-        const cols = line.split(d).map(h => h.trim()).join(', ');
+        const cols = line.split(d).map(h => h.replace(/^\uFEFF/, '').trim()).join(', ');
         return `Line ${idx + 1}: ${cols}`;
       }).join('\n');
 
