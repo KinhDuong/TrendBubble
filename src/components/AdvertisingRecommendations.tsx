@@ -311,22 +311,25 @@ export default function AdvertisingRecommendations({ keywordData, brandName, the
     };
 
     const highValueKeywords = scoredKeywords
+      .filter(kw => kw.avgCPC > 0)
       .map(kw => ({ ...kw, score: calculateHighValue(kw) }))
       .sort((a, b) => b.score - a.score)
       .slice(0, 10);
 
     const highPotentialKeywords = scoredKeywords
+      .filter(kw => kw.avgCPC > 0)
       .map(kw => ({ ...kw, score: calculateHighPotential(kw) }))
       .sort((a, b) => b.score - a.score)
       .slice(0, 10);
 
     const quickWinKeywords = scoredKeywords
+      .filter(kw => kw.avgCPC > 0)
       .map(kw => ({ ...kw, score: calculateQuickWin(kw) }))
       .sort((a, b) => b.score - a.score)
       .slice(0, 10);
 
     const defensiveKeywords = scoredKeywords
-      .filter(kw => isDefensiveKeyword(kw))
+      .filter(kw => isDefensiveKeyword(kw) && kw.avgCPC > 0)
       .map(kw => ({ ...kw, score: calculateDefensive(kw) }))
       .sort((a, b) => b.score - a.score)
       .slice(0, 10);
@@ -338,13 +341,13 @@ export default function AdvertisingRecommendations({ keywordData, brandName, the
       .slice(0, 10);
 
     const longTailKeywords = scoredKeywords
-      .filter(kw => kw.keyword.split(' ').length >= 4)
+      .filter(kw => kw.keyword.split(' ').length >= 4 && kw.avgCPC > 0)
       .map(kw => ({ ...kw, score: calculateLongTail(kw) }))
       .sort((a, b) => b.score - a.score)
       .slice(0, 10);
 
     const brandKeywords = scoredKeywords
-      .filter(kw => isBrandKeyword(kw))
+      .filter(kw => isBrandKeyword(kw) && kw.avgCPC > 0)
       .map(kw => ({ ...kw, score: calculateBrandKeyword(kw) }))
       .sort((a, b) => b.score - a.score)
       .slice(0, 10);
@@ -381,6 +384,7 @@ export default function AdvertisingRecommendations({ keywordData, brandName, the
       .slice(0, 10);
 
     const bestOverallKeywords = scoredKeywords
+      .filter(kw => kw.avgCPC > 0)
       .map(kw => {
         const hvScore = calculateHighValue(kw);
         const qwScore = calculateQuickWin(kw);
