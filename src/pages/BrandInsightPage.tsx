@@ -296,7 +296,7 @@ export default function BrandInsightPage() {
         const defaultData: BrandPageData = {
           id: '',
           brand: decodedBrand,
-          meta_title: `${decodedBrand} - Keyword Search Trends & SEO Insights`,
+          meta_title: `${decodedBrand} - Keyword Search & Brand Insights`,
           meta_description: `Analyze ${decodedBrand} keyword search volume trends and SEO performance data.`,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
@@ -310,7 +310,7 @@ export default function BrandInsightPage() {
         const defaultData: BrandPageData = {
           id: '',
           brand: decodedBrand,
-          meta_title: `${decodedBrand} - Keyword Search Trends & SEO Insights`,
+          meta_title: `${decodedBrand} - Keyword Search & Brand Insights`,
           meta_description: `Analyze ${decodedBrand} keyword search volume trends and SEO performance data.`,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
@@ -1499,7 +1499,7 @@ export default function BrandInsightPage() {
                         <ArrowLeft className="w-4 h-4" />
                         Back to Insights
                       </button>
-                      <h1 className={`text-xl md:text-4xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                      <h1 className={`text-lg md:text-3xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                         {brandPageData.meta_title}
                       </h1>
                     </div>
