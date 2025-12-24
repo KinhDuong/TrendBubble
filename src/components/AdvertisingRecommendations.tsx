@@ -38,7 +38,7 @@ interface Props {
 
 export default function AdvertisingRecommendations({ keywordData, brandName, theme }: Props) {
   const [showRecommendations, setShowRecommendations] = useState(false);
-  const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
+  const [expandedCategory, setExpandedCategory] = useState<string | null>('Highest ROI Potential');
 
   const processedData = useMemo(() => {
     if (!keywordData || keywordData.length === 0) return [];
@@ -182,47 +182,47 @@ export default function AdvertisingRecommendations({ keywordData, brandName, the
     const highValueKeywords = scoredKeywords
       .map(kw => ({ ...kw, score: calculateHighValue(kw) }))
       .sort((a, b) => b.score - a.score)
-      .slice(0, 5);
+      .slice(0, 10);
 
     const highPotentialKeywords = scoredKeywords
       .map(kw => ({ ...kw, score: calculateHighPotential(kw) }))
       .sort((a, b) => b.score - a.score)
-      .slice(0, 5);
+      .slice(0, 10);
 
     const quickWinKeywords = scoredKeywords
       .map(kw => ({ ...kw, score: calculateQuickWin(kw) }))
       .sort((a, b) => b.score - a.score)
-      .slice(0, 5);
+      .slice(0, 10);
 
     const defensiveKeywords = scoredKeywords
       .filter(kw => isDefensiveKeyword(kw))
       .map(kw => ({ ...kw, score: calculateDefensive(kw) }))
       .sort((a, b) => b.score - a.score)
-      .slice(0, 5);
+      .slice(0, 10);
 
     const budgetFriendlyKeywords = scoredKeywords
       .filter(kw => kw.avgCPC > 0)
       .map(kw => ({ ...kw, score: calculateBudgetFriendly(kw) }))
       .sort((a, b) => b.score - a.score)
-      .slice(0, 5);
+      .slice(0, 10);
 
     const longTailKeywords = scoredKeywords
       .filter(kw => kw.keyword.split(' ').length >= 4)
       .map(kw => ({ ...kw, score: calculateLongTail(kw) }))
       .sort((a, b) => b.score - a.score)
-      .slice(0, 5);
+      .slice(0, 10);
 
     const brandKeywords = scoredKeywords
       .filter(kw => isBrandKeyword(kw))
       .map(kw => ({ ...kw, score: calculateBrandKeyword(kw) }))
       .sort((a, b) => b.score - a.score)
-      .slice(0, 5);
+      .slice(0, 10);
 
     const bestValueKeywords = scoredKeywords
       .filter(kw => kw.avgCPC > 0)
       .map(kw => ({ ...kw, score: calculateBestValue(kw) }))
       .sort((a, b) => b.score - a.score)
-      .slice(0, 5);
+      .slice(0, 10);
 
     const bestOverallKeywords = scoredKeywords
       .map(kw => {
@@ -237,9 +237,16 @@ export default function AdvertisingRecommendations({ keywordData, brandName, the
         return { ...kw, score: overallScore };
       })
       .sort((a, b) => b.score - a.score)
-      .slice(0, 5);
+      .slice(0, 10);
 
     return [
+      {
+        name: 'Highest ROI Potential',
+        icon: <TrendingDown className="w-5 h-5" />,
+        description: 'Best cost-to-benefit ratio for PPC: high commercial intent + decent volume + low CPC + achievable competition',
+        keywords: bestValueKeywords,
+        color: theme === 'dark' ? 'bg-emerald-900/30 border-emerald-700' : 'bg-emerald-50 border-emerald-300',
+      },
       {
         name: 'High Value',
         icon: <Award className="w-5 h-5" />,
@@ -288,13 +295,6 @@ export default function AdvertisingRecommendations({ keywordData, brandName, the
         description: 'Keywords containing your brand name to protect brand presence',
         keywords: brandKeywords,
         color: theme === 'dark' ? 'bg-pink-900/30 border-pink-700' : 'bg-pink-50 border-pink-300',
-      },
-      {
-        name: 'Highest ROI Potential',
-        icon: <TrendingDown className="w-5 h-5" />,
-        description: 'Best cost-to-benefit ratio for PPC: high commercial intent + decent volume + low CPC + achievable competition',
-        keywords: bestValueKeywords,
-        color: theme === 'dark' ? 'bg-emerald-900/30 border-emerald-700' : 'bg-emerald-50 border-emerald-300',
       },
       {
         name: 'Best Overall',
