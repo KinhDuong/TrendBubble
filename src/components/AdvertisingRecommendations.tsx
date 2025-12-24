@@ -462,6 +462,13 @@ export default function AdvertisingRecommendations({ keywordData, brandName, the
     ];
   }, [processedData, theme, brandName]);
 
+  const getCompetitionLabel = (indexed: number | undefined): string => {
+    if (indexed === undefined) return 'N/A';
+    if (indexed < 33) return 'Low';
+    if (indexed < 67) return 'Medium';
+    return 'High';
+  };
+
   const formatNumber = (num: number): string => {
     if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
     if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
