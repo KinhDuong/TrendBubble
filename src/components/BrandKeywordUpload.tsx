@@ -355,7 +355,13 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light' }
     setSuccess(null);
 
     try {
-      const text = await file.text();
+      // Use FileReader for better cross-browser encoding support
+      const text = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve(e.target?.result as string);
+        reader.onerror = () => reject(new Error('Failed to read file'));
+        reader.readAsText(file, 'UTF-8');
+      });
       const data = parseCSV(text);
 
       if (data.length === 0) {
