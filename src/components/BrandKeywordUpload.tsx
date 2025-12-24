@@ -184,8 +184,8 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light' }
   const parseCSV = (text: string): Array<Record<string, any>> => {
     const lines = text.split('\n').filter(line => line.trim());
 
-    if (lines.length < 3) {
-      throw new Error('CSV must have at least 3 rows (title, date, headers, data)');
+    if (lines.length < 1) {
+      throw new Error('CSV file is empty');
     }
 
     const detectDelimiter = (line: string): string => {
@@ -194,25 +194,43 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light' }
       return tabCount > commaCount ? '\t' : ',';
     };
 
-    const delimiter = detectDelimiter(lines[2]);
-    const rawHeaders = lines[2].split(delimiter).map(h => h.trim());
+    let headerLineIndex = -1;
+    let delimiter = '\t';
+    let rawHeaders: string[] = [];
 
-    console.log('CSV Delimiter:', delimiter === '\t' ? 'TAB' : 'COMMA');
-    console.log('CSV Headers:', rawHeaders);
+    for (let i = 0; i < Math.min(5, lines.length); i++) {
+      delimiter = detectDelimiter(lines[i]);
+      const potentialHeaders = lines[i].split(delimiter).map(h => h.trim());
+      const keywordIdx = potentialHeaders.findIndex(h => h.toLowerCase() === 'keyword');
 
-    if (rawHeaders.length === 0) {
-      throw new Error('No headers found in CSV');
+      if (keywordIdx !== -1) {
+        headerLineIndex = i;
+        rawHeaders = potentialHeaders;
+        break;
+      }
+    }
+
+    if (headerLineIndex === -1) {
+      const firstFewLines = lines.slice(0, 5).map((line, idx) => {
+        const d = detectDelimiter(line);
+        const cols = line.split(d).map(h => h.trim()).join(', ');
+        return `Line ${idx + 1}: ${cols}`;
+      }).join('\n');
+
+      throw new Error(`CSV must contain a "Keyword" column in the first 5 rows.\n\nFound:\n${firstFewLines}`);
     }
 
     const keywordIndex = rawHeaders.findIndex(h => h.toLowerCase() === 'keyword');
+    const dataStartIndex = headerLineIndex + 1;
 
-    if (keywordIndex === -1) {
-      throw new Error(`CSV must contain a "Keyword" column. Found columns: ${rawHeaders.join(', ')}`);
-    }
+    console.log('CSV Delimiter:', delimiter === '\t' ? 'TAB' : 'COMMA');
+    console.log('Header found at line:', headerLineIndex + 1);
+    console.log('CSV Headers:', rawHeaders);
+    console.log('Data starts at line:', dataStartIndex + 1);
 
     const results: Array<Record<string, any>> = [];
 
-    lines.slice(3).forEach((line, lineNum) => {
+    lines.slice(dataStartIndex).forEach((line, lineNum) => {
       if (!line.trim()) return;
 
       const values = line.split(delimiter).map(v => v.trim());
