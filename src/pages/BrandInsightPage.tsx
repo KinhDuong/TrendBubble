@@ -1586,6 +1586,12 @@ export default function BrandInsightPage() {
 
                   {keywordData.length > 0 && (
                     <div className="mt-8">
+                      <KeywordAnalysis keywords={keywordData} theme={theme} brandName={decodedBrand} />
+                    </div>
+                  )}
+
+                  {keywordData.length > 0 && (
+                    <div className="mt-8">
                       <div className={`${theme === 'dark' ? 'bg-gradient-to-br from-blue-900/30 to-purple-900/30 border-blue-700/50' : 'bg-gradient-to-br from-blue-50 to-purple-50 border-blue-200'} rounded-lg border p-6 shadow-md`}>
                         <div className="flex items-start justify-between mb-4">
                           <div className="flex items-center gap-3 flex-1">
@@ -1883,10 +1889,10 @@ export default function BrandInsightPage() {
                 </div>
               )}
 
-              {false && transformToTopics.length > 0 && (viewMode === 'bubble' || viewMode === 'bar' || viewMode === 'treemap' || viewMode === 'donut') && (
-                <div className="max-w-7xl mx-auto mt-8 mb-0 md:mb-8 hidden">
+              {transformToTopics.length > 0 && (viewMode === 'bubble' || viewMode === 'bar' || viewMode === 'treemap' || viewMode === 'donut') && (
+                <div className="max-w-7xl mx-auto mt-8 mb-0 md:mb-8">
                   <div className="flex flex-col lg:flex-row gap-6">
-                    <section className="flex-1 lg:w-[65%]" aria-labelledby="top-keywords-heading" style={{display: 'none'}}>
+                    <section className="flex-1 lg:w-[65%]" aria-labelledby="top-keywords-heading">
                       <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-lg border p-6 shadow-md`}>
                         <h2 id="top-keywords-heading" className={`text-xl md:text-2xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                           Top {rankingFilteredTopics.length} Keywords for {decodedBrand}
@@ -2271,6 +2277,49 @@ export default function BrandInsightPage() {
                 </section>
               )}
 
+              {latestBrandPages.length > 0 && (
+                <section className="max-w-7xl mx-auto mt-8 mb-0 px-4 md:px-6" aria-labelledby="latest-brands-heading">
+                  <h2 id="latest-brands-heading" className={`text-xl md:text-2xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                    Latest Brand Insights
+                  </h2>
+                  <p className={`text-sm mb-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                    Explore keyword trends and SEO insights for other brands. Discover what keywords are driving search volume and performance across different brands.
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {latestBrandPages.map((page) => (
+                      <a
+                        key={page.id}
+                        href={userId ? `/insights/${encodeURIComponent(userId)}/${encodeURIComponent(page.brand)}/` : '#'}
+                        className={`group block ${theme === 'dark' ? 'bg-gray-800 hover:bg-gray-750' : 'bg-white hover:bg-gray-50 border border-gray-200'} rounded-lg overflow-hidden shadow-md transition-all hover:shadow-lg h-full`}
+                      >
+                        <div className="flex flex-row h-full min-h-[180px]">
+                          <div className={`w-2/5 ${theme === 'dark' ? 'bg-gradient-to-br from-green-900 to-green-800' : 'bg-gradient-to-br from-lime-500 to-lime-400'} flex items-center justify-center p-4`}>
+                            <div className="text-center">
+                              <div className={`text-4xl font-bold ${theme === 'dark' ? 'text-green-400' : 'text-white'} mb-2`}>
+                                {page.brand.substring(0, 2).toUpperCase()}
+                              </div>
+                              <div className={`text-xs font-medium ${theme === 'dark' ? 'text-green-300' : 'text-white'}`}>
+                                Brand
+                              </div>
+                            </div>
+                          </div>
+                          <div className="w-3/5 p-4 flex flex-col">
+                            <div className={`text-xs font-semibold uppercase tracking-wide mb-2 ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
+                              Brand Insights <span className="mx-1">|</span> {new Date(page.created_at).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}
+                            </div>
+                            <h3 className={`font-bold text-lg mb-2 ${theme === 'dark' ? 'text-white group-hover:text-green-400' : 'text-gray-900 group-hover:text-green-600'} transition-colors line-clamp-2`}>
+                              {page.meta_title}
+                            </h3>
+                            <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} line-clamp-2`}>
+                              {page.meta_description}
+                            </p>
+                          </div>
+                        </div>
+                      </a>
+                    ))}
+                  </div>
+                </section>
+              )}
 
               {transformToTopics.length > 0 && faqs.length > 0 && (
                 <section className="max-w-7xl mx-auto mt-12 mb-0 px-4 md:px-6" aria-labelledby="faq-heading">
