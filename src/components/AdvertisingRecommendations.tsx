@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { ChevronDown, ChevronUp, TrendingUp, Zap, Target, Shield, Award, DollarSign, Hash, Flame } from 'lucide-react';
+import { ChevronDown, ChevronUp, TrendingUp, Zap, Target, Shield, Award, DollarSign, Hash, Flame, TrendingDown } from 'lucide-react';
 
 interface KeywordData {
   keyword: string;
@@ -164,6 +164,21 @@ export default function AdvertisingRecommendations({ keywordData, brandName, the
       return 0.50 * kw.normalizedVolume + 0.30 * kw.normalizedCPC + 0.20 * kw.normalizedInvertedCompetition;
     };
 
+    const calculateBestValue = (kw: ScoredKeyword): number => {
+      const normInvertedCPC = 1 - kw.normalizedCPC;
+      let intentBoost = 0;
+
+      const kwLower = kw.keyword.toLowerCase();
+      const commercialKeywords = ['buy', 'purchase', 'price', 'cost', 'cheap', 'deal', 'discount', 'order', 'shop', 'sale', 'best', 'review', 'compare', 'vs', 'alternative'];
+      const hasCommercialIntent = commercialKeywords.some(word => kwLower.includes(word));
+
+      if (hasCommercialIntent) {
+        intentBoost = 0.3;
+      }
+
+      return 0.40 * kw.normalizedVolume + 0.30 * normInvertedCPC + 0.20 * kw.normalizedInvertedCompetition + 0.10 * intentBoost;
+    };
+
     const highValueKeywords = scoredKeywords
       .map(kw => ({ ...kw, score: calculateHighValue(kw) }))
       .sort((a, b) => b.score - a.score)
@@ -200,6 +215,12 @@ export default function AdvertisingRecommendations({ keywordData, brandName, the
     const brandKeywords = scoredKeywords
       .filter(kw => isBrandKeyword(kw))
       .map(kw => ({ ...kw, score: calculateBrandKeyword(kw) }))
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 5);
+
+    const bestValueKeywords = scoredKeywords
+      .filter(kw => kw.avgCPC > 0)
+      .map(kw => ({ ...kw, score: calculateBestValue(kw) }))
       .sort((a, b) => b.score - a.score)
       .slice(0, 5);
 
@@ -267,6 +288,13 @@ export default function AdvertisingRecommendations({ keywordData, brandName, the
         description: 'Keywords containing your brand name to protect brand presence',
         keywords: brandKeywords,
         color: theme === 'dark' ? 'bg-pink-900/30 border-pink-700' : 'bg-pink-50 border-pink-300',
+      },
+      {
+        name: 'Highest ROI Potential',
+        icon: <TrendingDown className="w-5 h-5" />,
+        description: 'Best cost-to-benefit ratio for PPC: high commercial intent + decent volume + low CPC + achievable competition',
+        keywords: bestValueKeywords,
+        color: theme === 'dark' ? 'bg-emerald-900/30 border-emerald-700' : 'bg-emerald-50 border-emerald-300',
       },
       {
         name: 'Best Overall',
