@@ -524,7 +524,7 @@ export default function AdvertisingRecommendations({ keywordData, brandName, the
           {categoryResults.map((category) => (
             <div
               key={category.name}
-              className={`border rounded-lg overflow-hidden ${theme === 'dark' ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`}
+              className={`border rounded-lg overflow-hidden ${category.color}`}
             >
               <button
                 onClick={() => setExpandedCategory(expandedCategory === category.name ? null : category.name)}
