@@ -784,6 +784,62 @@ export default function BrandInsightPage() {
     loading
   });
 
+  // Calculate category counts for all topics
+  const categoryCounts = useMemo(() => {
+    const counts = new Map<string, number>();
+
+    transformToTopics.forEach(topic => {
+      const categoryLabel = getKeywordCategoryLabel(topic.name);
+      counts.set(categoryLabel, (counts.get(categoryLabel) || 0) + 1);
+    });
+
+    return counts;
+  }, [transformToTopics, keywordPerformanceData, hasYoYData]);
+
+  // Helper function to get count for a filter
+  const getFilterCount = (filterId: string): number => {
+    if (filterId === 'all') {
+      return transformToTopics.length;
+    }
+
+    if (filterId === 'top-per-category') {
+      // Count top 10 from each category
+      const categoryGroups = new Map<string, number>();
+      transformToTopics.forEach(topic => {
+        const categoryLabel = getKeywordCategoryLabel(topic.name);
+        categoryGroups.set(categoryLabel, (categoryGroups.get(categoryLabel) || 0) + 1);
+      });
+
+      let topPerCategoryCount = 0;
+      categoryGroups.forEach(count => {
+        topPerCategoryCount += Math.min(count, 10);
+      });
+      return topPerCategoryCount;
+    }
+
+    const filterToCategoryMap: { [key: string]: string } = {
+      'ultra-growth': 'Ultra Growth',
+      'ultra-high-growth': 'Extreme Growth',
+      'high-growth': 'High Growth',
+      'rising-star': 'Rising Star',
+      'great-potential': 'Great Potential',
+      'steady-growth': 'Steady Growth',
+      'has-potential': 'Has Potential',
+      'momentum-building': 'Momentum Building',
+      'high-impact': 'High Impact',
+      'quick-win': 'Quick Win',
+      'start-declining': 'Start Declining',
+      'declining': 'Declining',
+      'solid-performer': 'Solid Performer',
+      'hidden-gem': 'Hidden Gem',
+      'high-value': 'High Value',
+      'high-volume': 'High Volume'
+    };
+
+    const categoryLabel = filterToCategoryMap[filterId];
+    return categoryLabel ? (categoryCounts.get(categoryLabel) || 0) : 0;
+  };
+
   // Separate filtering for ranking list
   const rankingFilteredTopics = useMemo(() => {
     try {
@@ -1729,6 +1785,9 @@ export default function BrandInsightPage() {
                           >
                             {filter.emoji && <span className="mr-1.5">{filter.emoji}</span>}
                             {filter.label}
+                            <span className={`ml-1.5 text-xs ${performanceFilter === filter.id ? 'opacity-90' : 'opacity-60'}`}>
+                              ({getFilterCount(filter.id)})
+                            </span>
                           </button>
                         ))}
                       </div>
@@ -1880,6 +1939,9 @@ export default function BrandInsightPage() {
                               >
                                 {filter.emoji && <span className="mr-1.5">{filter.emoji}</span>}
                                 {filter.label}
+                                <span className={`ml-1.5 text-xs ${rankingListFilter === filter.id ? 'opacity-90' : 'opacity-60'}`}>
+                                  ({getFilterCount(filter.id)})
+                                </span>
                               </button>
                             ))}
                           </div>
