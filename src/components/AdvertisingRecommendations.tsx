@@ -203,24 +203,50 @@ export default function AdvertisingRecommendations({ keywordData, brandName, the
       return !hasTransactional && !hasCommercial && !hasLocal;
     };
 
+    const hasProductSpecificModifiers = (kwLower: string): boolean => {
+      const productWords = [
+        'latte', 'espresso', 'subscription', 'beans', 'maker', 'pods', 'cold brew',
+        'machine', 'grinder', 'french press', 'pour over', 'drip', 'instant',
+        'ground', 'whole bean', 'roast', 'k-cup', 'capsule', 'filter', 'brewer'
+      ];
+      return productWords.some(word => kwLower.includes(word));
+    };
+
+    const hasStrongBuyerSignals = (kwLower: string): boolean => {
+      const buyerWords = ['best', 'buy', 'order', 'delivery', 'shop online', 'purchase', 'sale'];
+      return buyerWords.some(word => kwLower.includes(word));
+    };
+
+    const isNavigationalOrCultural = (kwLower: string): boolean => {
+      const vague = ['the coffee shop', 'coffee place'];
+      const cultural = ['friends', 'central perk', 'utopia cafe', 'gunther'];
+
+      if (vague.some(term => kwLower === term)) return true;
+      if (cultural.some(term => kwLower.includes(term))) return true;
+
+      return false;
+    };
+
     const calculateBestValue = (kw: ScoredKeyword): number => {
       const normInvertedCPC = 1 - kw.normalizedCPC;
-      let intentBoost = 0;
-
       const kwLower = kw.keyword.toLowerCase();
-      const transactionalWords = ['buy', 'purchase', 'order', 'shop', 'sale', 'subscription', 'sign up'];
-      const commercialWords = ['price', 'cost', 'cheap', 'deal', 'discount', 'best', 'top', 'review', 'compare', 'vs', 'alternative'];
 
-      const hasTransactional = transactionalWords.some(word => kwLower.includes(word));
-      const hasCommercial = commercialWords.some(word => kwLower.includes(word));
+      let score = 0.25 * kw.normalizedVolume + 0.45 * normInvertedCPC + 0.20 * kw.normalizedInvertedCompetition;
 
-      if (hasTransactional) {
-        intentBoost = 0.5;
-      } else if (hasCommercial) {
-        intentBoost = 0.3;
+      const hasNearMe = kwLower.includes('near me');
+      const hasCoffeeShop = kwLower.includes('coffee shop');
+      const hasProductModifier = hasProductSpecificModifiers(kwLower);
+      const hasBuyerSignal = hasStrongBuyerSignals(kwLower);
+
+      if (hasProductModifier || hasBuyerSignal) {
+        score += 0.10;
       }
 
-      return 0.35 * kw.normalizedVolume + 0.35 * normInvertedCPC + 0.20 * kw.normalizedInvertedCompetition + 0.10 * intentBoost;
+      if ((hasNearMe || hasCoffeeShop) && !hasProductModifier) {
+        score -= 0.40;
+      }
+
+      return Math.max(0, score);
     };
 
     const getCompetitionLabel = (indexed: number | undefined): string => {
@@ -234,59 +260,51 @@ export default function AdvertisingRecommendations({ keywordData, brandName, the
       const kwLower = kw.keyword.toLowerCase();
       const reasons: string[] = [];
 
-      const transactionalWords = ['buy', 'purchase', 'order', 'shop', 'subscription', 'sign up'];
-      const commercialWords = ['best', 'top', 'review', 'compare', 'vs', 'alternative'];
-      const productWords = ['maker', 'machine', 'pods', 'beans', 'grinder', 'brewer'];
-      const premiumWords = ['organic', 'premium', 'specialty', 'artisan', 'gourmet'];
       const recurringWords = ['subscription', 'delivery', 'monthly', 'service'];
+      const premiumWords = ['organic', 'premium', 'specialty', 'artisan', 'gourmet'];
 
-      const hasTransactional = transactionalWords.some(word => kwLower.includes(word));
-      const hasCommercial = commercialWords.some(word => kwLower.includes(word));
-      const hasProduct = productWords.some(word => kwLower.includes(word));
-      const hasPremium = premiumWords.some(word => kwLower.includes(word));
       const hasRecurring = recurringWords.some(word => kwLower.includes(word));
+      const hasPremium = premiumWords.some(word => kwLower.includes(word));
+      const hasProductMod = hasProductSpecificModifiers(kwLower);
+      const hasBuyerSig = hasStrongBuyerSignals(kwLower);
 
       const wordCount = kw.keyword.split(' ').length;
       const compLevel = getCompetitionLabel(kw.competitionIndexed);
 
       if (hasRecurring) {
-        reasons.push('recurring revenue intent');
-      } else if (hasTransactional) {
+        reasons.push('recurring revenue');
+      } else if (hasBuyerSig) {
         reasons.push('strong buyer intent');
-      } else if (hasCommercial) {
-        reasons.push('comparison shopping');
+      }
+
+      if (hasProductMod) {
+        reasons.push('product-focused');
       }
 
       if (hasPremium) {
         reasons.push('premium segment');
       }
 
-      if (hasProduct) {
-        reasons.push('product-specific');
-      }
-
-      if (kw.avgCPC < 2) {
-        reasons.push('low CPC');
+      if (kw.avgCPC < 2.50) {
+        reasons.push('affordable CPC');
       } else if (kw.avgCPC < 4) {
-        reasons.push('balanced CPC');
+        reasons.push('balanced cost');
       }
 
       if (compLevel === 'Low') {
         reasons.push('low competition');
       } else if (compLevel === 'Medium') {
-        reasons.push('achievable competition');
+        reasons.push('winnable auction');
       }
 
       if (wordCount >= 4) {
-        reasons.push('targeted long-tail');
-      } else if (wordCount === 3) {
-        reasons.push('focused intent');
+        reasons.push('specific long-tail');
       }
 
-      if (kw.searchVolume >= 10000) {
-        reasons.push('strong volume');
-      } else if (kw.searchVolume >= 1000) {
-        reasons.push('decent volume');
+      if (kw.searchVolume >= 50000) {
+        reasons.push('solid volume');
+      } else if (kw.searchVolume >= 10000) {
+        reasons.push('decent reach');
       }
 
       return reasons.slice(0, 3).join(', ');
@@ -333,11 +351,24 @@ export default function AdvertisingRecommendations({ keywordData, brandName, the
 
     const bestValueKeywords = scoredKeywords
       .filter(kw => {
+        const kwLower = kw.keyword.toLowerCase();
+
         if (kw.avgCPC <= 0) return false;
-        if (kw.avgCPC < 0.50) return false;
-        if (isUltraBroad(kw)) return false;
-        if (hasLowIntent(kw)) return false;
+        if (kw.avgCPC < 1.00 && kw.searchVolume < 50000) return false;
+
+        if (kw.searchVolume < 5000) return false;
+        if (kw.searchVolume > 1000000) return false;
+
+        if (isNavigationalOrCultural(kwLower)) return false;
         if (isSuspiciouslyBranded(kw)) return false;
+
+        const hasNearMe = kwLower.includes('near me') || kwLower.includes('local');
+        const hasProductModifier = hasProductSpecificModifiers(kwLower);
+        const hasBuyerSignal = hasStrongBuyerSignals(kwLower);
+
+        if (hasNearMe && !hasProductModifier) return false;
+
+        if (!hasProductModifier && !hasBuyerSignal) return false;
 
         return true;
       })
