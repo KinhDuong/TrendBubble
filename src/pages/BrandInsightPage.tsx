@@ -142,12 +142,18 @@ export default function BrandInsightPage() {
   }, [searchQuery, topSearchQuery]);
 
   useEffect(() => {
-    if (viewMode === 'bubble') {
+    // Don't auto-change filter if user has manually selected top-15-percent
+    if (performanceFilter === 'top-15-percent') {
+      return;
+    }
+
+    // Auto-set optimal defaults when switching view modes
+    if (viewMode === 'bubble' && performanceFilter !== 'top-per-category') {
       setPerformanceFilter('top-per-category');
-    } else {
+    } else if (viewMode === 'ranking' && performanceFilter === 'top-per-category') {
       setPerformanceFilter('all');
     }
-  }, [viewMode]);
+  }, [viewMode, performanceFilter]);
 
   const loadAllData = async () => {
     setLoading(true);
@@ -696,32 +702,12 @@ export default function BrandInsightPage() {
 
       // Handle top 15% filter using composite score
       if (performanceFilter === 'top-15-percent') {
-        console.log('BrandInsightPage - Top 15% filter active, checking keywordPerformanceData:', {
-          perfDataLength: keywordPerformanceData.length,
-          samplePerfData: keywordPerformanceData.slice(0, 3).map(k => ({
-            keyword: k.keyword,
-            three_month_change: k.three_month_change,
-            yoy_change: k.yoy_change
-          })),
-          topicsLength: transformToTopics.length,
-          sampleTopics: transformToTopics.slice(0, 3).map(t => t.name)
-        });
-
         const matchingTopics = transformToTopics.filter(topic => {
           const matchesSearch = !searchQuery || topic.name.toLowerCase().includes(searchQuery.toLowerCase());
           if (!matchesSearch) return false;
 
           // Check if this keyword is in the top 15% by composite score
-          const isInTop = isInTopPercentile(topic.name, keywordPerformanceData, 15);
-          if (isInTop) {
-            console.log(`Keyword "${topic.name}" IS in top 15%`);
-          }
-          return isInTop;
-        });
-
-        console.log('BrandInsightPage - Top 15% filter results:', {
-          matchingCount: matchingTopics.length,
-          matchingKeywords: matchingTopics.slice(0, 5).map(t => t.name)
+          return isInTopPercentile(topic.name, keywordPerformanceData, 15);
         });
 
         return matchingTopics.sort((a, b) => b.searchVolume - a.searchVolume);
