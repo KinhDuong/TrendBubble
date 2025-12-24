@@ -737,40 +737,37 @@ export default function BrandInsightPage() {
       }
 
       return transformToTopics.filter(topic => {
-      const matchesSearch = !searchQuery || topic.name.toLowerCase().includes(searchQuery.toLowerCase());
-
-      if (performanceFilter === 'all') return matchesSearch;
-
-      // Get the exact category for this keyword
-      const categoryLabel = getKeywordCategoryLabel(topic.name);
-
-      // Map filter values to category labels
-      const filterToCategoryMap: { [key: string]: string } = {
-        'ultra-growth': 'Ultra Growth',
-        'ultra-high-growth': 'Extreme Growth',
-        'high-growth': 'High Growth',
-        'rising-star': 'Rising Star',
-        'great-potential': 'Great Potential',
-        'steady-growth': 'Steady Growth',
-        'has-potential': 'Has Potential',
-        'momentum-building': 'Momentum Building',
-        'high-impact': 'High Impact',
-        'quick-win': 'Quick Win',
-        'start-declining': 'Start Declining',
-        'declining': 'Declining',
-        'solid-performer': 'Solid Performer',
-        'hidden-gem': 'Hidden Gem',
-        'high-value': 'High Value',
-        'high-volume': 'High Volume'
-      };
-
-      const targetCategory = filterToCategoryMap[performanceFilter];
-
-      // Only show keywords that exactly match this category (mutually exclusive)
-      return matchesSearch && categoryLabel === targetCategory;
-      }).filter(topic => {
         const matchesSearch = !searchQuery || topic.name.toLowerCase().includes(searchQuery.toLowerCase());
-        return matchesSearch;
+
+        if (performanceFilter === 'all') return matchesSearch;
+
+        // Get the exact category for this keyword
+        const categoryLabel = getKeywordCategoryLabel(topic.name);
+
+        // Map filter values to category labels
+        const filterToCategoryMap: { [key: string]: string } = {
+          'ultra-growth': 'Ultra Growth',
+          'ultra-high-growth': 'Extreme Growth',
+          'high-growth': 'High Growth',
+          'rising-star': 'Rising Star',
+          'great-potential': 'Great Potential',
+          'steady-growth': 'Steady Growth',
+          'has-potential': 'Has Potential',
+          'momentum-building': 'Momentum Building',
+          'high-impact': 'High Impact',
+          'quick-win': 'Quick Win',
+          'start-declining': 'Start Declining',
+          'declining': 'Declining',
+          'solid-performer': 'Solid Performer',
+          'hidden-gem': 'Hidden Gem',
+          'high-value': 'High Value',
+          'high-volume': 'High Volume'
+        };
+
+        const targetCategory = filterToCategoryMap[performanceFilter];
+
+        // Only show keywords that exactly match this category (mutually exclusive)
+        return matchesSearch && categoryLabel === targetCategory;
       });
     } catch (error) {
       console.error('Error filtering topics:', error);
