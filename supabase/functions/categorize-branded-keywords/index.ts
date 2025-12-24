@@ -123,31 +123,47 @@ Deno.serve(async (req: Request) => {
         `${idx + 1}. "${kw.keyword}"`
       ).join('\n');
 
-      const prompt = `You are an expert brand strategist analyzing search keywords. Determine if each keyword is BRANDED or NON-BRANDED for the brand "${brand}".
+      const prompt = `You are analyzing search keywords to determine if they are BRANDED or NON-BRANDED for the brand: "${brand}"
 
-**BRANDED keywords:**
-- Contain the brand name (e.g., "${brand.toLowerCase()} products", "buy ${brand.toLowerCase()}")
-- Contain brand-specific product names, slogans, or trademarked terms
-- Clearly reference the brand or its unique offerings
-- Include brand misspellings or variations
+**CRITICAL RULE:**
+A keyword is BRANDED if and ONLY if it contains the EXACT brand name "${brand}" or close variations/misspellings of it.
+A keyword is NON-BRANDED if it does NOT contain the brand name, regardless of topic relevance.
 
-**NON-BRANDED keywords:**
-- Generic category terms (e.g., "coffee shops", "running shoes")
-- Competitor brand names
-- Industry terms without brand reference
-- General informational queries
+**BRANDED Examples (must contain "${brand}" or variations):**
+- "${brand}" (exact brand name)
+- "${brand.toLowerCase()}" (lowercase variation)
+- "${brand} menu" (brand + product info)
+- "${brand} near me" (brand + location)
+- "${brand} prices" (brand + pricing)
+- "buy ${brand.toLowerCase()}" (brand in search)
+- Misspellings of "${brand}" (e.g., if brand is "7 Brew" then "7brew", "seven brew" would be branded)
+
+**NON-BRANDED Examples (do NOT contain brand name):**
+- "coffee near me" (generic category search)
+- "best coffee shops" (generic category)
+- "coffee place near me" (generic category)
+- "starbucks" (competitor brand)
+- "dunkin donuts" (competitor brand)
+- "coffee menu" (generic product info)
+- Any search that's related to the industry but doesn't mention "${brand}"
+
+**Simple Test:**
+Does the keyword contain "${brand}" or a clear variation of it?
+- YES → It's BRANDED
+- NO → It's NON-BRANDED
 
 **Keywords to Analyze:**
 ${keywordsList}
 
-**IMPORTANT INSTRUCTIONS:**
-1. You must analyze ALL ${batch.length} keywords listed above
-2. Respond with a JSON object containing a "results" array
-3. Each object in the array must have:
-   - keyword (exact match)
+**INSTRUCTIONS:**
+1. Analyze ALL ${batch.length} keywords listed above
+2. Apply the simple test: Does it contain the brand name "${brand}"?
+3. Respond with a JSON object containing a "results" array
+4. Each object must have:
+   - keyword (exact match to the keyword)
    - is_branded (either "branded" or "non-branded")
-   - reasoning (brief 1-sentence explanation)
-4. Format: {"results": [{"keyword": "exact keyword text", "is_branded": "branded", "reasoning": "Brief explanation"}]}
+   - reasoning (brief explanation)
+5. Format: {"results": [{"keyword": "exact keyword text", "is_branded": "branded", "reasoning": "Contains brand name ${brand}"}]}
 
 Respond with the JSON object now:`;
 
@@ -162,14 +178,14 @@ Respond with the JSON object now:`;
           messages: [
             {
               role: "system",
-              content: "You are an expert brand strategist who analyzes keywords to determine if they are branded or non-branded. You always respond with valid JSON objects only, with no additional text or markdown formatting."
+              content: "You are a keyword analyst. Your task is simple: determine if a keyword contains a specific brand name or not. A keyword is 'branded' ONLY if it contains the brand name or a clear variation of it. If it doesn't contain the brand name, it's 'non-branded' - even if it's related to the same industry or category. You always respond with valid JSON objects only, with no additional text or markdown formatting."
             },
             {
               role: "user",
               content: prompt
             }
           ],
-          temperature: 0.3,
+          temperature: 0.1,
           max_tokens: 8000,
           response_format: { type: "json_object" }
         }),
