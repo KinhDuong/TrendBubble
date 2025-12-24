@@ -404,7 +404,10 @@ export default function BrandInsightPage() {
         .eq('user_id', userIdToUse)
         .maybeSingle();
 
-      if (error) throw error;
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error loading AI analysis:', error);
+        return;
+      }
 
       if (data) {
         setAiAnalysis(data.analysis);
@@ -1246,6 +1249,7 @@ export default function BrandInsightPage() {
         const { error: saveError } = await supabase
           .from('brand_ai_analysis')
           .upsert({
+            user_id: pageOwnerId,
             brand: decodedBrand,
             analysis: result.analysis,
             keyword_count: keywordsForAnalysis.length,
@@ -1253,7 +1257,7 @@ export default function BrandInsightPage() {
             avg_volume: avgVolume,
             model: 'gpt-4o'
           }, {
-            onConflict: 'brand'
+            onConflict: 'user_id,brand'
           });
 
         if (saveError) {
