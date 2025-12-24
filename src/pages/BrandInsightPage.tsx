@@ -20,6 +20,7 @@ import ToolSchema from '../components/ToolSchema';
 import BubbleTooltip from '../components/BubbleTooltip';
 import { TrendingTopic, FAQ } from '../types';
 import { TrendingUp, Download, ArrowLeft, Search, X, ChevronsLeft, ChevronsRight, ArrowUpDown, ArrowUp, ArrowDown, Sparkles, AlertCircle } from 'lucide-react';
+import { isInTopPercentile, calculateCompositeScores } from '../utils/compositeScore';
 
 type SortField = 'name' | 'searchVolume' | 'rank' | 'month' | 'threeMonth' | 'yoy';
 type SortDirection = 'asc' | 'desc';
@@ -692,6 +693,19 @@ export default function BrandInsightPage() {
         totalPerformanceData: keywordPerformanceData.length,
         samplePerformanceKeywords: keywordPerformanceData.slice(0, 3).map(k => `"${k.keyword}"`)
       });
+
+      // Handle top 15% filter using composite score
+      if (performanceFilter === 'top-15-percent') {
+        const matchingTopics = transformToTopics.filter(topic => {
+          const matchesSearch = !searchQuery || topic.name.toLowerCase().includes(searchQuery.toLowerCase());
+          if (!matchesSearch) return false;
+
+          // Check if this keyword is in the top 15% by composite score
+          return isInTopPercentile(topic.name, keywordPerformanceData, 15);
+        });
+
+        return matchingTopics.sort((a, b) => b.searchVolume - a.searchVolume);
+      }
 
       // Handle top-per-category filter
       if (performanceFilter === 'top-per-category') {
@@ -1743,6 +1757,7 @@ export default function BrandInsightPage() {
                       <div className="flex flex-wrap gap-2">
                         {[
                           { id: 'all', label: 'All Keywords', emoji: '', requiresYoY: false },
+                          { id: 'top-15-percent', label: 'Top 15%', emoji: '⭐', requiresYoY: false },
                           { id: 'top-per-category', label: 'Top 10 per Category', emoji: '🎯', requiresYoY: false },
                           { id: 'ultra-growth', label: 'Ultra Growth', emoji: '🔥', requiresYoY: false },
                           { id: 'ultra-high-growth', label: 'Extreme Growth', emoji: '🚀', requiresYoY: false },
