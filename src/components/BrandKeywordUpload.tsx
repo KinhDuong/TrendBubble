@@ -21,101 +21,9 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light' }
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [brandName, setBrandName] = useState<string>('');
-  const [username, setUsername] = useState<string>('');
-  const [hasUsername, setHasUsername] = useState<boolean | null>(null);
-  const [checkingUsername, setCheckingUsername] = useState(true);
   const [mergeGroups, setMergeGroups] = useState<MergeGroup[]>([]);
   const [showMergeReview, setShowMergeReview] = useState(false);
   const [pendingData, setPendingData] = useState<any[]>([]);
-
-  useEffect(() => {
-    checkUserProfile();
-  }, []);
-
-  const checkUserProfile = async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        setCheckingUsername(false);
-        return;
-      }
-
-      const { data: profile, error } = await supabase
-        .from('user_profiles')
-        .select('username')
-        .eq('id', user.id)
-        .maybeSingle();
-
-      if (error) throw error;
-
-      if (profile && profile.username) {
-        setUsername(profile.username);
-        setHasUsername(true);
-      } else {
-        setHasUsername(false);
-      }
-    } catch (err) {
-      console.error('Error checking user profile:', err);
-      setHasUsername(false);
-    } finally {
-      setCheckingUsername(false);
-    }
-  };
-
-  const ensureUsername = async (): Promise<string> => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      throw new Error('You must be logged in to upload data');
-    }
-
-    if (!username.trim()) {
-      throw new Error('Please enter a username');
-    }
-
-    const usernameValue = username.trim().toLowerCase().replace(/[^a-z0-9-]/g, '-');
-
-    if (usernameValue.length < 3 || usernameValue.length > 30) {
-      throw new Error('Username must be between 3 and 30 characters');
-    }
-
-    const { data: existingProfile } = await supabase
-      .from('user_profiles')
-      .select('username')
-      .eq('id', user.id)
-      .maybeSingle();
-
-    if (!existingProfile) {
-      const { error: insertError } = await supabase
-        .from('user_profiles')
-        .insert({
-          id: user.id,
-          username: usernameValue,
-          display_name: brandName.trim() || usernameValue
-        });
-
-      if (insertError) {
-        if (insertError.code === '23505') {
-          throw new Error('This username is already taken. Please choose another one.');
-        }
-        throw insertError;
-      }
-    } else if (existingProfile.username !== usernameValue) {
-      const { error: updateError } = await supabase
-        .from('user_profiles')
-        .update({ username: usernameValue })
-        .eq('id', user.id);
-
-      if (updateError) {
-        if (updateError.code === '23505') {
-          throw new Error('This username is already taken. Please choose another one.');
-        }
-        throw updateError;
-      }
-    }
-
-    setHasUsername(true);
-    return usernameValue;
-  };
 
   const levenshteinDistance = (str1: string, str2: string): number => {
     const len1 = str1.length;
@@ -475,8 +383,6 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light' }
       throw new Error('You must be logged in to upload data');
     }
 
-    const userUsername = await ensureUsername();
-
     console.log('Deleting existing data for brand:', brandName.trim());
     const { error: deleteError } = await supabase
       .from('brand_keyword_data')
@@ -565,7 +471,6 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light' }
       .from('brand_pages')
       .upsert({
         user_id: user.id,
-        username: userUsername,
         brand: brandName.trim(),
         meta_title: `${brandName.trim()} - Keyword Search Trends & SEO Insights`,
         meta_description: `Analyze ${brandName.trim()} keyword search volume trends and SEO performance data.`,
@@ -597,39 +502,6 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light' }
 
       <div className={`rounded-lg shadow-sm p-6 ${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'}`}>
       <h2 className={`text-xl font-semibold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Upload Keyword Data</h2>
-
-      {!checkingUsername && hasUsername === false && (
-        <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-          <p className="text-sm text-blue-900 mb-3 font-semibold">
-            Choose a username for your brand insights page
-          </p>
-          <p className="text-xs text-blue-700 mb-3">
-            Your brand insights will be accessible at: <code className="bg-blue-100 px-1 rounded">/insights/your-username/brand-name</code>
-          </p>
-          <label htmlFor="username" className="block text-sm font-semibold mb-2 text-blue-900">
-            Username *
-          </label>
-          <input
-            id="username"
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            placeholder="Enter username (lowercase, letters, numbers, hyphens)"
-            className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 placeholder-gray-500"
-          />
-          <p className="text-xs text-blue-600 mt-1">
-            3-30 characters. Only lowercase letters, numbers, and hyphens allowed.
-          </p>
-        </div>
-      )}
-
-      {hasUsername && (
-        <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
-          <p className="text-sm text-green-800">
-            Your insights will be published at: <code className="bg-green-100 px-1 rounded font-semibold">/insights/{username}/brand-name</code>
-          </p>
-        </div>
-      )}
 
       <div className="mb-4">
         <label htmlFor="brandName" className={`block text-sm font-semibold mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
