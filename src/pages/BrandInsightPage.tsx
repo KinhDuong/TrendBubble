@@ -398,11 +398,14 @@ export default function BrandInsightPage() {
     try {
       const decodedBrand = decodeURIComponent(brandName);
 
+      // Try to get user-specific analysis first, fallback to null user_id (legacy records)
       const { data, error } = await supabase
         .from('brand_ai_analysis')
         .select('*')
         .eq('brand', decodedBrand)
-        .eq('user_id', userIdToUse)
+        .or(`user_id.eq.${userIdToUse},user_id.is.null`)
+        .order('user_id', { ascending: false, nullsLast: true })
+        .limit(1)
         .maybeSingle();
 
       if (error) throw error;
