@@ -37,26 +37,35 @@ export default function InsightsMetaPage() {
 
   useEffect(() => {
     loadBrandMetadata();
-  }, []);
+  }, [user?.id]);
 
   const loadBrandMetadata = async () => {
     setLoading(true);
     try {
+      if (!user?.id) {
+        setBrandMetadata([]);
+        setLoading(false);
+        return;
+      }
+
       const { data: monthlyData, error: monthlyError } = await supabase
         .from('brand_keyword_monthly_data')
-        .select('brand, month, keyword_count, total_volume, user_id');
+        .select('brand, month, keyword_count, total_volume, user_id')
+        .eq('user_id', user.id);
 
       if (monthlyError) throw monthlyError;
 
       const { data: keywordData, error: keywordError } = await supabase
         .from('brand_keyword_data')
-        .select('brand, keyword, user_id');
+        .select('brand, keyword, user_id')
+        .eq('user_id', user.id);
 
       if (keywordError) throw keywordError;
 
       const { data: brandPages, error: pagesError } = await supabase
         .from('brand_pages')
-        .select('brand, user_id');
+        .select('brand, user_id')
+        .eq('user_id', user.id);
 
       if (pagesError) throw pagesError;
 
