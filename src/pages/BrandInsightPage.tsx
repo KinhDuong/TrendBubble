@@ -74,6 +74,7 @@ export default function BrandInsightPage() {
   const [aiError, setAiError] = useState<string | null>(null);
   const [aiErrorCode, setAiErrorCode] = useState<string | null>(null);
   const [aiAnalysisDate, setAiAnalysisDate] = useState<string | null>(null);
+  const [aiSaveStatus, setAiSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
 
   const getInitialMaxBubbles = () => {
     const topParam = searchParams.get('Top');
@@ -1177,6 +1178,7 @@ export default function BrandInsightPage() {
     setAiLoading(true);
     setAiError(null);
     setAiErrorCode(null);
+    setAiSaveStatus('idle');
 
     try {
       const decodedBrand = decodeURIComponent(brandName);
@@ -1211,6 +1213,7 @@ export default function BrandInsightPage() {
         setAiAnalysis(result.analysis);
         setAiError(null);
         setAiErrorCode(null);
+        setAiSaveStatus('saving');
 
         const { error: saveError } = await supabase
           .from('brand_ai_analysis')
@@ -1220,15 +1223,20 @@ export default function BrandInsightPage() {
             keyword_count: keywordsForAnalysis.length,
             total_months: availableMonthsCount,
             avg_volume: avgVolume,
-            model: 'gpt-4o'
+            model: 'gpt-4o',
+            user_id: userIdToUse
           }, {
-            onConflict: 'brand'
+            onConflict: 'brand,user_id'
           });
 
         if (saveError) {
           console.error('Error saving AI analysis:', saveError);
+          setAiSaveStatus('error');
+          setTimeout(() => setAiSaveStatus('idle'), 3000);
         } else {
+          setAiSaveStatus('saved');
           await loadAIAnalysis();
+          setTimeout(() => setAiSaveStatus('idle'), 3000);
         }
       } else {
         setAiError(result.error || 'Failed to generate analysis');
@@ -1598,22 +1606,40 @@ export default function BrandInsightPage() {
                               </p>
                             </div>
                           </div>
-                          <button
-                            onClick={handleAIAnalysis}
-                            disabled={aiLoading}
-                            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all transform hover:scale-105 whitespace-nowrap ${
-                              aiLoading
-                                ? theme === 'dark'
-                                  ? 'bg-gray-700 text-gray-400 cursor-not-allowed'
-                                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                : theme === 'dark'
-                                  ? 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg'
-                                  : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-md'
-                            }`}
-                          >
-                            <Sparkles className="w-4 h-4" />
-                            {aiLoading ? 'Analyzing...' : aiAnalysis ? 'Regenerate' : 'Generate AI Insights'}
-                          </button>
+                          <div className="flex items-center gap-3">
+                            <button
+                              onClick={handleAIAnalysis}
+                              disabled={aiLoading}
+                              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all transform hover:scale-105 whitespace-nowrap ${
+                                aiLoading
+                                  ? theme === 'dark'
+                                    ? 'bg-gray-700 text-gray-400 cursor-not-allowed'
+                                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                  : theme === 'dark'
+                                    ? 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg'
+                                    : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-md'
+                              }`}
+                            >
+                              <Sparkles className="w-4 h-4" />
+                              {aiLoading ? 'Analyzing...' : aiAnalysis ? 'Regenerate' : 'Generate AI Insights'}
+                            </button>
+
+                            {aiSaveStatus === 'saving' && (
+                              <span className={`text-sm flex items-center gap-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                                Saving...
+                              </span>
+                            )}
+                            {aiSaveStatus === 'saved' && (
+                              <span className={`text-sm flex items-center gap-1 ${theme === 'dark' ? 'text-green-400' : 'text-green-600'} font-medium`}>
+                                ✓ Saved
+                              </span>
+                            )}
+                            {aiSaveStatus === 'error' && (
+                              <span className={`text-sm flex items-center gap-1 ${theme === 'dark' ? 'text-red-400' : 'text-red-600'} font-medium`}>
+                                ✗ Save Failed
+                              </span>
+                            )}
+                          </div>
                         </div>
 
                         {aiError && (
