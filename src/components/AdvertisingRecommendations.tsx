@@ -20,6 +20,7 @@ interface ScoredKeyword extends KeywordData {
   normalizedInvertedCompetition: number;
   avgCPC: number;
   growthRate: number;
+  explanation?: string;
 }
 
 interface CategoryResult {
@@ -222,6 +223,75 @@ export default function AdvertisingRecommendations({ keywordData, brandName, the
       return 0.35 * kw.normalizedVolume + 0.35 * normInvertedCPC + 0.20 * kw.normalizedInvertedCompetition + 0.10 * intentBoost;
     };
 
+    const getCompetitionLabel = (indexed: number | undefined): string => {
+      if (indexed === undefined) return 'N/A';
+      if (indexed < 33) return 'Low';
+      if (indexed < 67) return 'Medium';
+      return 'High';
+    };
+
+    const generateROASExplanation = (kw: ScoredKeyword): string => {
+      const kwLower = kw.keyword.toLowerCase();
+      const reasons: string[] = [];
+
+      const transactionalWords = ['buy', 'purchase', 'order', 'shop', 'subscription', 'sign up'];
+      const commercialWords = ['best', 'top', 'review', 'compare', 'vs', 'alternative'];
+      const productWords = ['maker', 'machine', 'pods', 'beans', 'grinder', 'brewer'];
+      const premiumWords = ['organic', 'premium', 'specialty', 'artisan', 'gourmet'];
+      const recurringWords = ['subscription', 'delivery', 'monthly', 'service'];
+
+      const hasTransactional = transactionalWords.some(word => kwLower.includes(word));
+      const hasCommercial = commercialWords.some(word => kwLower.includes(word));
+      const hasProduct = productWords.some(word => kwLower.includes(word));
+      const hasPremium = premiumWords.some(word => kwLower.includes(word));
+      const hasRecurring = recurringWords.some(word => kwLower.includes(word));
+
+      const wordCount = kw.keyword.split(' ').length;
+      const compLevel = getCompetitionLabel(kw.competitionIndexed);
+
+      if (hasRecurring) {
+        reasons.push('recurring revenue intent');
+      } else if (hasTransactional) {
+        reasons.push('strong buyer intent');
+      } else if (hasCommercial) {
+        reasons.push('comparison shopping');
+      }
+
+      if (hasPremium) {
+        reasons.push('premium segment');
+      }
+
+      if (hasProduct) {
+        reasons.push('product-specific');
+      }
+
+      if (kw.avgCPC < 2) {
+        reasons.push('low CPC');
+      } else if (kw.avgCPC < 4) {
+        reasons.push('balanced CPC');
+      }
+
+      if (compLevel === 'Low') {
+        reasons.push('low competition');
+      } else if (compLevel === 'Medium') {
+        reasons.push('achievable competition');
+      }
+
+      if (wordCount >= 4) {
+        reasons.push('targeted long-tail');
+      } else if (wordCount === 3) {
+        reasons.push('focused intent');
+      }
+
+      if (kw.searchVolume >= 10000) {
+        reasons.push('strong volume');
+      } else if (kw.searchVolume >= 1000) {
+        reasons.push('decent volume');
+      }
+
+      return reasons.slice(0, 3).join(', ');
+    };
+
     const highValueKeywords = scoredKeywords
       .map(kw => ({ ...kw, score: calculateHighValue(kw) }))
       .sort((a, b) => b.score - a.score)
@@ -271,7 +341,11 @@ export default function AdvertisingRecommendations({ keywordData, brandName, the
 
         return true;
       })
-      .map(kw => ({ ...kw, score: calculateBestValue(kw) }))
+      .map(kw => ({
+        ...kw,
+        score: calculateBestValue(kw),
+        explanation: generateROASExplanation(kw)
+      }))
       .sort((a, b) => b.score - a.score)
       .slice(0, 10);
 
@@ -367,13 +441,6 @@ export default function AdvertisingRecommendations({ keywordData, brandName, the
     return `$${num.toFixed(2)}`;
   };
 
-  const getCompetitionLabel = (indexed: number | undefined): string => {
-    if (indexed === undefined) return 'N/A';
-    if (indexed < 33) return 'Low';
-    if (indexed < 67) return 'Medium';
-    return 'High';
-  };
-
   if (processedData.length === 0) {
     return null;
   }
@@ -453,6 +520,11 @@ export default function AdvertisingRecommendations({ keywordData, brandName, the
                             <th className={`py-2 px-2 text-left font-semibold ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
                               Keyword
                             </th>
+                            {category.name === 'Highest ROI Potential' && (
+                              <th className={`py-2 px-2 text-left font-semibold ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                                Why High ROAS
+                              </th>
+                            )}
                             <th className={`py-2 px-2 text-right font-semibold ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
                               Volume
                             </th>
@@ -481,6 +553,11 @@ export default function AdvertisingRecommendations({ keywordData, brandName, the
                               <td className={`py-2 px-2 font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                                 {kw.keyword}
                               </td>
+                              {category.name === 'Highest ROI Potential' && (
+                                <td className={`py-2 px-2 text-left text-xs italic ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                                  {kw.explanation || 'N/A'}
+                                </td>
+                              )}
                               <td className={`py-2 px-2 text-right ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
                                 {formatNumber(kw.searchVolume)}
                               </td>
