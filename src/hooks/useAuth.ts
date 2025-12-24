@@ -11,7 +11,7 @@ export function useAuth() {
     checkAuth();
 
     const { data: authListener } = supabase.auth.onAuthStateChange((event) => {
-      if (event === 'SIGNED_IN') {
+      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
         (async () => {
           await checkAuth();
         })();
