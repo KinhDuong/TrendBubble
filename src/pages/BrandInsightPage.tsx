@@ -1589,8 +1589,6 @@ export default function BrandInsightPage() {
                     </div>
                   </div>
 
-                  <KeywordChart data={monthlyData} selectedBrand={decodedBrand} />
-
                   {keywordData.length > 0 && (
                     <div className="mt-8">
                       <div className={`${theme === 'dark' ? 'bg-gradient-to-br from-blue-900/30 to-purple-900/30 border-blue-700/50' : 'bg-gradient-to-br from-blue-50 to-purple-50 border-blue-200'} rounded-lg border p-6 shadow-md`}>
@@ -2217,23 +2215,11 @@ export default function BrandInsightPage() {
                     </section>
 
                     <aside className="lg:w-[35%]">
-                      <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-lg border p-6 sticky top-4 shadow-md`}>
-                        <h2 className={`text-xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                          Featured Brands
+                      <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-lg border p-4 sticky top-4 shadow-md`}>
+                        <h2 className={`text-lg font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                          Search Volume Trends
                         </h2>
-                        {latestBrandPages.length > 0 && (
-                          <div className="flex flex-col gap-3">
-                            {latestBrandPages.map((page) => (
-                              <a
-                                key={page.id}
-                                href={userId ? `/insights/${encodeURIComponent(userId)}/${encodeURIComponent(page.brand)}/` : '#'}
-                                className={`text-sm transition-colors hover:underline ${theme === 'dark' ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'}`}
-                              >
-                                {page.meta_title}
-                              </a>
-                            ))}
-                          </div>
-                        )}
+                        <KeywordChart data={monthlyData} selectedBrand={decodedBrand} />
                       </div>
                     </aside>
                   </div>
