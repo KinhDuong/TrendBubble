@@ -205,7 +205,6 @@ export default function KeywordChart({ data, selectedBrand }: KeywordChartProps)
   return (
     <div className="space-y-8">
       <div className="bg-white rounded-lg shadow-sm p-6">
-        <h3 className="text-lg font-semibold mb-4">Search Volume Trends</h3>
         <svg
           ref={trendRef}
           className="w-full"
