@@ -2,12 +2,25 @@ import { TrendingTopic } from '../types';
 import { useEffect, useRef, useState } from 'react';
 import BubbleTooltip from './BubbleTooltip';
 
+interface KeywordPerformanceData {
+  keyword: string;
+  three_month_change?: number;
+  yoy_change?: number;
+  monthly_searches?: number[];
+  bid_high?: number;
+  competition?: string | number;
+  searchVolume?: number;
+  ai_insights?: string;
+  sentiment?: number;
+}
+
 interface BarChartProps {
   topics: TrendingTopic[];
   maxDisplay?: number;
   theme: 'dark' | 'light';
   useCryptoColors?: boolean;
   cryptoTimeframe?: '1h' | '24h' | '7d' | '30d' | '1y';
+  keywordPerformanceData?: KeywordPerformanceData[];
 }
 
 interface TooltipData {
@@ -22,7 +35,8 @@ export default function BarChart({
   maxDisplay = 20,
   theme,
   useCryptoColors = false,
-  cryptoTimeframe = '24h'
+  cryptoTimeframe = '24h',
+  keywordPerformanceData = []
 }: BarChartProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
@@ -242,6 +256,7 @@ export default function BarChart({
           isComparing={comparingTopics.has(tooltipData.topic.name)}
           onClose={() => setTooltipData(null)}
           cryptoTimeframe={cryptoTimeframe}
+          keywordData={keywordPerformanceData.find(kw => kw.keyword === tooltipData.topic.name)}
         />
       )}
     </div>

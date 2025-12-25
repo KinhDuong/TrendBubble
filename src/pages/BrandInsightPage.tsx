@@ -1764,6 +1764,7 @@ export default function BrandInsightPage() {
                             theme={theme}
                             useCryptoColors={false}
                             cryptoTimeframe="24h"
+                            keywordPerformanceData={keywordPerformanceData}
                           />
                         </div>
                       )}
@@ -1776,6 +1777,7 @@ export default function BrandInsightPage() {
                             theme={theme}
                             useCryptoColors={false}
                             cryptoTimeframe="24h"
+                            keywordPerformanceData={keywordPerformanceData}
                           />
                         </div>
                       )}

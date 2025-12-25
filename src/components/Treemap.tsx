@@ -3,12 +3,25 @@ import * as d3 from 'd3';
 import { TrendingTopic, CryptoTimeframe } from '../types';
 import BubbleTooltip from './BubbleTooltip';
 
+interface KeywordPerformanceData {
+  keyword: string;
+  three_month_change?: number;
+  yoy_change?: number;
+  monthly_searches?: number[];
+  bid_high?: number;
+  competition?: string | number;
+  searchVolume?: number;
+  ai_insights?: string;
+  sentiment?: number;
+}
+
 interface TreemapProps {
   topics: TrendingTopic[];
   maxDisplay: number;
   theme: 'dark' | 'light';
   useCryptoColors?: boolean;
   cryptoTimeframe?: CryptoTimeframe;
+  keywordPerformanceData?: KeywordPerformanceData[];
 }
 
 interface TreeNode {
@@ -24,7 +37,7 @@ interface TooltipData {
   rank: number;
 }
 
-export default function Treemap({ topics, maxDisplay, theme, useCryptoColors = false, cryptoTimeframe = '1h' }: TreemapProps) {
+export default function Treemap({ topics, maxDisplay, theme, useCryptoColors = false, cryptoTimeframe = '1h', keywordPerformanceData = [] }: TreemapProps) {
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [tooltipData, setTooltipData] = useState<TooltipData | null>(null);
@@ -335,6 +348,7 @@ export default function Treemap({ topics, maxDisplay, theme, useCryptoColors = f
           isComparing={comparingTopics.has(tooltipData.topic.name)}
           onClose={() => setTooltipData(null)}
           cryptoTimeframe={cryptoTimeframe}
+          keywordData={keywordPerformanceData.find(kw => kw.keyword === tooltipData.topic.name)}
         />
       )}
     </div>
