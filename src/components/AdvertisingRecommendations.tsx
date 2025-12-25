@@ -490,9 +490,9 @@ export default function AdvertisingRecommendations({ keywordData, brandName, the
     <div className={`rounded-lg p-6 ${theme === 'dark' ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-200'}`}>
       <div className="space-y-4">
         <div>
-          <h3 className={`text-lg font-semibold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+          <h2 className={`text-2xl font-semibold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
             Top Keywords for Advertising
-          </h3>
+          </h2>
           <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
             Based on search volume, CPC, competition, and growth trends, here are the top 5 keywords for each advertising category.
           </p>
