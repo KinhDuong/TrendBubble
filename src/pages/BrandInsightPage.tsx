@@ -2077,7 +2077,7 @@ export default function BrandInsightPage() {
 
               {keywordData.length > 0 && (
                 <div className="max-w-7xl mx-auto mt-8 px-2 md:px-0">
-                  <div className={`${theme === 'dark' ? 'bg-gradient-to-br from-blue-900/30 to-purple-900/30 border-blue-700/50' : 'bg-gradient-to-br from-blue-50 to-purple-50 border-blue-200'} rounded-lg border p-6 shadow-md`}>
+                  <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-lg border p-6 shadow-lg`}>
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-center gap-3 flex-1">
                         <div className={`p-2 rounded-lg ${theme === 'dark' ? 'bg-blue-600/20' : 'bg-blue-100'}`}>
