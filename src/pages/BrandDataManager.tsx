@@ -5,7 +5,7 @@ import { useAuth } from '../hooks/useAuth';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import Login from '../components/Login';
-import { Trash2, Search, Download, RefreshCw, Filter, Sparkles } from 'lucide-react';
+import { Trash2, Search, Download, RefreshCw, Filter, Sparkles, Eye, EyeOff, Globe, Lock, ExternalLink } from 'lucide-react';
 
 interface BrandKeywordData {
   id: string;
@@ -54,6 +54,8 @@ export default function BrandDataManager() {
   const [aiAnalyzingSentiment, setAiAnalyzingSentiment] = useState(false);
   const [aiAnalyzingBranded, setAiAnalyzingBranded] = useState(false);
   const [aiMessage, setAiMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+  const [brandPage, setBrandPage] = useState<{ id: string; is_public: boolean } | null>(null);
+  const [togglingPublic, setTogglingPublic] = useState(false);
 
   const fetchBrands = async () => {
     try {
@@ -97,6 +99,59 @@ export default function BrandDataManager() {
     }
   };
 
+  const fetchBrandPage = async () => {
+    if (!brandName) {
+      setBrandPage(null);
+      return;
+    }
+
+    try {
+      const decodedBrand = decodeURIComponent(brandName);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: pageData, error } = await supabase
+        .from('brand_pages')
+        .select('id, is_public')
+        .eq('brand', decodedBrand)
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (error) throw error;
+      setBrandPage(pageData);
+    } catch (error) {
+      console.error('Error fetching brand page:', error);
+    }
+  };
+
+  const togglePublicStatus = async () => {
+    if (!brandPage || !brandName) return;
+
+    setTogglingPublic(true);
+    try {
+      const newStatus = !brandPage.is_public;
+      const { error } = await supabase
+        .from('brand_pages')
+        .update({ is_public: newStatus })
+        .eq('id', brandPage.id);
+
+      if (error) throw error;
+
+      setBrandPage({ ...brandPage, is_public: newStatus });
+      setAiMessage({
+        type: 'success',
+        text: `Brand page is now ${newStatus ? 'PUBLIC' : 'PRIVATE'}. ${newStatus ? 'Anyone can view your insights page.' : 'Only you can view your insights page.'}`
+      });
+      setTimeout(() => setAiMessage(null), 5000);
+    } catch (error) {
+      console.error('Error toggling public status:', error);
+      setAiMessage({ type: 'error', text: 'Failed to update public status' });
+      setTimeout(() => setAiMessage(null), 5000);
+    } finally {
+      setTogglingPublic(false);
+    }
+  };
+
   useEffect(() => {
     if (authLoading) {
       return;
@@ -107,6 +162,7 @@ export default function BrandDataManager() {
       setShowLogin(false);
       fetchBrands();
       fetchData();
+      fetchBrandPage();
     }
   }, [isAdmin, brandName, authLoading]);
 
@@ -709,6 +765,65 @@ export default function BrandDataManager() {
                   </div>
                 </div>
               </div>
+
+              {brandPage && (
+                <div className={`mb-4 p-4 rounded-lg border ${
+                  brandPage.is_public
+                    ? 'bg-green-50 border-green-200'
+                    : 'bg-gray-50 border-gray-200'
+                }`}>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      {brandPage.is_public ? (
+                        <Globe className="w-5 h-5 text-green-600" />
+                      ) : (
+                        <Lock className="w-5 h-5 text-gray-600" />
+                      )}
+                      <div>
+                        <h3 className={`font-semibold ${brandPage.is_public ? 'text-green-900' : 'text-gray-900'}`}>
+                          {brandPage.is_public ? 'Public Page' : 'Private Page'}
+                        </h3>
+                        <p className={`text-sm ${brandPage.is_public ? 'text-green-700' : 'text-gray-600'}`}>
+                          {brandPage.is_public
+                            ? 'Anyone can view your brand insights page'
+                            : 'Only you can view your brand insights page'}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {brandPage.is_public && (
+                        <a
+                          href={`/insights/${brandPage.id}/${encodeURIComponent(selectedBrand)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2 px-3 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                        >
+                          <ExternalLink className="w-4 h-4" />
+                          View Page
+                        </a>
+                      )}
+                      <button
+                        onClick={togglePublicStatus}
+                        disabled={togglingPublic}
+                        className={`flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                          brandPage.is_public
+                            ? 'bg-gray-600 text-white hover:bg-gray-700'
+                            : 'bg-green-600 text-white hover:bg-green-700'
+                        }`}
+                      >
+                        {togglingPublic ? (
+                          <RefreshCw className="w-4 h-4 animate-spin" />
+                        ) : brandPage.is_public ? (
+                          <EyeOff className="w-4 h-4" />
+                        ) : (
+                          <Eye className="w-4 h-4" />
+                        )}
+                        {togglingPublic ? 'Updating...' : brandPage.is_public ? 'Make Private' : 'Make Public'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               <div className="flex items-center justify-between">
                 <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>

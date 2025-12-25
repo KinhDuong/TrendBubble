@@ -55,7 +55,7 @@ interface LatestBrandPage {
 }
 
 export default function BrandInsightPage() {
-  const { userId, brandName } = useParams<{ userId: string; brandName: string }>();
+  const { userId: pageIdOrUserId, brandName } = useParams<{ userId: string; brandName: string }>();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { isAdmin, user, logout } = useAuth();
@@ -132,10 +132,10 @@ export default function BrandInsightPage() {
   }, [searchParams]);
 
   useEffect(() => {
-    if (brandName && userId) {
+    if (brandName && pageIdOrUserId) {
       loadAllData();
     }
-  }, [brandName, userId]);
+  }, [brandName, pageIdOrUserId]);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -151,21 +151,25 @@ export default function BrandInsightPage() {
 
   const loadAllData = async () => {
     setLoading(true);
-    if (!userId) {
+    if (!pageIdOrUserId) {
       setLoading(false);
       return;
     }
 
-    const decodedUserId = decodeURIComponent(userId);
-    setPageOwnerId(decodedUserId);
+    const brandPageData = await loadBrandPageData();
+    if (!brandPageData) {
+      setLoading(false);
+      return;
+    }
 
-    await loadBrandPageData();
+    setPageOwnerId(brandPageData.user_id);
+
     await Promise.all([
       loadMonthColumns(),
-      loadBrandData(decodedUserId),
-      loadKeywordData(decodedUserId),
-      loadLatestBrandPages(decodedUserId),
-      loadAIAnalysis(decodedUserId)
+      loadBrandData(brandPageData.user_id),
+      loadKeywordData(brandPageData.user_id),
+      loadLatestBrandPages(brandPageData.user_id),
+      loadAIAnalysis(brandPageData.user_id)
     ]);
     setLoading(false);
   };
@@ -272,52 +276,49 @@ export default function BrandInsightPage() {
     }
   };
 
-  const loadBrandPageData = async () => {
-    if (!brandName || !userId) return;
+  const loadBrandPageData = async (): Promise<BrandPageData & { user_id: string } | null> => {
+    if (!brandName || !pageIdOrUserId) return null;
 
     try {
       const decodedBrand = decodeURIComponent(brandName);
-      const decodedUserId = decodeURIComponent(userId);
+      const decodedPageIdOrUserId = decodeURIComponent(pageIdOrUserId);
 
-      setPageOwnerId(decodedUserId);
+      let data;
+      let error;
 
-      const { data, error } = await supabase
-        .from('brand_pages')
-        .select('*')
-        .eq('user_id', decodedUserId)
-        .eq('brand', decodedBrand)
-        .maybeSingle();
+      const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(decodedPageIdOrUserId);
+
+      if (isUUID) {
+        const result = await supabase
+          .from('brand_pages')
+          .select('*, user_id')
+          .eq('id', decodedPageIdOrUserId)
+          .maybeSingle();
+        data = result.data;
+        error = result.error;
+      } else {
+        const result = await supabase
+          .from('brand_pages')
+          .select('*, user_id')
+          .eq('user_id', decodedPageIdOrUserId)
+          .eq('brand', decodedBrand)
+          .maybeSingle();
+        data = result.data;
+        error = result.error;
+      }
 
       if (error) throw error;
 
       if (data) {
         setBrandPageData(data);
         await loadFAQs(data.id);
+        return data as BrandPageData & { user_id: string };
       } else {
-        const defaultData: BrandPageData = {
-          id: '',
-          brand: decodedBrand,
-          meta_title: `${decodedBrand} - Keyword Search & Brand Insights`,
-          meta_description: `Analyze ${decodedBrand} keyword search volume trends and SEO performance data.`,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        };
-        setBrandPageData(defaultData);
+        return null;
       }
     } catch (error) {
       console.error('Error loading brand page data:', error);
-      if (brandName) {
-        const decodedBrand = decodeURIComponent(brandName);
-        const defaultData: BrandPageData = {
-          id: '',
-          brand: decodedBrand,
-          meta_title: `${decodedBrand} - Keyword Search & Brand Insights`,
-          meta_description: `Analyze ${decodedBrand} keyword search volume trends and SEO performance data.`,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        };
-        setBrandPageData(defaultData);
-      }
+      return null;
     }
   };
 
