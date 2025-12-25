@@ -132,17 +132,19 @@ export default function Header({ theme, isAdmin, isLoggedIn = false, onLoginClic
             >
               Create My Charts
             </a>
+            {isLoggedIn && (
+              <a
+                href="/brand-data-manager/"
+                className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'} transition-colors`}
+              >
+                Brand Insight
+              </a>
+            )}
             <a
               href="/contact/"
               className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'} transition-colors`}
             >
               Contact
-            </a>
-            <a
-              href="/about/"
-              className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'} transition-colors`}
-            >
-              About
             </a>
             {isLoggedIn ? (
               <a
@@ -277,6 +279,16 @@ export default function Header({ theme, isAdmin, isLoggedIn = false, onLoginClic
                       <Upload size={20} />
                       <span>Create My Charts</span>
                     </a>
+                    {isLoggedIn && (
+                      <a
+                        href="/brand-data-manager/"
+                        className={`flex items-center gap-3 px-6 py-3 ${theme === 'dark' ? 'text-gray-300 hover:bg-gray-700 hover:text-white' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'} transition-colors`}
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        <BarChart3 size={20} />
+                        <span>Brand Insight</span>
+                      </a>
+                    )}
                     <a
                       href="/contact/"
                       className={`flex items-center gap-3 px-6 py-3 ${theme === 'dark' ? 'text-gray-300 hover:bg-gray-700 hover:text-white' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'} transition-colors`}
@@ -284,14 +296,6 @@ export default function Header({ theme, isAdmin, isLoggedIn = false, onLoginClic
                     >
                       <Mail size={20} />
                       <span>Contact</span>
-                    </a>
-                    <a
-                      href="/about/"
-                      className={`flex items-center gap-3 px-6 py-3 ${theme === 'dark' ? 'text-gray-300 hover:bg-gray-700 hover:text-white' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'} transition-colors`}
-                      onClick={() => setIsMenuOpen(false)}
-                    >
-                      <Info size={20} />
-                      <span>About</span>
                     </a>
                     <div className={`border-t ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'} my-2`}></div>
                     <a
