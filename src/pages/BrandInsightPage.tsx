@@ -2194,14 +2194,11 @@ export default function BrandInsightPage() {
                         <div
                           className={`prose prose-sm max-w-none ${
                             theme === 'dark'
-                              ? 'prose-invert prose-headings:text-white prose-p:text-gray-300 prose-strong:text-white prose-li:text-gray-300'
-                              : 'prose-headings:text-gray-900 prose-p:text-gray-700 prose-strong:text-gray-900 prose-li:text-gray-700'
+                              ? 'prose-invert prose-p:text-gray-300 prose-strong:text-white prose-li:text-gray-300'
+                              : 'prose-p:text-gray-700 prose-strong:text-gray-900 prose-li:text-gray-700'
                           }`}
                           dangerouslySetInnerHTML={{
                             __html: aiAnalysis
-                              .replace(/^### /gm, '<h3 class="font-bold text-lg mt-6 mb-3">')
-                              .replace(/^## /gm, '<h2 class="font-bold text-xl mt-6 mb-4">')
-                              .replace(/^# /gm, '<h1 class="font-bold text-2xl mt-6 mb-4">')
                               .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
                               .replace(/\*([^*]+)\*/g, '<em>$1</em>')
                               .replace(/^- /gm, '<li>')
