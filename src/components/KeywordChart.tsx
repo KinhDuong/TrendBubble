@@ -204,7 +204,7 @@ export default function KeywordChart({ data, selectedBrand }: KeywordChartProps)
 
   return (
     <div className="space-y-8">
-      <div className="bg-white rounded-lg shadow-sm p-6">
+      <div>
         <svg
           ref={trendRef}
           className="w-full"
