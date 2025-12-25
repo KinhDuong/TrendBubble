@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { BrowserRouter, Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import BubbleChart, { Shape } from './components/BubbleChart';
@@ -39,8 +39,8 @@ function HomePage() {
   const { isAdmin, user, logout } = useAuth();
   const location = useLocation();
   const [topics, setTopics] = useState<TrendingTopic[]>([]);
-  const isMobile = window.innerWidth < 768;
-  const [maxBubbles, setMaxBubbles] = useState<number>(isMobile ? 40 : 50);
+  const [isMobile, setIsMobile] = useState<boolean>(window.innerWidth < 768);
+  const [maxBubbles, setMaxBubbles] = useState<number>(window.innerWidth < 768 ? 40 : 50);
   const [dateFilter, setDateFilter] = useState<'now' | 'all' | '24h' | 'week' | 'month' | 'year'>('now');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [sourceFilter, setSourceFilter] = useState<string>('google_trends');
@@ -142,6 +142,15 @@ function HomePage() {
   }, []);
 
   useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  useEffect(() => {
     const bubbleInterval = setInterval(() => {
       if (oldestBubbleTime && oldestBubbleCreated && oldestBubbleLifetime) {
         const now = Date.now();
@@ -161,7 +170,7 @@ function HomePage() {
         setNextBubbleIn('--');
         setBubbleProgress(0);
       }
-    }, 100);
+    }, 500);
     return () => clearInterval(bubbleInterval);
   }, [oldestBubbleTime, oldestBubbleCreated, oldestBubbleLifetime]);
 
@@ -847,9 +856,17 @@ function HomePage() {
     return <Login onClose={() => { setShowLogin(false); loadTopics(); }} theme={theme} />;
   }
 
-  const topTopics = [...topics].sort((a, b) => b.searchVolume - a.searchVolume).slice(0, 10);
-  const topTopicNames = topTopics.map(t => t.name).join(', ');
-  const currentDate = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  const { topTopics, topTopicNames, currentDate } = useMemo(() => {
+    const sortedTopics = [...topics].sort((a, b) => b.searchVolume - a.searchVolume).slice(0, 10);
+    const names = sortedTopics.map(t => t.name).join(', ');
+    const date = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+
+    return {
+      topTopics: sortedTopics,
+      topTopicNames: names,
+      currentDate: date
+    };
+  }, [topics]);
 
   return (
     <>

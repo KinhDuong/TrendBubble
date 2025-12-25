@@ -42,7 +42,7 @@ function DynamicPage() {
   const { isAdmin, user, logout } = useAuth();
   const [pageData, setPageData] = useState<PageData | null>(null);
   const [topics, setTopics] = useState<TrendingTopic[]>([]);
-  const isMobile = window.innerWidth < 768;
+  const [isMobile, setIsMobile] = useState<boolean>(window.innerWidth < 768);
 
   // Initialize maxBubbles from URL parameter "Top" or default
   const getInitialMaxBubbles = () => {
@@ -53,7 +53,7 @@ function DynamicPage() {
         return parsed;
       }
     }
-    return isMobile ? 40 : 100;
+    return window.innerWidth < 768 ? 40 : 100;
   };
 
   const [maxBubbles, setMaxBubbles] = useState<number>(getInitialMaxBubbles());
@@ -168,6 +168,15 @@ function DynamicPage() {
   }, [searchParams]);
 
   useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  useEffect(() => {
     const bubbleInterval = setInterval(() => {
       if (oldestBubbleTime && oldestBubbleCreated && oldestBubbleLifetime) {
         const now = Date.now();
@@ -187,7 +196,7 @@ function DynamicPage() {
         setNextBubbleIn('--');
         setBubbleProgress(0);
       }
-    }, 100);
+    }, 500);
     return () => clearInterval(bubbleInterval);
   }, [oldestBubbleTime, oldestBubbleCreated, oldestBubbleLifetime]);
 

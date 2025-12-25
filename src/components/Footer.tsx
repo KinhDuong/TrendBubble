@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { BarChart3 } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, memo } from 'react';
 import { supabase } from '../lib/supabase';
 
 interface FooterProps {
@@ -13,8 +13,10 @@ interface Page {
   meta_title: string;
 }
 
-export default function Footer({ theme }: FooterProps) {
-  const currentYear = new Date().getFullYear();
+const CURRENT_YEAR = new Date().getFullYear();
+
+function Footer({ theme }: FooterProps) {
+  const currentYear = CURRENT_YEAR;
   const isDark = theme === 'dark';
   const [pages, setPages] = useState<Page[]>([]);
 
@@ -118,3 +120,5 @@ export default function Footer({ theme }: FooterProps) {
     </footer>
   );
 }
+
+export default memo(Footer);

@@ -417,11 +417,21 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
   const [internalComparingTopics, setInternalComparingTopics] = useState<Set<string>>(new Set());
   const [userId, setUserId] = useState<string | null>(null);
   const [showMaxCompareMessage, setShowMaxCompareMessage] = useState(false);
+  const [isMobile, setIsMobile] = useState<boolean>(window.innerWidth < 768);
 
   const comparingTopics = externalComparingTopics || internalComparingTopics;
   const setComparingTopics = onComparingTopicsChange || setInternalComparingTopics;
 
   const bubbleLifetimes = [40000, 60000, 80000, 100000, 120000];
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     const loadUserData = async () => {
@@ -564,16 +574,12 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
     if (!ctx) return;
 
     if (!topics || topics.length === 0) {
-      console.warn('BubbleChart: No topics to display');
       return;
     }
-
-    console.log('BubbleChart: Initializing with', topics.length, 'topics');
 
     const updateCanvasSize = () => {
       const dpr = window.devicePixelRatio || 1;
       const rect = canvas.getBoundingClientRect();
-      const isMobile = window.innerWidth < 768;
       const heightOffset = isMobile ? 0 : 150;
       canvas.width = rect.width * dpr;
       canvas.height = (window.innerHeight - heightOffset) * dpr;
@@ -669,7 +675,6 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
     const hasExtremeRange = rangeRatio > 1000;
 
     const calculateBubbleSize = (searchVolume: number) => {
-      const isMobile = window.innerWidth < 768;
       const displayCount = Math.min(maxDisplay, topics.length);
       const densityFactor = Math.min(1, Math.sqrt(50 / displayCount));
 
@@ -1278,7 +1283,6 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
         const densityRatio = totalBubbleArea / canvasArea;
 
         // Start shrinking when density exceeds threshold
-        const isMobile = window.innerWidth < 768;
         const densityThreshold = isMobile ? 0.65 : 0.6;
         const shrinkAmount = isMobile ? 0.4 : 0.4;
 
@@ -1293,7 +1297,6 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
 
       // Apply uniform scaling to maintain proportional accuracy
       bubblesRef.current.forEach((bubble) => {
-        const isMobile = window.innerWidth < 768;
         const hoverScale = (!isMobile && bubble.isHovered) ? 1.5 : 1.0;
         // All bubbles get same shrinkFactor, maintaining their relative proportions
         const targetRadius = bubble.baseRadius * shrinkFactor * hoverScale;
@@ -1552,8 +1555,6 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
           ctx.fill();
         }
 
-        const isMobile = window.innerWidth < 768;
-
         // Skip rings for declining bubbles (red/orange) and stable bubbles (blue/purple)
         const shouldSkipRing = bubble.color === '#E74C3C' || bubble.color === '#E67E22' || // Red/Orange
                                bubble.color === '#9B59B6' || bubble.color === '#3498DB' || // Purple/Blue
@@ -1620,7 +1621,6 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
           const textBrightness = theme === 'dark' ? (1 - ageRatio * 0.3) : 1;
           const textAlpha = theme === 'dark' ? textBrightness : 1;
           ctx.fillStyle = theme === 'dark' ? `rgba(255, 255, 255, ${textAlpha})` : 'rgba(255, 255, 255, 0.95)';
-          const isMobile = window.innerWidth < 768;
           const fontSize = Math.max(isMobile ? 9 : 10, displayRadius / (isMobile ? 3.2 : 3.5));
           ctx.font = `bold ${fontSize}px sans-serif`;
           ctx.textAlign = 'center';

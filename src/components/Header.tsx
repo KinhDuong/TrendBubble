@@ -1,5 +1,5 @@
 import { BarChart3, Menu, X, Home, Compass, BookOpen, Mail, Info, LogIn, LogOut, Search, Upload, User } from 'lucide-react';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, memo } from 'react';
 import { supabase } from '../lib/supabase';
 
 interface HeaderProps {
@@ -21,7 +21,13 @@ interface Page {
   source: string;
 }
 
-export default function Header({ theme, isAdmin, isLoggedIn = false, onLoginClick, onLogout, title = 'Top Best Charts', useH1 = false, snapshotButton }: HeaderProps) {
+const TITLE_STYLE = {
+  fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+  fontWeight: 700,
+  letterSpacing: '-0.02em'
+} as const;
+
+function Header({ theme, isAdmin, isLoggedIn = false, onLoginClick, onLogout, title = 'Top Best Charts', useH1 = false, snapshotButton }: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Page[]>([]);
@@ -104,9 +110,9 @@ export default function Header({ theme, isAdmin, isLoggedIn = false, onLoginClic
             </div>
             <div className="flex items-center gap-3">
               {useH1 ? (
-                <h1 className="text-lg md:text-2xl font-bold tracking-tight text-blue-600" style={{ fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", fontWeight: 700, letterSpacing: '-0.02em' }}>{title}</h1>
+                <h1 className="text-lg md:text-2xl font-bold tracking-tight text-blue-600" style={TITLE_STYLE}>{title}</h1>
               ) : (
-                <div className="text-lg md:text-2xl font-bold tracking-tight text-blue-600" style={{ fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", fontWeight: 700, letterSpacing: '-0.02em' }}>{title}</div>
+                <div className="text-lg md:text-2xl font-bold tracking-tight text-blue-600" style={TITLE_STYLE}>{title}</div>
               )}
               {snapshotButton}
             </div>
@@ -333,3 +339,5 @@ export default function Header({ theme, isAdmin, isLoggedIn = false, onLoginClic
     </header>
   );
 }
+
+export default memo(Header);

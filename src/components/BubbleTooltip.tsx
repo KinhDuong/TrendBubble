@@ -1,7 +1,7 @@
 import { TrendingTopic, CryptoTimeframe } from '../types';
 import { TrendingUp, Tag, Pin, X, DollarSign, Target, TrendingDown, BarChart3 } from 'lucide-react';
 import { createPortal } from 'react-dom';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, memo } from 'react';
 
 interface KeywordPerformanceData {
   keyword: string;
@@ -30,7 +30,7 @@ interface BubbleTooltipProps {
   keywordData?: KeywordPerformanceData;
 }
 
-export default function BubbleTooltip({
+function BubbleTooltip({
   topic,
   x,
   y,
@@ -49,13 +49,24 @@ export default function BubbleTooltip({
     return null;
   }
 
-  const isMobile = window.innerWidth < 768;
+  const [isMobile, setIsMobile] = useState<boolean>(window.innerWidth < 768);
+  const [windowDimensions, setWindowDimensions] = useState({ width: window.innerWidth, height: window.innerHeight });
   const [isExpanded, setIsExpanded] = useState(!isMobile && !!keywordData);
   const [isAnimating, setIsAnimating] = useState(true);
 
   useEffect(() => {
     const timer = setTimeout(() => setIsAnimating(false), 400);
     return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+      setWindowDimensions({ width: window.innerWidth, height: window.innerHeight });
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   // Desktop: small or expanded size
@@ -69,15 +80,15 @@ export default function BubbleTooltip({
   let left = x + offset;
   let top = y;
 
-  if (left + tooltipWidth > window.innerWidth - padding) {
+  if (left + tooltipWidth > windowDimensions.width - padding) {
     left = x - tooltipWidth - offset;
   }
   if (left < padding) {
     left = padding;
   }
 
-  if (top + tooltipHeight > window.innerHeight - padding) {
-    top = window.innerHeight - tooltipHeight - padding;
+  if (top + tooltipHeight > windowDimensions.height - padding) {
+    top = windowDimensions.height - tooltipHeight - padding;
   }
   if (top < padding) {
     top = padding;
@@ -723,3 +734,5 @@ export default function BubbleTooltip({
     document.body
   );
 }
+
+export default memo(BubbleTooltip);
