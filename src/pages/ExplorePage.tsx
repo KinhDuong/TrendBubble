@@ -32,6 +32,7 @@ export default function ExplorePage() {
   const [latestPages, setLatestPages] = useState<FeaturedPage[]>([]);
   const [categoryTopics, setCategoryTopics] = useState<Record<string, TrendingTopic[]>>({});
   const [loading, setLoading] = useState(true);
+  const [currentTime, setCurrentTime] = useState<number>(Date.now());
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     const savedTheme = localStorage.getItem('theme');
     return (savedTheme === 'dark' || savedTheme === 'light') ? savedTheme : 'light';
@@ -46,6 +47,13 @@ export default function ExplorePage() {
     // Remove prerendered meta tags to prevent duplicates with React Helmet
     const prerenderedTags = document.head.querySelectorAll('[data-prerendered]');
     prerenderedTags.forEach(tag => tag.remove());
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTime(Date.now());
+    }, 60000);
+    return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
@@ -146,9 +154,8 @@ export default function ExplorePage() {
   const formatTimeAgo = (date?: string) => {
     if (!date) return 'Recently';
 
-    const now = new Date();
     const created = new Date(date);
-    const diffMs = now.getTime() - created.getTime();
+    const diffMs = currentTime - created.getTime();
     const diffMins = Math.floor(diffMs / 60000);
     const diffHours = Math.floor(diffMs / 3600000);
     const diffDays = Math.floor(diffMs / 86400000);

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
@@ -440,7 +440,6 @@ export default function BrandDataManager() {
   };
 
   const exportToCSV = () => {
-    const filteredData = getFilteredData();
     if (filteredData.length === 0) return;
 
     const allColumns = Object.keys(filteredData[0]);
@@ -464,7 +463,7 @@ export default function BrandDataManager() {
     window.URL.revokeObjectURL(url);
   };
 
-  const getFilteredData = () => {
+  const filteredData = useMemo(() => {
     let filtered = [...data];
 
     if (selectedBrand !== 'all') {
@@ -501,7 +500,7 @@ export default function BrandDataManager() {
     });
 
     return filtered;
-  };
+  }, [data, selectedBrand, searchTerm, sortColumn, sortDirection]);
 
   const handleSort = (column: string) => {
     if (sortColumn === column) {
@@ -575,7 +574,6 @@ export default function BrandDataManager() {
     return 'bg-red-500';
   };
 
-  const filteredData = getFilteredData();
   const columns = getAllColumns();
 
   if (loading) {

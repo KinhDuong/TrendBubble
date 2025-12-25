@@ -60,7 +60,7 @@ export default function BrandInsightPage() {
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const { isAdmin, user, logout } = useAuth();
-  const isMobile = window.innerWidth < 768;
+  const [isMobile, setIsMobile] = useState<boolean>(window.innerWidth < 768);
 
   const [monthlyData, setMonthlyData] = useState<MonthlyData[]>([]);
   const [keywordData, setKeywordData] = useState<any[]>([]);
@@ -118,6 +118,15 @@ export default function BrandInsightPage() {
   const barChartRef = useRef<HTMLDivElement>(null);
 
   const itemsPerPage = 10;
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     document.documentElement.style.backgroundColor = theme === 'dark' ? '#111827' : '#f1f3f4';
@@ -519,6 +528,8 @@ export default function BrandInsightPage() {
         return [];
       }
 
+      const now = new Date().toISOString();
+
       const result = keywordData.map(kw => {
         const monthlyVolumes: number[] = [];
 
@@ -535,8 +546,8 @@ export default function BrandInsightPage() {
           searchVolume: maxVolume,
           searchVolumeRaw: maxVolume.toLocaleString(),
           url: '',
-          createdAt: new Date().toISOString(),
-          pubDate: new Date().toISOString(),
+          createdAt: now,
+          pubDate: now,
           category: kw.brand || '',
           source: 'brand_keywords',
           monthlySearches: monthlyVolumes.map((vol, idx) => ({
@@ -1365,26 +1376,41 @@ export default function BrandInsightPage() {
 
   const decodedBrand = decodeURIComponent(brandName || '');
 
-  const monthlyTotals = monthColumns.map(col => {
-    return keywordData.reduce((sum, kw) => sum + (Number(kw[col]) || 0), 0);
-  }).filter(total => total > 0);
+  const { monthlyTotals, totalMonths, avgKeywordCount, avgVolume, lastUpdated, pageUrl, topTopicNames, keywords, enhancedTitle, enhancedDescription } = useMemo(() => {
+    const monthlyTotalsCalc = monthColumns.map(col => {
+      return keywordData.reduce((sum, kw) => sum + (Number(kw[col]) || 0), 0);
+    }).filter(total => total > 0);
 
-  const totalMonths = monthlyTotals.length;
-  const avgKeywordCount = keywordData.length;
-  const avgVolume = monthlyTotals.length > 0
-    ? Math.round(monthlyTotals.reduce((sum, vol) => sum + vol, 0) / monthlyTotals.length)
-    : 0;
-  const lastUpdated = new Date();
+    const totalMonthsCalc = monthlyTotalsCalc.length;
+    const avgKeywordCountCalc = keywordData.length;
+    const avgVolumeCalc = monthlyTotalsCalc.length > 0
+      ? Math.round(monthlyTotalsCalc.reduce((sum, vol) => sum + vol, 0) / monthlyTotalsCalc.length)
+      : 0;
+    const lastUpdatedCalc = new Date();
 
-  const baseUrl = import.meta.env.VITE_BASE_URL || 'https://topbestcharts.com';
-  const pageUrl = pageOwnerUsername ? `${baseUrl}/insights/${encodeURIComponent(pageOwnerUsername)}/${encodeURIComponent(decodedBrand)}/` : `${baseUrl}/insights/`;
-  const topTopicNames = topTopics.slice(0, 5).map(t => t.name).join(', ');
-  const keywords = topTopics.slice(0, 10).map(t => t.name).join(', ') + ', keyword trends, search volume, SEO insights, brand analysis';
+    const baseUrl = import.meta.env.VITE_BASE_URL || 'https://topbestcharts.com';
+    const pageUrlCalc = pageOwnerUsername ? `${baseUrl}/insights/${encodeURIComponent(pageOwnerUsername)}/${encodeURIComponent(decodedBrand)}/` : `${baseUrl}/insights/`;
+    const topTopicNamesCalc = topTopics.slice(0, 5).map(t => t.name).join(', ');
+    const keywordsCalc = topTopics.slice(0, 10).map(t => t.name).join(', ') + ', keyword trends, search volume, SEO insights, brand analysis';
 
-  const enhancedTitle = brandPageData.meta_title;
-  const enhancedDescription = topTopicNames
-    ? `${brandPageData.meta_description} Top keywords: ${topTopicNames}. Track ${avgKeywordCount} keywords across ${totalMonths} months.`
-    : brandPageData.meta_description;
+    const enhancedTitleCalc = brandPageData.meta_title;
+    const enhancedDescriptionCalc = topTopicNamesCalc
+      ? `${brandPageData.meta_description} Top keywords: ${topTopicNamesCalc}. Track ${avgKeywordCountCalc} keywords across ${totalMonthsCalc} months.`
+      : brandPageData.meta_description;
+
+    return {
+      monthlyTotals: monthlyTotalsCalc,
+      totalMonths: totalMonthsCalc,
+      avgKeywordCount: avgKeywordCountCalc,
+      avgVolume: avgVolumeCalc,
+      lastUpdated: lastUpdatedCalc,
+      pageUrl: pageUrlCalc,
+      topTopicNames: topTopicNamesCalc,
+      keywords: keywordsCalc,
+      enhancedTitle: enhancedTitleCalc,
+      enhancedDescription: enhancedDescriptionCalc
+    };
+  }, [monthColumns, keywordData, topTopics, brandPageData, pageOwnerUsername, decodedBrand]);
 
   return (
     <>

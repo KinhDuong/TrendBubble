@@ -29,10 +29,18 @@ export default function BrowseTopicsPage() {
   const [showLogin, setShowLogin] = useState(false);
   const [categoryGroups, setCategoryGroups] = useState<CategoryGroup[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentTime, setCurrentTime] = useState<number>(Date.now());
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     const savedTheme = localStorage.getItem('theme');
     return (savedTheme === 'dark' || savedTheme === 'light') ? savedTheme : 'light';
   });
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTime(Date.now());
+    }, 60000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     const prerenderFooter = document.getElementById('prerender-footer');
@@ -93,9 +101,8 @@ export default function BrowseTopicsPage() {
   const formatTimeAgo = (date?: string) => {
     if (!date) return 'Recently';
 
-    const now = new Date();
     const created = new Date(date);
-    const diffMs = now.getTime() - created.getTime();
+    const diffMs = currentTime - created.getTime();
     const diffMins = Math.floor(diffMs / 60000);
     const diffHours = Math.floor(diffMs / 3600000);
     const diffDays = Math.floor(diffMs / 86400000);
