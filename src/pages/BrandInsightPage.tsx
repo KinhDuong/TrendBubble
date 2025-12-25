@@ -2164,7 +2164,7 @@ export default function BrandInsightPage() {
                             }`}
                           >
                             <Sparkles className="w-4 h-4" />
-                            {aiLoading ? 'Analyzing...' : aiAnalysis ? 'Regenerate' : 'Generate AI Insights'}
+                            {aiLoading ? 'Analyzing...' : aiAnalysis ? 'Regenerate' : 'Generate Advanced Insights'}
                           </button>
                         )}
 
@@ -2235,7 +2235,7 @@ export default function BrandInsightPage() {
                           <div className={`absolute top-0 left-0 w-16 h-16 rounded-full border-4 border-t-blue-600 animate-spin ${theme === 'dark' ? 'border-blue-900' : 'border-blue-200'}`}></div>
                         </div>
                         <p className={`mt-4 text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                          Analyzing your keyword data with AI...
+                          Analyzing your keyword data...
                         </p>
                         <p className={`mt-1 text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>
                           This may take 10-30 seconds
@@ -2360,8 +2360,8 @@ export default function BrandInsightPage() {
 
                     {!aiAnalysis && !aiLoading && !aiError && (
                       <div className={`text-center py-8 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                        <p className="mb-2">Click the button above to generate AI-powered insights about your keyword data.</p>
-                        <p className="text-sm">Our AI will analyze trends, identify opportunities, and provide strategic recommendations.</p>
+                        <p className="mb-2">Click the button above to generate advanced insights about your keyword data.</p>
+                        <p className="text-sm">Our analysis will identify trends, opportunities, and provide strategic recommendations.</p>
                       </div>
                     )}
                     </div>
