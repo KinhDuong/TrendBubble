@@ -1484,6 +1484,240 @@ async function prerenderInsightsMetaPage(baseHTML, distPath) {
   console.log('✓ Generated: /insights-meta/index.html');
 }
 
+async function prerenderBrandInsightPages(baseHTML, distPath) {
+  console.log('Pre-rendering: Brand Insight Pages');
+
+  // Fetch all public brand pages
+  const { data: brandPages, error } = await supabase
+    .from('brand_pages')
+    .select('*')
+    .eq('is_public', true);
+
+  if (error) {
+    console.error('Error fetching public brand pages:', error);
+    return [];
+  }
+
+  if (!brandPages || brandPages.length === 0) {
+    console.log('No public brand pages found');
+    return [];
+  }
+
+  console.log(`Found ${brandPages.length} public brand pages to pre-render`);
+
+  // Fetch all user profiles
+  const userIds = [...new Set(brandPages.map(bp => bp.user_id))];
+  const { data: userProfiles } = await supabase
+    .from('user_profiles')
+    .select('id, username')
+    .in('id', userIds);
+
+  const userProfileMap = new Map(userProfiles?.map(up => [up.id, up.username]) || []);
+
+  for (const brandPage of brandPages) {
+    const username = userProfileMap.get(brandPage.user_id);
+    if (!username) {
+      console.log(`Skipping ${brandPage.brand} - no username found`);
+      continue;
+    }
+
+    const pageUrl = `/insights/${encodeURIComponent(username)}/${encodeURIComponent(brandPage.brand)}`;
+    console.log(`Pre-rendering: ${pageUrl}`);
+
+    // Fetch keyword data for this brand
+    const { data: keywordData } = await supabase
+      .from('brand_keyword_data')
+      .select('*')
+      .eq('user_id', brandPage.user_id)
+      .eq('brand', brandPage.brand)
+      .order('avg_search_volume', { ascending: false })
+      .limit(1000);
+
+    // Fetch monthly data
+    const { data: monthlyData } = await supabase
+      .from('brand_keyword_monthly_data')
+      .select('*')
+      .eq('user_id', brandPage.user_id)
+      .eq('brand', brandPage.brand)
+      .order('month', { ascending: false });
+
+    const keywords = keywordData || [];
+    const months = monthlyData || [];
+
+    // Calculate stats
+    const totalKeywords = keywords.length;
+    const totalMonths = months.length;
+    const avgVolume = keywords.length > 0
+      ? Math.round(keywords.reduce((sum, k) => sum + (k.avg_search_volume || 0), 0) / keywords.length)
+      : 0;
+
+    const topKeywords = keywords
+      .slice(0, 10)
+      .map(k => k.keyword)
+      .join(', ');
+
+    const enhancedTitle = brandPage.meta_title;
+    const enhancedDescription = topKeywords
+      ? `${brandPage.meta_description} Top keywords: ${topKeywords}. Track ${totalKeywords} keywords across ${totalMonths} months.`
+      : brandPage.meta_description;
+
+    const keywordsMetaTag = keywords.slice(0, 15).map(k => k.keyword).join(', ') + `, ${brandPage.brand}, search trends, keyword analysis, SEO insights`;
+
+    const metaTags = `
+    <title>${enhancedTitle}</title>
+    <meta name="description" content="${enhancedDescription}" data-prerendered />
+    <meta name="keywords" content="${keywordsMetaTag}" data-prerendered />
+    <meta name="author" content="Top Best Charts" data-prerendered />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <link rel="canonical" href="${BASE_URL}${pageUrl}" />
+
+    <meta property="og:type" content="website" data-prerendered />
+    <meta property="og:url" content="${BASE_URL}${pageUrl}" data-prerendered />
+    <meta property="og:title" content="${enhancedTitle}" data-prerendered />
+    <meta property="og:description" content="${enhancedDescription}" data-prerendered />
+    <meta property="og:site_name" content="Top Best Charts" data-prerendered />
+    ${brandPage.cover_image ? `<meta property="og:image" content="${brandPage.cover_image}" data-prerendered />` : ''}
+
+    <meta name="twitter:card" content="summary_large_image" data-prerendered />
+    <meta name="twitter:title" content="${enhancedTitle}" data-prerendered />
+    <meta name="twitter:description" content="${enhancedDescription}" data-prerendered />
+    ${brandPage.cover_image ? `<meta name="twitter:image" content="${brandPage.cover_image}" data-prerendered />` : ''}
+  `;
+
+    // Generate content HTML
+    let contentHTML = `
+    <div class="brand-insight-page-content">
+      <header style="background-color: #111827; border-bottom: 1px solid #374151; padding: 0.5rem 1rem;">
+        <nav aria-label="Main navigation" style="max-width: 80rem; margin: 0 auto; display: flex; align-items: center; justify-content: space-between;">
+          <a href="${BASE_URL}/" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none;">
+            <span style="color: #2563eb; font-size: 1.5rem; font-weight: 700;">Top Best Charts</span>
+          </a>
+          <ul style="display: flex; gap: 1.5rem; list-style: none; margin: 0; padding: 0;">
+            <li><a href="${BASE_URL}/" style="color: #d1d5db; text-decoration: none;">Home</a></li>
+            <li><a href="${BASE_URL}/browse-topics" style="color: #d1d5db; text-decoration: none;">Browse Topics</a></li>
+            <li><a href="${BASE_URL}/trending-now" style="color: #d1d5db; text-decoration: none;">Trending Now</a></li>
+            <li><a href="${BASE_URL}/insights" style="color: #d1d5db; text-decoration: none;">Insights</a></li>
+            <li><a href="${BASE_URL}/contact" style="color: #d1d5db; text-decoration: none;">Contact</a></li>
+            <li><a href="${BASE_URL}/about" style="color: #d1d5db; text-decoration: none;">About</a></li>
+          </ul>
+        </nav>
+      </header>
+
+      <main style="max-width: 80rem; margin: 2rem auto; padding: 0 1rem;">
+        ${brandPage.cover_image ? `
+        <div style="margin-bottom: 2rem;">
+          <img src="${brandPage.cover_image}" alt="${brandPage.meta_title}" style="width: 100%; height: 24rem; object-fit: cover; border-radius: 0.5rem;" />
+        </div>
+        ` : ''}
+
+        <article style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; padding: 2rem; margin-bottom: 2rem;">
+          <h1 style="font-size: 2.5rem; font-weight: 700; color: white; margin-bottom: 1rem;">${brandPage.meta_title}</h1>
+
+          <div style="display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 2rem;">
+            <div style="background-color: #374151; padding: 1rem; border-radius: 0.5rem; flex: 1; min-width: 200px;">
+              <p style="color: #9ca3af; font-size: 0.875rem; margin-bottom: 0.25rem;">Total Keywords</p>
+              <p style="color: white; font-size: 2rem; font-weight: 700;">${totalKeywords.toLocaleString()}</p>
+            </div>
+            <div style="background-color: #374151; padding: 1rem; border-radius: 0.5rem; flex: 1; min-width: 200px;">
+              <p style="color: #9ca3af; font-size: 0.875rem; margin-bottom: 0.25rem;">Avg. Search Volume</p>
+              <p style="color: white; font-size: 2rem; font-weight: 700;">${avgVolume.toLocaleString()}</p>
+            </div>
+            <div style="background-color: #374151; padding: 1rem; border-radius: 0.5rem; flex: 1; min-width: 200px;">
+              <p style="color: #9ca3af; font-size: 0.875rem; margin-bottom: 0.25rem;">Months Tracked</p>
+              <p style="color: white; font-size: 2rem; font-weight: 700;">${totalMonths}</p>
+            </div>
+          </div>
+
+          ${brandPage.intro_text ? `
+          <div style="margin-bottom: 2rem;">
+            <h2 style="font-size: 1.5rem; font-weight: 700; color: white; margin-bottom: 1rem;">Overview</h2>
+            <div style="color: #d1d5db; line-height: 1.75;">${brandPage.intro_text}</div>
+          </div>
+          ` : ''}
+
+          ${brandPage.summary ? `
+          <div style="margin-bottom: 2rem;">
+            <h2 style="font-size: 1.5rem; font-weight: 700; color: white; margin-bottom: 1rem;">Summary</h2>
+            <div style="color: #d1d5db; line-height: 1.75;">${brandPage.summary}</div>
+          </div>
+          ` : ''}
+        </article>
+
+        ${keywords.length > 0 ? `
+        <section style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; padding: 2rem; margin-bottom: 2rem;">
+          <h2 style="font-size: 1.5rem; font-weight: 700; color: white; margin-bottom: 1rem;">Top Keywords</h2>
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem;">
+            ${keywords.slice(0, 20).map((keyword, index) => `
+              <div style="background-color: #374151; padding: 1rem; border-radius: 0.5rem;">
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+                  <span style="color: #60a5fa; font-size: 0.875rem; font-weight: 600;">#${index + 1}</span>
+                  ${keyword.ai_category ? `<span style="background-color: #4b5563; color: #d1d5db; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem;">${keyword.ai_category}</span>` : ''}
+                </div>
+                <h3 style="color: white; font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem;">${keyword.keyword}</h3>
+                <p style="color: #9ca3af; font-size: 0.875rem;">Avg. Volume: ${(keyword.avg_search_volume || 0).toLocaleString()}</p>
+              </div>
+            `).join('')}
+          </div>
+        </section>
+        ` : ''}
+
+        ${brandPage.faq ? `
+        <section style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; padding: 2rem; margin-bottom: 2rem;">
+          <h2 style="font-size: 1.5rem; font-weight: 700; color: white; margin-bottom: 1rem;">Frequently Asked Questions</h2>
+          <div style="color: #d1d5db; line-height: 1.75;">${brandPage.faq}</div>
+        </section>
+        ` : ''}
+      </main>
+
+      ${generateFooterHTML()}
+    </div>
+  `;
+
+    const structuredData = `
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "headline": "${enhancedTitle.replace(/"/g, '\\"')}",
+      "description": "${enhancedDescription.replace(/"/g, '\\"')}",
+      "author": {
+        "@type": "Organization",
+        "name": "Top Best Charts"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Top Best Charts",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "${BASE_URL}/favicon.svg"
+        }
+      },
+      "datePublished": "${brandPage.created_at}",
+      "dateModified": "${brandPage.updated_at || brandPage.created_at}"
+      ${brandPage.cover_image ? `,
+      "image": "${brandPage.cover_image}"` : ''}
+    }
+    </script>
+  `;
+
+    let html = baseHTML
+      .replace(/<title>.*?<\/title>/, '')
+      .replace('<!-- PRERENDER_META -->', metaTags)
+      .replace('<!-- PRERENDER_STRUCTURED_DATA -->', structuredData)
+      .replace('<div id="root"></div>', `<div id="root">${contentHTML}</div>`);
+
+    const pagePath = pageUrl.replace(/^\//, '');
+    const outputDir = path.join(distPath, pagePath);
+
+    fs.mkdirSync(outputDir, { recursive: true });
+    fs.writeFileSync(path.join(outputDir, 'index.html'), html);
+
+    console.log(`✓ Generated: ${outputDir}/index.html`);
+  }
+
+  return brandPages;
+}
+
 async function prerenderPages() {
   console.log('Starting pre-rendering process...');
 
@@ -1534,6 +1768,7 @@ async function prerenderPages() {
   await prerenderInsightPage(baseHTML, distPath);
   await prerenderInsightsMetaPage(baseHTML, distPath);
   await prerenderAboutPage(baseHTML, distPath);
+  const brandPages = await prerenderBrandInsightPages(baseHTML, distPath);
 
   // Create redirect from /explore to /
   const exploreRedirectHTML = `<!DOCTYPE html>
@@ -1587,10 +1822,10 @@ async function prerenderPages() {
   console.log('Pre-rendering complete!');
 
   // Generate sitemap
-  await generateSitemap(pages, distPath);
+  await generateSitemap(pages, brandPages, distPath);
 }
 
-async function generateSitemap(pages, distPath) {
+async function generateSitemap(pages, brandPages, distPath) {
   console.log('Generating sitemap...');
 
   const escapeXml = (str) => {
@@ -1642,6 +1877,12 @@ async function generateSitemap(pages, distPath) {
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
+  <url>
+    <loc>${escapeXml(BASE_URL)}/insights-meta/</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
 `;
 
   // Add all dynamic pages
@@ -1658,6 +1899,36 @@ async function generateSitemap(pages, distPath) {
     <priority>0.8</priority>
   </url>
 `;
+  }
+
+  // Add all brand insight pages
+  if (brandPages && brandPages.length > 0) {
+    // Fetch user profiles for brand pages
+    const userIds = [...new Set(brandPages.map(bp => bp.user_id))];
+    const { data: userProfiles } = await supabase
+      .from('user_profiles')
+      .select('id, username')
+      .in('id', userIds);
+
+    const userProfileMap = new Map(userProfiles?.map(up => [up.id, up.username]) || []);
+
+    for (const brandPage of brandPages) {
+      const username = userProfileMap.get(brandPage.user_id);
+      if (!username) continue;
+
+      const pageUrl = escapeXml(`${BASE_URL}/insights/${encodeURIComponent(username)}/${encodeURIComponent(brandPage.brand)}`);
+      const lastmod = brandPage.updated_at
+        ? new Date(brandPage.updated_at).toISOString().split('T')[0]
+        : new Date(brandPage.created_at).toISOString().split('T')[0];
+
+      sitemap += `  <url>
+    <loc>${pageUrl}</loc>
+    <lastmod>${lastmod}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+`;
+    }
   }
 
   sitemap += `</urlset>
