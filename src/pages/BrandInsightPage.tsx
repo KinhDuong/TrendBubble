@@ -2138,22 +2138,24 @@ export default function BrandInsightPage() {
                           </h2>
                         </div>
                         <div className="flex items-center gap-3">
-                        <button
-                          onClick={handleAIAnalysis}
-                          disabled={aiLoading}
-                          className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all transform hover:scale-105 whitespace-nowrap ${
-                            aiLoading
-                              ? theme === 'dark'
-                                ? 'bg-gray-700 text-gray-400 cursor-not-allowed'
-                                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                              : theme === 'dark'
-                                ? 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg'
-                                : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-md'
-                          }`}
-                        >
-                          <Sparkles className="w-4 h-4" />
-                          {aiLoading ? 'Analyzing...' : aiAnalysis ? 'Regenerate' : 'Generate AI Insights'}
-                        </button>
+                        {pageIdOrUserId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(pageIdOrUserId) && (
+                          <button
+                            onClick={handleAIAnalysis}
+                            disabled={aiLoading}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all transform hover:scale-105 whitespace-nowrap ${
+                              aiLoading
+                                ? theme === 'dark'
+                                  ? 'bg-gray-700 text-gray-400 cursor-not-allowed'
+                                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                : theme === 'dark'
+                                  ? 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg'
+                                  : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-md'
+                            }`}
+                          >
+                            <Sparkles className="w-4 h-4" />
+                            {aiLoading ? 'Analyzing...' : aiAnalysis ? 'Regenerate' : 'Generate AI Insights'}
+                          </button>
+                        )}
 
                         {aiSaveStatus === 'saving' && (
                           <span className={`text-sm flex items-center gap-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
