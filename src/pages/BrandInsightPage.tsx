@@ -2138,7 +2138,7 @@ export default function BrandInsightPage() {
                           </h2>
                         </div>
                         <div className="flex items-center gap-3">
-                        {pageIdOrUserId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(pageIdOrUserId) && (
+                        {user && pageOwnerId && (user.id === pageOwnerId || isAdmin) && (
                           <button
                             onClick={handleAIAnalysis}
                             disabled={aiLoading}
