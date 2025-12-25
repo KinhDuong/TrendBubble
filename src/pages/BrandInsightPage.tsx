@@ -2134,7 +2134,7 @@ export default function BrandInsightPage() {
                       <div className="flex items-start justify-between">
                         <div>
                           <h2 className={`text-2xl font-semibold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                            AI-Powered Keyword Analysis
+                            Summary and Analysis
                           </h2>
                         </div>
                         <div className="flex items-center gap-3">

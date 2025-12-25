@@ -703,7 +703,7 @@ export default function BrandDataManager() {
                 <div className="flex items-start gap-3">
                   <Sparkles className="w-5 h-5 text-purple-600 mt-0.5 flex-shrink-0" />
                   <div className="flex-1">
-                    <h3 className="font-semibold text-purple-900 mb-1">AI Keyword Analysis</h3>
+                    <h3 className="font-semibold text-purple-900 mb-1">Summary and Analysis</h3>
                     <p className="text-sm text-purple-700 mb-3">
                       Use AI to analyze your keywords. Categorization assigns growth categories based on Google Trends insights
                       (Explosive Growth, Rising Star, etc.) with strategic insights. Sentiment Analysis evaluates keyword sentiment

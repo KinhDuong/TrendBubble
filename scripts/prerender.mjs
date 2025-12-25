@@ -1757,7 +1757,7 @@ async function prerenderBrandInsightPages(baseHTML, distPath) {
         </section>
 
         <section style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; padding: 2rem; margin-bottom: 2rem;">
-          <h2 style="font-size: 1.5rem; font-weight: 700; color: white; margin-bottom: 1rem;">AI-Powered Keyword Analysis</h2>
+          <h2 style="font-size: 1.5rem; font-weight: 700; color: white; margin-bottom: 1rem;">Summary and Analysis</h2>
           ${aiAnalysis && aiAnalysis.analysis ? `
             <div style="background: linear-gradient(135deg, rgba(37, 99, 235, 0.1) 0%, rgba(124, 58, 237, 0.1) 100%); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 0.5rem; padding: 2rem;">
               <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(96, 165, 250, 0.2);">
