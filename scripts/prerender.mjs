@@ -1762,7 +1762,6 @@ async function prerenderBrandInsightPages(baseHTML, distPath) {
               <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(96, 165, 250, 0.2);">
                 <span style="font-size: 1.5rem;">✨</span>
                 <div>
-                  <h3 style="font-size: 1.125rem; font-weight: 600; color: white; margin-bottom: 0.25rem;">AI Strategic Insights</h3>
                   <p style="font-size: 0.875rem; color: #9ca3af;">Generated analysis for ${brandPage.brand}</p>
                 </div>
               </div>
