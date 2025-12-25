@@ -1730,7 +1730,6 @@ async function prerenderBrandInsightPages(baseHTML, distPath) {
 
         <section style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; padding: 2rem; margin-bottom: 2rem;">
           <h2 style="font-size: 1.5rem; font-weight: 700; color: white; margin-bottom: 1rem;">Top Keywords for Advertising</h2>
-          <p style="color: #9ca3af; margin-bottom: 1.5rem;">AI-powered recommendations for advertising campaigns.</p>
           ${(() => {
             const highValue = keywords.filter(k => (k['Avg. monthly searches'] || 0) > 1000 && (k['Top of page bid (high range)'] || 0) > 0)
               .sort((a, b) => (b['Avg. monthly searches'] || 0) * (b['Top of page bid (high range)'] || 0) - (a['Avg. monthly searches'] || 0) * (a['Top of page bid (high range)'] || 0))
