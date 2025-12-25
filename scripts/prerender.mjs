@@ -1793,6 +1793,22 @@ async function prerenderBrandInsightPages(baseHTML, distPath) {
     </div>
   `;
 
+    // Prepare trend data for structured data
+    const trendDataPoints = months
+      .sort((a, b) => new Date(a.month) - new Date(b.month))
+      .map(m => ({
+        date: m.month,
+        volume: m.total_volume
+      }));
+
+    // Create keyword data for structured schema
+    const keywordsList = keywords.slice(0, 20).map(k => ({
+      name: k.keyword,
+      searchVolume: k['Avg. monthly searches'] || 0,
+      category: k.ai_category || 'Uncategorized',
+      competition: k.competition || 'N/A'
+    }));
+
     const structuredData = `
     <script type="application/ld+json">
     {
@@ -1818,6 +1834,63 @@ async function prerenderBrandInsightPages(baseHTML, distPath) {
       "image": "${brandPage.cover_image}"` : ''}
     }
     </script>
+    ${trendDataPoints.length > 0 ? `
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Dataset",
+      "name": "${brandPage.brand} Search Volume Trends",
+      "description": "Monthly search volume trends for ${brandPage.brand} keywords showing ${totalMonths} months of data tracking ${totalKeywords} keywords.",
+      "creator": {
+        "@type": "Organization",
+        "name": "Top Best Charts"
+      },
+      "datePublished": "${brandPage.created_at}",
+      "dateModified": "${brandPage.updated_at || brandPage.created_at}",
+      "keywords": "${keywords.slice(0, 10).map(k => k.keyword).join(', ')}",
+      "temporalCoverage": "${trendDataPoints[0].date}/${trendDataPoints[trendDataPoints.length - 1].date}",
+      "distribution": {
+        "@type": "DataDownload",
+        "encodingFormat": "application/json",
+        "contentUrl": "${BASE_URL}${pageUrl}"
+      },
+      "variableMeasured": [
+        {
+          "@type": "PropertyValue",
+          "name": "Search Volume",
+          "description": "Total monthly search volume for tracked keywords",
+          "unitText": "searches per month"
+        }
+      ],
+      "temporalCoverage": "${trendDataPoints[0].date}/${trendDataPoints[trendDataPoints.length - 1].date}",
+      "measurementTechnique": "Aggregated search volume data from Google Keyword Planner",
+      "size": {
+        "@type": "QuantitativeValue",
+        "value": ${totalKeywords},
+        "unitText": "keywords"
+      }
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      "name": "Top Keywords for ${brandPage.brand}",
+      "description": "Top performing keywords ranked by search volume and growth",
+      "numberOfItems": ${keywordsList.length},
+      "itemListElement": [
+        ${keywordsList.map((kw, idx) => `{
+          "@type": "ListItem",
+          "position": ${idx + 1},
+          "item": {
+            "@type": "Thing",
+            "name": "${kw.name.replace(/"/g, '\\"')}",
+            "description": "Search volume: ${kw.searchVolume.toLocaleString()} | Category: ${kw.category} | Competition: ${kw.competition}"
+          }
+        }`).join(',\n        ')}
+      ]
+    }
+    </script>` : ''}
   `;
 
     let html = baseHTML
