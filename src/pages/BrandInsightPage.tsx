@@ -2202,12 +2202,12 @@ export default function BrandInsightPage() {
                             {(aiErrorCode === 'MISSING_API_KEY' || aiErrorCode === 'INVALID_API_KEY' || aiErrorCode === 'QUOTA_EXCEEDED') && (
                               <div className={`mt-3 p-3 rounded-md text-sm ${theme === 'dark' ? 'bg-gray-800/50' : 'bg-white'}`}>
                                 <p className={`font-semibold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Setup Instructions:</p>
-                                <ol className={`list-decimal list-inside space-y-1 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                                  <li>Get an API key from <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer" className="underline hover:no-underline">platform.openai.com/api-keys</a></li>
-                                  <li>Go to your Supabase Dashboard → Project Settings → Edge Functions</li>
-                                  <li>Add environment variable: <code className={`px-1 py-0.5 rounded ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'}`}>OPENAI_API_KEY</code></li>
+                                <ol className={`list-decimal ml-5 space-y-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                                  <li className="pl-2">Get an API key from <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer" className="underline hover:no-underline">platform.openai.com/api-keys</a></li>
+                                  <li className="pl-2">Go to your Supabase Dashboard → Project Settings → Edge Functions</li>
+                                  <li className="pl-2">Add environment variable: <code className={`px-1 py-0.5 rounded ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'}`}>OPENAI_API_KEY</code></li>
                                   {aiErrorCode === 'QUOTA_EXCEEDED' && (
-                                    <li>Check billing at <a href="https://platform.openai.com/account/billing" target="_blank" rel="noopener noreferrer" className="underline hover:no-underline">platform.openai.com/account/billing</a></li>
+                                    <li className="pl-2">Check billing at <a href="https://platform.openai.com/account/billing" target="_blank" rel="noopener noreferrer" className="underline hover:no-underline">platform.openai.com/account/billing</a></li>
                                   )}
                                 </ol>
                               </div>
@@ -2248,18 +2248,74 @@ export default function BrandInsightPage() {
                         <div
                           className={`prose prose-sm max-w-none ${
                             theme === 'dark'
-                              ? 'prose-invert prose-p:text-gray-300 prose-strong:text-white prose-li:text-gray-300'
-                              : 'prose-p:text-gray-700 prose-strong:text-gray-900 prose-li:text-gray-700'
+                              ? 'prose-invert prose-p:text-gray-300 prose-strong:text-white prose-li:text-gray-300 prose-ul:text-gray-300 prose-ol:text-gray-300'
+                              : 'prose-p:text-gray-700 prose-strong:text-gray-900 prose-li:text-gray-700 prose-ul:text-gray-700 prose-ol:text-gray-700'
                           }`}
                           dangerouslySetInnerHTML={{
-                            __html: aiAnalysis
-                              .replace(/^#{1,6}\s+/gm, '')
-                              .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-                              .replace(/\*([^*]+)\*/g, '<em>$1</em>')
-                              .replace(/^- /gm, '<li>')
-                              .replace(/\n\n/g, '</p><p>')
-                              .replace(/^(?!<[h|l|p])/gm, '<p>')
-                              .replace(/(?<![>])$/gm, '</p>')
+                            __html: (() => {
+                              let html = aiAnalysis;
+
+                              // Remove markdown headers
+                              html = html.replace(/^#{1,6}\s+/gm, '');
+
+                              // Convert bold and italic
+                              html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+                              html = html.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+
+                              // Split into lines for list processing
+                              const lines = html.split('\n');
+                              const processed: string[] = [];
+                              let inList = false;
+                              let listType = '';
+
+                              for (let i = 0; i < lines.length; i++) {
+                                const line = lines[i];
+                                const isUnorderedListItem = /^[\-\*]\s+/.test(line);
+                                const isOrderedListItem = /^\d+\.\s+/.test(line);
+
+                                if (isUnorderedListItem || isOrderedListItem) {
+                                  const newListType = isUnorderedListItem ? 'ul' : 'ol';
+
+                                  if (!inList) {
+                                    processed.push(`<${newListType}>`);
+                                    inList = true;
+                                    listType = newListType;
+                                  } else if (listType !== newListType) {
+                                    processed.push(`</${listType}>`);
+                                    processed.push(`<${newListType}>`);
+                                    listType = newListType;
+                                  }
+
+                                  const content = line.replace(/^[\-\*\d\.]\s+/, '');
+                                  processed.push(`<li>${content}</li>`);
+                                } else {
+                                  if (inList) {
+                                    processed.push(`</${listType}>`);
+                                    inList = false;
+                                    listType = '';
+                                  }
+
+                                  if (line.trim() === '') {
+                                    processed.push('');
+                                  } else {
+                                    processed.push(line);
+                                  }
+                                }
+                              }
+
+                              if (inList) {
+                                processed.push(`</${listType}>`);
+                              }
+
+                              html = processed.join('\n');
+
+                              // Convert paragraphs
+                              html = html.replace(/\n\n/g, '</p><p>');
+                              html = html.replace(/^(?!<[h|l|p|u|o])/gm, '<p>');
+                              html = html.replace(/(?<![>])$/gm, '</p>');
+
+                              return html;
+                            })()
                           }}
                         />
                       </div>
