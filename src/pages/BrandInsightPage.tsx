@@ -151,7 +151,7 @@ export default function BrandInsightPage() {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, topSearchQuery]);
+  }, [searchQuery, topSearchQuery, rankingListFilter]);
 
   useEffect(() => {
     if (viewMode === 'bubble') {
