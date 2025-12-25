@@ -5,7 +5,7 @@ import { supabase } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import { TrendingUp, Calendar, Database, BarChart3, AlertCircle, CheckCircle, ArrowRight, Table } from 'lucide-react';
+import { TrendingUp, Calendar, Database, BarChart3, AlertCircle, CheckCircle, ArrowRight, Table, Lock, Unlock, Loader2 } from 'lucide-react';
 
 interface BrandMetadata {
   brand: string;
@@ -18,6 +18,8 @@ interface BrandMetadata {
   oldest_month: string;
   has_yoy_data: boolean;
   has_page: boolean;
+  is_public: boolean;
+  page_id?: string;
 }
 
 export default function InsightsMetaPage() {
@@ -26,6 +28,7 @@ export default function InsightsMetaPage() {
   const [brandMetadata, setBrandMetadata] = useState<BrandMetadata[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [togglingBrand, setTogglingBrand] = useState<string | null>(null);
 
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     const savedTheme = localStorage.getItem('theme');
@@ -76,7 +79,7 @@ export default function InsightsMetaPage() {
 
       const { data: brandPages, error: pagesError } = await supabase
         .from('brand_pages')
-        .select('brand, user_id')
+        .select('id, brand, user_id, is_public')
         .eq('user_id', user.id);
 
       if (pagesError) throw pagesError;
@@ -96,7 +99,9 @@ export default function InsightsMetaPage() {
             latest_month: row.month,
             oldest_month: row.month,
             has_yoy_data: false,
-            has_page: false
+            has_page: false,
+            is_public: false,
+            page_id: undefined
           });
         }
 
@@ -124,6 +129,8 @@ export default function InsightsMetaPage() {
         if (brandMap.has(key)) {
           const metadata = brandMap.get(key)!;
           metadata.has_page = true;
+          metadata.is_public = page.is_public;
+          metadata.page_id = page.id;
         }
       });
 
@@ -148,6 +155,31 @@ export default function InsightsMetaPage() {
     setTheme(newTheme);
     localStorage.setItem('theme', newTheme);
     document.documentElement.style.backgroundColor = newTheme === 'dark' ? '#111827' : '#f1f3f4';
+  };
+
+  const handleTogglePublic = async (brand: BrandMetadata) => {
+    if (!brand.page_id || togglingBrand) return;
+
+    setTogglingBrand(brand.brand);
+    try {
+      const { error } = await supabase
+        .from('brand_pages')
+        .update({ is_public: !brand.is_public })
+        .eq('id', brand.page_id);
+
+      if (error) throw error;
+
+      setBrandMetadata(prev => prev.map(b =>
+        b.brand === brand.brand && b.user_id === brand.user_id
+          ? { ...b, is_public: !b.is_public }
+          : b
+      ));
+    } catch (error) {
+      console.error('Error toggling page visibility:', error);
+      alert('Failed to update page visibility. Please try again.');
+    } finally {
+      setTogglingBrand(null);
+    }
   };
 
   const filteredBrands = brandMetadata.filter(brand =>
@@ -300,6 +332,9 @@ export default function InsightsMetaPage() {
                       Status
                     </th>
                     <th className={`text-center py-3 px-4 font-semibold ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                      Visibility
+                    </th>
+                    <th className={`text-center py-3 px-4 font-semibold ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
                       Action
                     </th>
                   </tr>
@@ -351,6 +386,44 @@ export default function InsightsMetaPage() {
                             </span>
                           )}
                         </div>
+                      </td>
+                      <td className="py-3 px-4 text-center">
+                        {brand.has_page ? (
+                          <button
+                            onClick={() => handleTogglePublic(brand)}
+                            disabled={togglingBrand === brand.brand}
+                            className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                              togglingBrand === brand.brand
+                                ? 'opacity-50 cursor-wait'
+                                : brand.is_public
+                                ? theme === 'dark'
+                                  ? 'bg-green-600 hover:bg-green-700 text-white'
+                                  : 'bg-green-600 hover:bg-green-700 text-white'
+                                : theme === 'dark'
+                                ? 'bg-gray-600 hover:bg-gray-700 text-white'
+                                : 'bg-gray-600 hover:bg-gray-700 text-white'
+                            }`}
+                            title={brand.is_public ? 'Page is public - click to make private' : 'Page is private - click to make public'}
+                          >
+                            {togglingBrand === brand.brand ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : brand.is_public ? (
+                              <>
+                                <Unlock className="w-4 h-4" />
+                                Public
+                              </>
+                            ) : (
+                              <>
+                                <Lock className="w-4 h-4" />
+                                Private
+                              </>
+                            )}
+                          </button>
+                        ) : (
+                          <span className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
+                            No page
+                          </span>
+                        )}
                       </td>
                       <td className="py-3 px-4 text-center">
                         <div className="flex items-center justify-center gap-2">
