@@ -100,7 +100,7 @@ ${topKeywords}
 3. **Strategic Recommendations**: Provide 3-4 specific, actionable recommendations for SEO and content strategy
 4. **Risk Areas**: Identify any declining keywords or competitive threats
 
-Provide a clear, well-structured analysis using bold text and bullet points. Do NOT use markdown headings (# ## ###). Use **bold text** instead to emphasize section titles. Be specific and reference actual keywords from the data. Keep the total response under 1000 words.`;
+IMPORTANT: Provide a clear, well-structured analysis using only bold text and bullet points. NEVER use markdown headings with # symbols. Do not use #, ##, or ### anywhere in your response. Instead, use **Bold Text:** to emphasize section titles. Be specific and reference actual keywords from the data. Keep the total response under 1000 words.`;
 
     console.log("Calling OpenAI API...");
 

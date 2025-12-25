@@ -2199,6 +2199,7 @@ export default function BrandInsightPage() {
                           }`}
                           dangerouslySetInnerHTML={{
                             __html: aiAnalysis
+                              .replace(/^#{1,6}\s+/gm, '')
                               .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
                               .replace(/\*([^*]+)\*/g, '<em>$1</em>')
                               .replace(/^- /gm, '<li>')
