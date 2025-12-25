@@ -1525,13 +1525,17 @@ async function prerenderBrandInsightPages(baseHTML, distPath) {
     console.log(`Pre-rendering: ${pageUrl}`);
 
     // Fetch keyword data for this brand
-    const { data: keywordData } = await supabase
+    const { data: keywordData, error: keywordError } = await supabase
       .from('brand_keyword_data')
       .select('*')
       .eq('user_id', brandPage.user_id)
       .eq('brand', brandPage.brand)
-      .order('avg_search_volume', { ascending: false })
+      .order('"Avg. monthly searches"', { ascending: false })
       .limit(1000);
+
+    if (keywordError) {
+      console.error(`Error fetching keyword data for ${brandPage.brand}:`, keywordError);
+    }
 
     // Fetch monthly data
     const { data: monthlyData } = await supabase
@@ -1548,8 +1552,10 @@ async function prerenderBrandInsightPages(baseHTML, distPath) {
     const totalKeywords = keywords.length;
     const totalMonths = months.length;
     const avgVolume = keywords.length > 0
-      ? Math.round(keywords.reduce((sum, k) => sum + (k.avg_search_volume || 0), 0) / keywords.length)
+      ? Math.round(keywords.reduce((sum, k) => sum + (k['Avg. monthly searches'] || 0), 0) / keywords.length)
       : 0;
+
+    console.log(`  Found ${totalKeywords} keywords, ${totalMonths} months for ${brandPage.brand}`);
 
     const topKeywords = keywords
       .slice(0, 10)
@@ -1645,18 +1651,106 @@ async function prerenderBrandInsightPages(baseHTML, distPath) {
 
         ${keywords.length > 0 ? `
         <section style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; padding: 2rem; margin-bottom: 2rem;">
-          <h2 style="font-size: 1.5rem; font-weight: 700; color: white; margin-bottom: 1rem;">Top Keywords</h2>
-          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem;">
-            ${keywords.slice(0, 20).map((keyword, index) => `
-              <div style="background-color: #374151; padding: 1rem; border-radius: 0.5rem;">
-                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
-                  <span style="color: #60a5fa; font-size: 0.875rem; font-weight: 600;">#${index + 1}</span>
-                  ${keyword.ai_category ? `<span style="background-color: #4b5563; color: #d1d5db; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem;">${keyword.ai_category}</span>` : ''}
-                </div>
-                <h3 style="color: white; font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem;">${keyword.keyword}</h3>
-                <p style="color: #9ca3af; font-size: 0.875rem;">Avg. Volume: ${(keyword.avg_search_volume || 0).toLocaleString()}</p>
+          <h2 style="font-size: 1.5rem; font-weight: 700; color: white; margin-bottom: 1.5rem;">Top ${keywords.length} Keywords for ${brandPage.brand}</h2>
+
+          <div style="margin-bottom: 1.5rem;">
+            <h3 style="font-size: 0.875rem; font-weight: 600; color: #d1d5db; margin-bottom: 0.75rem;">Filter by Performance</h3>
+            <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem;">
+              <button style="padding: 0.375rem 0.75rem; border-radius: 0.5rem; font-size: 0.875rem; background-color: #2563eb; color: white; border: none;">All Keywords (${keywords.length})</button>
+              <button style="padding: 0.375rem 0.75rem; border-radius: 0.5rem; font-size: 0.875rem; background-color: #374151; color: #d1d5db; border: none;">🎯 Top 10 per Category</button>
+              <button style="padding: 0.375rem 0.75rem; border-radius: 0.5rem; font-size: 0.875rem; background-color: #374151; color: #d1d5db; border: none;">🔥 Ultra Growth</button>
+              <button style="padding: 0.375rem 0.75rem; border-radius: 0.5rem; font-size: 0.875rem; background-color: #374151; color: #d1d5db; border: none;">🚀 Extreme Growth</button>
+              <button style="padding: 0.375rem 0.75rem; border-radius: 0.5rem; font-size: 0.875rem; background-color: #374151; color: #d1d5db; border: none;">📈 High Growth</button>
+              <button style="padding: 0.375rem 0.75rem; border-radius: 0.5rem; font-size: 0.875rem; background-color: #374151; color: #d1d5db; border: none;">⭐ Rising Star</button>
+              <button style="padding: 0.375rem 0.75rem; border-radius: 0.5rem; font-size: 0.875rem; background-color: #374151; color: #d1d5db; border: none;">🎯 Great Potential</button>
+              <button style="padding: 0.375rem 0.75rem; border-radius: 0.5rem; font-size: 0.875rem; background-color: #374151; color: #d1d5db; border: none;">👑 High Value</button>
+              <button style="padding: 0.375rem 0.75rem; border-radius: 0.5rem; font-size: 0.875rem; background-color: #374151; color: #d1d5db; border: none;">⚡ Quick Win</button>
+            </div>
+          </div>
+
+          <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse;">
+              <thead>
+                <tr style="border-bottom: 2px solid #374151; background-color: rgba(55, 65, 81, 0.5);">
+                  <th style="padding: 0.75rem 0.5rem; text-align: left; font-size: 0.75rem; font-weight: 600; color: #d1d5db;">#</th>
+                  <th style="padding: 0.75rem 0.5rem; text-align: left; font-size: 0.75rem; font-weight: 600; color: #d1d5db;">Keyword</th>
+                  <th style="padding: 0.75rem 0.5rem; text-align: left; font-size: 0.75rem; font-weight: 600; color: #d1d5db;">Volume</th>
+                  <th style="padding: 0.75rem 0.5rem; text-align: left; font-size: 0.75rem; font-weight: 600; color: #d1d5db;">Growth</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${keywords.slice(0, 100).map((keyword, index) => {
+                  const threeMonth = keyword['Three month change'] || 'N/A';
+                  const yoy = keyword['YoY change'] || 'N/A';
+                  const volume = keyword['Avg. monthly searches'] || 0;
+                  const category = keyword.ai_category || '';
+                  const competition = keyword.competition || 'N/A';
+                  const bidHigh = keyword['Top of page bid (high range)'] || 0;
+
+                  return `
+                  <tr style="border-bottom: 1px solid #374151;">
+                    <td style="padding: 0.75rem 0.5rem; color: #9ca3af; font-weight: 600;">${index + 1}</td>
+                    <td style="padding: 0.75rem 0.5rem;">
+                      <div style="font-weight: 700; color: white; margin-bottom: 0.25rem;">${keyword.keyword}</div>
+                      ${category ? `<span style="display: inline-block; padding: 0.125rem 0.5rem; background-color: #4b5563; color: #d1d5db; border-radius: 0.25rem; font-size: 0.75rem;">${category}</span>` : ''}
+                      <div style="font-size: 0.75rem; color: #9ca3af; margin-top: 0.25rem;">Comp: ${competition}${bidHigh > 0 ? ` • Bid: $${bidHigh.toFixed(2)}` : ''}</div>
+                    </td>
+                    <td style="padding: 0.75rem 0.5rem; color: #d1d5db; font-weight: 600;">${volume.toLocaleString()}</td>
+                    <td style="padding: 0.75rem 0.5rem;">
+                      <div style="font-size: 0.75rem;">
+                        <div style="color: ${threeMonth === 'N/A' ? '#9ca3af' : threeMonth.toString().startsWith('-') ? '#ef4444' : '#10b981'};">3mo: ${threeMonth}</div>
+                        ${yoy !== 'N/A' ? `<div style="color: ${yoy.toString().startsWith('-') ? '#ef4444' : '#10b981'};">YoY: ${yoy}</div>` : ''}
+                      </div>
+                    </td>
+                  </tr>
+                  `;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; padding: 2rem; margin-bottom: 2rem;">
+          <h2 style="font-size: 1.5rem; font-weight: 700; color: white; margin-bottom: 1rem;">Search Volume Trends</h2>
+          <div style="background-color: #374151; border-radius: 0.5rem; padding: 2rem; text-align: center; color: #9ca3af;">
+            <p>Interactive chart showing keyword search volume trends over time.</p>
+            <p style="margin-top: 0.5rem; font-size: 0.875rem;">Load the full page to view the interactive chart.</p>
+          </div>
+        </section>
+
+        <section style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; padding: 2rem; margin-bottom: 2rem;">
+          <h2 style="font-size: 1.5rem; font-weight: 700; color: white; margin-bottom: 1rem;">Top Keywords for Advertising</h2>
+          <p style="color: #9ca3af; margin-bottom: 1.5rem;">AI-powered recommendations for advertising campaigns.</p>
+          ${(() => {
+            const highValue = keywords.filter(k => (k['Avg. monthly searches'] || 0) > 1000 && (k['Top of page bid (high range)'] || 0) > 0)
+              .sort((a, b) => (b['Avg. monthly searches'] || 0) * (b['Top of page bid (high range)'] || 0) - (a['Avg. monthly searches'] || 0) * (a['Top of page bid (high range)'] || 0))
+              .slice(0, 10);
+
+            return highValue.length > 0 ? `
+            <div>
+              <h3 style="font-size: 1.125rem; font-weight: 600; color: white; margin-bottom: 1rem;">👑 Highest ROI Potential</h3>
+              <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem;">
+                ${highValue.map(k => `
+                  <div style="background-color: #374151; padding: 1rem; border-radius: 0.5rem; border: 1px solid #4b5563;">
+                    <h4 style="color: white; font-weight: 600; margin-bottom: 0.5rem;">${k.keyword}</h4>
+                    <div style="font-size: 0.75rem; color: #d1d5db;">
+                      <div>Volume: ${(k['Avg. monthly searches'] || 0).toLocaleString()}</div>
+                      <div>CPC: $${(k['Top of page bid (low range)'] || 0).toFixed(2)} - $${(k['Top of page bid (high range)'] || 0).toFixed(2)}</div>
+                      <div>Competition: ${k.competition || 'N/A'}</div>
+                    </div>
+                  </div>
+                `).join('')}
               </div>
-            `).join('')}
+            </div>
+            ` : '<p style="color: #9ca3af;">No high-value keywords found.</p>';
+          })()}
+        </section>
+
+        <section style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; padding: 2rem; margin-bottom: 2rem;">
+          <h2 style="font-size: 1.5rem; font-weight: 700; color: white; margin-bottom: 1rem;">AI-Powered Keyword Analysis</h2>
+          <div style="background-color: #374151; border-radius: 0.5rem; padding: 2rem; text-align: center;">
+            <p style="color: #9ca3af; margin-bottom: 1rem;">Get AI insights and recommendations for your keyword strategy.</p>
+            <button style="padding: 0.75rem 1.5rem; border-radius: 0.5rem; font-weight: 600; background: linear-gradient(to right, #2563eb, #7c3aed); color: white; border: none;">✨ Generate AI Insights</button>
           </div>
         </section>
         ` : ''}
