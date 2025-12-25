@@ -1894,8 +1894,7 @@ export default function BrandInsightPage() {
 
               {transformToTopics.length > 0 && (viewMode === 'bubble' || viewMode === 'bar' || viewMode === 'treemap' || viewMode === 'donut') && (
                 <div className="max-w-7xl mx-auto mt-8 mb-0 md:mb-8">
-                  <div className="flex flex-col lg:flex-row gap-6">
-                    <section className="flex-1 lg:w-[65%]" aria-labelledby="top-keywords-heading">
+                  <section className="w-full" aria-labelledby="top-keywords-heading">
                       <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-lg border p-6 shadow-md`}>
                         <h2 id="top-keywords-heading" className={`text-xl md:text-2xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                           Top {rankingFilteredTopics.length} Keywords for {decodedBrand}
@@ -2214,15 +2213,14 @@ export default function BrandInsightPage() {
                       </div>
                     </section>
 
-                    <aside className="lg:w-[35%]">
-                      <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-lg border p-4 sticky top-4 shadow-md`}>
-                        <h2 className={`text-lg font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                    <section className="w-full mt-6" aria-labelledby="search-volume-trends-heading">
+                      <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-lg border p-6 shadow-md`}>
+                        <h2 id="search-volume-trends-heading" className={`text-xl md:text-2xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                           Search Volume Trends
                         </h2>
                         <KeywordChart data={monthlyData} selectedBrand={decodedBrand} />
                       </div>
-                    </aside>
-                  </div>
+                    </section>
                 </div>
               )}
 
