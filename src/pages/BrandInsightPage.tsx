@@ -2078,21 +2078,20 @@ export default function BrandInsightPage() {
               {keywordData.length > 0 && (
                 <div className="max-w-7xl mx-auto mt-8 px-2 md:px-0">
                   <div className={`rounded-lg p-6 ${theme === 'dark' ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-200'}`}>
-                    <div className="space-y-4">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <h2 className={`text-2xl font-semibold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                            AI-Powered Keyword Analysis
-                          </h2>
-                          <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                            {aiAnalysisDate ? (
-                              <>Generated {new Date(aiAnalysisDate).toLocaleDateString()} at {new Date(aiAnalysisDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</>
-                            ) : (
-                              'Get intelligent insights and recommendations from GPT-4'
-                            )}
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-3">
+                    <div className="flex items-start justify-between mb-4">
+                      <div>
+                        <h2 className={`text-2xl font-semibold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                          AI-Powered Keyword Analysis
+                        </h2>
+                        <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                          {aiAnalysisDate ? (
+                            <>Generated {new Date(aiAnalysisDate).toLocaleDateString()} at {new Date(aiAnalysisDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</>
+                          ) : (
+                            'Get intelligent insights and recommendations from GPT-4'
+                          )}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-3">
                         <button
                           onClick={handleAIAnalysis}
                           disabled={aiLoading}
@@ -2226,7 +2225,6 @@ export default function BrandInsightPage() {
                         <p className="text-sm">Our AI will analyze trends, identify opportunities, and provide strategic recommendations.</p>
                       </div>
                     )}
-                    </div>
                   </div>
                 </div>
               )}
