@@ -1749,16 +1749,6 @@ export default function BrandInsightPage() {
                       </div>
                     </div>
                   )}
-
-                  {keywordData.length > 0 && (
-                    <div className="mt-8">
-                      <AdvertisingRecommendations
-                        keywordData={keywordData}
-                        brandName={decodedBrand}
-                        theme={theme}
-                      />
-                    </div>
-                  )}
                 </div>
               )}
 
@@ -2243,6 +2233,16 @@ export default function BrandInsightPage() {
                       </div>
                     </aside>
                   </div>
+                </div>
+              )}
+
+              {keywordData.length > 0 && (
+                <div className="max-w-7xl mx-auto mt-8 px-2 md:px-0">
+                  <AdvertisingRecommendations
+                    keywordData={keywordData}
+                    brandName={decodedBrand}
+                    theme={theme}
+                  />
                 </div>
               )}
 
