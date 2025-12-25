@@ -355,10 +355,15 @@ export default function InsightsMetaPage() {
                       <td className="py-3 px-4 text-center">
                         <div className="flex items-center justify-center gap-2">
                           <button
-                            onClick={() => brand.username && navigate(`/insights/${encodeURIComponent(brand.username)}/${encodeURIComponent(brand.brand)}`)}
-                            disabled={!brand.username}
+                            onClick={() => {
+                              const identifier = brand.username || brand.user_id;
+                              if (identifier) {
+                                navigate(`/insights/${encodeURIComponent(identifier)}/${encodeURIComponent(brand.brand)}`);
+                              }
+                            }}
+                            disabled={!brand.username && !brand.user_id}
                             className={`inline-flex items-center gap-1 px-3 py-1.5 rounded text-sm font-medium transition-colors ${
-                              !brand.username
+                              !brand.username && !brand.user_id
                                 ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
                                 : theme === 'dark'
                                 ? 'bg-blue-600 hover:bg-blue-700 text-white'

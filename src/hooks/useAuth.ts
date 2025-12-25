@@ -40,6 +40,35 @@ export function useAuth() {
 
       setUser(user);
 
+      const { data: profileData, error: profileError } = await supabase
+        .from('user_profiles')
+        .select('id')
+        .eq('id', user.id)
+        .maybeSingle();
+
+      if (!profileError && !profileData) {
+        let username = user.email?.split('@')[0] || `user${user.id.substring(0, 8)}`;
+        const displayName = user.user_metadata?.name || username;
+
+        const { data: existingUsername } = await supabase
+          .from('user_profiles')
+          .select('username')
+          .eq('username', username)
+          .maybeSingle();
+
+        if (existingUsername) {
+          username = `${username}_${user.id.substring(0, 8)}`;
+        }
+
+        await supabase
+          .from('user_profiles')
+          .insert({
+            id: user.id,
+            username: username,
+            display_name: displayName
+          });
+      }
+
       const { data: adminData, error } = await supabase
         .from('admin_users')
         .select('id')
