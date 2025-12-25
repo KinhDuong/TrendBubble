@@ -2084,13 +2084,6 @@ export default function BrandInsightPage() {
                           <h2 className={`text-2xl font-semibold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                             AI-Powered Keyword Analysis
                           </h2>
-                          <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                            {aiAnalysisDate ? (
-                              <>Generated {new Date(aiAnalysisDate).toLocaleDateString()} at {new Date(aiAnalysisDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</>
-                            ) : (
-                              'Get intelligent insights and recommendations from GPT-4'
-                            )}
-                          </p>
                         </div>
                         <div className="flex items-center gap-3">
                         <button
