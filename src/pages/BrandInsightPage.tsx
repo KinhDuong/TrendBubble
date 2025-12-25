@@ -1588,165 +1588,6 @@ export default function BrandInsightPage() {
                       </p>
                     </div>
                   </div>
-
-                  {keywordData.length > 0 && (
-                    <div className="mt-8">
-                      <div className={`${theme === 'dark' ? 'bg-gradient-to-br from-blue-900/30 to-purple-900/30 border-blue-700/50' : 'bg-gradient-to-br from-blue-50 to-purple-50 border-blue-200'} rounded-lg border p-6 shadow-md`}>
-                        <div className="flex items-start justify-between mb-4">
-                          <div className="flex items-center gap-3 flex-1">
-                            <div className={`p-2 rounded-lg ${theme === 'dark' ? 'bg-blue-600/20' : 'bg-blue-100'}`}>
-                              <Sparkles className={`w-6 h-6 ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`} />
-                            </div>
-                            <div>
-                              <h3 className={`text-xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                                AI-Powered Keyword Analysis
-                              </h3>
-                              <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                                {aiAnalysisDate ? (
-                                  <>Generated {new Date(aiAnalysisDate).toLocaleDateString()} at {new Date(aiAnalysisDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</>
-                                ) : (
-                                  'Get intelligent insights and recommendations from GPT-4'
-                                )}
-                              </p>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-3">
-                            <button
-                              onClick={handleAIAnalysis}
-                              disabled={aiLoading}
-                              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all transform hover:scale-105 whitespace-nowrap ${
-                                aiLoading
-                                  ? theme === 'dark'
-                                    ? 'bg-gray-700 text-gray-400 cursor-not-allowed'
-                                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                  : theme === 'dark'
-                                    ? 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg'
-                                    : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-md'
-                              }`}
-                            >
-                              <Sparkles className="w-4 h-4" />
-                              {aiLoading ? 'Analyzing...' : aiAnalysis ? 'Regenerate' : 'Generate AI Insights'}
-                            </button>
-
-                            {aiSaveStatus === 'saving' && (
-                              <span className={`text-sm flex items-center gap-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                                Saving...
-                              </span>
-                            )}
-                            {aiSaveStatus === 'saved' && (
-                              <span className={`text-sm flex items-center gap-1 ${theme === 'dark' ? 'text-green-400' : 'text-green-600'} font-medium`}>
-                                ✓ Saved
-                              </span>
-                            )}
-                            {aiSaveStatus === 'error' && (
-                              <span className={`text-sm flex items-center gap-1 ${theme === 'dark' ? 'text-red-400' : 'text-red-600'} font-medium`}>
-                                ✗ Save Failed
-                              </span>
-                            )}
-                          </div>
-                        </div>
-
-                        {aiError && (
-                          <div className={`mb-4 p-4 rounded-lg border ${theme === 'dark' ? 'bg-red-900/20 border-red-800/30' : 'bg-red-50 border-red-200'}`}>
-                            <div className="flex items-start gap-3">
-                              <AlertCircle className={`w-5 h-5 flex-shrink-0 mt-0.5 ${theme === 'dark' ? 'text-red-400' : 'text-red-600'}`} />
-                              <div className="flex-1">
-                                <p className={`font-semibold mb-2 ${theme === 'dark' ? 'text-red-400' : 'text-red-700'}`}>
-                                  {aiErrorCode === 'MISSING_API_KEY' ? 'API Key Not Configured' :
-                                   aiErrorCode === 'QUOTA_EXCEEDED' ? 'Quota Exceeded' :
-                                   aiErrorCode === 'INVALID_API_KEY' ? 'Invalid API Key' :
-                                   'Analysis Failed'}
-                                </p>
-                                <p className={`text-sm mb-3 ${theme === 'dark' ? 'text-red-300' : 'text-red-600'}`}>{aiError}</p>
-
-                                {(aiErrorCode === 'MISSING_API_KEY' || aiErrorCode === 'INVALID_API_KEY' || aiErrorCode === 'QUOTA_EXCEEDED') && (
-                                  <div className={`mt-3 p-3 rounded-md text-sm ${theme === 'dark' ? 'bg-gray-800/50' : 'bg-white'}`}>
-                                    <p className={`font-semibold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Setup Instructions:</p>
-                                    <ol className={`list-decimal list-inside space-y-1 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                                      <li>Get an API key from <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer" className="underline hover:no-underline">platform.openai.com/api-keys</a></li>
-                                      <li>Go to your Supabase Dashboard → Project Settings → Edge Functions</li>
-                                      <li>Add environment variable: <code className={`px-1 py-0.5 rounded ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'}`}>OPENAI_API_KEY</code></li>
-                                      {aiErrorCode === 'QUOTA_EXCEEDED' && (
-                                        <li>Check billing at <a href="https://platform.openai.com/account/billing" target="_blank" rel="noopener noreferrer" className="underline hover:no-underline">platform.openai.com/account/billing</a></li>
-                                      )}
-                                    </ol>
-                                  </div>
-                                )}
-
-                                <button
-                                  onClick={handleAIAnalysis}
-                                  className={`mt-3 text-sm px-3 py-1.5 rounded-md transition-colors ${
-                                    theme === 'dark'
-                                      ? 'bg-red-900/30 hover:bg-red-900/50 text-red-300'
-                                      : 'bg-red-100 hover:bg-red-200 text-red-700'
-                                  }`}
-                                >
-                                  Try Again
-                                </button>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-
-                        {aiLoading && (
-                          <div className="flex flex-col items-center justify-center py-12">
-                            <div className="relative">
-                              <div className={`w-16 h-16 rounded-full border-4 ${theme === 'dark' ? 'border-blue-900' : 'border-blue-200'}`}></div>
-                              <div className={`absolute top-0 left-0 w-16 h-16 rounded-full border-4 border-t-blue-600 animate-spin ${theme === 'dark' ? 'border-blue-900' : 'border-blue-200'}`}></div>
-                            </div>
-                            <p className={`mt-4 text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                              Analyzing your keyword data with AI...
-                            </p>
-                            <p className={`mt-1 text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>
-                              This may take 10-30 seconds
-                            </p>
-                          </div>
-                        )}
-
-                        {aiAnalysis && !aiLoading && (
-                          <div>
-                            <div className="flex items-center justify-between mb-4">
-                              <div className={`text-xs px-3 py-1 rounded-full ${theme === 'dark' ? 'bg-green-900/30 text-green-400' : 'bg-green-100 text-green-700'}`}>
-                                Analysis Complete
-                              </div>
-                              <button
-                                onClick={handleAIAnalysis}
-                                className={`text-sm px-3 py-1 rounded-lg transition-colors ${theme === 'dark' ? 'text-blue-400 hover:bg-blue-900/30' : 'text-blue-600 hover:bg-blue-100'}`}
-                              >
-                                Regenerate
-                              </button>
-                            </div>
-                            <div
-                              className={`prose prose-sm max-w-none ${
-                                theme === 'dark'
-                                  ? 'prose-invert prose-headings:text-white prose-p:text-gray-300 prose-strong:text-white prose-li:text-gray-300'
-                                  : 'prose-headings:text-gray-900 prose-p:text-gray-700 prose-strong:text-gray-900 prose-li:text-gray-700'
-                              }`}
-                              dangerouslySetInnerHTML={{
-                                __html: aiAnalysis
-                                  .replace(/^### /gm, '<h3 class="font-bold text-lg mt-6 mb-3">')
-                                  .replace(/^## /gm, '<h2 class="font-bold text-xl mt-6 mb-4">')
-                                  .replace(/^# /gm, '<h1 class="font-bold text-2xl mt-6 mb-4">')
-                                  .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-                                  .replace(/\*([^*]+)\*/g, '<em>$1</em>')
-                                  .replace(/^- /gm, '<li>')
-                                  .replace(/\n\n/g, '</p><p>')
-                                  .replace(/^(?!<[h|l|p])/gm, '<p>')
-                                  .replace(/(?<![>])$/gm, '</p>')
-                              }}
-                            />
-                          </div>
-                        )}
-
-                        {!aiAnalysis && !aiLoading && !aiError && (
-                          <div className={`text-center py-8 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                            <p className="mb-2">Click the button above to generate AI-powered insights about your keyword data.</p>
-                            <p className="text-sm">Our AI will analyze trends, identify opportunities, and provide strategic recommendations.</p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
                 </div>
               )}
 
@@ -2231,6 +2072,165 @@ export default function BrandInsightPage() {
                     brandName={decodedBrand}
                     theme={theme}
                   />
+                </div>
+              )}
+
+              {keywordData.length > 0 && (
+                <div className="max-w-7xl mx-auto mt-8 px-2 md:px-0">
+                  <div className={`${theme === 'dark' ? 'bg-gradient-to-br from-blue-900/30 to-purple-900/30 border-blue-700/50' : 'bg-gradient-to-br from-blue-50 to-purple-50 border-blue-200'} rounded-lg border p-6 shadow-md`}>
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-center gap-3 flex-1">
+                        <div className={`p-2 rounded-lg ${theme === 'dark' ? 'bg-blue-600/20' : 'bg-blue-100'}`}>
+                          <Sparkles className={`w-6 h-6 ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`} />
+                        </div>
+                        <div>
+                          <h3 className={`text-xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                            AI-Powered Keyword Analysis
+                          </h3>
+                          <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                            {aiAnalysisDate ? (
+                              <>Generated {new Date(aiAnalysisDate).toLocaleDateString()} at {new Date(aiAnalysisDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</>
+                            ) : (
+                              'Get intelligent insights and recommendations from GPT-4'
+                            )}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <button
+                          onClick={handleAIAnalysis}
+                          disabled={aiLoading}
+                          className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all transform hover:scale-105 whitespace-nowrap ${
+                            aiLoading
+                              ? theme === 'dark'
+                                ? 'bg-gray-700 text-gray-400 cursor-not-allowed'
+                                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                              : theme === 'dark'
+                                ? 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg'
+                                : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-md'
+                          }`}
+                        >
+                          <Sparkles className="w-4 h-4" />
+                          {aiLoading ? 'Analyzing...' : aiAnalysis ? 'Regenerate' : 'Generate AI Insights'}
+                        </button>
+
+                        {aiSaveStatus === 'saving' && (
+                          <span className={`text-sm flex items-center gap-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                            Saving...
+                          </span>
+                        )}
+                        {aiSaveStatus === 'saved' && (
+                          <span className={`text-sm flex items-center gap-1 ${theme === 'dark' ? 'text-green-400' : 'text-green-600'} font-medium`}>
+                            ✓ Saved
+                          </span>
+                        )}
+                        {aiSaveStatus === 'error' && (
+                          <span className={`text-sm flex items-center gap-1 ${theme === 'dark' ? 'text-red-400' : 'text-red-600'} font-medium`}>
+                            ✗ Save Failed
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {aiError && (
+                      <div className={`mb-4 p-4 rounded-lg border ${theme === 'dark' ? 'bg-red-900/20 border-red-800/30' : 'bg-red-50 border-red-200'}`}>
+                        <div className="flex items-start gap-3">
+                          <AlertCircle className={`w-5 h-5 flex-shrink-0 mt-0.5 ${theme === 'dark' ? 'text-red-400' : 'text-red-600'}`} />
+                          <div className="flex-1">
+                            <p className={`font-semibold mb-2 ${theme === 'dark' ? 'text-red-400' : 'text-red-700'}`}>
+                              {aiErrorCode === 'MISSING_API_KEY' ? 'API Key Not Configured' :
+                               aiErrorCode === 'QUOTA_EXCEEDED' ? 'Quota Exceeded' :
+                               aiErrorCode === 'INVALID_API_KEY' ? 'Invalid API Key' :
+                               'Analysis Failed'}
+                            </p>
+                            <p className={`text-sm mb-3 ${theme === 'dark' ? 'text-red-300' : 'text-red-600'}`}>{aiError}</p>
+
+                            {(aiErrorCode === 'MISSING_API_KEY' || aiErrorCode === 'INVALID_API_KEY' || aiErrorCode === 'QUOTA_EXCEEDED') && (
+                              <div className={`mt-3 p-3 rounded-md text-sm ${theme === 'dark' ? 'bg-gray-800/50' : 'bg-white'}`}>
+                                <p className={`font-semibold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Setup Instructions:</p>
+                                <ol className={`list-decimal list-inside space-y-1 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                                  <li>Get an API key from <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer" className="underline hover:no-underline">platform.openai.com/api-keys</a></li>
+                                  <li>Go to your Supabase Dashboard → Project Settings → Edge Functions</li>
+                                  <li>Add environment variable: <code className={`px-1 py-0.5 rounded ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'}`}>OPENAI_API_KEY</code></li>
+                                  {aiErrorCode === 'QUOTA_EXCEEDED' && (
+                                    <li>Check billing at <a href="https://platform.openai.com/account/billing" target="_blank" rel="noopener noreferrer" className="underline hover:no-underline">platform.openai.com/account/billing</a></li>
+                                  )}
+                                </ol>
+                              </div>
+                            )}
+
+                            <button
+                              onClick={handleAIAnalysis}
+                              className={`mt-3 text-sm px-3 py-1.5 rounded-md transition-colors ${
+                                theme === 'dark'
+                                  ? 'bg-red-900/30 hover:bg-red-900/50 text-red-300'
+                                  : 'bg-red-100 hover:bg-red-200 text-red-700'
+                              }`}
+                            >
+                              Try Again
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {aiLoading && (
+                      <div className="flex flex-col items-center justify-center py-12">
+                        <div className="relative">
+                          <div className={`w-16 h-16 rounded-full border-4 ${theme === 'dark' ? 'border-blue-900' : 'border-blue-200'}`}></div>
+                          <div className={`absolute top-0 left-0 w-16 h-16 rounded-full border-4 border-t-blue-600 animate-spin ${theme === 'dark' ? 'border-blue-900' : 'border-blue-200'}`}></div>
+                        </div>
+                        <p className={`mt-4 text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                          Analyzing your keyword data with AI...
+                        </p>
+                        <p className={`mt-1 text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>
+                          This may take 10-30 seconds
+                        </p>
+                      </div>
+                    )}
+
+                    {aiAnalysis && !aiLoading && (
+                      <div>
+                        <div className="flex items-center justify-between mb-4">
+                          <div className={`text-xs px-3 py-1 rounded-full ${theme === 'dark' ? 'bg-green-900/30 text-green-400' : 'bg-green-100 text-green-700'}`}>
+                            Analysis Complete
+                          </div>
+                          <button
+                            onClick={handleAIAnalysis}
+                            className={`text-sm px-3 py-1 rounded-lg transition-colors ${theme === 'dark' ? 'text-blue-400 hover:bg-blue-900/30' : 'text-blue-600 hover:bg-blue-100'}`}
+                          >
+                            Regenerate
+                          </button>
+                        </div>
+                        <div
+                          className={`prose prose-sm max-w-none ${
+                            theme === 'dark'
+                              ? 'prose-invert prose-headings:text-white prose-p:text-gray-300 prose-strong:text-white prose-li:text-gray-300'
+                              : 'prose-headings:text-gray-900 prose-p:text-gray-700 prose-strong:text-gray-900 prose-li:text-gray-700'
+                          }`}
+                          dangerouslySetInnerHTML={{
+                            __html: aiAnalysis
+                              .replace(/^### /gm, '<h3 class="font-bold text-lg mt-6 mb-3">')
+                              .replace(/^## /gm, '<h2 class="font-bold text-xl mt-6 mb-4">')
+                              .replace(/^# /gm, '<h1 class="font-bold text-2xl mt-6 mb-4">')
+                              .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+                              .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+                              .replace(/^- /gm, '<li>')
+                              .replace(/\n\n/g, '</p><p>')
+                              .replace(/^(?!<[h|l|p])/gm, '<p>')
+                              .replace(/(?<![>])$/gm, '</p>')
+                          }}
+                        />
+                      </div>
+                    )}
+
+                    {!aiAnalysis && !aiLoading && !aiError && (
+                      <div className={`text-center py-8 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                        <p className="mb-2">Click the button above to generate AI-powered insights about your keyword data.</p>
+                        <p className="text-sm">Our AI will analyze trends, identify opportunities, and provide strategic recommendations.</p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
 
