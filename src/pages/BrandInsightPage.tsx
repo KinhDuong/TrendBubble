@@ -1493,7 +1493,7 @@ export default function BrandInsightPage() {
         onBubbleLayoutChange={setBubbleLayout}
         onShapeChange={setShape}
         onCryptoTimeframeChange={() => {}}
-        variant="bubble"
+        variant="homepage"
       />
 
       <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'} px-2 md:px-6 py-2 md:py-6 pb-0`}>
