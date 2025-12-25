@@ -1,5 +1,6 @@
 import { TrendingTopic } from '../types';
 import { useEffect, useRef, useState } from 'react';
+import BubbleTooltip from './BubbleTooltip';
 
 interface BarChartProps {
   topics: TrendingTopic[];
@@ -7,6 +8,13 @@ interface BarChartProps {
   theme: 'dark' | 'light';
   useCryptoColors?: boolean;
   cryptoTimeframe?: '1h' | '24h' | '7d' | '30d' | '1y';
+}
+
+interface TooltipData {
+  topic: TrendingTopic;
+  x: number;
+  y: number;
+  rank: number;
 }
 
 export default function BarChart({
@@ -19,6 +27,9 @@ export default function BarChart({
   const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const [animate, setAnimate] = useState(false);
+  const [tooltipData, setTooltipData] = useState<TooltipData | null>(null);
+  const [pinnedTopics, setPinnedTopics] = useState<Set<string>>(new Set());
+  const [comparingTopics, setComparingTopics] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -116,6 +127,40 @@ export default function BarChart({
       : `hsl(${hue}, 70%, 50%)`;
   };
 
+  const handleTogglePin = (topicName: string) => {
+    setPinnedTopics(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(topicName)) {
+        newSet.delete(topicName);
+      } else {
+        newSet.add(topicName);
+      }
+      return newSet;
+    });
+  };
+
+  const handleToggleCompare = (topicName: string) => {
+    setComparingTopics(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(topicName)) {
+        newSet.delete(topicName);
+      } else {
+        newSet.add(topicName);
+      }
+      return newSet;
+    });
+  };
+
+  const handleBarClick = (event: React.MouseEvent, topic: TrendingTopic, rank: number) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    setTooltipData({
+      topic,
+      x: rect.left + rect.width / 2,
+      y: rect.top,
+      rank
+    });
+  };
+
   return (
     <div
       ref={containerRef}
@@ -139,7 +184,10 @@ export default function BarChart({
                   <span className={`text-xs font-medium truncate overflow-hidden flex-shrink-0 w-20 ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'}`}>
                     {topic.name.replace(/"/g, '')}
                   </span>
-                  <div className={`flex-1 h-8 rounded ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-200'} overflow-hidden relative`}>
+                  <div
+                    className={`flex-1 h-8 rounded ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-200'} overflow-hidden relative cursor-pointer hover:opacity-80 transition-opacity`}
+                    onClick={(e) => handleBarClick(e, topic, index + 1)}
+                  >
                     <div
                       className="h-full transition-all duration-1000 ease-out"
                       style={{
@@ -160,7 +208,10 @@ export default function BarChart({
                   <span className={`text-sm font-medium flex-shrink-0 w-64 ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'}`} style={{ overflow: 'visible', whiteSpace: 'normal', lineHeight: '1.2' }}>
                     {topic.name.replace(/"/g, '')}
                   </span>
-                  <div className={`flex-1 h-10 rounded ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-200'} overflow-hidden relative`}>
+                  <div
+                    className={`flex-1 h-10 rounded ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-200'} overflow-hidden relative cursor-pointer hover:opacity-80 transition-opacity`}
+                    onClick={(e) => handleBarClick(e, topic, index + 1)}
+                  >
                     <div
                       className="h-full transition-all duration-1000 ease-out"
                       style={{
@@ -178,6 +229,21 @@ export default function BarChart({
           );
         })}
       </div>
+      {tooltipData && (
+        <BubbleTooltip
+          topic={tooltipData.topic}
+          x={tooltipData.x}
+          y={tooltipData.y}
+          rank={tooltipData.rank}
+          theme={theme}
+          isPinned={pinnedTopics.has(tooltipData.topic.name)}
+          onTogglePin={() => handleTogglePin(tooltipData.topic.name)}
+          onCompare={() => handleToggleCompare(tooltipData.topic.name)}
+          isComparing={comparingTopics.has(tooltipData.topic.name)}
+          onClose={() => setTooltipData(null)}
+          cryptoTimeframe={cryptoTimeframe}
+        />
+      )}
     </div>
   );
 }

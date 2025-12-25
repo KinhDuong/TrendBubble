@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import { TrendingTopic, CryptoTimeframe } from '../types';
+import BubbleTooltip from './BubbleTooltip';
 
 interface TreemapProps {
   topics: TrendingTopic[];
@@ -16,10 +17,19 @@ interface TreeNode {
   topic: TrendingTopic;
 }
 
+interface TooltipData {
+  topic: TrendingTopic;
+  x: number;
+  y: number;
+  rank: number;
+}
+
 export default function Treemap({ topics, maxDisplay, theme, useCryptoColors = false, cryptoTimeframe = '1h' }: TreemapProps) {
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [tooltip, setTooltip] = useState<{ topic: TrendingTopic; x: number; y: number } | null>(null);
+  const [tooltipData, setTooltipData] = useState<TooltipData | null>(null);
+  const [pinnedTopics, setPinnedTopics] = useState<Set<string>>(new Set());
+  const [comparingTopics, setComparingTopics] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (!svgRef.current || !containerRef.current || topics.length === 0) return;
@@ -153,10 +163,12 @@ export default function Treemap({ topics, maxDisplay, theme, useCryptoColors = f
       .on('click', function(event, d) {
         const nodeData = d.data as TreeNode;
         const rect = (event.target as SVGRectElement).getBoundingClientRect();
-        setTooltip({
+        const rank = displayTopics.findIndex(t => t.name === nodeData.topic.name) + 1;
+        setTooltipData({
           topic: nodeData.topic,
           x: rect.left + rect.width / 2,
-          y: rect.top
+          y: rect.top,
+          rank: rank
         });
       });
 
@@ -265,6 +277,30 @@ export default function Treemap({ topics, maxDisplay, theme, useCryptoColors = f
 
   const displayTopics = topics.slice(0, maxDisplay);
 
+  const handleTogglePin = (topicName: string) => {
+    setPinnedTopics(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(topicName)) {
+        newSet.delete(topicName);
+      } else {
+        newSet.add(topicName);
+      }
+      return newSet;
+    });
+  };
+
+  const handleToggleCompare = (topicName: string) => {
+    setComparingTopics(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(topicName)) {
+        newSet.delete(topicName);
+      } else {
+        newSet.add(topicName);
+      }
+      return newSet;
+    });
+  };
+
   const generateAriaLabel = () => {
     const topicCount = displayTopics.length;
     const topTopic = displayTopics[0]?.name || 'trending topics';
@@ -286,53 +322,20 @@ export default function Treemap({ topics, maxDisplay, theme, useCryptoColors = f
         title={useCryptoColors ? `Cryptocurrency treemap - ${cryptoTimeframe} timeframe` : 'Trending topics treemap - Click tiles for details'}
         role="img"
       />
-      {tooltip && (
-        <div
-          className={`fixed z-50 px-4 py-3 rounded-lg shadow-xl max-w-sm ${
-            theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'
-          }`}
-          style={{
-            left: `${tooltip.x}px`,
-            top: `${tooltip.y - 10}px`,
-            transform: 'translate(-50%, -100%)',
-            pointerEvents: 'none'
-          }}
-        >
-          <button
-            className={`absolute top-2 right-2 p-1 rounded ${
-              theme === 'dark' ? 'hover:bg-gray-700' : 'hover:bg-gray-100'
-            }`}
-            style={{ pointerEvents: 'auto' }}
-            onClick={() => setTooltip(null)}
-          >
-            ×
-          </button>
-          <h3 className="font-bold text-lg mb-2">{tooltip.topic.name.replace(/"/g, '')}</h3>
-          <p className="text-sm mb-1">
-            <span className="font-medium">Search Volume:</span> {tooltip.topic.searchVolumeRaw.replace(/"/g, '')}
-          </p>
-          {tooltip.topic.category && (
-            <p className="text-sm mb-1">
-              <span className="font-medium">Category:</span> {tooltip.topic.category}
-            </p>
-          )}
-          {tooltip.topic.source && (
-            <p className="text-sm mb-1">
-              <span className="font-medium">Source:</span> {tooltip.topic.source}
-            </p>
-          )}
-          {tooltip.topic.url && (
-            <a
-              href={tooltip.topic.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-500 hover:text-blue-600 text-sm block mt-2"
-              style={{ pointerEvents: 'auto' }}
-            >
-              View Details →
-            </a>
-          )}
-        </div>
+      {tooltipData && (
+        <BubbleTooltip
+          topic={tooltipData.topic}
+          x={tooltipData.x}
+          y={tooltipData.y}
+          rank={tooltipData.rank}
+          theme={theme}
+          isPinned={pinnedTopics.has(tooltipData.topic.name)}
+          onTogglePin={() => handleTogglePin(tooltipData.topic.name)}
+          onCompare={() => handleToggleCompare(tooltipData.topic.name)}
+          isComparing={comparingTopics.has(tooltipData.topic.name)}
+          onClose={() => setTooltipData(null)}
+          cryptoTimeframe={cryptoTimeframe}
+        />
       )}
     </div>
   );
