@@ -1888,15 +1888,26 @@ export default function BrandInsightPage() {
                           )}
                         </div>
 
-                        {rankingFilteredTopics.length === 0 && topSearchQuery ? (
+                        {sortedTopicsWithRanks.length === 0 ? (
                           <div className={`rounded-lg p-8 text-center border ${theme === 'dark' ? 'bg-gray-700 text-gray-300 border-gray-600' : 'bg-gray-50 text-gray-600 border-gray-200'}`}>
-                            <p className="text-lg">No keywords found matching "{topSearchQuery}"</p>
-                            <button
-                              onClick={() => setTopSearchQuery('')}
-                              className="mt-4 px-4 py-2 rounded-lg font-semibold bg-blue-600 hover:bg-blue-700 text-white transition-colors"
-                            >
-                              Clear Search
-                            </button>
+                            <p className="text-lg mb-2">
+                              {topSearchQuery
+                                ? `No keywords found matching "${topSearchQuery}"`
+                                : 'No keywords match the selected filters'}
+                            </p>
+                            {topSearchQuery && (
+                              <button
+                                onClick={() => setTopSearchQuery('')}
+                                className="mt-4 px-4 py-2 rounded-lg font-semibold bg-blue-600 hover:bg-blue-700 text-white transition-colors"
+                              >
+                                Clear Search
+                              </button>
+                            )}
+                            {!topSearchQuery && (
+                              <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                                Try selecting a different filter to see results
+                              </p>
+                            )}
                           </div>
                         ) : (
                           <>
