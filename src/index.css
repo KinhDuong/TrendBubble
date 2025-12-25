@@ -536,8 +536,8 @@ html {
   }
 }
 
-/* AI Analysis nested list styles - scoped to AI analysis section only */
-.ai-analysis-content.prose ol > li > ul {
+/* Top Best Charts nested list styles - scoped to top best charts section only */
+.top-best-charts-content.prose ol > li > ul {
   margin-top: 0.5rem !important;
   margin-bottom: 0.5rem !important;
   margin-left: 0 !important;
@@ -545,22 +545,22 @@ html {
   list-style-type: disc !important;
 }
 
-.ai-analysis-content.prose ol > li > ul > li {
+.top-best-charts-content.prose ol > li > ul > li {
   margin-top: 0.25rem !important;
   margin-bottom: 0.25rem !important;
   padding-left: 0.25rem !important;
 }
 
-.ai-analysis-content.prose ol > li {
+.top-best-charts-content.prose ol > li {
   padding-left: 0.375rem !important;
 }
 
 /* Ensure nested lists don't have extra margins */
-.ai-analysis-content.prose ol > li > ul::before {
+.top-best-charts-content.prose ol > li > ul::before {
   content: none !important;
 }
 
-.ai-analysis-content.prose ol > li > ul::after {
+.top-best-charts-content.prose ol > li > ul::after {
   content: none !important;
 }
 
