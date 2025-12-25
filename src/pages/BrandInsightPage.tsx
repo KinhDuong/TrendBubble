@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
-import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
@@ -57,6 +57,7 @@ interface LatestBrandPage {
 export default function BrandInsightPage() {
   const { userId: pageIdOrUserId, brandName } = useParams<{ userId: string; brandName: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const { isAdmin, user, logout } = useAuth();
   const isMobile = window.innerWidth < 768;
@@ -121,6 +122,16 @@ export default function BrandInsightPage() {
   useEffect(() => {
     document.documentElement.style.backgroundColor = theme === 'dark' ? '#111827' : '#f1f3f4';
   }, [theme]);
+
+  useEffect(() => {
+    const pathname = location.pathname;
+    const hasTrailingSlash = pathname.endsWith('/');
+
+    if (!hasTrailingSlash) {
+      const search = location.search;
+      navigate(pathname + '/' + search, { replace: true });
+    }
+  }, [location.pathname, location.search, navigate]);
 
   useEffect(() => {
     const topParam = searchParams.get('Top');
