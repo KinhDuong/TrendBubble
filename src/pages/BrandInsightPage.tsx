@@ -1180,6 +1180,13 @@ export default function BrandInsightPage() {
   const handleAIAnalysis = async () => {
     if (!brandName || keywordPerformanceData.length === 0) return;
 
+    const userIdToUse = pageOwnerId;
+    if (!userIdToUse) {
+      setAiError('User ID not available');
+      setAiErrorCode('MISSING_USER_ID');
+      return;
+    }
+
     setAiLoading(true);
     setAiError(null);
     setAiErrorCode(null);
