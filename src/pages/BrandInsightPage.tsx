@@ -290,13 +290,25 @@ export default function BrandInsightPage() {
       const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(decodedPageIdOrUserId);
 
       if (isUUID) {
-        const result = await supabase
+        const brandPageResult = await supabase
           .from('brand_pages')
           .select('*, user_id')
           .eq('id', decodedPageIdOrUserId)
           .maybeSingle();
-        data = result.data;
-        error = result.error;
+
+        if (brandPageResult.data) {
+          data = brandPageResult.data;
+          error = brandPageResult.error;
+        } else {
+          const result = await supabase
+            .from('brand_pages')
+            .select('*, user_id')
+            .eq('user_id', decodedPageIdOrUserId)
+            .eq('brand', decodedBrand)
+            .maybeSingle();
+          data = result.data;
+          error = result.error;
+        }
       } else {
         const { data: profileData, error: profileError } = await supabase
           .from('user_profiles')
