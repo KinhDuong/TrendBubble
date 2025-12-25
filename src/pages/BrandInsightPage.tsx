@@ -2265,54 +2265,90 @@ export default function BrandInsightPage() {
                               // Split into lines for list processing
                               const lines = html.split('\n');
                               const processed: string[] = [];
-                              let inList = false;
-                              let listType = '';
+                              let inOrderedList = false;
+                              let inNestedList = false;
+                              let currentOrderedItem: string[] = [];
+
+                              const flushOrderedItem = () => {
+                                if (currentOrderedItem.length > 0) {
+                                  if (inNestedList) {
+                                    currentOrderedItem.push('</ul>');
+                                    inNestedList = false;
+                                  }
+                                  processed.push('<li>' + currentOrderedItem.join('\n') + '</li>');
+                                  currentOrderedItem = [];
+                                }
+                              };
 
                               for (let i = 0; i < lines.length; i++) {
                                 const line = lines[i];
-                                const isUnorderedListItem = /^[\-\*]\s+/.test(line);
                                 const isOrderedListItem = /^\d+\.\s+/.test(line);
+                                const isUnorderedListItem = /^[\-\*]\s+/.test(line);
 
-                                if (isUnorderedListItem || isOrderedListItem) {
-                                  const newListType = isUnorderedListItem ? 'ul' : 'ol';
+                                if (isOrderedListItem) {
+                                  // Flush previous ordered item if exists
+                                  flushOrderedItem();
 
-                                  if (!inList) {
-                                    processed.push(`<${newListType}>`);
-                                    inList = true;
-                                    listType = newListType;
-                                  } else if (listType !== newListType) {
-                                    processed.push(`</${listType}>`);
-                                    processed.push(`<${newListType}>`);
-                                    listType = newListType;
+                                  if (!inOrderedList) {
+                                    processed.push('<ol>');
+                                    inOrderedList = true;
                                   }
 
-                                  const content = line.replace(/^[\-\*\d\.]\s+/, '');
-                                  processed.push(`<li>${content}</li>`);
+                                  const content = line.replace(/^\d+\.\s+/, '');
+                                  currentOrderedItem.push(content);
+                                } else if (isUnorderedListItem && inOrderedList) {
+                                  // This is a nested bullet point under a numbered item
+                                  if (!inNestedList) {
+                                    currentOrderedItem.push('<ul>');
+                                    inNestedList = true;
+                                  }
+                                  const content = line.replace(/^[\-\*]\s+/, '');
+                                  currentOrderedItem.push(`<li>${content}</li>`);
+                                } else if (isUnorderedListItem && !inOrderedList) {
+                                  // Standalone unordered list
+                                  const content = line.replace(/^[\-\*]\s+/, '');
+                                  processed.push(`<ul><li>${content}</li></ul>`);
                                 } else {
-                                  if (inList) {
-                                    processed.push(`</${listType}>`);
-                                    inList = false;
-                                    listType = '';
-                                  }
-
-                                  if (line.trim() === '') {
-                                    processed.push('');
+                                  // Not a list item
+                                  if (inOrderedList && line.trim() === '') {
+                                    // Empty line might be part of list item content
+                                    continue;
+                                  } else if (inOrderedList && line.trim() !== '') {
+                                    // Non-empty, non-list line ends the ordered list
+                                    flushOrderedItem();
+                                    if (inOrderedList) {
+                                      processed.push('</ol>');
+                                      inOrderedList = false;
+                                    }
+                                    processed.push(line);
                                   } else {
                                     processed.push(line);
                                   }
                                 }
                               }
 
-                              if (inList) {
-                                processed.push(`</${listType}>`);
+                              // Flush any remaining list items
+                              if (inOrderedList) {
+                                flushOrderedItem();
+                                processed.push('</ol>');
                               }
 
                               html = processed.join('\n');
 
-                              // Convert paragraphs
-                              html = html.replace(/\n\n/g, '</p><p>');
-                              html = html.replace(/^(?!<[h|l|p|u|o])/gm, '<p>');
-                              html = html.replace(/(?<![>])$/gm, '</p>');
+                              // Convert paragraphs (avoid wrapping list tags)
+                              html = html.replace(/\n\n+/g, '</p><p>');
+                              html = html.split('\n').map(line => {
+                                const trimmed = line.trim();
+                                if (!trimmed || trimmed.startsWith('<ol>') || trimmed.startsWith('</ol>') ||
+                                    trimmed.startsWith('<ul>') || trimmed.startsWith('</ul>') ||
+                                    trimmed.startsWith('<li>') || trimmed.startsWith('</li>')) {
+                                  return line;
+                                }
+                                if (!line.startsWith('<p>')) {
+                                  return '<p>' + line + '</p>';
+                                }
+                                return line;
+                              }).join('\n');
 
                               return html;
                             })()
