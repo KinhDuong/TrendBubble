@@ -1545,6 +1545,16 @@ async function prerenderBrandInsightPages(baseHTML, distPath) {
       .eq('brand', brandPage.brand)
       .order('month', { ascending: false });
 
+    // Fetch AI analysis
+    const { data: aiAnalysis } = await supabase
+      .from('brand_ai_analysis')
+      .select('*')
+      .eq('user_id', brandPage.user_id)
+      .eq('brand', brandPage.brand)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
     const keywords = keywordData || [];
     const months = monthlyData || [];
 
@@ -1748,10 +1758,28 @@ async function prerenderBrandInsightPages(baseHTML, distPath) {
 
         <section style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; padding: 2rem; margin-bottom: 2rem;">
           <h2 style="font-size: 1.5rem; font-weight: 700; color: white; margin-bottom: 1rem;">AI-Powered Keyword Analysis</h2>
-          <div style="background-color: #374151; border-radius: 0.5rem; padding: 2rem; text-align: center;">
-            <p style="color: #9ca3af; margin-bottom: 1rem;">Get AI insights and recommendations for your keyword strategy.</p>
-            <button style="padding: 0.75rem 1.5rem; border-radius: 0.5rem; font-weight: 600; background: linear-gradient(to right, #2563eb, #7c3aed); color: white; border: none;">✨ Generate AI Insights</button>
-          </div>
+          ${aiAnalysis && aiAnalysis.analysis ? `
+            <div style="background: linear-gradient(135deg, rgba(37, 99, 235, 0.1) 0%, rgba(124, 58, 237, 0.1) 100%); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 0.5rem; padding: 2rem;">
+              <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(96, 165, 250, 0.2);">
+                <span style="font-size: 1.5rem;">✨</span>
+                <div>
+                  <h3 style="font-size: 1.125rem; font-weight: 600; color: white; margin-bottom: 0.25rem;">AI Strategic Insights</h3>
+                  <p style="font-size: 0.875rem; color: #9ca3af;">Generated analysis for ${brandPage.brand}</p>
+                </div>
+              </div>
+              <div style="color: #d1d5db; line-height: 1.75; white-space: pre-wrap; font-size: 0.9375rem;">${aiAnalysis.analysis}</div>
+              ${aiAnalysis.model ? `
+                <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid rgba(96, 165, 250, 0.2);">
+                  <p style="font-size: 0.75rem; color: #9ca3af;">Analysis generated using ${aiAnalysis.model} • ${new Date(aiAnalysis.created_at).toLocaleDateString()}</p>
+                </div>
+              ` : ''}
+            </div>
+          ` : `
+            <div style="background-color: #374151; border-radius: 0.5rem; padding: 2rem; text-align: center;">
+              <p style="color: #9ca3af; margin-bottom: 1rem;">Get AI insights and recommendations for your keyword strategy.</p>
+              <button style="padding: 0.75rem 1.5rem; border-radius: 0.5rem; font-weight: 600; background: linear-gradient(to right, #2563eb, #7c3aed); color: white; border: none;">✨ Generate AI Insights</button>
+            </div>
+          `}
         </section>
         ` : ''}
 
