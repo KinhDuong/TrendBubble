@@ -2232,16 +2232,10 @@ export default function BrandInsightPage() {
 
                     {aiAnalysis && !aiLoading && (
                       <div>
-                        <div className="flex items-center justify-between mb-4">
-                          <div className={`text-xs px-3 py-1 rounded-full ${theme === 'dark' ? 'bg-green-900/30 text-green-400' : 'bg-green-100 text-green-700'}`}>
+                        <div className="mb-4">
+                          <div className={`text-xs px-3 py-1 rounded-full inline-block ${theme === 'dark' ? 'bg-green-900/30 text-green-400' : 'bg-green-100 text-green-700'}`}>
                             Analysis Complete
                           </div>
-                          <button
-                            onClick={handleAIAnalysis}
-                            className={`text-sm px-3 py-1 rounded-lg transition-colors ${theme === 'dark' ? 'text-blue-400 hover:bg-blue-900/30' : 'text-blue-600 hover:bg-blue-100'}`}
-                          >
-                            Regenerate
-                          </button>
                         </div>
                         <div
                           className={`prose prose-sm max-w-none ${
