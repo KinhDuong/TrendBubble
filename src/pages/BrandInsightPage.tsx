@@ -2282,8 +2282,9 @@ export default function BrandInsightPage() {
 
                               for (let i = 0; i < lines.length; i++) {
                                 const line = lines[i];
-                                const isOrderedListItem = /^\d+\.\s+/.test(line);
-                                const isUnorderedListItem = /^[\-\*]\s+/.test(line);
+                                const trimmedLine = line.trim();
+                                const isOrderedListItem = /^\d+\.\s+/.test(trimmedLine);
+                                const isUnorderedListItem = /^[\-\*]\s+/.test(trimmedLine);
 
                                 if (isOrderedListItem) {
                                   // Flush previous ordered item if exists
@@ -2294,7 +2295,7 @@ export default function BrandInsightPage() {
                                     inOrderedList = true;
                                   }
 
-                                  const content = line.replace(/^\d+\.\s+/, '');
+                                  const content = trimmedLine.replace(/^\d+\.\s+/, '');
                                   currentOrderedItem.push(content);
                                 } else if (isUnorderedListItem && inOrderedList) {
                                   // This is a nested bullet point under a numbered item
@@ -2302,11 +2303,11 @@ export default function BrandInsightPage() {
                                     currentOrderedItem.push('<ul>');
                                     inNestedList = true;
                                   }
-                                  const content = line.replace(/^[\-\*]\s+/, '');
+                                  const content = trimmedLine.replace(/^[\-\*]\s+/, '');
                                   currentOrderedItem.push(`<li>${content}</li>`);
                                 } else if (isUnorderedListItem && !inOrderedList) {
                                   // Standalone unordered list
-                                  const content = line.replace(/^[\-\*]\s+/, '');
+                                  const content = trimmedLine.replace(/^[\-\*]\s+/, '');
                                   processed.push(`<ul><li>${content}</li></ul>`);
                                 } else {
                                   // Not a list item
