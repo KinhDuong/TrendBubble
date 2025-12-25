@@ -501,7 +501,7 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light' }
 
     console.log('Successfully inserted monthly data:', insertedData);
 
-    await supabase
+    const { error: brandPageError } = await supabase
       .from('brand_pages')
       .upsert({
         user_id: user.id,
@@ -512,6 +512,11 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light' }
       }, {
         onConflict: 'user_id,brand'
       });
+
+    if (brandPageError) {
+      console.error('Brand page upsert error:', brandPageError);
+      throw new Error(`Failed to create brand page: ${brandPageError.message}`);
+    }
 
     setSuccess(`Successfully uploaded data for ${brandName.trim()}: ${data.length} keywords with ${aggregatedData.length} months of trend data`);
     onUploadComplete();
