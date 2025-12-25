@@ -1376,41 +1376,26 @@ export default function BrandInsightPage() {
 
   const decodedBrand = decodeURIComponent(brandName || '');
 
-  const { monthlyTotals, totalMonths, avgKeywordCount, avgVolume, lastUpdated, pageUrl, topTopicNames, keywords, enhancedTitle, enhancedDescription } = useMemo(() => {
-    const monthlyTotalsCalc = monthColumns.map(col => {
-      return keywordData.reduce((sum, kw) => sum + (Number(kw[col]) || 0), 0);
-    }).filter(total => total > 0);
+  const monthlyTotals = monthColumns.map(col => {
+    return keywordData.reduce((sum, kw) => sum + (Number(kw[col]) || 0), 0);
+  }).filter(total => total > 0);
 
-    const totalMonthsCalc = monthlyTotalsCalc.length;
-    const avgKeywordCountCalc = keywordData.length;
-    const avgVolumeCalc = monthlyTotalsCalc.length > 0
-      ? Math.round(monthlyTotalsCalc.reduce((sum, vol) => sum + vol, 0) / monthlyTotalsCalc.length)
-      : 0;
-    const lastUpdatedCalc = new Date();
+  const totalMonths = monthlyTotals.length;
+  const avgKeywordCount = keywordData.length;
+  const avgVolume = monthlyTotals.length > 0
+    ? Math.round(monthlyTotals.reduce((sum, vol) => sum + vol, 0) / monthlyTotals.length)
+    : 0;
+  const lastUpdated = new Date();
 
-    const baseUrl = import.meta.env.VITE_BASE_URL || 'https://topbestcharts.com';
-    const pageUrlCalc = pageOwnerUsername ? `${baseUrl}/insights/${encodeURIComponent(pageOwnerUsername)}/${encodeURIComponent(decodedBrand)}/` : `${baseUrl}/insights/`;
-    const topTopicNamesCalc = topTopics.slice(0, 5).map(t => t.name).join(', ');
-    const keywordsCalc = topTopics.slice(0, 10).map(t => t.name).join(', ') + ', keyword trends, search volume, SEO insights, brand analysis';
+  const baseUrl = import.meta.env.VITE_BASE_URL || 'https://topbestcharts.com';
+  const pageUrl = pageOwnerUsername ? `${baseUrl}/insights/${encodeURIComponent(pageOwnerUsername)}/${encodeURIComponent(decodedBrand)}/` : `${baseUrl}/insights/`;
+  const topTopicNames = topTopics.slice(0, 5).map(t => t.name).join(', ');
+  const keywords = topTopics.slice(0, 10).map(t => t.name).join(', ') + ', keyword trends, search volume, SEO insights, brand analysis';
 
-    const enhancedTitleCalc = brandPageData.meta_title;
-    const enhancedDescriptionCalc = topTopicNamesCalc
-      ? `${brandPageData.meta_description} Top keywords: ${topTopicNamesCalc}. Track ${avgKeywordCountCalc} keywords across ${totalMonthsCalc} months.`
-      : brandPageData.meta_description;
-
-    return {
-      monthlyTotals: monthlyTotalsCalc,
-      totalMonths: totalMonthsCalc,
-      avgKeywordCount: avgKeywordCountCalc,
-      avgVolume: avgVolumeCalc,
-      lastUpdated: lastUpdatedCalc,
-      pageUrl: pageUrlCalc,
-      topTopicNames: topTopicNamesCalc,
-      keywords: keywordsCalc,
-      enhancedTitle: enhancedTitleCalc,
-      enhancedDescription: enhancedDescriptionCalc
-    };
-  }, [monthColumns, keywordData, topTopics, brandPageData, pageOwnerUsername, decodedBrand]);
+  const enhancedTitle = brandPageData.meta_title;
+  const enhancedDescription = topTopicNames
+    ? `${brandPageData.meta_description} Top keywords: ${topTopicNames}. Track ${avgKeywordCount} keywords across ${totalMonths} months.`
+    : brandPageData.meta_description;
 
   return (
     <>
