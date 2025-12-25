@@ -7,7 +7,7 @@ import { TrendingTopic } from '../types';
 import { useAuth } from '../hooks/useAuth';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import Login from '../components/Login';
+import UserLogin from '../components/UserLogin';
 import ToolSchema from '../components/ToolSchema';
 
 interface FeaturedPage {
@@ -221,7 +221,7 @@ export default function ExplorePage() {
           </div>
         </main>
         <Footer theme={theme} />
-        {showLogin && <Login onClose={() => setShowLogin(false)} theme={theme} />}
+        {showLogin && <UserLogin onClose={() => setShowLogin(false)} theme={theme} />}
       </div>
     );
   }
@@ -715,7 +715,7 @@ export default function ExplorePage() {
       </main>
 
       <Footer theme={theme} />
-      {showLogin && <Login onClose={() => setShowLogin(false)} theme={theme} />}
+      {showLogin && <UserLogin onClose={() => setShowLogin(false)} theme={theme} />}
     </div>
   );
 }

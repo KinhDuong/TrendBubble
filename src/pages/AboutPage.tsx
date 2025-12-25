@@ -4,7 +4,7 @@ import { TrendingUp, Circle, BarChart3, PieChart, Grid3x3, Target, Users, Lightb
 import { useAuth } from '../hooks/useAuth';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import Login from '../components/Login';
+import UserLogin from '../components/UserLogin';
 
 export default function AboutPage() {
   const { isAdmin, user, logout } = useAuth();
@@ -221,7 +221,7 @@ export default function AboutPage() {
       </main>
 
       <Footer theme={theme} />
-      {showLogin && <Login onClose={() => setShowLogin(false)} theme={theme} />}
+      {showLogin && <UserLogin onClose={() => setShowLogin(false)} theme={theme} />}
     </div>
   );
 }
