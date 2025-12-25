@@ -2246,7 +2246,7 @@ export default function BrandInsightPage() {
                     {aiAnalysis && !aiLoading && (
                       <div>
                         <div
-                          className={`prose prose-sm max-w-none ${
+                          className={`ai-analysis-content prose prose-sm max-w-none ${
                             theme === 'dark'
                               ? 'prose-invert prose-p:text-gray-300 prose-strong:text-white prose-li:text-gray-300 prose-ul:text-gray-300 prose-ol:text-gray-300'
                               : 'prose-p:text-gray-700 prose-strong:text-gray-900 prose-li:text-gray-700 prose-ul:text-gray-700 prose-ol:text-gray-700'
