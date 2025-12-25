@@ -2232,11 +2232,6 @@ export default function BrandInsightPage() {
 
                     {aiAnalysis && !aiLoading && (
                       <div>
-                        <div className="mb-4">
-                          <div className={`text-xs px-3 py-1 rounded-full inline-block ${theme === 'dark' ? 'bg-green-900/30 text-green-400' : 'bg-green-100 text-green-700'}`}>
-                            Analysis Complete
-                          </div>
-                        </div>
                         <div
                           className={`prose prose-sm max-w-none ${
                             theme === 'dark'
