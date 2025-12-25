@@ -134,7 +134,7 @@ export default function Header({ theme, isAdmin, isLoggedIn = false, onLoginClic
             </a>
             {isLoggedIn && (
               <a
-                href="/brand-data-manager/"
+                href="/insights-meta/"
                 className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'} transition-colors`}
               >
                 Brand Insight
@@ -281,7 +281,7 @@ export default function Header({ theme, isAdmin, isLoggedIn = false, onLoginClic
                     </a>
                     {isLoggedIn && (
                       <a
-                        href="/brand-data-manager/"
+                        href="/insights-meta/"
                         className={`flex items-center gap-3 px-6 py-3 ${theme === 'dark' ? 'text-gray-300 hover:bg-gray-700 hover:text-white' : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'} transition-colors`}
                         onClick={() => setIsMenuOpen(false)}
                       >
