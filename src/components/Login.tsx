@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { LogIn, Loader2, X } from 'lucide-react';
+import { LogIn, UserPlus, Loader2, X } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 interface LoginProps {
@@ -8,8 +8,11 @@ interface LoginProps {
 }
 
 export default function Login({ onClose, theme }: LoginProps) {
+  const [mode, setMode] = useState<'login' | 'signup'>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [username, setUsername] = useState('');
+  const [displayName, setDisplayName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -27,23 +30,56 @@ export default function Login({ onClose, theme }: LoginProps) {
       if (signInError) throw signInError;
 
       if (data.user) {
-        const { data: adminData, error: adminError } = await supabase
-          .from('admin_users')
-          .select('id')
-          .eq('id', data.user.id)
-          .maybeSingle();
+        onClose();
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to login');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-        if (adminError) throw adminError;
+  const handleSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setIsLoading(true);
 
-        if (!adminData) {
-          await supabase.auth.signOut();
-          throw new Error('Access denied. You are not authorized as an admin.');
+    try {
+      if (username.length < 3) {
+        throw new Error('Username must be at least 3 characters long');
+      }
+
+      if (!/^[a-z0-9-]+$/.test(username)) {
+        throw new Error('Username can only contain lowercase letters, numbers, and hyphens');
+      }
+
+      const { data, error: signUpError } = await supabase.auth.signUp({
+        email,
+        password,
+      });
+
+      if (signUpError) throw signUpError;
+
+      if (data.user) {
+        const { error: profileError } = await supabase
+          .from('user_profiles')
+          .insert({
+            id: data.user.id,
+            username: username.toLowerCase(),
+            display_name: displayName || username,
+          });
+
+        if (profileError) {
+          if (profileError.code === '23505') {
+            throw new Error('Username already taken. Please choose another one.');
+          }
+          throw profileError;
         }
 
         onClose();
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to login');
+      setError(err instanceof Error ? err.message : 'Failed to create account');
     } finally {
       setIsLoading(false);
     }
@@ -67,13 +103,67 @@ export default function Login({ onClose, theme }: LoginProps) {
         </button>
 
         <div className="flex items-center justify-center mb-8">
-          <LogIn className={`mr-3 ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`} size={32} />
+          {mode === 'login' ? (
+            <LogIn className={`mr-3 ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`} size={32} />
+          ) : (
+            <UserPlus className={`mr-3 ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`} size={32} />
+          )}
           <h1 className={`text-3xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-            Admin Login
+            {mode === 'login' ? 'Sign In' : 'Create Account'}
           </h1>
         </div>
 
-        <form onSubmit={handleLogin} className="space-y-6">
+        <form onSubmit={mode === 'login' ? handleLogin : handleSignup} className="space-y-6">
+          {mode === 'signup' && (
+            <>
+              <div>
+                <label className={`block text-sm font-medium mb-2 ${
+                  theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                }`}>
+                  Username
+                </label>
+                <input
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value.toLowerCase())}
+                  required
+                  disabled={isLoading}
+                  minLength={3}
+                  pattern="[a-z0-9-]+"
+                  className={`w-full px-4 py-3 rounded-lg border ${
+                    theme === 'dark'
+                      ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
+                      : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
+                  } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                  placeholder="username"
+                />
+                <p className={`mt-1 text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                  Lowercase letters, numbers, and hyphens only
+                </p>
+              </div>
+
+              <div>
+                <label className={`block text-sm font-medium mb-2 ${
+                  theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                }`}>
+                  Display Name (optional)
+                </label>
+                <input
+                  type="text"
+                  value={displayName}
+                  onChange={(e) => setDisplayName(e.target.value)}
+                  disabled={isLoading}
+                  className={`w-full px-4 py-3 rounded-lg border ${
+                    theme === 'dark'
+                      ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
+                      : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
+                  } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                  placeholder="Your Name"
+                />
+              </div>
+            </>
+          )}
+
           <div>
             <label className={`block text-sm font-medium mb-2 ${
               theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
@@ -91,7 +181,7 @@ export default function Login({ onClose, theme }: LoginProps) {
                   ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
                   : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
               } focus:outline-none focus:ring-2 focus:ring-blue-500`}
-              placeholder="admin@example.com"
+              placeholder="you@example.com"
             />
           </div>
 
@@ -107,6 +197,7 @@ export default function Login({ onClose, theme }: LoginProps) {
               onChange={(e) => setPassword(e.target.value)}
               required
               disabled={isLoading}
+              minLength={6}
               className={`w-full px-4 py-3 rounded-lg border ${
                 theme === 'dark'
                   ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
@@ -136,15 +227,56 @@ export default function Login({ onClose, theme }: LoginProps) {
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 animate-spin" size={20} />
-                Signing in...
+                {mode === 'login' ? 'Signing in...' : 'Creating account...'}
               </>
             ) : (
               <>
-                <LogIn className="mr-2" size={20} />
-                Sign In
+                {mode === 'login' ? (
+                  <>
+                    <LogIn className="mr-2" size={20} />
+                    Sign In
+                  </>
+                ) : (
+                  <>
+                    <UserPlus className="mr-2" size={20} />
+                    Create Account
+                  </>
+                )}
               </>
             )}
           </button>
+
+          <div className={`text-center text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+            {mode === 'login' ? (
+              <>
+                Don't have an account?{' '}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMode('signup');
+                    setError('');
+                  }}
+                  className={`font-medium ${theme === 'dark' ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'}`}
+                >
+                  Sign up
+                </button>
+              </>
+            ) : (
+              <>
+                Already have an account?{' '}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMode('login');
+                    setError('');
+                  }}
+                  className={`font-medium ${theme === 'dark' ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'}`}
+                >
+                  Sign in
+                </button>
+              </>
+            )}
+          </div>
         </form>
       </div>
     </div>

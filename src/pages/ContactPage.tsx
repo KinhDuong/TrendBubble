@@ -4,7 +4,7 @@ import { Send, Mail, Phone, User, MessageSquare, CheckCircle } from 'lucide-reac
 import { useAuth } from '../hooks/useAuth';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import UserLogin from '../components/UserLogin';
+import Login from '../components/Login';
 
 export default function ContactPage() {
   const { isAdmin, user, logout } = useAuth();
@@ -324,7 +324,7 @@ export default function ContactPage() {
       </main>
 
       <Footer theme={theme} />
-      {showLogin && <UserLogin onClose={() => setShowLogin(false)} theme={theme} />}
+      {showLogin && <Login onClose={() => setShowLogin(false)} theme={theme} />}
     </div>
   );
 }

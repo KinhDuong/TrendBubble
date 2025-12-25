@@ -7,7 +7,7 @@ import BrandKeywordUpload from '../components/BrandKeywordUpload';
 import KeywordChart from '../components/KeywordChart';
 import ToolSchema from '../components/ToolSchema';
 import Header from '../components/Header';
-import UserLogin from '../components/UserLogin';
+import Login from '../components/Login';
 import Footer from '../components/Footer';
 import { useAuth } from '../hooks/useAuth';
 
@@ -157,7 +157,7 @@ export default function InsightPage() {
           onLoginClick={() => setShowLogin(true)}
           onLogout={logout}
         />
-        <UserLogin onClose={handleLoginClose} theme="light" />
+        <Login onClose={handleLoginClose} theme="light" />
         <Footer theme="light" />
       </>
     );

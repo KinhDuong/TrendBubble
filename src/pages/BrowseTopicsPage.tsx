@@ -7,7 +7,7 @@ import { useAuth } from '../hooks/useAuth';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import ToolSchema from '../components/ToolSchema';
-import UserLogin from '../components/UserLogin';
+import Login from '../components/Login';
 
 interface Page {
   id: string;
@@ -161,7 +161,7 @@ export default function BrowseTopicsPage() {
           </div>
         </main>
         <Footer theme={theme} />
-        {showLogin && <UserLogin onClose={() => setShowLogin(false)} theme={theme} />}
+        {showLogin && <Login onClose={() => setShowLogin(false)} theme={theme} />}
       </div>
     );
   }
@@ -304,7 +304,7 @@ export default function BrowseTopicsPage() {
       </main>
 
       <Footer theme={theme} />
-      {showLogin && <UserLogin onClose={() => setShowLogin(false)} theme={theme} />}
+      {showLogin && <Login onClose={() => setShowLogin(false)} theme={theme} />}
     </div>
   );
 }

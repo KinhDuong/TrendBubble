@@ -1,15 +1,49 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { User as UserIcon, Mail, Calendar, LogOut, LogIn, Users } from 'lucide-react';
+import { User as UserIcon, Mail, Calendar, LogOut, LogIn as LoginIcon, Users } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { useAuth } from '../hooks/useAuth';
-import UserLogin from '../components/UserLogin';
+import Login from '../components/Login';
+import { supabase } from '../lib/supabase';
+
+interface UserProfile {
+  username: string;
+  display_name: string;
+}
 
 export default function UserProfilePage() {
   const { isAdmin, user, logout, isLoading } = useAuth();
   const [showLogin, setShowLogin] = useState(false);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [profileLoading, setProfileLoading] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      fetchProfile();
+    }
+  }, [user]);
+
+  const fetchProfile = async () => {
+    if (!user) return;
+
+    setProfileLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('user_profiles')
+        .select('username, display_name')
+        .eq('id', user.id)
+        .maybeSingle();
+
+      if (error) throw error;
+      if (data) setProfile(data);
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+    } finally {
+      setProfileLoading(false);
+    }
+  };
 
   const handleLogout = async () => {
     await logout();
@@ -90,64 +124,86 @@ export default function UserProfilePage() {
             {!user ? (
               <div className="space-y-6">
                 <div className="text-center py-8">
-                  <LogIn size={64} className="mx-auto text-gray-300 mb-4" />
+                  <LoginIcon size={64} className="mx-auto text-gray-300 mb-4" />
                   <h2 className="text-2xl font-bold text-gray-900 mb-2">Sign In Required</h2>
                   <p className="text-gray-600 mb-8">Please log in to view your profile</p>
+                  <button
+                    onClick={() => setShowLogin(true)}
+                    className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold shadow-md hover:shadow-lg"
+                  >
+                    Sign In or Create Account
+                  </button>
                 </div>
-
-                {showLogin && (
-                  <div className="max-w-md mx-auto">
-                    <UserLogin onClose={handleLoginClose} theme="light" />
-                  </div>
-                )}
               </div>
             ) : (
               <div className="space-y-8">
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold text-gray-500 uppercase tracking-wide">
-                      Email Address
-                    </label>
-                    <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                      <Mail size={20} className="text-gray-400" />
-                      <span className="text-gray-900 font-medium">{user.email}</span>
-                    </div>
+                {profileLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
                   </div>
+                ) : (
+                  <div className="grid md:grid-cols-2 gap-6">
+                    {profile && (
+                      <>
+                        <div className="space-y-2">
+                          <label className="text-sm font-semibold text-gray-500 uppercase tracking-wide">
+                            Username
+                          </label>
+                          <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                            <UserIcon size={20} className="text-gray-400" />
+                            <span className="text-gray-900 font-medium">@{profile.username}</span>
+                          </div>
+                        </div>
 
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold text-gray-500 uppercase tracking-wide">
-                      User ID
-                    </label>
-                    <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                      <UserIcon size={20} className="text-gray-400" />
-                      <span className="text-gray-900 font-mono text-sm">{user.id}</span>
-                    </div>
-                  </div>
+                        {profile.display_name && (
+                          <div className="space-y-2">
+                            <label className="text-sm font-semibold text-gray-500 uppercase tracking-wide">
+                              Display Name
+                            </label>
+                            <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                              <UserIcon size={20} className="text-gray-400" />
+                              <span className="text-gray-900 font-medium">{profile.display_name}</span>
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    )}
 
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold text-gray-500 uppercase tracking-wide">
-                      Account Created
-                    </label>
-                    <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                      <Calendar size={20} className="text-gray-400" />
-                      <span className="text-gray-900 font-medium">
-                        {formatDate(user.created_at)}
-                      </span>
+                    <div className="space-y-2">
+                      <label className="text-sm font-semibold text-gray-500 uppercase tracking-wide">
+                        Email Address
+                      </label>
+                      <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                        <Mail size={20} className="text-gray-400" />
+                        <span className="text-gray-900 font-medium">{user.email}</span>
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold text-gray-500 uppercase tracking-wide">
-                      Last Sign In
-                    </label>
-                    <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                      <Calendar size={20} className="text-gray-400" />
-                      <span className="text-gray-900 font-medium">
-                        {user.last_sign_in_at ? formatDate(user.last_sign_in_at) : 'N/A'}
-                      </span>
+                    <div className="space-y-2">
+                      <label className="text-sm font-semibold text-gray-500 uppercase tracking-wide">
+                        Account Created
+                      </label>
+                      <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                        <Calendar size={20} className="text-gray-400" />
+                        <span className="text-gray-900 font-medium">
+                          {formatDate(user.created_at)}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-sm font-semibold text-gray-500 uppercase tracking-wide">
+                        Last Sign In
+                      </label>
+                      <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                        <Calendar size={20} className="text-gray-400" />
+                        <span className="text-gray-900 font-medium">
+                          {user.last_sign_in_at ? formatDate(user.last_sign_in_at) : 'N/A'}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
 
                 {isAdmin && (
                   <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
@@ -188,6 +244,10 @@ export default function UserProfilePage() {
       </main>
 
       <Footer />
+
+      {showLogin && (
+        <Login onClose={handleLoginClose} theme="light" />
+      )}
     </div>
   );
 }
