@@ -1752,7 +1752,7 @@ export default function BrandInsightPage() {
                 </div>
               )}
 
-              {transformToTopics.length > 0 && viewMode === 'bubble' && (
+              {transformToTopics.length > 0 && (viewMode === 'bubble' || viewMode === 'bar' || viewMode === 'treemap' || viewMode === 'donut') && (
                 <>
                   <div className="max-w-7xl mx-auto mb-6">
                     <div>
@@ -1835,59 +1835,63 @@ export default function BrandInsightPage() {
                       </div>
                     </div>
                   ) : (
-                    <div ref={bubbleChartRef} style={{ minHeight: '500px' }}>
-                      <BubbleChart
-                      topics={filteredTopics}
-                      maxDisplay={maxBubbles}
-                      theme={theme}
-                      layout={bubbleLayout}
-                      comparingTopics={comparingTopics}
-                      onComparingTopicsChange={setComparingTopics}
-                      useCryptoColors={false}
-                      cryptoTimeframe="24h"
-                      animationStyle={animationStyle}
-                      shape={shape as Shape}
-                      keywordPerformanceData={keywordPerformanceData}
-                    />
-                    </div>
+                    <>
+                      {viewMode === 'bubble' && (
+                        <div ref={bubbleChartRef} style={{ minHeight: '500px' }}>
+                          <BubbleChart
+                          topics={filteredTopics}
+                          maxDisplay={maxBubbles}
+                          theme={theme}
+                          layout={bubbleLayout}
+                          comparingTopics={comparingTopics}
+                          onComparingTopicsChange={setComparingTopics}
+                          useCryptoColors={false}
+                          cryptoTimeframe="24h"
+                          animationStyle={animationStyle}
+                          shape={shape as Shape}
+                          keywordPerformanceData={keywordPerformanceData}
+                        />
+                        </div>
+                      )}
+
+                      {viewMode === 'bar' && (
+                        <div ref={barChartRef} className="max-w-7xl mx-auto">
+                          <BarChart
+                            topics={filteredTopics}
+                            maxDisplay={maxBubbles}
+                            theme={theme}
+                            useCryptoColors={false}
+                            cryptoTimeframe="24h"
+                          />
+                        </div>
+                      )}
+
+                      {viewMode === 'treemap' && (
+                        <div ref={treemapChartRef} className="max-w-7xl mx-auto" style={{ height: 'calc(100vh - 300px)', minHeight: '500px' }}>
+                          <Treemap
+                            topics={filteredTopics}
+                            maxDisplay={maxBubbles}
+                            theme={theme}
+                            useCryptoColors={false}
+                            cryptoTimeframe="24h"
+                          />
+                        </div>
+                      )}
+
+                      {viewMode === 'donut' && (
+                        <div ref={donutChartRef} className="max-w-7xl mx-auto" style={{ height: 'calc(100vh - 300px)', minHeight: '600px' }}>
+                          <DonutChart
+                            topics={filteredTopics}
+                            maxDisplay={maxBubbles}
+                            theme={theme}
+                            useCryptoColors={false}
+                            cryptoTimeframe="24h"
+                          />
+                        </div>
+                      )}
+                    </>
                   )}
                 </>
-              )}
-
-              {transformToTopics.length > 0 && viewMode === 'bar' && (
-                <div ref={barChartRef} className="max-w-7xl mx-auto">
-                  <BarChart
-                    topics={filteredTopics}
-                    maxDisplay={maxBubbles}
-                    theme={theme}
-                    useCryptoColors={false}
-                    cryptoTimeframe="24h"
-                  />
-                </div>
-              )}
-
-              {transformToTopics.length > 0 && viewMode === 'treemap' && (
-                <div ref={treemapChartRef} className="max-w-7xl mx-auto" style={{ height: 'calc(100vh - 300px)', minHeight: '500px' }}>
-                  <Treemap
-                    topics={transformToTopics}
-                    maxDisplay={maxBubbles}
-                    theme={theme}
-                    useCryptoColors={false}
-                    cryptoTimeframe="24h"
-                  />
-                </div>
-              )}
-
-              {transformToTopics.length > 0 && viewMode === 'donut' && (
-                <div ref={donutChartRef} className="max-w-7xl mx-auto" style={{ height: 'calc(100vh - 300px)', minHeight: '600px' }}>
-                  <DonutChart
-                    topics={filteredTopics}
-                    maxDisplay={maxBubbles}
-                    theme={theme}
-                    useCryptoColors={false}
-                    cryptoTimeframe="24h"
-                  />
-                </div>
               )}
 
               {transformToTopics.length > 0 && (viewMode === 'bubble' || viewMode === 'bar' || viewMode === 'treemap' || viewMode === 'donut') && (
