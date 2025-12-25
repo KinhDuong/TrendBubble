@@ -38,7 +38,6 @@ interface Props {
 }
 
 export default function AdvertisingRecommendations({ keywordData, brandName, theme }: Props) {
-  const [showRecommendations, setShowRecommendations] = useState(false);
   const [expandedCategory, setExpandedCategory] = useState<string | null>('Highest ROI Potential');
 
   const processedData = useMemo(() => {
@@ -489,39 +488,17 @@ export default function AdvertisingRecommendations({ keywordData, brandName, the
 
   return (
     <div className={`rounded-lg p-6 ${theme === 'dark' ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-200'}`}>
-      <button
-        onClick={() => setShowRecommendations(!showRecommendations)}
-        className={`w-full px-4 py-3 rounded-lg font-semibold transition-all flex items-center justify-center gap-2 ${
-          theme === 'dark'
-            ? 'bg-gray-700 hover:bg-gray-600 text-white border border-gray-600'
-            : 'bg-white hover:bg-gray-50 text-gray-900 border border-gray-300'
-        }`}
-      >
-        {showRecommendations ? (
-          <>
-            <ChevronUp className="w-5 h-5" />
-            Hide Top Keywords for Advertising
-          </>
-        ) : (
-          <>
-            <ChevronDown className="w-5 h-5" />
-            Show Top Keywords for Advertising
-          </>
-        )}
-      </button>
+      <div className="space-y-4">
+        <div>
+          <h3 className={`text-lg font-semibold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+            Top Keywords for Advertising
+          </h3>
+          <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+            Based on search volume, CPC, competition, and growth trends, here are the top 5 keywords for each advertising category.
+          </p>
+        </div>
 
-      {showRecommendations && (
-        <div className="mt-6 space-y-4">
-          <div>
-            <h3 className={`text-lg font-semibold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-              Advertising Keyword Recommendations
-            </h3>
-            <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-              Based on search volume, CPC, competition, and growth trends, here are the top 5 keywords for each advertising category.
-            </p>
-          </div>
-
-          {categoryResults.map((category) => (
+        {categoryResults.map((category) => (
             <div
               key={category.name}
               className={`border rounded-lg overflow-hidden ${category.color}`}
@@ -631,8 +608,7 @@ export default function AdvertisingRecommendations({ keywordData, brandName, the
               )}
             </div>
           ))}
-        </div>
-      )}
+      </div>
     </div>
   );
 }
