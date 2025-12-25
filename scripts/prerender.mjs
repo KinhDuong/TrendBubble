@@ -1521,7 +1521,7 @@ async function prerenderBrandInsightPages(baseHTML, distPath) {
       continue;
     }
 
-    const pageUrl = `/insights/${encodeURIComponent(username)}/${encodeURIComponent(brandPage.brand)}`;
+    const pageUrl = `/insights/${encodeURIComponent(username)}/${encodeURIComponent(brandPage.brand)}/`;
     console.log(`Pre-rendering: ${pageUrl}`);
 
     // Fetch keyword data for this brand
@@ -1916,7 +1916,7 @@ async function generateSitemap(pages, brandPages, distPath) {
       const username = userProfileMap.get(brandPage.user_id);
       if (!username) continue;
 
-      const pageUrl = escapeXml(`${BASE_URL}/insights/${encodeURIComponent(username)}/${encodeURIComponent(brandPage.brand)}`);
+      const pageUrl = escapeXml(`${BASE_URL}/insights/${encodeURIComponent(username)}/${encodeURIComponent(brandPage.brand)}/`);
       const lastmod = brandPage.updated_at
         ? new Date(brandPage.updated_at).toISOString().split('T')[0]
         : new Date(brandPage.created_at).toISOString().split('T')[0];

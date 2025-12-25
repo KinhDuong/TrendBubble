@@ -431,7 +431,7 @@ export default function InsightsMetaPage() {
                             onClick={() => {
                               const identifier = brand.username || brand.user_id;
                               if (identifier) {
-                                navigate(`/insights/${encodeURIComponent(identifier)}/${encodeURIComponent(brand.brand)}`);
+                                navigate(`/insights/${encodeURIComponent(identifier)}/${encodeURIComponent(brand.brand)}/`);
                               }
                             }}
                             disabled={!brand.username && !brand.user_id}

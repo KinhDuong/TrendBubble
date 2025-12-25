@@ -793,7 +793,7 @@ export default function BrandDataManager() {
                     <div className="flex items-center gap-2">
                       {brandPage.is_public && (
                         <a
-                          href={`/insights/${brandPage.id}/${encodeURIComponent(selectedBrand)}`}
+                          href={`/insights/${brandPage.id}/${encodeURIComponent(selectedBrand)}/`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="flex items-center gap-2 px-3 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
