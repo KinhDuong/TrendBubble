@@ -10,6 +10,7 @@ import { TrendingUp, Calendar, Database, BarChart3, AlertCircle, CheckCircle, Ar
 interface BrandMetadata {
   brand: string;
   user_id: string | null;
+  username: string | null;
   keyword_count: number;
   total_volume: number;
   available_months: number;
@@ -48,6 +49,16 @@ export default function InsightsMetaPage() {
         return;
       }
 
+      const { data: userProfile, error: profileError } = await supabase
+        .from('user_profiles')
+        .select('username')
+        .eq('id', user.id)
+        .maybeSingle();
+
+      if (profileError) throw profileError;
+
+      const username = userProfile?.username || null;
+
       const { data: monthlyData, error: monthlyError } = await supabase
         .from('brand_keyword_monthly_data')
         .select('brand, month, keyword_count, total_volume, user_id')
@@ -78,6 +89,7 @@ export default function InsightsMetaPage() {
           brandMap.set(key, {
             brand: row.brand,
             user_id: row.user_id,
+            username: username,
             keyword_count: 0,
             total_volume: 0,
             available_months: 0,
@@ -343,10 +355,10 @@ export default function InsightsMetaPage() {
                       <td className="py-3 px-4 text-center">
                         <div className="flex items-center justify-center gap-2">
                           <button
-                            onClick={() => brand.user_id && navigate(`/insights/${encodeURIComponent(brand.user_id)}/${encodeURIComponent(brand.brand)}`)}
-                            disabled={!brand.user_id}
+                            onClick={() => brand.username && navigate(`/insights/${encodeURIComponent(brand.username)}/${encodeURIComponent(brand.brand)}`)}
+                            disabled={!brand.username}
                             className={`inline-flex items-center gap-1 px-3 py-1.5 rounded text-sm font-medium transition-colors ${
-                              !brand.user_id
+                              !brand.username
                                 ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
                                 : theme === 'dark'
                                 ? 'bg-blue-600 hover:bg-blue-700 text-white'

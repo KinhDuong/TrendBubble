@@ -69,6 +69,7 @@ export default function BrandInsightPage() {
   const [faqs, setFaqs] = useState<FAQ[]>([]);
   const [loading, setLoading] = useState(true);
   const [pageOwnerId, setPageOwnerId] = useState<string | null>(null);
+  const [pageOwnerUsername, setPageOwnerUsername] = useState<string | null>(null);
   const [aiAnalysis, setAiAnalysis] = useState<string | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState<string | null>(null);
@@ -297,10 +298,24 @@ export default function BrandInsightPage() {
         data = result.data;
         error = result.error;
       } else {
+        const { data: profileData, error: profileError } = await supabase
+          .from('user_profiles')
+          .select('id, username')
+          .eq('username', decodedPageIdOrUserId)
+          .maybeSingle();
+
+        if (profileError) throw profileError;
+
+        if (!profileData) {
+          return null;
+        }
+
+        setPageOwnerUsername(profileData.username);
+
         const result = await supabase
           .from('brand_pages')
           .select('*, user_id')
-          .eq('user_id', decodedPageIdOrUserId)
+          .eq('user_id', profileData.id)
           .eq('brand', decodedBrand)
           .maybeSingle();
         data = result.data;
@@ -312,6 +327,19 @@ export default function BrandInsightPage() {
       if (data) {
         setBrandPageData(data);
         await loadFAQs(data.id);
+
+        if (!pageOwnerUsername) {
+          const { data: profileData } = await supabase
+            .from('user_profiles')
+            .select('username')
+            .eq('id', data.user_id)
+            .maybeSingle();
+
+          if (profileData) {
+            setPageOwnerUsername(profileData.username);
+          }
+        }
+
         return data as BrandPageData & { user_id: string };
       } else {
         return null;
@@ -1326,7 +1354,7 @@ export default function BrandInsightPage() {
   const lastUpdated = new Date();
 
   const baseUrl = import.meta.env.VITE_BASE_URL || 'https://topbestcharts.com';
-  const pageUrl = userId ? `${baseUrl}/insights/${encodeURIComponent(userId)}/${encodeURIComponent(decodedBrand)}/` : `${baseUrl}/insights/`;
+  const pageUrl = pageOwnerUsername ? `${baseUrl}/insights/${encodeURIComponent(pageOwnerUsername)}/${encodeURIComponent(decodedBrand)}/` : `${baseUrl}/insights/`;
   const topTopicNames = topTopics.slice(0, 5).map(t => t.name).join(', ');
   const keywords = topTopics.slice(0, 10).map(t => t.name).join(', ') + ', keyword trends, search volume, SEO insights, brand analysis';
 
