@@ -1685,6 +1685,7 @@ async function prerenderBrandInsightPages(baseHTML, distPath) {
                   <th style="padding: 0.75rem 0.5rem; text-align: left; font-size: 0.75rem; font-weight: 600; color: #d1d5db;">#</th>
                   <th style="padding: 0.75rem 0.5rem; text-align: left; font-size: 0.75rem; font-weight: 600; color: #d1d5db;">Keyword</th>
                   <th style="padding: 0.75rem 0.5rem; text-align: left; font-size: 0.75rem; font-weight: 600; color: #d1d5db;">Volume</th>
+                  <th style="padding: 0.75rem 0.5rem; text-align: left; font-size: 0.75rem; font-weight: 600; color: #d1d5db;">Sentiment</th>
                   <th style="padding: 0.75rem 0.5rem; text-align: left; font-size: 0.75rem; font-weight: 600; color: #d1d5db;">Growth</th>
                 </tr>
               </thead>
@@ -1696,6 +1697,27 @@ async function prerenderBrandInsightPages(baseHTML, distPath) {
                   const category = keyword.ai_category || '';
                   const competition = keyword.competition || 'N/A';
                   const bidHigh = keyword['Top of page bid (high range)'] || 0;
+                  const sentimentScore = keyword.sentiment ? parseFloat(keyword.sentiment) : null;
+
+                  let sentimentLabel = '';
+                  let sentimentEmoji = '';
+                  let sentimentColor = '#9ca3af';
+
+                  if (sentimentScore !== null) {
+                    if (sentimentScore >= 0.6) {
+                      sentimentLabel = 'positive';
+                      sentimentEmoji = '😊';
+                      sentimentColor = '#10b981';
+                    } else if (sentimentScore <= 0.4) {
+                      sentimentLabel = 'negative';
+                      sentimentEmoji = '😞';
+                      sentimentColor = '#ef4444';
+                    } else {
+                      sentimentLabel = 'neutral';
+                      sentimentEmoji = '😐';
+                      sentimentColor = '#9ca3af';
+                    }
+                  }
 
                   return `
                   <tr style="border-bottom: 1px solid #374151;">
@@ -1706,6 +1728,12 @@ async function prerenderBrandInsightPages(baseHTML, distPath) {
                       <div style="font-size: 0.75rem; color: #9ca3af; margin-top: 0.25rem;">Comp: ${competition}${bidHigh > 0 ? ` • Bid: $${bidHigh.toFixed(2)}` : ''}</div>
                     </td>
                     <td style="padding: 0.75rem 0.5rem; color: #d1d5db; font-weight: 600;">${volume.toLocaleString()}</td>
+                    <td style="padding: 0.75rem 0.5rem;">
+                      ${sentimentLabel ? `<div style="display: flex; align-items: center; gap: 0.25rem; font-size: 0.75rem; color: ${sentimentColor};">
+                        <span style="font-size: 1rem;">${sentimentEmoji}</span>
+                        <span style="text-transform: capitalize;">${sentimentLabel}</span>
+                      </div>` : '<span style="color: #9ca3af; font-size: 0.75rem;">-</span>'}
+                    </td>
                     <td style="padding: 0.75rem 0.5rem;">
                       <div style="font-size: 0.75rem;">
                         <div style="color: ${threeMonth === 'N/A' ? '#9ca3af' : threeMonth.toString().startsWith('-') ? '#ef4444' : '#10b981'};">3mo: ${threeMonth}</div>
