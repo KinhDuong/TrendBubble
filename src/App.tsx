@@ -7,6 +7,7 @@ import Treemap from './components/Treemap';
 import DonutChart from './components/DonutChart';
 import FileUpload from './components/FileUpload';
 import Login from './components/Login';
+import UserLogin from './components/UserLogin';
 import Footer from './components/Footer';
 import Header from './components/Header';
 import FilterMenu, { BubbleLayout, Shape as FilterShape } from './components/FilterMenu';
@@ -844,7 +845,7 @@ function HomePage() {
   };
 
   if (!isAdmin && showLogin) {
-    return <Login onLogin={loadTopics} theme={theme} />;
+    return <UserLogin onClose={() => { setShowLogin(false); loadTopics(); }} theme={theme} />;
   }
 
   const topTopics = [...topics].sort((a, b) => b.searchVolume - a.searchVolume).slice(0, 10);
