@@ -320,6 +320,8 @@ export default function SEOStrategyInsights({ brandName, theme, userId, isOwner 
           );
         } else if (line.trim() === '') {
           // Skip empty lines between elements
+        } else if (line.trim().match(/^[-]+$/)) {
+          // Skip markdown horizontal rules (lines with only dashes)
         } else {
           elements.push(
             <p key={`p-${elements.length}`} className={`my-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'} leading-relaxed`}>
