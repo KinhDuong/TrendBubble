@@ -7,97 +7,12 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Client-Info, Apikey",
 };
 
-interface SearchIntentResult {
-  intent: 'transactional' | 'commercial' | 'local_transactional' | 'informational' | 'unknown';
-  confidence: number;
-  matchedPatterns: string[];
-}
-
-function classifySearchIntent(keyword: string): SearchIntentResult {
-  const lowerKeyword = keyword.toLowerCase().trim();
-
-  const transactionalPatterns = [
-    'buy', 'purchase', 'order', 'shop', 'sale', 'discount', 'coupon',
-    'promo code', 'deal', 'cheap', 'cheapest', 'affordable', 'price',
-    'pricing', 'cost', 'for sale', 'free shipping', 'delivery',
-    'subscribe', 'subscription', 'sign up', 'join', 'get',
-    'add to cart', 'checkout'
-  ];
-
-  const commercialPatterns = [
-    'best', 'top', 'review', 'reviews', 'comparison', 'compare',
-    'vs', 'versus', 'alternative', 'alternatives', 'recommended',
-    'rating', 'ratings', 'good', 'better', 'worth it', 'pros and cons',
-    'guide', 'how to choose'
-  ];
-
-  const localTransactionalPatterns = [
-    'near me', 'nearby', 'locations', 'store', 'open now', 'delivery near me'
-  ];
-
-  const informationalPatterns = [
-    'how to', 'what is', 'what are', 'why', 'benefits', 'difference between',
-    'tutorial', 'recipe', 'how do i', 'can i', 'does', 'tips', 'ideas',
-    'meaning', 'definition', 'ingredients', 'side effects', 'health benefits',
-    'calories in', 'nutrition', 'history of', 'is'
-  ];
-
-  const checkPatterns = (patterns: string[]) => {
-    return patterns.filter(pattern => lowerKeyword.includes(pattern));
-  };
-
-  const localMatches = checkPatterns(localTransactionalPatterns);
-  if (localMatches.length > 0) {
-    return {
-      intent: 'local_transactional',
-      confidence: 0.95,
-      matchedPatterns: localMatches
-    };
-  }
-
-  const transactionalMatches = checkPatterns(transactionalPatterns);
-  if (transactionalMatches.length > 0) {
-    return {
-      intent: 'transactional',
-      confidence: 0.9,
-      matchedPatterns: transactionalMatches
-    };
-  }
-
-  const commercialMatches = checkPatterns(commercialPatterns);
-  if (commercialMatches.length > 0) {
-    return {
-      intent: 'commercial',
-      confidence: 0.85,
-      matchedPatterns: commercialMatches
-    };
-  }
-
-  const informationalMatches = checkPatterns(informationalPatterns);
-  if (informationalMatches.length > 0) {
-    return {
-      intent: 'informational',
-      confidence: 0.8,
-      matchedPatterns: informationalMatches
-    };
-  }
-
-  return {
-    intent: 'unknown',
-    confidence: 0.5,
-    matchedPatterns: []
-  };
-}
-
 interface KeywordData {
   keyword: string;
   competition?: string;
   'Avg. monthly searches'?: number;
   'Top of page bid (low range)'?: number;
   'Top of page bid (high range)'?: number;
-  avg_cpc?: number;
-  volume?: number;
-  intent?: SearchIntentResult;
 }
 
 Deno.serve(async (req: Request) => {
@@ -120,6 +35,14 @@ Deno.serve(async (req: Request) => {
       return new Response(
         JSON.stringify({ error: "Authorization header is required" }),
         { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const openaiApiKey = Deno.env.get("OPENAI_API_KEY");
+    if (!openaiApiKey) {
+      return new Response(
+        JSON.stringify({ error: "OpenAI API key not configured" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
@@ -171,112 +94,76 @@ Deno.serve(async (req: Request) => {
     if (!keywords || keywords.length === 0) {
       return new Response(
         JSON.stringify({
-          insights: "No keyword data available for PPC analysis. Please upload keyword data first.",
-          campaigns: []
+          insights_markdown: "No keyword data available for PPC analysis. Please upload keyword data first."
         }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    const classifiedKeywords: KeywordData[] = keywords.map(kw => {
+    const keywordSummary = keywords.map(kw => {
       const lowBid = kw['Top of page bid (low range)'] || 0;
       const highBid = kw['Top of page bid (high range)'] || 0;
-      const avgCpc = lowBid && highBid ? (lowBid + highBid) / 2 : lowBid || highBid || 0;
+      const avgCpc = lowBid && highBid ? ((lowBid + highBid) / 2).toFixed(2) : (lowBid || highBid || 0).toFixed(2);
+      const volume = kw['Avg. monthly searches'] || 0;
 
-      return {
-        ...kw,
-        avg_cpc: avgCpc,
-        volume: kw['Avg. monthly searches'],
-        intent: classifySearchIntent(kw.keyword)
-      };
+      return `- "${kw.keyword}" (~${volume.toLocaleString()} searches, ${kw.competition || 'unknown'} competition, $${lowBid.toFixed(2)}–$${highBid.toFixed(2)} CPC)`;
+    }).join('\n');
+
+    const prompt = `You are an expert PPC strategist and Google Ads specialist with deep experience optimizing for ROAS using Keyword Planner data.
+
+I am providing a keyword dataset from Google Keyword Planner for the ${brandPage.brand} brand/niche. Key highlights:
+
+${keywordSummary}
+
+Provide a detailed PPC / Google Ads Campaigns analysis focused on paid traffic and ROAS. Structure your response exactly like this, using markdown:
+
+### PPC / Google Ads Campaigns Insights from the Dataset (Paid Traffic & ROAS)
+
+#### 1. High-ROAS Keywords to Target
+[Markdown table with columns: Keyword, Monthly Volume, Avg CPC (est.), Competition, Growth/Trend, Why High-ROAS for Ads]
+List 5–8 top keywords. Explain why they deliver strong returns (e.g., high LTV, conversion rates, intent strength).
+
+#### 2. Seasonal & Trend Timing Opportunities
+Bullet points on timing opportunities (e.g., spikes, emerging trends). Suggest when to ramp up budgets and related keywords (including alternatives/interception).
+
+#### 3. Keywords to Avoid or Use Cautiously (Low ROAS Traps)
+Bullet points explaining low-performing patterns (e.g., broad/local, vague intent, trademark risks). Recommend as negative keywords.
+
+#### 4. Recommended Campaign Types & Budget Tips
+[Markdown table with columns: Campaign Focus, Recommended Type, Budget/Timing Tips]
+Suggest Search, Shopping, PMax, etc., with allocation ideas.
+
+#### Bottom Line
+Short summary of the overall PPC strategy (focus areas, bidding tips, optimization advice).
+
+Use current 2025 trends and realistic CPC/ROAS benchmarks. Be actionable, specific, and professional. Use real markdown tables for clarity.`;
+
+    const openaiResponse = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${openaiApiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "user",
+            content: prompt
+          }
+        ],
+        temperature: 0.7,
+        max_tokens: 3000
+      })
     });
 
-    const transactionalKeywords = classifiedKeywords.filter(
-      kw => kw.intent?.intent === 'transactional' && kw.avg_cpc && kw.avg_cpc > 0
-    );
-
-    const commercialKeywords = classifiedKeywords.filter(
-      kw => kw.intent?.intent === 'commercial' && kw.avg_cpc && kw.avg_cpc > 0
-    );
-
-    const localKeywords = classifiedKeywords.filter(
-      kw => kw.intent?.intent === 'local_transactional' && kw.avg_cpc && kw.avg_cpc > 0
-    );
-
-    const topTransactional = transactionalKeywords
-      .sort((a, b) => (b.volume || 0) - (a.volume || 0))
-      .slice(0, 10);
-
-    const topCommercial = commercialKeywords
-      .sort((a, b) => (b.volume || 0) - (a.volume || 0))
-      .slice(0, 10);
-
-    const avgCpcTransactional = transactionalKeywords.reduce((sum, kw) => sum + (kw.avg_cpc || 0), 0) /
-      (transactionalKeywords.length || 1);
-
-    const avgCpcCommercial = commercialKeywords.reduce((sum, kw) => sum + (kw.avg_cpc || 0), 0) /
-      (commercialKeywords.length || 1);
-
-    const totalVolumeTransactional = transactionalKeywords.reduce((sum, kw) => sum + (kw.volume || 0), 0);
-    const totalVolumeCommercial = commercialKeywords.reduce((sum, kw) => sum + (kw.volume || 0), 0);
-
-    const insights = {
-      summary: {
-        totalKeywords: classifiedKeywords.length,
-        transactionalCount: transactionalKeywords.length,
-        commercialCount: commercialKeywords.length,
-        localCount: localKeywords.length,
-        avgCpcTransactional: avgCpcTransactional.toFixed(2),
-        avgCpcCommercial: avgCpcCommercial.toFixed(2),
-        totalVolumeTransactional,
-        totalVolumeCommercial
-      },
-      recommendations: {
-        priorityCampaign: transactionalKeywords.length > 0 ? 'transactional' : 'commercial',
-        budgetAllocation: {
-          transactional: '60-70%',
-          commercial: '20-30%',
-          local: '10%'
-        },
-        topTransactionalKeywords: topTransactional.map(kw => ({
-          keyword: kw.keyword,
-          cpc: kw.avg_cpc,
-          volume: kw.volume,
-          competition: kw.competition,
-          matchedPatterns: kw.intent?.matchedPatterns
-        })),
-        topCommercialKeywords: topCommercial.map(kw => ({
-          keyword: kw.keyword,
-          cpc: kw.avg_cpc,
-          volume: kw.volume,
-          competition: kw.competition,
-          matchedPatterns: kw.intent?.matchedPatterns
-        })),
-        warnings: []
-      }
-    };
-
-    if (avgCpcTransactional > 5) {
-      insights.recommendations.warnings.push(
-        `High average CPC ($${avgCpcTransactional.toFixed(2)}) for transactional keywords. Consider long-tail variations to reduce costs.`
-      );
+    if (!openaiResponse.ok) {
+      const errorData = await openaiResponse.text();
+      throw new Error(`OpenAI API error: ${errorData}`);
     }
 
-    if (transactionalKeywords.length === 0) {
-      insights.recommendations.warnings.push(
-        "No transactional keywords found. Consider adding 'buy', 'purchase', or 'order' related keywords to your strategy."
-      );
-    }
-
-    const highCompetitionTransactional = transactionalKeywords.filter(
-      kw => kw.competition && kw.competition.toUpperCase() === 'HIGH'
-    ).length;
-
-    if (highCompetitionTransactional > transactionalKeywords.length * 0.7) {
-      insights.recommendations.warnings.push(
-        "Over 70% of transactional keywords have high competition. Budget may need to be increased for visibility."
-      );
-    }
+    const openaiData = await openaiResponse.json();
+    const insightsMarkdown = openaiData.choices[0].message.content;
 
     const { data: existingInsights } = await supabase
       .from("brand_ppc_insights")
@@ -289,7 +176,7 @@ Deno.serve(async (req: Request) => {
       const { data, error: updateError } = await supabase
         .from("brand_ppc_insights")
         .update({
-          insights,
+          insights: { markdown: insightsMarkdown },
           updated_at: new Date().toISOString()
         })
         .eq("brand_page_id", brandPage.id)
@@ -306,7 +193,7 @@ Deno.serve(async (req: Request) => {
         .insert({
           brand_page_id: brandPage.id,
           user_id: user.id,
-          insights
+          insights: { markdown: insightsMarkdown }
         })
         .select("id, created_at, updated_at")
         .single();
@@ -319,7 +206,7 @@ Deno.serve(async (req: Request) => {
 
     return new Response(
       JSON.stringify({
-        ...insights,
+        insights_markdown: insightsMarkdown,
         metadata: {
           id: savedInsights.id,
           created_at: savedInsights.created_at,

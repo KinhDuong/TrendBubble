@@ -1,41 +1,10 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { DollarSign, TrendingUp, AlertTriangle, Target, Sparkles } from 'lucide-react';
+import { DollarSign, Sparkles, AlertTriangle } from 'lucide-react';
 
-interface PPCInsights {
-  summary: {
-    totalKeywords: number;
-    transactionalCount: number;
-    commercialCount: number;
-    localCount: number;
-    avgCpcTransactional: string;
-    avgCpcCommercial: string;
-    totalVolumeTransactional: number;
-    totalVolumeCommercial: number;
-  };
-  recommendations: {
-    priorityCampaign: string;
-    budgetAllocation: {
-      transactional: string;
-      commercial: string;
-      local: string;
-    };
-    topTransactionalKeywords: Array<{
-      keyword: string;
-      cpc: number;
-      volume: number;
-      competition: string;
-      matchedPatterns: string[];
-    }>;
-    topCommercialKeywords: Array<{
-      keyword: string;
-      cpc: number;
-      volume: number;
-      competition: string;
-      matchedPatterns: string[];
-    }>;
-    warnings: string[];
-  };
+interface PPCInsightsResponse {
+  insights_markdown?: string;
+  markdown?: string;
   metadata?: {
     id: string;
     created_at: string;
@@ -51,6 +20,122 @@ interface PPCCampaignInsightsProps {
   isOwner: boolean;
 }
 
+function MarkdownRenderer({ content, theme }: { content: string; theme: string }) {
+  const lines = content.split('\n');
+  const elements: JSX.Element[] = [];
+  let currentTable: string[][] = [];
+  let inTable = false;
+  let listItems: string[] = [];
+  let inList = false;
+
+  const flushList = () => {
+    if (listItems.length > 0) {
+      elements.push(
+        <ul key={elements.length} className={`mb-4 space-y-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+          {listItems.map((item, i) => (
+            <li key={i} className="ml-4">
+              <span className="mr-2">•</span>
+              {item}
+            </li>
+          ))}
+        </ul>
+      );
+      listItems = [];
+    }
+    inList = false;
+  };
+
+  const flushTable = () => {
+    if (currentTable.length > 0) {
+      const headers = currentTable[0];
+      const rows = currentTable.slice(2);
+
+      elements.push(
+        <div key={elements.length} className="overflow-x-auto mb-6">
+          <table className={`w-full border ${theme === 'dark' ? 'border-gray-600' : 'border-gray-300'}`}>
+            <thead className={theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'}>
+              <tr>
+                {headers.map((header, i) => (
+                  <th key={i} className={`px-4 py-2 text-left text-sm font-semibold border ${theme === 'dark' ? 'border-gray-600 text-gray-200' : 'border-gray-300 text-gray-700'}`}>
+                    {header.trim()}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((row, i) => (
+                <tr key={i} className={`border-b ${theme === 'dark' ? 'border-gray-700 hover:bg-gray-700/30' : 'border-gray-200 hover:bg-gray-50'}`}>
+                  {row.map((cell, j) => (
+                    <td key={j} className={`px-4 py-2 text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'} border ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
+                      {cell.trim()}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      );
+      currentTable = [];
+    }
+    inTable = false;
+  };
+
+  lines.forEach((line, index) => {
+    if (line.trim().startsWith('###')) {
+      flushList();
+      flushTable();
+      const text = line.replace(/^###\s*/, '');
+      elements.push(
+        <h3 key={elements.length} className={`text-2xl font-bold mt-8 mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+          {text}
+        </h3>
+      );
+    } else if (line.trim().startsWith('####')) {
+      flushList();
+      flushTable();
+      const text = line.replace(/^####\s*/, '');
+      elements.push(
+        <h4 key={elements.length} className={`text-xl font-semibold mt-6 mb-3 ${theme === 'dark' ? 'text-blue-400' : 'text-blue-700'}`}>
+          {text}
+        </h4>
+      );
+    } else if (line.trim().startsWith('|')) {
+      flushList();
+      if (!inTable) {
+        inTable = true;
+      }
+      const cells = line.split('|').filter(cell => cell.trim() !== '');
+      if (!line.includes('---')) {
+        currentTable.push(cells);
+      }
+    } else if (line.trim().startsWith('-') || line.trim().startsWith('•')) {
+      flushTable();
+      inList = true;
+      const text = line.replace(/^[-•]\s*/, '').trim();
+      if (text) {
+        listItems.push(text);
+      }
+    } else if (line.trim() === '') {
+      flushList();
+      flushTable();
+    } else if (line.trim()) {
+      flushList();
+      flushTable();
+      elements.push(
+        <p key={elements.length} className={`mb-3 leading-relaxed ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+          {line}
+        </p>
+      );
+    }
+  });
+
+  flushList();
+  flushTable();
+
+  return <div>{elements}</div>;
+}
+
 export default function PPCCampaignInsights({
   brandPageSlug,
   brandName,
@@ -58,7 +143,7 @@ export default function PPCCampaignInsights({
   userId,
   isOwner
 }: PPCCampaignInsightsProps) {
-  const [insights, setInsights] = useState<PPCInsights | null>(null);
+  const [insights, setInsights] = useState<PPCInsightsResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -86,7 +171,7 @@ export default function PPCCampaignInsights({
 
       if (existingInsights) {
         setInsights({
-          ...existingInsights.insights,
+          markdown: existingInsights.insights?.markdown,
           metadata: {
             id: existingInsights.id,
             created_at: existingInsights.created_at,
@@ -126,7 +211,10 @@ export default function PPCCampaignInsights({
       }
 
       const data = await response.json();
-      setInsights(data);
+      setInsights({
+        markdown: data.insights_markdown,
+        metadata: data.metadata
+      });
     } catch (err) {
       console.error('Error generating PPC insights:', err);
       setError(err instanceof Error ? err.message : 'Failed to generate PPC insights');
@@ -175,249 +263,36 @@ export default function PPCCampaignInsights({
         )}
 
         {loading && (
-          <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <div className="flex flex-col items-center justify-center py-12 gap-4">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
+            <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+              Analyzing your keyword data with AI...
+            </p>
           </div>
         )}
 
         {!loading && !insights && !error && (
           <div className={`text-center py-8 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-            <p>Click "Generate" to create PPC campaign insights for {brandName}.</p>
-            <p className="text-sm mt-2">This will analyze your keyword data and provide advertising recommendations.</p>
+            <p>Click "Generate" to create AI-powered PPC campaign insights for {brandName}.</p>
+            <p className="text-sm mt-2">This will analyze your keyword data and provide strategic advertising recommendations.</p>
           </div>
         )}
 
-        {!loading && insights && (
+        {!loading && insights && insights.markdown && (
           <div>
+            <MarkdownRenderer content={insights.markdown} theme={theme} />
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <div className={`p-4 rounded-lg ${theme === 'dark' ? 'bg-gray-700' : 'bg-blue-50'}`}>
-            <div className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
-              Transactional Keywords
-            </div>
-            <div className={`text-2xl font-bold mt-1 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-              {insights.summary.transactionalCount}
-            </div>
-            <div className={`text-xs mt-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-              Avg CPC: ${insights.summary.avgCpcTransactional}
-            </div>
-          </div>
-
-          <div className={`p-4 rounded-lg ${theme === 'dark' ? 'bg-gray-700' : 'bg-purple-50'}`}>
-            <div className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
-              Commercial Keywords
-            </div>
-            <div className={`text-2xl font-bold mt-1 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-              {insights.summary.commercialCount}
-            </div>
-            <div className={`text-xs mt-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-              Avg CPC: ${insights.summary.avgCpcCommercial}
-            </div>
-          </div>
-
-          <div className={`p-4 rounded-lg ${theme === 'dark' ? 'bg-gray-700' : 'bg-green-50'}`}>
-            <div className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
-              Total Search Volume
-            </div>
-            <div className={`text-2xl font-bold mt-1 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-              {(insights.summary.totalVolumeTransactional + insights.summary.totalVolumeCommercial).toLocaleString()}
-            </div>
-            <div className={`text-xs mt-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-              Monthly searches
-            </div>
-          </div>
-
-          <div className={`p-4 rounded-lg ${theme === 'dark' ? 'bg-gray-700' : 'bg-orange-50'}`}>
-            <div className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
-              Priority Campaign
-            </div>
-            <div className={`text-2xl font-bold mt-1 capitalize ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-              {insights.recommendations.priorityCampaign}
-            </div>
-            <div className={`text-xs mt-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-              Focus here first
-            </div>
-          </div>
-        </div>
-
-        {insights.recommendations.warnings.length > 0 && (
-          <div className={`mb-6 p-4 rounded-lg border ${theme === 'dark' ? 'bg-yellow-900/20 border-yellow-700' : 'bg-yellow-50 border-yellow-200'}`}>
-            <div className="flex items-start gap-2">
-              <AlertTriangle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
-              <div>
-                <h3 className={`font-semibold mb-2 ${theme === 'dark' ? 'text-yellow-400' : 'text-yellow-800'}`}>
-                  Warnings & Considerations
-                </h3>
-                <ul className={`space-y-1 text-sm ${theme === 'dark' ? 'text-yellow-300' : 'text-yellow-700'}`}>
-                  {insights.recommendations.warnings.map((warning, idx) => (
-                    <li key={idx}>• {warning}</li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          </div>
-        )}
-
-        <div className={`mb-6 p-4 rounded-lg ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-50'}`}>
-          <div className="flex items-center gap-2 mb-3">
-            <Target className="w-5 h-5 text-blue-600" />
-            <h3 className={`font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-              Recommended Budget Allocation
-            </h3>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <div className={`p-3 rounded ${theme === 'dark' ? 'bg-gray-600' : 'bg-white'}`}>
-              <div className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
-                Transactional
-              </div>
-              <div className={`text-lg font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                {insights.recommendations.budgetAllocation.transactional}
-              </div>
-            </div>
-            <div className={`p-3 rounded ${theme === 'dark' ? 'bg-gray-600' : 'bg-white'}`}>
-              <div className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
-                Commercial
-              </div>
-              <div className={`text-lg font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                {insights.recommendations.budgetAllocation.commercial}
-              </div>
-            </div>
-            <div className={`p-3 rounded ${theme === 'dark' ? 'bg-gray-600' : 'bg-white'}`}>
-              <div className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
-                Local
-              </div>
-              <div className={`text-lg font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                {insights.recommendations.budgetAllocation.local}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {insights.recommendations.topTransactionalKeywords.length > 0 && (
-          <div className="mb-6">
-            <div className="flex items-center gap-2 mb-3">
-              <TrendingUp className="w-5 h-5 text-green-600" />
-              <h3 className={`font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                Top Transactional Keywords (Ready to Buy)
-              </h3>
-            </div>
-            <div className="overflow-x-auto">
-              <table className={`w-full ${theme === 'dark' ? 'text-gray-300' : 'text-gray-900'}`}>
-                <thead>
-                  <tr className={`border-b ${theme === 'dark' ? 'border-gray-600' : 'border-gray-200'}`}>
-                    <th className={`text-left py-2 px-3 text-sm font-semibold ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                      Keyword
-                    </th>
-                    <th className={`text-right py-2 px-3 text-sm font-semibold ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                      CPC
-                    </th>
-                    <th className={`text-right py-2 px-3 text-sm font-semibold ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                      Volume
-                    </th>
-                    <th className={`text-center py-2 px-3 text-sm font-semibold ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                      Competition
-                    </th>
-                    <th className={`text-left py-2 px-3 text-sm font-semibold ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                      Intent Signals
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {insights.recommendations.topTransactionalKeywords.map((kw, idx) => (
-                    <tr key={idx} className={`border-b ${theme === 'dark' ? 'border-gray-700' : 'border-gray-100'}`}>
-                      <td className="py-2 px-3 text-sm font-medium">{kw.keyword}</td>
-                      <td className="py-2 px-3 text-sm text-right">${kw.cpc?.toFixed(2) || 'N/A'}</td>
-                      <td className="py-2 px-3 text-sm text-right">{kw.volume?.toLocaleString() || 'N/A'}</td>
-                      <td className="py-2 px-3 text-sm text-center">
-                        <span className={`px-2 py-1 rounded text-xs font-medium ${
-                          kw.competition === 'HIGH'
-                            ? 'bg-red-100 text-red-700'
-                            : kw.competition === 'MEDIUM'
-                            ? 'bg-yellow-100 text-yellow-700'
-                            : 'bg-green-100 text-green-700'
-                        }`}>
-                          {kw.competition || 'N/A'}
-                        </span>
-                      </td>
-                      <td className="py-2 px-3 text-xs">
-                        {kw.matchedPatterns?.join(', ') || 'N/A'}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
-        {insights.recommendations.topCommercialKeywords.length > 0 && (
-          <div>
-            <div className="flex items-center gap-2 mb-3">
-              <TrendingUp className="w-5 h-5 text-purple-600" />
-              <h3 className={`font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                Top Commercial Keywords (Research Intent)
-              </h3>
-            </div>
-            <div className="overflow-x-auto">
-              <table className={`w-full ${theme === 'dark' ? 'text-gray-300' : 'text-gray-900'}`}>
-                <thead>
-                  <tr className={`border-b ${theme === 'dark' ? 'border-gray-600' : 'border-gray-200'}`}>
-                    <th className={`text-left py-2 px-3 text-sm font-semibold ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                      Keyword
-                    </th>
-                    <th className={`text-right py-2 px-3 text-sm font-semibold ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                      CPC
-                    </th>
-                    <th className={`text-right py-2 px-3 text-sm font-semibold ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                      Volume
-                    </th>
-                    <th className={`text-center py-2 px-3 text-sm font-semibold ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                      Competition
-                    </th>
-                    <th className={`text-left py-2 px-3 text-sm font-semibold ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                      Intent Signals
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {insights.recommendations.topCommercialKeywords.map((kw, idx) => (
-                    <tr key={idx} className={`border-b ${theme === 'dark' ? 'border-gray-700' : 'border-gray-100'}`}>
-                      <td className="py-2 px-3 text-sm font-medium">{kw.keyword}</td>
-                      <td className="py-2 px-3 text-sm text-right">${kw.cpc?.toFixed(2) || 'N/A'}</td>
-                      <td className="py-2 px-3 text-sm text-right">{kw.volume?.toLocaleString() || 'N/A'}</td>
-                      <td className="py-2 px-3 text-sm text-center">
-                        <span className={`px-2 py-1 rounded text-xs font-medium ${
-                          kw.competition === 'HIGH'
-                            ? 'bg-red-100 text-red-700'
-                            : kw.competition === 'MEDIUM'
-                            ? 'bg-yellow-100 text-yellow-700'
-                            : 'bg-green-100 text-green-700'
-                        }`}>
-                          {kw.competition || 'N/A'}
-                        </span>
-                      </td>
-                      <td className="py-2 px-3 text-xs">
-                        {kw.matchedPatterns?.join(', ') || 'N/A'}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
-        {insights?.metadata && (
-          <p className={`text-sm mt-6 ${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>
-            Generated on {new Date(insights.metadata.updated_at || insights.metadata.created_at).toLocaleDateString('en-US', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-              hour: '2-digit',
-              minute: '2-digit'
-            })}
-          </p>
-        )}
+            {insights.metadata && (
+              <p className={`text-sm mt-8 pt-4 border-t ${theme === 'dark' ? 'text-gray-500 border-gray-700' : 'text-gray-500 border-gray-200'}`}>
+                Generated on {new Date(insights.metadata.updated_at || insights.metadata.created_at).toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })}
+              </p>
+            )}
           </div>
         )}
       </div>
