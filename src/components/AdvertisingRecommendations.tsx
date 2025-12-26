@@ -218,7 +218,13 @@ export default function AdvertisingRecommendations({ keywordData, brandName, the
     };
 
     const hasStrongBuyerSignals = (kwLower: string): boolean => {
-      const buyerWords = ['best', 'buy', 'order', 'delivery', 'shop online', 'purchase', 'sale'];
+      const buyerWords = [
+        'buy', 'purchase', 'order', 'shop', 'sale', 'discount', 'coupon',
+        'promo code', 'deal', 'cheap', 'cheapest', 'affordable', 'price',
+        'pricing', 'cost', 'for sale', 'free shipping', 'delivery',
+        'subscribe', 'subscription', 'sign up', 'join', 'get',
+        'add to cart', 'checkout', 'best'
+      ];
       return buyerWords.some(word => kwLower.includes(word));
     };
 
@@ -364,7 +370,7 @@ export default function AdvertisingRecommendations({ keywordData, brandName, the
         if (kw.avgCPC <= 0) return false;
         if (kw.avgCPC < 1.00 && kw.searchVolume < 50000) return false;
 
-        if (kw.searchVolume < 5000) return false;
+        if (kw.searchVolume < 500) return false;
         if (kw.searchVolume > 1000000) return false;
 
         if (isNavigationalOrCultural(kwLower)) return false;
