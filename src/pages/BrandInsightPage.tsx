@@ -2162,15 +2162,24 @@ export default function BrandInsightPage() {
                               const sentimentPercentage = Math.round(((avgSentiment + 1) / 2) * 100);
 
                               let sentimentLabel = 'Neutral';
-                              if (sentimentPercentage >= 55) sentimentLabel = 'Positive';
-                              else if (sentimentPercentage < 45) sentimentLabel = 'Negative';
-
                               let sentimentEmoji = '😐';
-                              if (sentimentPercentage >= 70) sentimentEmoji = '🤩';
-                              else if (sentimentPercentage >= 55) sentimentEmoji = '😊';
-                              else if (sentimentPercentage >= 45) sentimentEmoji = '😐';
-                              else if (sentimentPercentage >= 30) sentimentEmoji = '😕';
-                              else sentimentEmoji = '😢';
+
+                              if (sentimentPercentage >= 70) {
+                                sentimentLabel = 'Positive';
+                                sentimentEmoji = '🤩';
+                              } else if (sentimentPercentage >= 55) {
+                                sentimentLabel = 'Somewhat Positive';
+                                sentimentEmoji = '😊';
+                              } else if (sentimentPercentage >= 45) {
+                                sentimentLabel = 'Neutral';
+                                sentimentEmoji = '😐';
+                              } else if (sentimentPercentage >= 30) {
+                                sentimentLabel = 'Somewhat Negative';
+                                sentimentEmoji = '😕';
+                              } else {
+                                sentimentLabel = 'Negative';
+                                sentimentEmoji = '😢';
+                              }
 
                               return (
                                 <div className={`${theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-50'} rounded-lg p-6 h-full flex flex-col justify-center`}>
