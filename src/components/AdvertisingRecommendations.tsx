@@ -10,6 +10,7 @@ interface KeywordData {
   competition?: string;
   yoyChange?: string;
   threeMonthChange?: string;
+  isBranded?: boolean;
 }
 
 interface ScoredKeyword extends KeywordData {
@@ -59,6 +60,7 @@ export default function AdvertisingRecommendations({ keywordData, brandName, the
         competition: kw.competition,
         yoyChange,
         threeMonthChange,
+        isBranded: kw.is_branded || false,
       };
     });
 
@@ -154,6 +156,10 @@ export default function AdvertisingRecommendations({ keywordData, brandName, the
     };
 
     const isBrandKeyword = (kw: ScoredKeyword): boolean => {
+      // Check database field first
+      if (kw.isBranded === true) return true;
+
+      // Fallback to name matching
       if (!brandName) return false;
       const kwLower = kw.keyword.toLowerCase();
       const brandLower = brandName.toLowerCase();
@@ -310,37 +316,37 @@ export default function AdvertisingRecommendations({ keywordData, brandName, the
     };
 
     const highValueKeywords = scoredKeywords
-      .filter(kw => kw.avgCPC > 0)
+      .filter(kw => kw.avgCPC > 0 && !isBrandKeyword(kw))
       .map(kw => ({ ...kw, score: calculateHighValue(kw) }))
       .sort((a, b) => b.score - a.score)
       .slice(0, 10);
 
     const highPotentialKeywords = scoredKeywords
-      .filter(kw => kw.avgCPC > 0)
+      .filter(kw => kw.avgCPC > 0 && !isBrandKeyword(kw))
       .map(kw => ({ ...kw, score: calculateHighPotential(kw) }))
       .sort((a, b) => b.score - a.score)
       .slice(0, 10);
 
     const quickWinKeywords = scoredKeywords
-      .filter(kw => kw.avgCPC > 0)
+      .filter(kw => kw.avgCPC > 0 && !isBrandKeyword(kw))
       .map(kw => ({ ...kw, score: calculateQuickWin(kw) }))
       .sort((a, b) => b.score - a.score)
       .slice(0, 10);
 
     const defensiveKeywords = scoredKeywords
-      .filter(kw => isDefensiveKeyword(kw) && kw.avgCPC > 0)
+      .filter(kw => isDefensiveKeyword(kw) && kw.avgCPC > 0 && !isBrandKeyword(kw))
       .map(kw => ({ ...kw, score: calculateDefensive(kw) }))
       .sort((a, b) => b.score - a.score)
       .slice(0, 10);
 
     const budgetFriendlyKeywords = scoredKeywords
-      .filter(kw => kw.avgCPC > 0)
+      .filter(kw => kw.avgCPC > 0 && !isBrandKeyword(kw))
       .map(kw => ({ ...kw, score: calculateBudgetFriendly(kw) }))
       .sort((a, b) => b.score - a.score)
       .slice(0, 10);
 
     const longTailKeywords = scoredKeywords
-      .filter(kw => kw.keyword.split(' ').length >= 4 && kw.avgCPC > 0)
+      .filter(kw => kw.keyword.split(' ').length >= 4 && kw.avgCPC > 0 && !isBrandKeyword(kw))
       .map(kw => ({ ...kw, score: calculateLongTail(kw) }))
       .sort((a, b) => b.score - a.score)
       .slice(0, 10);
@@ -363,6 +369,7 @@ export default function AdvertisingRecommendations({ keywordData, brandName, the
 
         if (isNavigationalOrCultural(kwLower)) return false;
         if (isSuspiciouslyBranded(kw)) return false;
+        if (isBrandKeyword(kw)) return false;
 
         const hasNearMe = kwLower.includes('near me') || kwLower.includes('local');
         const hasProductModifier = hasProductSpecificModifiers(kwLower);
@@ -383,7 +390,7 @@ export default function AdvertisingRecommendations({ keywordData, brandName, the
       .slice(0, 10);
 
     const bestOverallKeywords = scoredKeywords
-      .filter(kw => kw.avgCPC > 0)
+      .filter(kw => kw.avgCPC > 0 && !isBrandKeyword(kw))
       .map(kw => {
         const hvScore = calculateHighValue(kw);
         const qwScore = calculateQuickWin(kw);
