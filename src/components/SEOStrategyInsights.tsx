@@ -17,6 +17,18 @@ interface SEOStrategy {
   analysis: string;
   created_at: string;
   updated_at: string;
+  top50Keywords?: Array<{
+    rank: number;
+    keyword: string;
+    volume: number;
+    competition: string;
+    threeMonthChange: string;
+    yoyChange: string;
+    priorityScore: number;
+    isBranded: boolean;
+  }>;
+  totalKeywords?: number;
+  qualifiedKeywords?: number;
 }
 
 export default function SEOStrategyInsights({ brandName, theme, userId, isOwner }: SEOStrategyInsightsProps) {
@@ -307,8 +319,180 @@ export default function SEOStrategyInsights({ brandName, theme, userId, isOwner 
         )}
 
         {!loading && strategy && (
-          <div className={`prose max-w-none ${theme === 'dark' ? 'prose-invert' : ''}`}>
-            {renderAnalysis(strategy.analysis)}
+          <div className={`${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+            {/* Dataset Overview */}
+            {strategy.totalKeywords !== undefined && strategy.qualifiedKeywords !== undefined && (
+              <div className={`mb-6 p-4 rounded-lg ${theme === 'dark' ? 'bg-gray-900/50 border border-gray-700' : 'bg-gray-50 border border-gray-200'}`}>
+                <h3 className={`text-lg font-semibold mb-3 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                  Dataset Overview
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>Total Keywords Analyzed</p>
+                    <p className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                      {strategy.totalKeywords.toLocaleString()}
+                    </p>
+                  </div>
+                  <div>
+                    <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>Qualified Opportunities</p>
+                    <p className={`text-2xl font-bold ${theme === 'dark' ? 'text-green-400' : 'text-green-600'}`}>
+                      {strategy.qualifiedKeywords.toLocaleString()}
+                    </p>
+                    <p className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>
+                      Low/Medium competition with sufficient traffic
+                    </p>
+                  </div>
+                  <div>
+                    <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>AI-Analyzed Keywords</p>
+                    <p className={`text-2xl font-bold ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`}>
+                      20
+                    </p>
+                    <p className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>
+                      Top priority with detailed strategy
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* AI Analysis */}
+            <div className={`prose max-w-none ${theme === 'dark' ? 'prose-invert' : ''} mb-8`}>
+              {renderAnalysis(strategy.analysis)}
+            </div>
+
+            {/* Top 50 Keywords Table */}
+            {strategy.top50Keywords && strategy.top50Keywords.length > 0 && (
+              <div className="mt-8 mb-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className={`text-xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                    Full Top 50 Keyword Reference
+                  </h3>
+                  <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                    All qualified keywords (Low/Medium competition)
+                  </p>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className={`min-w-full border-collapse text-sm ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
+                    <thead className={theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'}>
+                      <tr>
+                        <th className={`border px-3 py-2 text-left font-semibold ${theme === 'dark' ? 'border-gray-600 text-gray-200' : 'border-gray-300 text-gray-700'}`}>
+                          Rank
+                        </th>
+                        <th className={`border px-3 py-2 text-left font-semibold ${theme === 'dark' ? 'border-gray-600 text-gray-200' : 'border-gray-300 text-gray-700'}`}>
+                          Keyword
+                        </th>
+                        <th className={`border px-3 py-2 text-right font-semibold ${theme === 'dark' ? 'border-gray-600 text-gray-200' : 'border-gray-300 text-gray-700'}`}>
+                          Volume
+                        </th>
+                        <th className={`border px-3 py-2 text-center font-semibold ${theme === 'dark' ? 'border-gray-600 text-gray-200' : 'border-gray-300 text-gray-700'}`}>
+                          Competition
+                        </th>
+                        <th className={`border px-3 py-2 text-right font-semibold ${theme === 'dark' ? 'border-gray-600 text-gray-200' : 'border-gray-300 text-gray-700'}`}>
+                          3-Mo Change
+                        </th>
+                        <th className={`border px-3 py-2 text-right font-semibold ${theme === 'dark' ? 'border-gray-600 text-gray-200' : 'border-gray-300 text-gray-700'}`}>
+                          YoY Change
+                        </th>
+                        <th className={`border px-3 py-2 text-center font-semibold ${theme === 'dark' ? 'border-gray-600 text-gray-200' : 'border-gray-300 text-gray-700'}`}>
+                          Type
+                        </th>
+                        <th className={`border px-3 py-2 text-right font-semibold ${theme === 'dark' ? 'border-gray-600 text-gray-200' : 'border-gray-300 text-gray-700'}`}>
+                          Priority Score
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {strategy.top50Keywords.slice(0, 20).map((kw) => (
+                        <tr key={kw.rank} className={`${theme === 'dark' ? 'bg-blue-900/20 hover:bg-blue-900/30' : 'bg-blue-50 hover:bg-blue-100'}`}>
+                          <td className={`border px-3 py-2 font-semibold ${theme === 'dark' ? 'border-gray-600 text-blue-400' : 'border-gray-300 text-blue-600'}`}>
+                            {kw.rank}
+                          </td>
+                          <td className={`border px-3 py-2 ${theme === 'dark' ? 'border-gray-600 text-gray-200' : 'border-gray-300 text-gray-800'}`}>
+                            {kw.keyword}
+                          </td>
+                          <td className={`border px-3 py-2 text-right ${theme === 'dark' ? 'border-gray-600 text-gray-300' : 'border-gray-300 text-gray-700'}`}>
+                            {kw.volume.toLocaleString()}
+                          </td>
+                          <td className={`border px-3 py-2 text-center ${theme === 'dark' ? 'border-gray-600' : 'border-gray-300'}`}>
+                            <span className={`inline-block px-2 py-1 rounded-full text-xs font-semibold ${
+                              kw.competition === 'Low'
+                                ? theme === 'dark' ? 'bg-green-900/50 text-green-300' : 'bg-green-100 text-green-700'
+                                : theme === 'dark' ? 'bg-yellow-900/50 text-yellow-300' : 'bg-yellow-100 text-yellow-700'
+                            }`}>
+                              {kw.competition}
+                            </span>
+                          </td>
+                          <td className={`border px-3 py-2 text-right ${theme === 'dark' ? 'border-gray-600 text-gray-300' : 'border-gray-300 text-gray-700'}`}>
+                            {kw.threeMonthChange}
+                          </td>
+                          <td className={`border px-3 py-2 text-right ${theme === 'dark' ? 'border-gray-600 text-gray-300' : 'border-gray-300 text-gray-700'}`}>
+                            {kw.yoyChange}
+                          </td>
+                          <td className={`border px-3 py-2 text-center ${theme === 'dark' ? 'border-gray-600' : 'border-gray-300'}`}>
+                            <span className={`text-xs ${kw.isBranded ? theme === 'dark' ? 'text-purple-400' : 'text-purple-600' : theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                              {kw.isBranded ? 'Branded' : 'Non-Branded'}
+                            </span>
+                          </td>
+                          <td className={`border px-3 py-2 text-right font-semibold ${theme === 'dark' ? 'border-gray-600 text-gray-200' : 'border-gray-300 text-gray-800'}`}>
+                            {kw.priorityScore.toLocaleString()}
+                          </td>
+                        </tr>
+                      ))}
+                      {strategy.top50Keywords.length > 20 && (
+                        <>
+                          <tr className={theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'}>
+                            <td colSpan={8} className={`border px-3 py-2 text-center font-semibold ${theme === 'dark' ? 'border-gray-600 text-gray-400' : 'border-gray-300 text-gray-600'}`}>
+                              Keywords 21-50 (Reference Only - No AI Analysis)
+                            </td>
+                          </tr>
+                          {strategy.top50Keywords.slice(20).map((kw) => (
+                            <tr key={kw.rank} className={theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-50'}>
+                              <td className={`border px-3 py-2 ${theme === 'dark' ? 'border-gray-600 text-gray-400' : 'border-gray-300 text-gray-600'}`}>
+                                {kw.rank}
+                              </td>
+                              <td className={`border px-3 py-2 ${theme === 'dark' ? 'border-gray-600 text-gray-300' : 'border-gray-300 text-gray-700'}`}>
+                                {kw.keyword}
+                              </td>
+                              <td className={`border px-3 py-2 text-right ${theme === 'dark' ? 'border-gray-600 text-gray-300' : 'border-gray-300 text-gray-700'}`}>
+                                {kw.volume.toLocaleString()}
+                              </td>
+                              <td className={`border px-3 py-2 text-center ${theme === 'dark' ? 'border-gray-600' : 'border-gray-300'}`}>
+                                <span className={`inline-block px-2 py-1 rounded-full text-xs font-semibold ${
+                                  kw.competition === 'Low'
+                                    ? theme === 'dark' ? 'bg-green-900/50 text-green-300' : 'bg-green-100 text-green-700'
+                                    : theme === 'dark' ? 'bg-yellow-900/50 text-yellow-300' : 'bg-yellow-100 text-yellow-700'
+                                }`}>
+                                  {kw.competition}
+                                </span>
+                              </td>
+                              <td className={`border px-3 py-2 text-right ${theme === 'dark' ? 'border-gray-600 text-gray-300' : 'border-gray-300 text-gray-700'}`}>
+                                {kw.threeMonthChange}
+                              </td>
+                              <td className={`border px-3 py-2 text-right ${theme === 'dark' ? 'border-gray-600 text-gray-300' : 'border-gray-300 text-gray-700'}`}>
+                                {kw.yoyChange}
+                              </td>
+                              <td className={`border px-3 py-2 text-center ${theme === 'dark' ? 'border-gray-600' : 'border-gray-300'}`}>
+                                <span className={`text-xs ${kw.isBranded ? theme === 'dark' ? 'text-purple-400' : 'text-purple-600' : theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                                  {kw.isBranded ? 'Branded' : 'Non-Branded'}
+                                </span>
+                              </td>
+                              <td className={`border px-3 py-2 text-right ${theme === 'dark' ? 'border-gray-600 text-gray-300' : 'border-gray-300 text-gray-700'}`}>
+                                {kw.priorityScore.toLocaleString()}
+                              </td>
+                            </tr>
+                          ))}
+                        </>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+                <p className={`text-xs mt-3 ${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>
+                  <span className={theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}>Highlighted rows (1-20)</span> have detailed AI analysis above.
+                  Keywords 21-50 are qualified opportunities for secondary content planning.
+                </p>
+              </div>
+            )}
+
             <p className={`text-sm mt-6 ${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>
               Generated on {new Date(strategy.created_at).toLocaleDateString('en-US', {
                 year: 'numeric',

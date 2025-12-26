@@ -71,10 +71,17 @@ Deno.serve(async (req: Request) => {
       .maybeSingle();
 
     if (existingStrategy) {
+      // For cached strategies, we need to recalculate top50 if not stored
+      // Note: top50Keywords won't be available in old cached strategies
       return new Response(
         JSON.stringify({
           success: true,
-          data: existingStrategy,
+          data: {
+            ...existingStrategy,
+            top50Keywords: [], // Empty for cached - could recalculate if needed
+            totalKeywords: 0,
+            qualifiedKeywords: 0,
+          },
           cached: true,
         }),
         {
@@ -87,110 +94,294 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    // Fetch keyword data for the brand - only raw metrics
-    const { data: keywords, error: fetchError } = await supabaseClient
-      .from("brand_keyword_data")
-      .select('keyword, "Avg. monthly searches", "Three month change", "YoY change", competition')
+    // Fetch brand positioning if exists
+    const { data: brandPositioning } = await supabaseClient
+      .from("brand_positioning")
+      .select("*")
       .eq("brand", brand)
-      .order('"Avg. monthly searches"', { ascending: false })
-      .limit(200);
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    // Fetch keyword data with all monthly columns for seasonality analysis
+    const monthlyColumns = [
+      'Searches: Dec 2021', 'Searches: Jan 2022', 'Searches: Feb 2022', 'Searches: Mar 2022',
+      'Searches: Apr 2022', 'Searches: May 2022', 'Searches: Jun 2022', 'Searches: Jul 2022',
+      'Searches: Aug 2022', 'Searches: Sep 2022', 'Searches: Oct 2022', 'Searches: Nov 2022',
+      'Searches: Dec 2022', 'Searches: Jan 2023', 'Searches: Feb 2023', 'Searches: Mar 2023',
+      'Searches: Apr 2023', 'Searches: May 2023', 'Searches: Jun 2023', 'Searches: Jul 2023',
+      'Searches: Aug 2023', 'Searches: Sep 2023', 'Searches: Oct 2023', 'Searches: Nov 2023',
+      'Searches: Dec 2023', 'Searches: Jan 2024', 'Searches: Feb 2024', 'Searches: Mar 2024',
+      'Searches: Apr 2024', 'Searches: May 2024', 'Searches: Jun 2024', 'Searches: Jul 2024',
+      'Searches: Aug 2024', 'Searches: Sep 2024', 'Searches: Oct 2024', 'Searches: Nov 2024',
+      'Searches: Dec 2024', 'Searches: Jan 2025', 'Searches: Feb 2025', 'Searches: Mar 2025',
+      'Searches: Apr 2025', 'Searches: May 2025', 'Searches: Jun 2025', 'Searches: Jul 2025',
+      'Searches: Aug 2025', 'Searches: Sep 2025', 'Searches: Oct 2025', 'Searches: Nov 2025'
+    ].map(col => `"${col}"`).join(', ');
+
+    const { data: allKeywords, error: fetchError } = await supabaseClient
+      .from("brand_keyword_data")
+      .select(`keyword, "Avg. monthly searches", "Three month change", "YoY change", competition, is_branded, ${monthlyColumns}`)
+      .eq("brand", brand);
 
     if (fetchError) {
       throw new Error(`Failed to fetch keywords: ${fetchError.message}`);
     }
 
-    if (!keywords || keywords.length === 0) {
+    if (!allKeywords || allKeywords.length === 0) {
       throw new Error("No keyword data found for this brand");
     }
 
-    console.log(`Found ${keywords.length} keywords for ${brand}`);
+    console.log(`Found ${allKeywords.length} total keywords for ${brand}`);
 
-    // Format keywords as CSV-like data for GPT-4
-    const keywordDataCSV = keywords.map((k, i) =>
-      `${i + 1}. "${k.keyword}" | Volume: ${(k['Avg. monthly searches'] || 0).toLocaleString()}/mo | 3-Month Change: ${k['Three month change'] || 'N/A'} | YoY Change: ${k['YoY change'] || 'N/A'} | Competition: ${k.competition || 'N/A'}`
-    ).join('\n');
+    // Filter for Low/Medium competition only and apply minimum thresholds
+    const filteredKeywords = allKeywords.filter(k => {
+      const comp = k.competition;
+      const volume = k['Avg. monthly searches'] || 0;
 
-    const datasetSummary = `
-Brand: ${brand}
-Total Keywords Analyzed: ${keywords.length}
-Total Monthly Search Volume: ${keywords.reduce((sum, k) => sum + (k['Avg. monthly searches'] || 0), 0).toLocaleString()}
+      if (comp === 'Low' && volume >= 500) return true;
+      if (comp === 'Medium' && volume >= 2000) return true;
+      return false;
+    });
 
-RAW KEYWORD DATA (sorted by search volume):
-${keywordDataCSV}
-`;
+    console.log(`${filteredKeywords.length} keywords passed Low/Medium competition filter`);
+
+    if (filteredKeywords.length === 0) {
+      throw new Error("No keywords meet the Low/Medium competition criteria with sufficient traffic");
+    }
+
+    // Calculate priority scores with weighted multipliers
+    const scoredKeywords = filteredKeywords.map(k => {
+      const volume = k['Avg. monthly searches'] || 0;
+      const threeMonthChange = parseFloat(k['Three month change']?.replace('%', '') || '0');
+      const yoyChange = parseFloat(k['YoY change']?.replace('%', '') || '0');
+      const comp = k.competition;
+
+      // Growth multiplier: 1.0 baseline, +0.02 per percentage point of growth
+      const avgGrowth = (threeMonthChange + yoyChange) / 2;
+      const growthMultiplier = 1.0 + (avgGrowth / 100);
+
+      // Competition multiplier: Low = 2.5x, Medium = 1.0x
+      const compMultiplier = comp === 'Low' ? 2.5 : 1.0;
+
+      // Intent multiplier: Could add branded vs non-branded weight here
+      const intentMultiplier = 1.0;
+
+      const priorityScore = volume * growthMultiplier * compMultiplier * intentMultiplier;
+
+      return {
+        ...k,
+        priorityScore: Math.round(priorityScore)
+      };
+    });
+
+    // Sort by priority score and get top 50
+    const top50Keywords = scoredKeywords
+      .sort((a, b) => b.priorityScore - a.priorityScore)
+      .slice(0, 50);
+
+    console.log(`Selected top 50 keywords for analysis`);
+
+    // Get top 20 for AI deep-dive
+    const top20Keywords = top50Keywords.slice(0, 20);
+
+    // Format top 20 with seasonality data for AI analysis
+    const top20WithSeasonality = top20Keywords.map((k, i) => {
+      // Extract monthly data
+      const monthlyData: number[] = [];
+      const monthlyLabels: string[] = [];
+
+      ['Dec 2021', 'Jan 2022', 'Feb 2022', 'Mar 2022', 'Apr 2022', 'May 2022', 'Jun 2022', 'Jul 2022',
+       'Aug 2022', 'Sep 2022', 'Oct 2022', 'Nov 2022', 'Dec 2022', 'Jan 2023', 'Feb 2023', 'Mar 2023',
+       'Apr 2023', 'May 2023', 'Jun 2023', 'Jul 2023', 'Aug 2023', 'Sep 2023', 'Oct 2023', 'Nov 2023',
+       'Dec 2023', 'Jan 2024', 'Feb 2024', 'Mar 2024', 'Apr 2024', 'May 2024', 'Jun 2024', 'Jul 2024',
+       'Aug 2024', 'Sep 2024', 'Oct 2024', 'Nov 2024', 'Dec 2024', 'Jan 2025', 'Feb 2025', 'Mar 2025',
+       'Apr 2025', 'May 2025', 'Jun 2025', 'Jul 2025', 'Aug 2025', 'Sep 2025', 'Oct 2025', 'Nov 2025'].forEach(month => {
+        const value = k[`Searches: ${month}`];
+        if (value !== null && value !== undefined) {
+          monthlyData.push(value);
+          monthlyLabels.push(month);
+        }
+      });
+
+      // Calculate seasonality metrics
+      const validData = monthlyData.filter(v => v > 0);
+      const avgVolume = validData.length > 0 ? validData.reduce((a, b) => a + b, 0) / validData.length : 0;
+      const maxVolume = Math.max(...monthlyData);
+      const minVolume = Math.min(...validData);
+      const peakMonth = monthlyLabels[monthlyData.indexOf(maxVolume)];
+
+      // Calculate standard deviation for seasonality index
+      const variance = validData.reduce((sum, val) => sum + Math.pow(val - avgVolume, 2), 0) / validData.length;
+      const stdDev = Math.sqrt(variance);
+      const seasonalityIndex = avgVolume > 0 ? (stdDev / avgVolume) : 0;
+
+      const isHighSeasonality = seasonalityIndex > 0.3;
+
+      return `${i + 1}. "${k.keyword}"
+   - Volume: ${(k['Avg. monthly searches'] || 0).toLocaleString()}/mo
+   - Competition: ${k.competition} ${k.competition === 'Low' ? '🟢' : '🟡'}
+   - Growth: 3-Month: ${k['Three month change'] || 'N/A'} | YoY: ${k['YoY change'] || 'N/A'}
+   - Priority Score: ${k.priorityScore.toLocaleString()}
+   - Type: ${k.is_branded ? 'Branded' : 'Non-Branded'}
+   - Seasonality: ${isHighSeasonality ? `HIGH (${(seasonalityIndex * 100).toFixed(0)}% variance) - Peak: ${peakMonth}` : `Low (${(seasonalityIndex * 100).toFixed(0)}% variance)`}
+   - 48-Month Range: ${minVolume.toLocaleString()} - ${maxVolume.toLocaleString()}`;
+    }).join('\n\n');
+
+    // Brand positioning context
+    const brandContext = brandPositioning ? `
+BRAND POSITIONING CONTEXT:
+- Target Audience: ${brandPositioning.target_audience || 'Not specified'}
+- Positioning Attributes: ${brandPositioning.positioning?.join(', ') || 'Not specified'}
+- Competitive Positioning: ${brandPositioning.competitive_positioning || 'Not specified'}
+- Brand Voice: ${brandPositioning.brand_voice || 'Not specified'}
+- Unique Value Props: ${brandPositioning.unique_value_props?.join(', ') || 'Not specified'}
+
+Use this brand context to tailor your content recommendations and positioning strategy.
+` : '';
 
     const fullPrompt = `You are an expert SEO and content marketing strategist analyzing keyword data from Google Keyword Planner.
 
 BRAND: ${brand}
+${brandContext}
+
+SELECTION CRITERIA USED:
+- Competition: LOW or MEDIUM only (High competition excluded)
+- Minimum Traffic: Low comp ≥ 500/mo, Medium comp ≥ 2,000/mo
+- Priority Scoring: Low competition gets 2.5x multiplier (easier to rank)
+- Total Keywords Analyzed: ${allKeywords.length}
+- Qualified Keywords: ${filteredKeywords.length}
+- Top 50 Selected (provided below for reference)
+- **YOUR FOCUS: Deep analysis of TOP 20 ONLY**
 
 YOUR TASK:
-1. **Identify Branded vs. Non-Branded Keywords**: Determine which keywords contain the brand name or are direct brand variations (branded), versus generic industry/product terms (non-branded).
+Provide DETAILED, ACTIONABLE analysis for each of the TOP 20 keywords below. For EACH keyword, create a comprehensive strategy block including:
 
-2. **Categorize Keywords Strategically**: Group all keywords into meaningful categories such as:
-   - High Potential (high volume, strong growth, moderate competition)
-   - Rising Stars (strong growth trends, emerging opportunities)
-   - Competitive Challenges (high volume but saturated/high competition)
-   - Niche Opportunities (lower volume but targeted, low competition)
-   - Brand Protection (branded terms to defend/optimize)
-   - Other relevant categories you identify
+1. **Specific Content Angle** (not generic - give exact approach)
+2. **3-5 Ready-to-Use Title Options** (with character count)
+3. **Target Audience Profile** (demographics, pain points, search intent)
+4. **Content Structure** (H2/H3 outline with key sections)
+5. **Competitive Differentiation** (how to stand out)
+6. **Seasonality Strategy** (based on 48 months of data provided)
+7. **Expected Traffic Potential** (realistic CTR estimates for rank 3-7)
+8. **Why This Keyword Matters RIGHT NOW**
 
-3. **Analyze Growth Patterns**: Identify trending keywords based on 3-month and year-over-year changes.
+TOP 20 PRIORITY KEYWORDS (REQUIRES DEEP ANALYSIS):
+${top20WithSeasonality}
 
-4. **Prioritize Top 10 Opportunities**: List the most strategic keywords to target and explain why each matters.
+---
 
-5. **Provide Actionable Recommendations**: Create specific SEO and content strategies.
+ADDITIONAL CONTEXT - FULL TOP 50 KEYWORDS:
+(Reference only - do NOT provide detailed analysis for keywords 21-50)
 
-RAW KEYWORD DATA:
-${datasetSummary}
+${top50Keywords.slice(20).map((k, i) =>
+  `${i + 21}. "${k.keyword}" | ${(k['Avg. monthly searches'] || 0).toLocaleString()}/mo | ${k.competition} | Score: ${k.priorityScore.toLocaleString()}`
+).join('\n')}
 
-STRUCTURE YOUR RESPONSE EXACTLY AS FOLLOWS (using proper markdown):
+---
 
-### SEO Strategy Analysis for ${brand}
+STRUCTURE YOUR RESPONSE:
 
-#### Executive Summary
-Brief overview of key findings (3-4 sentences).
+# SEO Strategy: ${brand}
 
-#### Branded vs. Non-Branded Breakdown
-- **Branded Keywords**: Count and % (keywords containing brand name)
-- **Non-Branded Keywords**: Count and % (generic industry terms)
-- **Strategic Implications**: What this ratio means for the brand's SEO strategy
+## 📊 Executive Summary
+[3-4 sentences on overall opportunity, competition landscape, and strategic focus]
 
-#### Strategic Keyword Categories
-[Markdown table with columns: Category, # Keywords, Total Volume, Key Examples, Strategic Focus]
+---
 
-Organize keywords into your identified categories and explain what each category means for the strategy.
+## 🎯 TOP 20 PRIORITY KEYWORDS - DETAILED ANALYSIS
 
-#### Top 10 Priority Keywords
-[Markdown table with columns: Rank, Keyword, Type (Branded/Non-Branded), Volume, Growth Trend, Why Priority]
+### 1. [Keyword Name]
+**📈 Metrics:**
+- Monthly Volume: [volume]
+- Competition: [Low/Medium] [🟢/🟡]
+- Growth: [3-month] / [YoY]
+- Priority Score: [score]
 
-Explain specifically why each keyword is a top opportunity.
+**🎨 Content Strategy:**
 
-#### Growth Opportunities Analysis
-- **Rising Trends**: Keywords with strongest growth (3-month and YoY)
-- **Quick Wins**: Low competition, decent volume opportunities
-- **Long-term Plays**: High volume competitive terms worth pursuing
+**Recommended Titles (Choose One):**
+1. "[Title Option 1]" (62 chars)
+2. "[Title Option 2]" (58 chars)
+3. "[Title Option 3]" (65 chars)
 
-#### Content & SEO Recommendations
-##### Organic Traffic Growth
-- Specific content types to create (guides, comparisons, how-tos, etc.)
-- Content gaps to fill
-- Seasonal opportunities
+**Content Angle:**
+[Specific, detailed approach - NOT generic. Explain exactly what format, perspective, and hook to use]
 
-##### Technical SEO Priorities
-- On-page optimization priorities
-- Internal linking strategies
-- User intent optimization
+**Target Audience:**
+- [Demographic/psychographic profile]
+- [Pain points and motivations]
+- [Search intent: informational/commercial/transactional]
 
-#### Advertising Recommendations (Optional)
-If applicable, suggest paid search opportunities for high-intent keywords where organic ranking may be challenging.
+**Content Structure:**
+1. [H2: Opening hook and value prop]
+2. [H2: Main content section 1]
+   - H3: [Subsection]
+   - H3: [Subsection]
+3. [H2: Main content section 2]
+4. [H2: Actionable takeaways / CTA]
 
-#### Recommended Content Calendar
-[Markdown table with columns: Timeframe, Keyword Focus, Content Type, Priority]
+**Competitive Differentiation:**
+[How to make this content stand out from existing results]
 
-#### Bottom Line
-2-3 sentence summary of the overall strategy and expected impact.
+**Seasonality Strategy:** 📅
+- [Peak period based on data]
+- [Recommended publish timing]
+- [Historical pattern insights]
 
-Use current 2025 trends and best practices. Be specific, actionable, and data-driven. Use proper markdown tables throughout.`;
+**Expected Impact:**
+- Est. Monthly Organic Traffic: [range] visits
+- Conversion Potential: [Low/Medium/High]
+- Time to Rank: [realistic estimate]
+
+**Why This Matters:**
+[Specific reason this keyword is valuable RIGHT NOW]
+
+---
+
+### 2. [Next Keyword]
+[Repeat detailed analysis]
+
+[Continue for all 20 keywords]
+
+---
+
+## 📋 Keywords 21-50 Reference
+
+Below are the remaining qualified keywords. These didn't make the top 20 AI analysis but represent solid opportunities for secondary content planning:
+
+| Rank | Keyword | Volume | Competition | Priority Score | Type |
+|------|---------|--------|-------------|----------------|------|
+[Include simple table for keywords 21-50]
+
+---
+
+## 📅 90-Day Content Calendar
+
+Based on seasonality patterns and priority scores:
+
+| Week | Keyword | Content Type | Why Now |
+|------|---------|--------------|---------|
+[Create strategic publishing schedule]
+
+---
+
+## 🎯 Strategic Insights
+
+**Quick Wins (Next 30 Days):**
+[3-5 low-competition keywords you can rank for FAST with specific reasons]
+
+**Long-Term Plays (3-6 Months):**
+[3-5 medium-competition, higher-volume terms worth the investment]
+
+**Content Gaps Identified:**
+[Missing content types based on keyword patterns]
+
+**Competitive Positioning:**
+[Overall market positioning recommendations]
+
+---
+
+Use current 2025 SEO best practices. Be EXTREMELY specific and actionable - avoid generic advice. Each keyword should have a unique, tailored strategy.`;
 
     console.log(`Calling OpenAI to generate SEO strategy...`);
 
@@ -205,7 +396,7 @@ Use current 2025 trends and best practices. Be specific, actionable, and data-dr
         messages: [
           {
             role: "system",
-            content: "You are an expert SEO and content marketing strategist with deep expertise in keyword research and competitive analysis. Your role is to analyze raw keyword data from Google Keyword Planner and identify patterns, opportunities, and strategic insights. You excel at identifying branded vs. non-branded keywords, categorizing keywords strategically, spotting growth trends, and creating actionable SEO strategies. Always use proper markdown formatting including tables for clarity and professionalism."
+            content: "You are an expert SEO and content marketing strategist with deep expertise in keyword research and competitive analysis. Your role is to analyze raw keyword data from Google Keyword Planner and identify patterns, opportunities, and strategic insights. You excel at creating DETAILED, SPECIFIC content strategies for each keyword - not generic advice. You provide exact title options, content structures, and actionable recommendations. Always use proper markdown formatting including tables for clarity and professionalism."
           },
           {
             role: "user",
@@ -213,7 +404,7 @@ Use current 2025 trends and best practices. Be specific, actionable, and data-dr
           }
         ],
         temperature: 0.7,
-        max_tokens: 4000,
+        max_tokens: 8000,
       }),
     });
 
@@ -237,6 +428,18 @@ Use current 2025 trends and best practices. Be specific, actionable, and data-dr
 
     console.log(`AI analysis generated successfully. Saving to database...`);
 
+    // Prepare top 50 keywords data for frontend
+    const top50Data = top50Keywords.map((k, i) => ({
+      rank: i + 1,
+      keyword: k.keyword,
+      volume: k['Avg. monthly searches'] || 0,
+      competition: k.competition,
+      threeMonthChange: k['Three month change'] || 'N/A',
+      yoyChange: k['YoY change'] || 'N/A',
+      priorityScore: k.priorityScore,
+      isBranded: k.is_branded || false,
+    }));
+
     // Save to database
     const { data: savedStrategy, error: saveError } = await supabaseClient
       .from("brand_seo_strategy")
@@ -258,7 +461,12 @@ Use current 2025 trends and best practices. Be specific, actionable, and data-dr
     return new Response(
       JSON.stringify({
         success: true,
-        data: savedStrategy,
+        data: {
+          ...savedStrategy,
+          top50Keywords: top50Data,
+          totalKeywords: allKeywords.length,
+          qualifiedKeywords: filteredKeywords.length,
+        },
         cached: false,
       }),
       {
