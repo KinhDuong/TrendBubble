@@ -176,6 +176,52 @@ export default function SEOStrategyInsights({ brandName, theme, userId, isOwner 
     }
   };
 
+  // Parse text into sections
+  const parseAnalysisSections = (text: string) => {
+    const sections: { title: string; content: string }[] = [];
+    const lines = text.split('\n');
+    let currentSection = { title: '', content: '' };
+
+    for (const line of lines) {
+      if (line.startsWith('## ')) {
+        if (currentSection.title) {
+          sections.push(currentSection);
+        }
+        currentSection = { title: line.substring(3).trim(), content: '' };
+      } else {
+        currentSection.content += line + '\n';
+      }
+    }
+    if (currentSection.title) {
+      sections.push(currentSection);
+    }
+
+    return sections;
+  };
+
+  // Parse individual keyword analysis from TOP 10 section
+  const parseKeywordAnalyses = (content: string) => {
+    const analyses: string[] = [];
+    const lines = content.split('\n');
+    let currentAnalysis = '';
+
+    for (const line of lines) {
+      if (line.match(/^### \d+\./)) {
+        if (currentAnalysis.trim()) {
+          analyses.push(currentAnalysis.trim());
+        }
+        currentAnalysis = line + '\n';
+      } else {
+        currentAnalysis += line + '\n';
+      }
+    }
+    if (currentAnalysis.trim()) {
+      analyses.push(currentAnalysis.trim());
+    }
+
+    return analyses;
+  };
+
   // Render markdown-like content
   const renderAnalysis = (text: string) => {
     const lines = text.split('\n');
@@ -434,7 +480,52 @@ export default function SEOStrategyInsights({ brandName, theme, userId, isOwner 
 
             {/* AI Analysis */}
             <div className={`prose max-w-none ${theme === 'dark' ? 'prose-invert' : ''} mb-8`}>
-              {renderAnalysis(strategy.analysis)}
+              {(() => {
+                const sections = parseAnalysisSections(strategy.analysis);
+
+                return sections.map((section, sectionIdx) => {
+                  const isTop10Section = section.title.includes('TOP 10 PRIORITY KEYWORDS') || section.title.includes('TOP 10 KEYWORDS');
+
+                  if (isTop10Section) {
+                    const keywordAnalyses = parseKeywordAnalyses(section.content);
+                    const leftColumn = keywordAnalyses.slice(0, 5);
+                    const rightColumn = keywordAnalyses.slice(5, 10);
+
+                    return (
+                      <div key={`section-${sectionIdx}`}>
+                        <h2 className={`text-2xl font-bold mt-8 mb-6 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                          {section.title}
+                        </h2>
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                          <div className="space-y-6">
+                            {leftColumn.map((analysis, idx) => (
+                              <div key={`left-${idx}`} className={`p-4 rounded-lg border ${theme === 'dark' ? 'bg-gray-900/30 border-gray-700' : 'bg-gray-50 border-gray-200'}`}>
+                                {renderAnalysis(analysis)}
+                              </div>
+                            ))}
+                          </div>
+                          <div className="space-y-6">
+                            {rightColumn.map((analysis, idx) => (
+                              <div key={`right-${idx}`} className={`p-4 rounded-lg border ${theme === 'dark' ? 'bg-gray-900/30 border-gray-700' : 'bg-gray-50 border-gray-200'}`}>
+                                {renderAnalysis(analysis)}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  } else {
+                    return (
+                      <div key={`section-${sectionIdx}`}>
+                        <h2 className={`text-2xl font-bold mt-8 mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                          {section.title}
+                        </h2>
+                        {renderAnalysis(section.content)}
+                      </div>
+                    );
+                  }
+                });
+              })()}
             </div>
 
             {/* Top 50 Keywords Table */}

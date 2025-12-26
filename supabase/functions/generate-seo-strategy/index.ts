@@ -386,13 +386,6 @@ STRUCTURE YOUR RESPONSE:
 ## 🎯 TOP 10 PRIORITY KEYWORDS - DETAILED ANALYSIS
 
 ### 1. [Keyword Name]
-**📈 Metrics:**
-- Monthly Volume: [volume]
-- Competition: [Low/Medium] [🟢/🟡]
-- Growth: [3-month] / [YoY]
-- Priority Score: [score]
-
-**🎨 Content Strategy:**
 
 **Recommended Titles (Choose One):**
 1. \"[Title Option 1]\" (62 chars)
