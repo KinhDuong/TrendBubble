@@ -91,12 +91,11 @@ function classifySearchIntent(keyword: string): SearchIntentResult {
 
 interface KeywordData {
   keyword: string;
-  Competition?: string;
+  competition?: string;
   'Avg. monthly searches'?: number;
   'Top of page bid (low range)'?: number;
   'Top of page bid (high range)'?: number;
   avg_cpc?: number;
-  competition?: string;
   volume?: number;
   intent?: SearchIntentResult;
 }
@@ -160,7 +159,7 @@ Deno.serve(async (req: Request) => {
 
     const { data: keywords, error: keywordsError } = await supabase
       .from("brand_keyword_data")
-      .select(`keyword, "Competition", "Avg. monthly searches", "Top of page bid (low range)", "Top of page bid (high range)"`)
+      .select(`keyword, competition, "Avg. monthly searches", "Top of page bid (low range)", "Top of page bid (high range)"`)
       .eq("brand_page_id", brandPage.id)
       .not("Top of page bid (low range)", "is", null);
 
@@ -186,7 +185,6 @@ Deno.serve(async (req: Request) => {
       return {
         ...kw,
         avg_cpc: avgCpc,
-        competition: kw.Competition,
         volume: kw['Avg. monthly searches'],
         intent: classifySearchIntent(kw.keyword)
       };
