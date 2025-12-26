@@ -71,16 +71,88 @@ Deno.serve(async (req: Request) => {
       .maybeSingle();
 
     if (existingStrategy) {
-      // For cached strategies, we need to recalculate top50 if not stored
-      // Note: top50Keywords won't be available in old cached strategies
+      // For cached strategies, recalculate top50 data for display
+      // Fetch keyword data with monthly columns
+      const monthlyColumns = [
+        'Searches: Dec 2021', 'Searches: Jan 2022', 'Searches: Feb 2022', 'Searches: Mar 2022',
+        'Searches: Apr 2022', 'Searches: May 2022', 'Searches: Jun 2022', 'Searches: Jul 2022',
+        'Searches: Aug 2022', 'Searches: Sep 2022', 'Searches: Oct 2022', 'Searches: Nov 2022',
+        'Searches: Dec 2022', 'Searches: Jan 2023', 'Searches: Feb 2023', 'Searches: Mar 2023',
+        'Searches: Apr 2023', 'Searches: May 2023', 'Searches: Jun 2023', 'Searches: Jul 2023',
+        'Searches: Aug 2023', 'Searches: Sep 2023', 'Searches: Oct 2023', 'Searches: Nov 2023',
+        'Searches: Dec 2023', 'Searches: Jan 2024', 'Searches: Feb 2024', 'Searches: Mar 2024',
+        'Searches: Apr 2024', 'Searches: May 2024', 'Searches: Jun 2024', 'Searches: Jul 2024',
+        'Searches: Aug 2024', 'Searches: Sep 2024', 'Searches: Oct 2024', 'Searches: Nov 2024',
+        'Searches: Dec 2024', 'Searches: Jan 2025', 'Searches: Feb 2025', 'Searches: Mar 2025',
+        'Searches: Apr 2025', 'Searches: May 2025', 'Searches: Jun 2025', 'Searches: Jul 2025',
+        'Searches: Aug 2025', 'Searches: Sep 2025', 'Searches: Oct 2025', 'Searches: Nov 2025'
+      ].map(col => `"${col}"`).join(', ');
+
+      const { data: allKeywords } = await supabaseClient
+        .from("brand_keyword_data")
+        .select(`keyword, "Avg. monthly searches", "Three month change", "YoY change", competition, is_branded, ${monthlyColumns}`)
+        .eq("brand", brand);
+
+      let top50Data: any[] = [];
+      let totalKeywords = 0;
+      let qualifiedKeywords = 0;
+
+      if (allKeywords && allKeywords.length > 0) {
+        totalKeywords = allKeywords.length;
+
+        // Filter for Low/Medium competition
+        const filteredKeywords = allKeywords.filter(k => {
+          const comp = k.competition;
+          const volume = k['Avg. monthly searches'] || 0;
+          if (comp === 'Low' && volume >= 500) return true;
+          if (comp === 'Medium' && volume >= 2000) return true;
+          return false;
+        });
+
+        qualifiedKeywords = filteredKeywords.length;
+
+        // Calculate priority scores
+        const scoredKeywords = filteredKeywords.map(k => {
+          const volume = k['Avg. monthly searches'] || 0;
+          const threeMonthChange = parseFloat(k['Three month change']?.replace('%', '') || '0');
+          const yoyChange = parseFloat(k['YoY change']?.replace('%', '') || '0');
+          const comp = k.competition;
+          const avgGrowth = (threeMonthChange + yoyChange) / 2;
+          const growthMultiplier = 1.0 + (avgGrowth / 100);
+          const compMultiplier = comp === 'Low' ? 2.5 : 1.0;
+          const priorityScore = volume * growthMultiplier * compMultiplier;
+
+          return {
+            ...k,
+            priorityScore: Math.round(priorityScore)
+          };
+        });
+
+        // Get top 50
+        const top50Keywords = scoredKeywords
+          .sort((a, b) => b.priorityScore - a.priorityScore)
+          .slice(0, 50);
+
+        top50Data = top50Keywords.map((k, i) => ({
+          rank: i + 1,
+          keyword: k.keyword,
+          volume: k['Avg. monthly searches'] || 0,
+          competition: k.competition,
+          threeMonthChange: k['Three month change'] || 'N/A',
+          yoyChange: k['YoY change'] || 'N/A',
+          priorityScore: k.priorityScore,
+          isBranded: k.is_branded || false,
+        }));
+      }
+
       return new Response(
         JSON.stringify({
           success: true,
           data: {
             ...existingStrategy,
-            top50Keywords: [], // Empty for cached - could recalculate if needed
-            totalKeywords: 0,
-            qualifiedKeywords: 0,
+            top50Keywords: top50Data,
+            totalKeywords: totalKeywords,
+            qualifiedKeywords: qualifiedKeywords,
           },
           cached: true,
         }),
