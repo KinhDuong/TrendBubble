@@ -61,6 +61,7 @@ export default function BrandDataManager() {
   const [creatingPage, setCreatingPage] = useState(false);
   const [selectedKeywords, setSelectedKeywords] = useState<string[]>([]);
   const [showMergeReview, setShowMergeReview] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const fetchBrands = async () => {
     try {
@@ -286,9 +287,7 @@ export default function BrandDataManager() {
     await fetchData();
   };
 
-  const handleDeleteBrand = async (brand: string) => {
-    if (!confirm(`Are you sure you want to delete all data for "${brand}"?`)) return;
-
+  const handleDeleteBrand = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
@@ -296,16 +295,18 @@ export default function BrandDataManager() {
       const { error } = await supabase
         .from('brand_keyword_data')
         .delete()
-        .eq('brand', brand)
+        .eq('brand', selectedBrand)
         .eq('user_id', user.id);
 
       if (error) throw error;
 
       await fetchData();
       setSelectedBrand('all');
+      setShowDeleteConfirm(false);
     } catch (error) {
       console.error('Error deleting brand:', error);
       alert('Failed to delete brand data');
+      setShowDeleteConfirm(false);
     }
   };
 
@@ -1050,7 +1051,7 @@ export default function BrandDataManager() {
                     </button>
                   )}
                   <button
-                    onClick={() => handleDeleteBrand(selectedBrand)}
+                    onClick={() => setShowDeleteConfirm(true)}
                     className="flex items-center gap-2 px-3 py-1.5 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -1195,6 +1196,44 @@ export default function BrandDataManager() {
           onClose={() => setShowMergeReview(false)}
           onMergeComplete={handleMergeComplete}
         />
+      )}
+
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-xl max-w-md w-full p-6`}>
+            <div className="flex items-start gap-4 mb-6">
+              <div className="flex-shrink-0 w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
+                <Trash2 className="w-6 h-6 text-red-600" />
+              </div>
+              <div className="flex-1">
+                <h3 className={`text-lg font-semibold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                  Delete All Data?
+                </h3>
+                <p className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+                  Are you sure you want to delete all keyword data for "{selectedBrand}"? This action cannot be undone.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center justify-end gap-3">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                  theme === 'dark'
+                    ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`}
+              >
+                No, Cancel
+              </button>
+              <button
+                onClick={handleDeleteBrand}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors"
+              >
+                Yes, Delete
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
