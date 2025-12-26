@@ -467,29 +467,44 @@ export default function SEOStrategyInsights({ brandName, theme, userId, isOwner 
 
                   if (isTop10Section) {
                     const keywordAnalyses = parseKeywordAnalyses(section.content);
-                    const leftColumn = keywordAnalyses.slice(0, 5);
-                    const rightColumn = keywordAnalyses.slice(5, 10);
 
                     return (
                       <div key={`section-${sectionIdx}`}>
                         <h2 className={`text-2xl font-bold mt-8 mb-6 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                           {section.title}
                         </h2>
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                          <div className="space-y-6">
-                            {leftColumn.map((analysis, idx) => (
-                              <div key={`left-${idx}`} className={`p-4 rounded-lg border ${theme === 'dark' ? 'bg-gray-900/30 border-gray-700' : 'bg-gray-50 border-gray-200'}`}>
-                                {renderAnalysis(analysis)}
-                              </div>
-                            ))}
-                          </div>
-                          <div className="space-y-6">
-                            {rightColumn.map((analysis, idx) => (
-                              <div key={`right-${idx}`} className={`p-4 rounded-lg border ${theme === 'dark' ? 'bg-gray-900/30 border-gray-700' : 'bg-gray-50 border-gray-200'}`}>
-                                {renderAnalysis(analysis)}
-                              </div>
-                            ))}
-                          </div>
+                        <div className="space-y-3">
+                          {keywordAnalyses.map((analysis, idx) => {
+                            // Extract keyword title from the analysis
+                            const titleMatch = analysis.match(/^### (\d+\..+?)$/m);
+                            const keywordTitle = titleMatch ? titleMatch[1] : `Keyword ${idx + 1}`;
+
+                            return (
+                              <details
+                                key={`keyword-${idx}`}
+                                className={`group rounded-lg border ${theme === 'dark' ? 'bg-gray-900/30 border-gray-700' : 'bg-white border-gray-200'} overflow-hidden`}
+                              >
+                                <summary className={`cursor-pointer list-none p-4 font-semibold flex items-center justify-between transition-colors ${
+                                  theme === 'dark'
+                                    ? 'hover:bg-gray-800/50 text-gray-200'
+                                    : 'hover:bg-gray-50 text-gray-900'
+                                }`}>
+                                  <span className="flex-1">{keywordTitle}</span>
+                                  <svg
+                                    className="w-5 h-5 transition-transform group-open:rotate-180"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                  </svg>
+                                </summary>
+                                <div className={`p-4 pt-0 border-t ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
+                                  {renderAnalysis(analysis)}
+                                </div>
+                              </details>
+                            );
+                          })}
                         </div>
                       </div>
                     );
