@@ -91,6 +91,10 @@ function classifySearchIntent(keyword: string): SearchIntentResult {
 
 interface KeywordData {
   keyword: string;
+  Competition?: string;
+  'Avg. monthly searches'?: number;
+  'Top of page bid (low range)'?: number;
+  'Top of page bid (high range)'?: number;
   avg_cpc?: number;
   competition?: string;
   volume?: number;
@@ -156,9 +160,9 @@ Deno.serve(async (req: Request) => {
 
     const { data: keywords, error: keywordsError } = await supabase
       .from("brand_keyword_data")
-      .select("keyword, avg_cpc, competition, volume")
+      .select(`keyword, "Competition", "Avg. monthly searches", "Top of page bid (low range)", "Top of page bid (high range)"`)
       .eq("brand_page_id", brandPage.id)
-      .not("avg_cpc", "is", null);
+      .not("Top of page bid (low range)", "is", null);
 
     if (keywordsError) {
       throw keywordsError;
@@ -174,10 +178,19 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    const classifiedKeywords: KeywordData[] = keywords.map(kw => ({
-      ...kw,
-      intent: classifySearchIntent(kw.keyword)
-    }));
+    const classifiedKeywords: KeywordData[] = keywords.map(kw => {
+      const lowBid = kw['Top of page bid (low range)'] || 0;
+      const highBid = kw['Top of page bid (high range)'] || 0;
+      const avgCpc = lowBid && highBid ? (lowBid + highBid) / 2 : lowBid || highBid || 0;
+
+      return {
+        ...kw,
+        avg_cpc: avgCpc,
+        competition: kw.Competition,
+        volume: kw['Avg. monthly searches'],
+        intent: classifySearchIntent(kw.keyword)
+      };
+    });
 
     const transactionalKeywords = classifiedKeywords.filter(
       kw => kw.intent?.intent === 'transactional' && kw.avg_cpc && kw.avg_cpc > 0
@@ -257,7 +270,7 @@ Deno.serve(async (req: Request) => {
     }
 
     const highCompetitionTransactional = transactionalKeywords.filter(
-      kw => kw.competition === 'HIGH'
+      kw => kw.competition && kw.competition.toUpperCase() === 'HIGH'
     ).length;
 
     if (highCompetitionTransactional > transactionalKeywords.length * 0.7) {
