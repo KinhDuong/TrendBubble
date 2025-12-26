@@ -73,7 +73,7 @@ export default function PPCCampaignInsights({
       const { data: brandPage } = await supabase
         .from('brand_pages')
         .select('id')
-        .eq('slug', brandPageSlug)
+        .eq('brand', brandPageSlug)
         .maybeSingle();
 
       if (!brandPage) return;

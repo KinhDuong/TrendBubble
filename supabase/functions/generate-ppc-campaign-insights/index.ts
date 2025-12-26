@@ -136,8 +136,8 @@ Deno.serve(async (req: Request) => {
 
     const { data: brandPage, error: pageError } = await supabase
       .from("brand_pages")
-      .select("id, brand_name, user_id")
-      .eq("slug", brandPageSlug)
+      .select("id, brand, user_id")
+      .eq("brand", brandPageSlug)
       .maybeSingle();
 
     if (pageError || !brandPage) {
