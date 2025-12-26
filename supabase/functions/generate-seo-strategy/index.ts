@@ -102,6 +102,13 @@ Deno.serve(async (req: Request) => {
 
         // Filter for Low/Medium competition
         const filteredKeywords = allKeywords.filter(k => {
+          const keyword = (k.keyword || '').toLowerCase();
+
+          // Exclude "near me" and "close to me" keywords
+          if (keyword.includes('near me') || keyword.includes('close to me')) {
+            return false;
+          }
+
           const comp = k.competition;
           const volume = k['Avg. monthly searches'] || 0;
           if (comp === 'Low' && volume >= 500) return true;
@@ -207,6 +214,13 @@ Deno.serve(async (req: Request) => {
 
     // Filter for Low/Medium competition only and apply minimum thresholds
     const filteredKeywords = allKeywords.filter(k => {
+      const keyword = (k.keyword || '').toLowerCase();
+
+      // Exclude "near me" and "close to me" keywords
+      if (keyword.includes('near me') || keyword.includes('close to me')) {
+        return false;
+      }
+
       const comp = k.competition;
       const volume = k['Avg. monthly searches'] || 0;
 
@@ -319,6 +333,7 @@ ${brandContext}
 SELECTION CRITERIA USED:
 - Competition: LOW or MEDIUM only (High competition excluded)
 - Minimum Traffic: Low comp ≥ 500/mo, Medium comp ≥ 2,000/mo
+- Excluded: Keywords containing "near me" or "close to me" (local intent)
 - Priority Scoring: Low competition gets 2.5x multiplier (easier to rank)
 - Total Keywords Analyzed: ${allKeywords.length}
 - Qualified Keywords: ${filteredKeywords.length}
