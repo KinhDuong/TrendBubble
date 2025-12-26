@@ -2142,12 +2142,12 @@ export default function BrandInsightPage() {
                 </div>
               )}
 
-              {keywordData.length > 0 && user && (
+              {keywordData.length > 0 && pageOwnerId && (
                 <SEOStrategyInsights
                   brandName={decodedBrand}
                   theme={theme}
-                  userId={user.id}
-                  isOwner={user.id === pageOwnerId || isAdmin}
+                  userId={pageOwnerId}
+                  isOwner={user ? (user.id === pageOwnerId || isAdmin) : false}
                 />
               )}
 

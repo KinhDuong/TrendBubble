@@ -44,21 +44,30 @@ export default function SEOStrategyInsights({ brandName, theme, userId, isOwner 
   }, [brandName, userId]);
 
   const loadStrategy = async () => {
-    if (!userId) return;
+    if (!userId) {
+      console.log('SEO Strategy: No userId provided, skipping load');
+      return;
+    }
+
+    console.log(`SEO Strategy: Loading for brand="${brandName}", userId="${userId}"`);
 
     try {
-      // Directly query database for existing strategy
+      // Directly query database for existing strategy (get latest one)
       const { data: existingStrategy, error } = await supabase
         .from('brand_seo_strategy')
         .select('*')
         .eq('brand_name', brandName)
         .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(1)
         .maybeSingle();
 
       if (error) {
         console.error('Error loading SEO strategy:', error);
         return;
       }
+
+      console.log('SEO Strategy query result:', existingStrategy ? `Found (${existingStrategy.analysis?.length || 0} chars)` : 'Not found');
 
       if (existingStrategy) {
         // Fetch keyword data to calculate top50 for display
