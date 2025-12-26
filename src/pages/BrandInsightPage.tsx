@@ -2048,14 +2048,12 @@ export default function BrandInsightPage() {
                                               {topic.competition}
                                             </span>
                                           </div>
-                                          {topic.bidHigh > 0 && (
-                                            <div>
-                                              <span className={`${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>Bid: </span>
-                                              <span className={`font-semibold ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                                                ${topic.bidHigh.toFixed(2)}
-                                              </span>
-                                            </div>
-                                          )}
+                                          <div>
+                                            <span className={`${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>Bid: </span>
+                                            <span className={`font-semibold ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                                              {topic.bidHigh > 0 ? `$${topic.bidHigh.toFixed(2)}` : 'N/A'}
+                                            </span>
+                                          </div>
                                           {topic.sentiment !== undefined && topic.sentiment !== null && (
                                             <div className="col-span-2 md:col-span-1">
                                               <div className="flex items-center gap-1.5">
