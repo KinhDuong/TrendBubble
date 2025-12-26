@@ -455,40 +455,6 @@ export default function SEOStrategyInsights({ brandName, theme, userId, isOwner 
         {!loading && strategy && (
           <div className={`${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
             {console.log('Rendering strategy:', { hasAnalysis: !!strategy.analysis, analysisLength: strategy.analysis?.length })}
-            {/* Dataset Overview */}
-            {strategy.totalKeywords !== undefined && strategy.qualifiedKeywords !== undefined && (
-              <div className={`mb-6 p-4 rounded-lg ${theme === 'dark' ? 'bg-gray-900/50 border border-gray-700' : 'bg-gray-50 border border-gray-200'}`}>
-                <h3 className={`text-lg font-semibold mb-3 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                  Dataset Overview
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>Total Keywords Analyzed</p>
-                    <p className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                      {strategy.totalKeywords.toLocaleString()}
-                    </p>
-                  </div>
-                  <div>
-                    <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>Qualified Opportunities</p>
-                    <p className={`text-2xl font-bold ${theme === 'dark' ? 'text-green-400' : 'text-green-600'}`}>
-                      {strategy.qualifiedKeywords.toLocaleString()}
-                    </p>
-                    <p className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>
-                      Low/Medium competition with sufficient traffic
-                    </p>
-                  </div>
-                  <div>
-                    <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>AI-Analyzed Keywords</p>
-                    <p className={`text-2xl font-bold ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`}>
-                      10
-                    </p>
-                    <p className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>
-                      Top priority with detailed strategy
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
 
             {/* AI Analysis */}
             <div className={`prose max-w-none ${theme === 'dark' ? 'prose-invert' : ''} mb-8`}>
