@@ -5,7 +5,8 @@ import { useAuth } from '../hooks/useAuth';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import Login from '../components/Login';
-import { Trash2, Search, Download, RefreshCw, Filter, Sparkles, Eye, EyeOff, Globe, Lock, ExternalLink, AlertCircle } from 'lucide-react';
+import KeywordMergeReview from '../components/KeywordMergeReview';
+import { Trash2, Search, Download, RefreshCw, Filter, Sparkles, Eye, EyeOff, Globe, Lock, ExternalLink, AlertCircle, GitMerge } from 'lucide-react';
 
 interface BrandKeywordData {
   id: string;
@@ -58,6 +59,8 @@ export default function BrandDataManager() {
   const [brandPage, setBrandPage] = useState<{ id: string; is_public: boolean } | null>(null);
   const [togglingPublic, setTogglingPublic] = useState(false);
   const [creatingPage, setCreatingPage] = useState(false);
+  const [selectedKeywords, setSelectedKeywords] = useState<string[]>([]);
+  const [showMergeReview, setShowMergeReview] = useState(false);
 
   const fetchBrands = async () => {
     try {
@@ -253,6 +256,34 @@ export default function BrandDataManager() {
       console.error('Error deleting record:', error);
       alert('Failed to delete record');
     }
+  };
+
+  const handleSelectKeyword = (id: string) => {
+    setSelectedKeywords(prev =>
+      prev.includes(id) ? prev.filter(k => k !== id) : [...prev, id]
+    );
+  };
+
+  const handleSelectAll = () => {
+    if (selectedKeywords.length === filteredData.length) {
+      setSelectedKeywords([]);
+    } else {
+      setSelectedKeywords(filteredData.map(d => d.id));
+    }
+  };
+
+  const handleMergeClick = () => {
+    if (selectedKeywords.length < 2) {
+      alert('Please select at least 2 keywords to merge');
+      return;
+    }
+    setShowMergeReview(true);
+  };
+
+  const handleMergeComplete = async () => {
+    setShowMergeReview(false);
+    setSelectedKeywords([]);
+    await fetchData();
   };
 
   const handleDeleteBrand = async (brand: string) => {
@@ -997,17 +1028,35 @@ export default function BrandDataManager() {
               )}
 
               <div className="flex items-center justify-between">
-                <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                  Showing <span className="font-semibold">{filteredData.length}</span> of <span className="font-semibold">{data.length}</span> records
-                </p>
+                <div className="flex items-center gap-4">
+                  <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                    Showing <span className="font-semibold">{filteredData.length}</span> of <span className="font-semibold">{data.length}</span> records
+                  </p>
+                  {selectedKeywords.length > 0 && (
+                    <p className="text-sm text-blue-600 font-semibold">
+                      {selectedKeywords.length} selected
+                    </p>
+                  )}
+                </div>
 
-                <button
-                  onClick={() => handleDeleteBrand(selectedBrand)}
-                  className="flex items-center gap-2 px-3 py-1.5 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-                >
-                  <Trash2 className="w-4 h-4" />
-                  Delete All {selectedBrand} Data
-                </button>
+                <div className="flex items-center gap-2">
+                  {selectedKeywords.length >= 2 && (
+                    <button
+                      onClick={handleMergeClick}
+                      className="flex items-center gap-2 px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                      <GitMerge className="w-4 h-4" />
+                      Merge {selectedKeywords.length} Keywords
+                    </button>
+                  )}
+                  <button
+                    onClick={() => handleDeleteBrand(selectedBrand)}
+                    className="flex items-center gap-2 px-3 py-1.5 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    Delete All {selectedBrand} Data
+                  </button>
+                </div>
               </div>
             </>
           )}
@@ -1030,6 +1079,14 @@ export default function BrandDataManager() {
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
                     <th className="sticky left-0 bg-gray-50 px-4 py-3 text-left font-semibold text-gray-700 border-r border-gray-200 z-10">
+                      <input
+                        type="checkbox"
+                        checked={selectedKeywords.length === filteredData.length && filteredData.length > 0}
+                        onChange={handleSelectAll}
+                        className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+                      />
+                    </th>
+                    <th className="sticky left-[56px] bg-gray-50 px-4 py-3 text-left font-semibold text-gray-700 border-r border-gray-200 z-10">
                       Actions
                     </th>
                     {columns.map(column => (
@@ -1059,6 +1116,14 @@ export default function BrandDataManager() {
                   {filteredData.map((row) => (
                     <tr key={row.id} className="hover:bg-gray-50 transition-colors">
                       <td className="sticky left-0 bg-white px-4 py-3 border-r border-gray-200 z-10">
+                        <input
+                          type="checkbox"
+                          checked={selectedKeywords.includes(row.id)}
+                          onChange={() => handleSelectKeyword(row.id)}
+                          className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+                        />
+                      </td>
+                      <td className="sticky left-[56px] bg-white px-4 py-3 border-r border-gray-200 z-10">
                         <button
                           onClick={() => handleDelete(row.id)}
                           className="text-red-600 hover:text-red-800 transition-colors"
@@ -1121,6 +1186,16 @@ export default function BrandDataManager() {
         </div>
       </div>
       <Footer theme={theme} />
+
+      {showMergeReview && (
+        <KeywordMergeReview
+          selectedIds={selectedKeywords}
+          data={data}
+          theme={theme}
+          onClose={() => setShowMergeReview(false)}
+          onMergeComplete={handleMergeComplete}
+        />
+      )}
     </div>
   );
 }
