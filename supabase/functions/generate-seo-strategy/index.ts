@@ -313,12 +313,12 @@ Deno.serve(async (req: Request) => {
 
       return `${i + 1}. \"${k.keyword}\"
    - Volume: ${(k['Avg. monthly searches'] || 0).toLocaleString()}/mo
-   - Competition: ${k.competition} ${k.competition === 'Low' ? '🟢' : '🟡'}
+   - Competition: ${k.competition}
    - Growth: 3-Month: ${k['Three month change'] || 'N/A'} | YoY: ${k['YoY change'] || 'N/A'}
    - Priority Score: ${k.priorityScore.toLocaleString()}
    - Type: ${k.is_branded ? 'Branded' : 'Non-Branded'}
-   - Seasonality: ${isHighSeasonality ? `HIGH (${(seasonalityIndex * 100).toFixed(0)}% variance) - Peak: ${peakMonth}` : `Low (${(seasonalityIndex * 100).toFixed(0)}% variance)`}
-   - 48-Month Range: ${minVolume.toLocaleString()} - ${maxVolume.toLocaleString()}`;
+   - Seasonality: ${isHighSeasonality ? `HIGH (${(seasonalityIndex * 100).toFixed(0)}% variance), Peak: ${peakMonth}` : `Low (${(seasonalityIndex * 100).toFixed(0)}% variance)`}
+   - 48-Month Range: ${minVolume.toLocaleString()} to ${maxVolume.toLocaleString()}`;
     }).join('\n\n');
 
     // Brand positioning context
@@ -365,25 +365,16 @@ ${top10WithSeasonality}
 
 ---
 
-ADDITIONAL CONTEXT - FULL TOP 50 KEYWORDS:
-(Reference only - do NOT provide detailed analysis for keywords 11-50)
-
-${top50Keywords.slice(10).map((k, i) =>
-  `${i + 11}. \"${k.keyword}\" | ${(k['Avg. monthly searches'] || 0).toLocaleString()}/mo | ${k.competition} | Score: ${k.priorityScore.toLocaleString()}`
-).join('\n')}
-
----
-
 STRUCTURE YOUR RESPONSE:
 
 # SEO Strategy: ${brand}
 
-## 📊 Executive Summary
+## Executive Summary
 [3-4 sentences on overall opportunity, competition landscape, and strategic focus]
 
 ---
 
-## 🎯 TOP 10 PRIORITY KEYWORDS - DETAILED ANALYSIS
+## TOP 10 PRIORITY KEYWORDS (DETAILED ANALYSIS)
 
 ### 1. [Keyword Name]
 
@@ -393,7 +384,7 @@ STRUCTURE YOUR RESPONSE:
 3. \"[Title Option 3]\" (65 chars)
 
 **Content Angle:**
-[Specific, detailed approach - NOT generic. Explain exactly what format, perspective, and hook to use]
+[Specific, detailed approach, NOT generic. Explain exactly what format, perspective, and hook to use]
 
 **Target Audience:**
 - [Demographic/psychographic profile]
@@ -411,7 +402,7 @@ STRUCTURE YOUR RESPONSE:
 **Competitive Differentiation:**
 [How to make this content stand out from existing results]
 
-**Seasonality Strategy:** 📅
+**Seasonality Strategy:**
 - [Peak period based on data]
 - [Recommended publish timing]
 - [Historical pattern insights]
@@ -433,27 +424,17 @@ STRUCTURE YOUR RESPONSE:
 
 ---
 
-## 📋 Keywords 11-50 Reference
-
-Below are the remaining qualified keywords. These didn't make the top 10 AI analysis but represent solid opportunities for secondary content planning:
-
-| Rank | Keyword | Volume | Competition | Priority Score | Type |
-|------|---------|--------|-------------|----------------|------|
-[Include simple table for keywords 11-50]
-
----
-
-## 📅 90-Day Content Calendar
+## 90-Day Content Calendar
 
 Based on seasonality patterns and priority scores:
 
 | Week | Keyword | Content Type | Why Now |
-|------|---------|--------------|---------|
+|------|---------|--------------|---------|-------
 [Create strategic publishing schedule]
 
 ---
 
-## 🎯 Strategic Insights
+## Strategic Insights
 
 **Quick Wins (Next 30 Days):**
 [3-5 low-competition keywords you can rank for FAST with specific reasons]
@@ -462,14 +443,14 @@ Based on seasonality patterns and priority scores:
 [3-5 medium-competition, higher-volume terms worth the investment]
 
 **Content Gaps Identified:**
-[Missing content types based on keyword patterns - what are competitors NOT covering?]
+[Missing content types based on keyword patterns, what are competitors NOT covering?]
 
 **Competitive Positioning:**
 [Overall market positioning recommendations]
 
 ---
 
-## 🎯 Competitor Gap Analysis
+## Competitor Gap Analysis
 
 Analyze the keyword landscape to identify competitor weaknesses:
 
@@ -487,7 +468,7 @@ Analyze the keyword landscape to identify competitor weaknesses:
 
 ---
 
-## 🚀 Traffic Interception Strategy
+## Traffic Interception Strategy
 
 Identify specific opportunities to capture traffic from competitors:
 
@@ -505,8 +486,8 @@ Create a ranked list of 8-10 keywords where you can realistically outrank compet
 - Provide exact content improvements needed
 
 **Competitive Weaknesses to Exploit:**
-1. **Thin Content Opportunities**: [Keywords where top results have <800 words - you can go deeper]
-2. **Outdated Content**: [Keywords where top results are 2+ years old - freshness advantage]
+1. **Thin Content Opportunities**: [Keywords where top results have less than 800 words, you can go deeper]
+2. **Outdated Content**: [Keywords where top results are 2+ years old, freshness advantage]
 3. **Poor User Experience**: [Keywords where top results have slow load times, poor mobile experience]
 4. **Missing Visuals**: [Keywords where competitors lack infographics, charts, or helpful images]
 5. **Weak CTAs**: [Keywords where competitors have poor conversion optimization]
@@ -520,7 +501,7 @@ For the top 3 priority keywords, analyze what's currently ranking:
 
 ---
 
-## 📊 Competitive Landscape Map
+## Competitive Landscape Map
 
 **Market Positioning:**
 [Based on keyword patterns, map out where competitors are focused and where the white space exists]
@@ -538,7 +519,7 @@ For the top 3 priority keywords, analyze what's currently ranking:
 
 ---
 
-Use current 2025 SEO best practices. Be EXTREMELY specific and actionable - avoid generic advice. Each keyword should have a unique, tailored strategy. Focus on finding real competitive gaps and traffic interception opportunities based on the actual keyword data patterns.`;
+Use current 2025 SEO best practices. Be EXTREMELY specific and actionable, avoid generic advice. Each keyword should have a unique, tailored strategy. Focus on finding real competitive gaps and traffic interception opportunities based on the actual keyword data patterns.`;
 
     console.log(`Calling OpenAI to generate SEO strategy...`);
 
@@ -553,7 +534,7 @@ Use current 2025 SEO best practices. Be EXTREMELY specific and actionable - avoi
         messages: [
           {
             role: "system",
-            content: "You are an expert SEO and content marketing strategist with deep expertise in keyword research and competitive analysis. Your role is to analyze raw keyword data from Google Keyword Planner and identify patterns, opportunities, and strategic insights. You excel at creating DETAILED, SPECIFIC content strategies for each keyword - not generic advice. You provide exact title options, content structures, and actionable recommendations. Always use proper markdown formatting including tables for clarity and professionalism."
+            content: "You are an expert SEO and content marketing strategist with deep expertise in keyword research and competitive analysis. Your role is to analyze raw keyword data from Google Keyword Planner and identify patterns, opportunities, and strategic insights. You excel at creating DETAILED, SPECIFIC content strategies for each keyword, not generic advice. You provide exact title options, content structures, and actionable recommendations. Always use proper markdown formatting including tables for clarity and professionalism. IMPORTANT: Do not use emojis or icons in your output. Do not use em-dashes, use regular hyphens or commas instead."
           },
           {
             role: "user",
