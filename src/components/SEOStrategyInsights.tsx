@@ -47,24 +47,88 @@ export default function SEOStrategyInsights({ brandName, theme, userId, isOwner 
     if (!userId) return;
 
     try {
-      const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-seo-strategy`;
-      const { data: { session } } = await supabase.auth.getSession();
+      // Directly query database for existing strategy
+      const { data: existingStrategy, error } = await supabase
+        .from('brand_seo_strategy')
+        .select('*')
+        .eq('brand_name', brandName)
+        .eq('user_id', userId)
+        .maybeSingle();
 
-      if (!session) return;
+      if (error) {
+        console.error('Error loading SEO strategy:', error);
+        return;
+      }
 
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ brand: brandName }),
-      });
+      if (existingStrategy) {
+        // Fetch keyword data to calculate top50 for display
+        const { data: allKeywords } = await supabase
+          .from('brand_keyword_data')
+          .select('keyword, "Avg. monthly searches", "Three month change", "YoY change", competition, is_branded')
+          .eq('brand', brandName);
 
-      const result = await response.json();
+        let top50Data: any[] = [];
+        let totalKeywords = 0;
+        let qualifiedKeywords = 0;
 
-      if (result.success && result.data) {
-        setStrategy(result.data);
+        if (allKeywords && allKeywords.length > 0) {
+          totalKeywords = allKeywords.length;
+
+          // Filter for Low/Medium competition
+          const filteredKeywords = allKeywords.filter(k => {
+            const keyword = (k.keyword || '').toLowerCase();
+            if (keyword.includes('near me') || keyword.includes('close to me')) {
+              return false;
+            }
+            const comp = k.competition;
+            const volume = k['Avg. monthly searches'] || 0;
+            if (comp === 'Low' && volume >= 500) return true;
+            if (comp === 'Medium' && volume >= 2000) return true;
+            return false;
+          });
+
+          qualifiedKeywords = filteredKeywords.length;
+
+          // Calculate priority scores
+          const scoredKeywords = filteredKeywords.map(k => {
+            const volume = k['Avg. monthly searches'] || 0;
+            const threeMonthChange = parseFloat(k['Three month change']?.replace('%', '') || '0');
+            const yoyChange = parseFloat(k['YoY change']?.replace('%', '') || '0');
+            const comp = k.competition;
+            const avgGrowth = (threeMonthChange + yoyChange) / 2;
+            const growthMultiplier = 1.0 + (avgGrowth / 100);
+            const compMultiplier = comp === 'Low' ? 2.5 : 1.0;
+            const priorityScore = volume * growthMultiplier * compMultiplier;
+
+            return {
+              ...k,
+              priorityScore: Math.round(priorityScore)
+            };
+          });
+
+          // Get top 50
+          const top50Keywords = scoredKeywords
+            .sort((a, b) => b.priorityScore - a.priorityScore)
+            .slice(0, 50);
+
+          top50Data = top50Keywords.map((k, i) => ({
+            rank: i + 1,
+            keyword: k.keyword,
+            volume: k['Avg. monthly searches'] || 0,
+            competition: k.competition,
+            threeMonthChange: k['Three month change'] || 'N/A',
+            yoyChange: k['YoY change'] || 'N/A',
+            priorityScore: k.priorityScore,
+            isBranded: k.is_branded || false,
+          }));
+        }
+
+        setStrategy({
+          ...existingStrategy,
+          top50Keywords: top50Data,
+          totalKeywords: totalKeywords,
+          qualifiedKeywords: qualifiedKeywords,
+        });
       }
     } catch (err: any) {
       console.error('Error loading SEO strategy:', err);
