@@ -236,32 +236,6 @@ export default function BrandDataManager() {
     window.location.reload();
   };
 
-  if (authLoading) {
-    return (
-      <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'}`}>
-        <Header
-          theme={theme}
-          isAdmin={isAdmin}
-          isLoggedIn={!!user}
-          onLoginClick={() => {}}
-          onLogout={logout}
-        />
-        <div className="flex items-center justify-center py-24">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!user && showLogin) {
-    return <Login onClose={handleLogin} theme={theme} />;
-  }
-
-  if (!user) {
-    navigate('/');
-    return null;
-  }
-
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this record?')) return;
 
@@ -631,6 +605,33 @@ export default function BrandDataManager() {
   };
 
   const columns = getAllColumns();
+
+  // Handle authentication states
+  if (authLoading) {
+    return (
+      <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'}`}>
+        <Header
+          theme={theme}
+          isAdmin={isAdmin}
+          isLoggedIn={!!user}
+          onLoginClick={() => {}}
+          onLogout={logout}
+        />
+        <div className="flex items-center justify-center py-24">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user && showLogin) {
+    return <Login onClose={handleLogin} theme={theme} />;
+  }
+
+  if (!user) {
+    navigate('/');
+    return null;
+  }
 
   if (loading) {
     return (
