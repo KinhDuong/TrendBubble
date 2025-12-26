@@ -87,10 +87,10 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    // Fetch keyword data for the brand
+    // Fetch keyword data for the brand - only raw metrics
     const { data: keywords, error: fetchError } = await supabaseClient
       .from("brand_keyword_data")
-      .select('keyword, "Avg. monthly searches", "Three month change", "YoY change", competition, ai_category, is_branded')
+      .select('keyword, "Avg. monthly searches", "Three month change", "YoY change", competition')
       .eq("brand", brand)
       .order('"Avg. monthly searches"', { ascending: false })
       .limit(200);
@@ -105,85 +105,92 @@ Deno.serve(async (req: Request) => {
 
     console.log(`Found ${keywords.length} keywords for ${brand}`);
 
-    // Prepare dataset summary
-    const totalVolume = keywords.reduce((sum, k) => sum + (k['Avg. monthly searches'] || 0), 0);
-    const brandedKeywords = keywords.filter(k => k.is_branded);
-    const nonBrandedKeywords = keywords.filter(k => !k.is_branded);
-    
-    // Get top keywords by category
-    const topKeywordsByCategory: Record<string, any[]> = {};
-    keywords.forEach(k => {
-      const cat = k.ai_category || 'Uncategorized';
-      if (!topKeywordsByCategory[cat]) {
-        topKeywordsByCategory[cat] = [];
-      }
-      if (topKeywordsByCategory[cat].length < 5) {
-        topKeywordsByCategory[cat].push(k);
-      }
-    });
-
-    // Top 10 keywords
-    const top10 = keywords.slice(0, 10);
-    
-    // Rising keywords (high growth)
-    const risingKeywords = keywords.filter(k => {
-      const yoy = k['YoY change'];
-      const threeMo = k['Three month change'];
-      if (typeof yoy === 'string' && yoy.includes('%')) {
-        const yoyNum = parseFloat(yoy.replace('%', ''));
-        if (yoyNum > 50) return true;
-      }
-      if (typeof threeMo === 'string' && threeMo.includes('%')) {
-        const threeMoNum = parseFloat(threeMo.replace('%', ''));
-        if (threeMoNum > 30) return true;
-      }
-      return false;
-    }).slice(0, 10);
+    // Format keywords as CSV-like data for GPT-4
+    const keywordDataCSV = keywords.map((k, i) =>
+      `${i + 1}. "${k.keyword}" | Volume: ${(k['Avg. monthly searches'] || 0).toLocaleString()}/mo | 3-Month Change: ${k['Three month change'] || 'N/A'} | YoY Change: ${k['YoY change'] || 'N/A'} | Competition: ${k.competition || 'N/A'}`
+    ).join('\n');
 
     const datasetSummary = `
 Brand: ${brand}
 Total Keywords Analyzed: ${keywords.length}
-Total Monthly Search Volume: ${totalVolume.toLocaleString()}
-Branded Keywords: ${brandedKeywords.length} (${((brandedKeywords.length / keywords.length) * 100).toFixed(1)}%)
-Non-Branded Keywords: ${nonBrandedKeywords.length} (${((nonBrandedKeywords.length / keywords.length) * 100).toFixed(1)}%)
+Total Monthly Search Volume: ${keywords.reduce((sum, k) => sum + (k['Avg. monthly searches'] || 0), 0).toLocaleString()}
 
-TOP 10 KEYWORDS BY VOLUME:
-${top10.map((k, i) => `${i + 1}. "${k.keyword}" - ${(k['Avg. monthly searches'] || 0).toLocaleString()} searches/mo | 3mo: ${k['Three month change'] || 'N/A'} | YoY: ${k['YoY change'] || 'N/A'} | Competition: ${k.competition || 'N/A'} | ${k.is_branded ? 'BRANDED' : 'Non-branded'}`).join('\n')}
-
-${risingKeywords.length > 0 ? `RISING/HIGH-GROWTH KEYWORDS:
-${risingKeywords.map((k, i) => `${i + 1}. "${k.keyword}" - ${(k['Avg. monthly searches'] || 0).toLocaleString()} searches/mo | 3mo: ${k['Three month change'] || 'N/A'} | YoY: ${k['YoY change'] || 'N/A'} | Competition: ${k.competition || 'N/A'}`).join('\n')}` : ''}
-
-${Object.keys(topKeywordsByCategory).length > 0 ? `KEYWORDS BY GROWTH CATEGORY:
-${Object.entries(topKeywordsByCategory).map(([cat, kws]) => `\n${cat}:
-${kws.map(k => `  - "${k.keyword}" (${(k['Avg. monthly searches'] || 0).toLocaleString()} searches, ${k['Three month change'] || 'N/A'} 3mo, ${k['YoY change'] || 'N/A'} YoY)`).join('\n')}`).join('\n')}` : ''}
+RAW KEYWORD DATA (sorted by search volume):
+${keywordDataCSV}
 `;
 
-    const fullPrompt = `You are an expert SEO and content marketing strategist with deep experience using Google Keyword Planner data.
+    const fullPrompt = `You are an expert SEO and content marketing strategist analyzing keyword data from Google Keyword Planner.
 
-I am providing a keyword dataset from Google Keyword Planner for the ${brand} niche. Here are the key highlights from the dataset:
+BRAND: ${brand}
+
+YOUR TASK:
+1. **Identify Branded vs. Non-Branded Keywords**: Determine which keywords contain the brand name or are direct brand variations (branded), versus generic industry/product terms (non-branded).
+
+2. **Categorize Keywords Strategically**: Group all keywords into meaningful categories such as:
+   - High Potential (high volume, strong growth, moderate competition)
+   - Rising Stars (strong growth trends, emerging opportunities)
+   - Competitive Challenges (high volume but saturated/high competition)
+   - Niche Opportunities (lower volume but targeted, low competition)
+   - Brand Protection (branded terms to defend/optimize)
+   - Other relevant categories you identify
+
+3. **Analyze Growth Patterns**: Identify trending keywords based on 3-month and year-over-year changes.
+
+4. **Prioritize Top 10 Opportunities**: List the most strategic keywords to target and explain why each matters.
+
+5. **Provide Actionable Recommendations**: Create specific SEO and content strategies.
+
+RAW KEYWORD DATA:
 ${datasetSummary}
 
-Provide a detailed SEO & Content Strategy analysis focused on organic traffic growth. Structure your response exactly like this, using markdown:
+STRUCTURE YOUR RESPONSE EXACTLY AS FOLLOWS (using proper markdown):
 
-### SEO & Content Strategy Insights from the Dataset (Organic Traffic Growth)
+### SEO Strategy Analysis for ${brand}
 
-#### 1. High-Intent Keywords to Target
-[Markdown table with columns: Keyword, Monthly Volume, Growth/Trend, Content Ideas & Why High-Intent]
-List 5–8 top keywords with specific, actionable content suggestions (e.g., blog posts, guides, reviews, comparisons, listicles).
+#### Executive Summary
+Brief overview of key findings (3-4 sentences).
 
-#### 2. Spotting Content Gaps
-Bullet points highlighting content opportunities and gaps revealed by the data (e.g., seasonal trends, customization, emerging niches). Suggest timely or evergreen content ideas.
+#### Branded vs. Non-Branded Breakdown
+- **Branded Keywords**: Count and % (keywords containing brand name)
+- **Non-Branded Keywords**: Count and % (generic industry terms)
+- **Strategic Implications**: What this ratio means for the brand's SEO strategy
 
-#### 3. Competitor Insight & Traffic Interception
-Explain how branded dominance or broad term saturation creates opportunities. Suggest specific interception strategies with content examples (e.g., alternatives, dupes, recipes, comparisons).
+#### Strategic Keyword Categories
+[Markdown table with columns: Category, # Keywords, Total Volume, Key Examples, Strategic Focus]
 
-#### Recommended Content Calendar (Based on Dataset Trends)
-[Markdown table with columns: Month/Season, Keyword Focus, Content Type]
-Include seasonal timing where relevant, plus evergreen suggestions.
+Organize keywords into your identified categories and explain what each category means for the strategy.
 
-End with a short "Bottom Line" summary of the overall SEO/content strategy.
+#### Top 10 Priority Keywords
+[Markdown table with columns: Rank, Keyword, Type (Branded/Non-Branded), Volume, Growth Trend, Why Priority]
 
-Use current 2025 trends where applicable. Be actionable, specific, and professional. Use real markdown tables for clarity.`;
+Explain specifically why each keyword is a top opportunity.
+
+#### Growth Opportunities Analysis
+- **Rising Trends**: Keywords with strongest growth (3-month and YoY)
+- **Quick Wins**: Low competition, decent volume opportunities
+- **Long-term Plays**: High volume competitive terms worth pursuing
+
+#### Content & SEO Recommendations
+##### Organic Traffic Growth
+- Specific content types to create (guides, comparisons, how-tos, etc.)
+- Content gaps to fill
+- Seasonal opportunities
+
+##### Technical SEO Priorities
+- On-page optimization priorities
+- Internal linking strategies
+- User intent optimization
+
+#### Advertising Recommendations (Optional)
+If applicable, suggest paid search opportunities for high-intent keywords where organic ranking may be challenging.
+
+#### Recommended Content Calendar
+[Markdown table with columns: Timeframe, Keyword Focus, Content Type, Priority]
+
+#### Bottom Line
+2-3 sentence summary of the overall strategy and expected impact.
+
+Use current 2025 trends and best practices. Be specific, actionable, and data-driven. Use proper markdown tables throughout.`;
 
     console.log(`Calling OpenAI to generate SEO strategy...`);
 
@@ -198,7 +205,7 @@ Use current 2025 trends where applicable. Be actionable, specific, and professio
         messages: [
           {
             role: "system",
-            content: "You are an expert SEO and content marketing strategist. You analyze keyword data and provide detailed, actionable SEO strategies. Always use proper markdown formatting including tables."
+            content: "You are an expert SEO and content marketing strategist with deep expertise in keyword research and competitive analysis. Your role is to analyze raw keyword data from Google Keyword Planner and identify patterns, opportunities, and strategic insights. You excel at identifying branded vs. non-branded keywords, categorizing keywords strategically, spotting growth trends, and creating actionable SEO strategies. Always use proper markdown formatting including tables for clarity and professionalism."
           },
           {
             role: "user",
