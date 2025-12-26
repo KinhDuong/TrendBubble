@@ -47,15 +47,25 @@ export default function SEOStrategyInsights({ brandName, theme, userId, isOwner 
     if (!userId) return;
 
     try {
-      const { data, error: fetchError } = await supabase
-        .from('brand_seo_strategy')
-        .select('*')
-        .eq('brand_name', brandName)
-        .eq('user_id', userId)
-        .maybeSingle();
+      const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-seo-strategy`;
+      const { data: { session } } = await supabase.auth.getSession();
 
-      if (fetchError) throw fetchError;
-      setStrategy(data);
+      if (!session) return;
+
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ brand: brandName }),
+      });
+
+      const result = await response.json();
+
+      if (result.success && result.data) {
+        setStrategy(result.data);
+      }
     } catch (err: any) {
       console.error('Error loading SEO strategy:', err);
     }
@@ -345,7 +355,7 @@ export default function SEOStrategyInsights({ brandName, theme, userId, isOwner 
                   <div>
                     <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>AI-Analyzed Keywords</p>
                     <p className={`text-2xl font-bold ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`}>
-                      20
+                      10
                     </p>
                     <p className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>
                       Top priority with detailed strategy
@@ -402,7 +412,7 @@ export default function SEOStrategyInsights({ brandName, theme, userId, isOwner 
                       </tr>
                     </thead>
                     <tbody>
-                      {strategy.top50Keywords.slice(0, 20).map((kw) => (
+                      {strategy.top50Keywords.slice(0, 10).map((kw) => (
                         <tr key={kw.rank} className={`${theme === 'dark' ? 'bg-blue-900/20 hover:bg-blue-900/30' : 'bg-blue-50 hover:bg-blue-100'}`}>
                           <td className={`border px-3 py-2 font-semibold ${theme === 'dark' ? 'border-gray-600 text-blue-400' : 'border-gray-300 text-blue-600'}`}>
                             {kw.rank}
@@ -438,14 +448,14 @@ export default function SEOStrategyInsights({ brandName, theme, userId, isOwner 
                           </td>
                         </tr>
                       ))}
-                      {strategy.top50Keywords.length > 20 && (
+                      {strategy.top50Keywords.length > 10 && (
                         <>
                           <tr className={theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'}>
                             <td colSpan={8} className={`border px-3 py-2 text-center font-semibold ${theme === 'dark' ? 'border-gray-600 text-gray-400' : 'border-gray-300 text-gray-600'}`}>
-                              Keywords 21-50 (Reference Only - No AI Analysis)
+                              Keywords 11-50 (Reference Only - No AI Analysis)
                             </td>
                           </tr>
-                          {strategy.top50Keywords.slice(20).map((kw) => (
+                          {strategy.top50Keywords.slice(10).map((kw) => (
                             <tr key={kw.rank} className={theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-50'}>
                               <td className={`border px-3 py-2 ${theme === 'dark' ? 'border-gray-600 text-gray-400' : 'border-gray-300 text-gray-600'}`}>
                                 {kw.rank}
@@ -487,8 +497,8 @@ export default function SEOStrategyInsights({ brandName, theme, userId, isOwner 
                   </table>
                 </div>
                 <p className={`text-xs mt-3 ${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>
-                  <span className={theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}>Highlighted rows (1-20)</span> have detailed AI analysis above.
-                  Keywords 21-50 are qualified opportunities for secondary content planning.
+                  <span className={theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}>Highlighted rows (1-10)</span> have detailed AI analysis above.
+                  Keywords 11-50 are qualified opportunities for secondary content planning.
                 </p>
               </div>
             )}

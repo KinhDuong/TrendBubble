@@ -86,7 +86,7 @@ Deno.serve(async (req: Request) => {
         'Searches: Dec 2024', 'Searches: Jan 2025', 'Searches: Feb 2025', 'Searches: Mar 2025',
         'Searches: Apr 2025', 'Searches: May 2025', 'Searches: Jun 2025', 'Searches: Jul 2025',
         'Searches: Aug 2025', 'Searches: Sep 2025', 'Searches: Oct 2025', 'Searches: Nov 2025'
-      ].map(col => `"${col}"`).join(', ');
+      ].map(col => `\"${col}\"`).join(', ');
 
       const { data: allKeywords } = await supabaseClient
         .from("brand_keyword_data")
@@ -104,7 +104,7 @@ Deno.serve(async (req: Request) => {
         const filteredKeywords = allKeywords.filter(k => {
           const keyword = (k.keyword || '').toLowerCase();
 
-          // Exclude "near me" and "close to me" keywords
+          // Exclude \"near me\" and \"close to me\" keywords
           if (keyword.includes('near me') || keyword.includes('close to me')) {
             return false;
           }
@@ -195,7 +195,7 @@ Deno.serve(async (req: Request) => {
       'Searches: Dec 2024', 'Searches: Jan 2025', 'Searches: Feb 2025', 'Searches: Mar 2025',
       'Searches: Apr 2025', 'Searches: May 2025', 'Searches: Jun 2025', 'Searches: Jul 2025',
       'Searches: Aug 2025', 'Searches: Sep 2025', 'Searches: Oct 2025', 'Searches: Nov 2025'
-    ].map(col => `"${col}"`).join(', ');
+    ].map(col => `\"${col}\"`).join(', ');
 
     const { data: allKeywords, error: fetchError } = await supabaseClient
       .from("brand_keyword_data")
@@ -216,7 +216,7 @@ Deno.serve(async (req: Request) => {
     const filteredKeywords = allKeywords.filter(k => {
       const keyword = (k.keyword || '').toLowerCase();
 
-      // Exclude "near me" and "close to me" keywords
+      // Exclude \"near me\" and \"close to me\" keywords
       if (keyword.includes('near me') || keyword.includes('close to me')) {
         return false;
       }
@@ -267,11 +267,11 @@ Deno.serve(async (req: Request) => {
 
     console.log(`Selected top 50 keywords for analysis`);
 
-    // Get top 20 for AI deep-dive
-    const top20Keywords = top50Keywords.slice(0, 20);
+    // Get top 10 for AI deep-dive
+    const top10Keywords = top50Keywords.slice(0, 10);
 
-    // Format top 20 with seasonality data for AI analysis
-    const top20WithSeasonality = top20Keywords.map((k, i) => {
+    // Format top 10 with seasonality data for AI analysis
+    const top10WithSeasonality = top10Keywords.map((k, i) => {
       // Extract monthly data
       const monthlyData: number[] = [];
       const monthlyLabels: string[] = [];
@@ -303,7 +303,7 @@ Deno.serve(async (req: Request) => {
 
       const isHighSeasonality = seasonalityIndex > 0.3;
 
-      return `${i + 1}. "${k.keyword}"
+      return `${i + 1}. \"${k.keyword}\"
    - Volume: ${(k['Avg. monthly searches'] || 0).toLocaleString()}/mo
    - Competition: ${k.competition} ${k.competition === 'Low' ? '🟢' : '🟡'}
    - Growth: 3-Month: ${k['Three month change'] || 'N/A'} | YoY: ${k['YoY change'] || 'N/A'}
@@ -311,7 +311,7 @@ Deno.serve(async (req: Request) => {
    - Type: ${k.is_branded ? 'Branded' : 'Non-Branded'}
    - Seasonality: ${isHighSeasonality ? `HIGH (${(seasonalityIndex * 100).toFixed(0)}% variance) - Peak: ${peakMonth}` : `Low (${(seasonalityIndex * 100).toFixed(0)}% variance)`}
    - 48-Month Range: ${minVolume.toLocaleString()} - ${maxVolume.toLocaleString()}`;
-    }).join('\n\n');
+    }).join('\\n\\n');
 
     // Brand positioning context
     const brandContext = brandPositioning ? `
@@ -333,15 +333,15 @@ ${brandContext}
 SELECTION CRITERIA USED:
 - Competition: LOW or MEDIUM only (High competition excluded)
 - Minimum Traffic: Low comp ≥ 500/mo, Medium comp ≥ 2,000/mo
-- Excluded: Keywords containing "near me" or "close to me" (local intent)
+- Excluded: Keywords containing \"near me\" or \"close to me\" (local intent)
 - Priority Scoring: Low competition gets 2.5x multiplier (easier to rank)
 - Total Keywords Analyzed: ${allKeywords.length}
 - Qualified Keywords: ${filteredKeywords.length}
 - Top 50 Selected (provided below for reference)
-- **YOUR FOCUS: Deep analysis of TOP 20 ONLY**
+- **YOUR FOCUS: Deep analysis of TOP 10 ONLY**
 
 YOUR TASK:
-Provide DETAILED, ACTIONABLE analysis for each of the TOP 20 keywords below. For EACH keyword, create a comprehensive strategy block including:
+Provide DETAILED, ACTIONABLE analysis for each of the TOP 10 keywords below. For EACH keyword, create a comprehensive strategy block including:
 
 1. **Specific Content Angle** (not generic - give exact approach)
 2. **3-5 Ready-to-Use Title Options** (with character count)
@@ -352,17 +352,17 @@ Provide DETAILED, ACTIONABLE analysis for each of the TOP 20 keywords below. For
 7. **Expected Traffic Potential** (realistic CTR estimates for rank 3-7)
 8. **Why This Keyword Matters RIGHT NOW**
 
-TOP 20 PRIORITY KEYWORDS (REQUIRES DEEP ANALYSIS):
-${top20WithSeasonality}
+TOP 10 PRIORITY KEYWORDS (REQUIRES DEEP ANALYSIS):
+${top10WithSeasonality}
 
 ---
 
 ADDITIONAL CONTEXT - FULL TOP 50 KEYWORDS:
-(Reference only - do NOT provide detailed analysis for keywords 21-50)
+(Reference only - do NOT provide detailed analysis for keywords 11-50)
 
-${top50Keywords.slice(20).map((k, i) =>
-  `${i + 21}. "${k.keyword}" | ${(k['Avg. monthly searches'] || 0).toLocaleString()}/mo | ${k.competition} | Score: ${k.priorityScore.toLocaleString()}`
-).join('\n')}
+${top50Keywords.slice(10).map((k, i) =>
+  `${i + 11}. \"${k.keyword}\" | ${(k['Avg. monthly searches'] || 0).toLocaleString()}/mo | ${k.competition} | Score: ${k.priorityScore.toLocaleString()}`
+).join('\\n')}
 
 ---
 
@@ -375,7 +375,7 @@ STRUCTURE YOUR RESPONSE:
 
 ---
 
-## 🎯 TOP 20 PRIORITY KEYWORDS - DETAILED ANALYSIS
+## 🎯 TOP 10 PRIORITY KEYWORDS - DETAILED ANALYSIS
 
 ### 1. [Keyword Name]
 **📈 Metrics:**
@@ -387,9 +387,9 @@ STRUCTURE YOUR RESPONSE:
 **🎨 Content Strategy:**
 
 **Recommended Titles (Choose One):**
-1. "[Title Option 1]" (62 chars)
-2. "[Title Option 2]" (58 chars)
-3. "[Title Option 3]" (65 chars)
+1. \"[Title Option 1]\" (62 chars)
+2. \"[Title Option 2]\" (58 chars)
+3. \"[Title Option 3]\" (65 chars)
 
 **Content Angle:**
 [Specific, detailed approach - NOT generic. Explain exactly what format, perspective, and hook to use]
@@ -428,17 +428,17 @@ STRUCTURE YOUR RESPONSE:
 ### 2. [Next Keyword]
 [Repeat detailed analysis]
 
-[Continue for all 20 keywords]
+[Continue for all 10 keywords]
 
 ---
 
-## 📋 Keywords 21-50 Reference
+## 📋 Keywords 11-50 Reference
 
-Below are the remaining qualified keywords. These didn't make the top 20 AI analysis but represent solid opportunities for secondary content planning:
+Below are the remaining qualified keywords. These didn't make the top 10 AI analysis but represent solid opportunities for secondary content planning:
 
 | Rank | Keyword | Volume | Competition | Priority Score | Type |
 |------|---------|--------|-------------|----------------|------|
-[Include simple table for keywords 21-50]
+[Include simple table for keywords 11-50]
 
 ---
 
