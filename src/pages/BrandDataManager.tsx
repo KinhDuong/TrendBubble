@@ -53,6 +53,7 @@ export default function BrandDataManager() {
   const [aiCategorizing, setAiCategorizing] = useState(false);
   const [aiAnalyzingSentiment, setAiAnalyzingSentiment] = useState(false);
   const [aiAnalyzingBranded, setAiAnalyzingBranded] = useState(false);
+  const [competitiveAnalyzing, setCompetitiveAnalyzing] = useState(false);
   const [aiMessage, setAiMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
   const [brandPage, setBrandPage] = useState<{ id: string; is_public: boolean } | null>(null);
   const [togglingPublic, setTogglingPublic] = useState(false);
@@ -469,6 +470,70 @@ export default function BrandDataManager() {
     }
   };
 
+  const handleCompetitiveLogicAnalysis = async () => {
+    if (selectedBrand === 'all') {
+      setAiMessage({ type: 'error', text: 'Please select a specific brand to analyze' });
+      setTimeout(() => setAiMessage(null), 5000);
+      return;
+    }
+
+    if (!confirm(`This will analyze keywords using competitive logic (high volume + low competition = likely branded). This uses dynamic percentile-based thresholds calculated from YOUR data. Continue?`)) {
+      return;
+    }
+
+    setCompetitiveAnalyzing(true);
+    setAiMessage(null);
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('Not authenticated');
+
+      const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/detect-branded-competitive-logic`;
+
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ brand: selectedBrand })
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Response error:', errorText);
+        throw new Error(`HTTP ${response.status}: ${errorText || 'Failed to analyze competitive logic'}`);
+      }
+
+      const result = await response.json();
+
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to analyze competitive logic');
+      }
+
+      await fetchData();
+
+      const volumeInfo = result.volumeBrackets ?
+        `\nVolume brackets: p50=${result.volumeBrackets.p50.toLocaleString()}, p90=${result.volumeBrackets.p90.toLocaleString()}, p95=${result.volumeBrackets.p95.toLocaleString()}` : '';
+
+      setAiMessage({
+        type: 'success',
+        text: result.message + volumeInfo
+      });
+
+      setTimeout(() => setAiMessage(null), 20000);
+    } catch (error: any) {
+      console.error('Error during competitive logic analysis:', error);
+      setAiMessage({
+        type: 'error',
+        text: error.message || 'Failed to analyze competitive logic. Please check console for details.'
+      });
+      setTimeout(() => setAiMessage(null), 10000);
+    } finally {
+      setCompetitiveAnalyzing(false);
+    }
+  };
+
   const exportToCSV = () => {
     if (filteredData.length === 0) return;
 
@@ -763,11 +828,12 @@ export default function BrandDataManager() {
                       Use AI to analyze your keywords. Categorization assigns growth categories based on Google Trends insights
                       (Explosive Growth, Rising Star, etc.) with strategic insights. Sentiment Analysis evaluates keyword sentiment
                       from negative to positive as a percentage. Is Brand determines if keywords are branded or non-branded.
+                      Competitive Logic uses volume + competition data to detect branded keywords without AI costs.
                     </p>
                     <div className="flex flex-wrap gap-3">
                       <button
                         onClick={handleAICategorization}
-                        disabled={aiCategorizing || aiAnalyzingSentiment || aiAnalyzingBranded}
+                        disabled={aiCategorizing || aiAnalyzingSentiment || aiAnalyzingBranded || competitiveAnalyzing}
                         className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {aiCategorizing ? (
@@ -784,7 +850,7 @@ export default function BrandDataManager() {
                       </button>
                       <button
                         onClick={handleSentimentAnalysis}
-                        disabled={aiCategorizing || aiAnalyzingSentiment || aiAnalyzingBranded}
+                        disabled={aiCategorizing || aiAnalyzingSentiment || aiAnalyzingBranded || competitiveAnalyzing}
                         className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {aiAnalyzingSentiment ? (
@@ -801,7 +867,7 @@ export default function BrandDataManager() {
                       </button>
                       <button
                         onClick={handleBrandedAnalysis}
-                        disabled={aiCategorizing || aiAnalyzingSentiment || aiAnalyzingBranded}
+                        disabled={aiCategorizing || aiAnalyzingSentiment || aiAnalyzingBranded || competitiveAnalyzing}
                         className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {aiAnalyzingBranded ? (
@@ -812,7 +878,24 @@ export default function BrandDataManager() {
                         ) : (
                           <>
                             <Sparkles className="w-5 h-5" />
-                            Is Brand
+                            Is Brand (AI)
+                          </>
+                        )}
+                      </button>
+                      <button
+                        onClick={handleCompetitiveLogicAnalysis}
+                        disabled={aiCategorizing || aiAnalyzingSentiment || aiAnalyzingBranded || competitiveAnalyzing}
+                        className="flex items-center gap-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {competitiveAnalyzing ? (
+                          <>
+                            <RefreshCw className="w-5 h-5 animate-spin" />
+                            Analyzing...
+                          </>
+                        ) : (
+                          <>
+                            <Filter className="w-5 h-5" />
+                            Competitive Logic
                           </>
                         )}
                       </button>
