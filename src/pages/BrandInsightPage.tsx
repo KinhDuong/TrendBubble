@@ -19,6 +19,7 @@ import ToolSchema from '../components/ToolSchema';
 import BubbleTooltip from '../components/BubbleTooltip';
 import AdvertisingRecommendations from '../components/AdvertisingRecommendations';
 import SEOStrategyInsights from '../components/SEOStrategyInsights';
+import PPCCampaignInsights from '../components/PPCCampaignInsights';
 import { TrendingTopic, FAQ } from '../types';
 import { TrendingUp, Download, ArrowLeft, Search, X, ChevronsLeft, ChevronsRight, ArrowUpDown, ArrowUp, ArrowDown, Sparkles, AlertCircle } from 'lucide-react';
 
@@ -2144,6 +2145,16 @@ export default function BrandInsightPage() {
 
               {keywordData.length > 0 && pageOwnerId && (
                 <SEOStrategyInsights
+                  brandName={decodedBrand}
+                  theme={theme}
+                  userId={pageOwnerId}
+                  isOwner={user ? (user.id === pageOwnerId || isAdmin) : false}
+                />
+              )}
+
+              {keywordData.length > 0 && pageOwnerId && brandName && (
+                <PPCCampaignInsights
+                  brandPageSlug={brandName}
                   brandName={decodedBrand}
                   theme={theme}
                   userId={pageOwnerId}
