@@ -60,9 +60,15 @@ export default function BrandDataManager() {
 
   const fetchBrands = async () => {
     try {
+      if (!user?.id) {
+        setBrands([]);
+        return;
+      }
+
       const { data: keywordData, error } = await supabase
         .from('brand_keyword_data')
-        .select('brand');
+        .select('brand')
+        .eq('user_id', user.id);
 
       if (error) throw error;
 
@@ -80,6 +86,12 @@ export default function BrandDataManager() {
       return;
     }
 
+    if (!user?.id) {
+      setData([]);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     try {
       const decodedBrand = decodeURIComponent(brandName);
@@ -87,6 +99,7 @@ export default function BrandDataManager() {
         .from('brand_keyword_data')
         .select('*')
         .eq('brand', decodedBrand)
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false })
         .limit(5000);
 
@@ -199,7 +212,7 @@ export default function BrandDataManager() {
     if (authLoading) {
       return;
     }
-    if (!isAdmin) {
+    if (!user) {
       setShowLogin(true);
     } else {
       setShowLogin(false);
@@ -207,7 +220,7 @@ export default function BrandDataManager() {
       fetchData();
       fetchBrandPage();
     }
-  }, [isAdmin, brandName, authLoading]);
+  }, [user?.id, brandName, authLoading]);
 
   useEffect(() => {
     if (brandName) {
@@ -240,11 +253,11 @@ export default function BrandDataManager() {
     );
   }
 
-  if (!isAdmin && showLogin) {
+  if (!user && showLogin) {
     return <Login onClose={handleLogin} theme={theme} />;
   }
 
-  if (!isAdmin) {
+  if (!user) {
     navigate('/');
     return null;
   }
