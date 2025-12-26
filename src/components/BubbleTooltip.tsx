@@ -240,7 +240,17 @@ function BubbleTooltip({
     if (percentage >= 45) return 'Neutral';
     if (percentage >= 30) return 'Somewhat Negative';
     return 'Negative';
-  };;
+  };
+
+  const getSentimentEmoji = (sentiment: number | undefined): string => {
+    if (sentiment === undefined || sentiment === null) return '😐';
+    const percentage = ((sentiment + 1) / 2) * 100;
+    if (percentage >= 70) return '🤩';
+    if (percentage >= 55) return '😊';
+    if (percentage >= 45) return '😐';
+    if (percentage >= 30) return '😕';
+    return '😢';
+  };
 
   if (isMobile) {
     return createPortal(
@@ -612,7 +622,7 @@ function BubbleTooltip({
               {keywordData.sentiment !== undefined && keywordData.sentiment !== null && (
                 <div className={`${theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-50'} rounded-lg p-3 col-span-2`}>
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="text-sm">😊</span>
+                    <span className="text-sm">{getSentimentEmoji(keywordData.sentiment)}</span>
                     <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
                       Sentiment
                     </span>

@@ -2165,11 +2165,18 @@ export default function BrandInsightPage() {
                               if (sentimentPercentage >= 55) sentimentLabel = 'Positive';
                               else if (sentimentPercentage < 45) sentimentLabel = 'Negative';
 
+                              let sentimentEmoji = '😐';
+                              if (sentimentPercentage >= 70) sentimentEmoji = '🤩';
+                              else if (sentimentPercentage >= 55) sentimentEmoji = '😊';
+                              else if (sentimentPercentage >= 45) sentimentEmoji = '😐';
+                              else if (sentimentPercentage >= 30) sentimentEmoji = '😕';
+                              else sentimentEmoji = '😢';
+
                               return (
                                 <div className={`${theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-50'} rounded-lg p-6 h-full flex flex-col justify-center`}>
                                   <div className="mb-4">
                                     <h3 className={`text-lg font-semibold mb-1 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                                      😊 Sentiment
+                                      {sentimentEmoji} Sentiment
                                     </h3>
                                     <p className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
                                       Average across {keywordsWithSentiment.length} keyword{keywordsWithSentiment.length !== 1 ? 's' : ''}
