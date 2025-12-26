@@ -161,12 +161,14 @@ export default function SEOStrategyInsights({ brandName, theme, userId, isOwner 
       });
 
       const result = await response.json();
+      console.log('SEO Strategy generation result:', result);
 
       if (!result.success) {
         setErrorCode(result.errorCode || null);
         throw new Error(result.error || 'Failed to generate SEO strategy');
       }
 
+      console.log('Setting strategy data:', result.data);
       setStrategy(result.data);
     } catch (err: any) {
       console.error('Error generating SEO strategy:', err);
@@ -443,6 +445,7 @@ export default function SEOStrategyInsights({ brandName, theme, userId, isOwner 
 
         {!loading && strategy && (
           <div className={`${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+            {console.log('Rendering strategy:', { hasAnalysis: !!strategy.analysis, analysisLength: strategy.analysis?.length })}
             {/* Dataset Overview */}
             {strategy.totalKeywords !== undefined && strategy.qualifiedKeywords !== undefined && (
               <div className={`mb-6 p-4 rounded-lg ${theme === 'dark' ? 'bg-gray-900/50 border border-gray-700' : 'bg-gray-50 border border-gray-200'}`}>
@@ -482,6 +485,7 @@ export default function SEOStrategyInsights({ brandName, theme, userId, isOwner 
             <div className={`prose max-w-none ${theme === 'dark' ? 'prose-invert' : ''} mb-8`}>
               {(() => {
                 const sections = parseAnalysisSections(strategy.analysis);
+                console.log('Parsed sections:', sections.length, sections.map(s => s.title));
 
                 return sections.map((section, sectionIdx) => {
                   const isTop10Section = section.title.includes('TOP 10 PRIORITY KEYWORDS') || section.title.includes('TOP 10 KEYWORDS');

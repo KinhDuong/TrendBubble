@@ -564,7 +564,7 @@ Use current 2025 SEO best practices. Be EXTREMELY specific and actionable, avoid
       throw new Error("No analysis returned from AI");
     }
 
-    console.log(`AI analysis generated successfully. Saving to database...`);
+    console.log(`AI analysis generated successfully. Analysis length: ${analysis.length} chars. Saving to database...`);
 
     // Prepare top 50 keywords data for frontend
     const top50Data = top50Keywords.map((k, i) => ({
@@ -594,7 +594,7 @@ Use current 2025 SEO best practices. Be EXTREMELY specific and actionable, avoid
       throw new Error(`Failed to save strategy: ${saveError.message}`);
     }
 
-    console.log(`SEO strategy saved successfully for ${brand}`);
+    console.log(`SEO strategy saved successfully for ${brand}. Has analysis: ${!!savedStrategy?.analysis}, Analysis length: ${savedStrategy?.analysis?.length || 0}`);
 
     return new Response(
       JSON.stringify({
