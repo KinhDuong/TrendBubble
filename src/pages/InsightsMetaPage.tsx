@@ -430,18 +430,21 @@ export default function InsightsMetaPage() {
                           <button
                             onClick={() => {
                               const identifier = brand.username || brand.user_id;
-                              if (identifier) {
+                              if (identifier && brand.has_page) {
                                 navigate(`/insights/${encodeURIComponent(identifier)}/${encodeURIComponent(brand.brand)}/`);
                               }
                             }}
-                            disabled={!brand.username && !brand.user_id}
+                            disabled={!brand.has_page}
                             className={`inline-flex items-center gap-1 px-3 py-1.5 rounded text-sm font-medium transition-colors ${
-                              !brand.username && !brand.user_id
-                                ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                              !brand.has_page
+                                ? theme === 'dark'
+                                  ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
+                                  : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                                 : theme === 'dark'
                                 ? 'bg-blue-600 hover:bg-blue-700 text-white'
                                 : 'bg-blue-600 hover:bg-blue-700 text-white'
                             }`}
+                            title={brand.has_page ? 'View brand insight page' : 'No page created yet'}
                           >
                             View
                             <ArrowRight className="w-3 h-3" />
