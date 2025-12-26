@@ -2137,7 +2137,74 @@ export default function BrandInsightPage() {
                         <h2 id="search-volume-trends-heading" className={`text-xl md:text-2xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                           Search Volume Trends
                         </h2>
-                        <KeywordChart data={monthlyData} selectedBrand={decodedBrand} />
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                          {/* Chart Section */}
+                          <div className="lg:col-span-2">
+                            <KeywordChart data={monthlyData} selectedBrand={decodedBrand} />
+                          </div>
+
+                          {/* Overall Sentiment Section */}
+                          <div className="lg:col-span-1">
+                            {(() => {
+                              const keywordsWithSentiment = keywordData.filter(kw => kw.sentiment !== null && kw.sentiment !== undefined);
+
+                              if (keywordsWithSentiment.length === 0) {
+                                return (
+                                  <div className={`${theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-50'} rounded-lg p-6 h-full flex items-center justify-center`}>
+                                    <p className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'} text-center text-sm`}>
+                                      No sentiment data available
+                                    </p>
+                                  </div>
+                                );
+                              }
+
+                              const avgSentiment = keywordsWithSentiment.reduce((sum, kw) => sum + kw.sentiment, 0) / keywordsWithSentiment.length;
+                              const sentimentPercentage = Math.round(((avgSentiment + 1) / 2) * 100);
+
+                              let sentimentLabel = 'Neutral';
+                              if (sentimentPercentage >= 55) sentimentLabel = 'Positive';
+                              else if (sentimentPercentage < 45) sentimentLabel = 'Negative';
+
+                              return (
+                                <div className={`${theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-50'} rounded-lg p-6 h-full flex flex-col justify-center`}>
+                                  <div className="mb-4">
+                                    <h3 className={`text-lg font-semibold mb-1 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                                      😊 Sentiment
+                                    </h3>
+                                    <p className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                                      Average across {keywordsWithSentiment.length} keyword{keywordsWithSentiment.length !== 1 ? 's' : ''}
+                                    </p>
+                                  </div>
+
+                                  <div className="flex items-center gap-4">
+                                    <div className="flex-1">
+                                      <div className="w-full h-8 bg-gray-200 rounded-full overflow-hidden">
+                                        <div
+                                          className={`h-full transition-all ${
+                                            sentimentPercentage >= 70 ? 'bg-green-500' :
+                                            sentimentPercentage >= 55 ? 'bg-green-400' :
+                                            sentimentPercentage >= 45 ? 'bg-yellow-400' :
+                                            sentimentPercentage >= 30 ? 'bg-orange-400' :
+                                            'bg-red-500'
+                                          }`}
+                                          style={{ width: `${sentimentPercentage}%` }}
+                                        />
+                                      </div>
+                                    </div>
+                                    <div className="text-right">
+                                      <div className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                                        {sentimentPercentage}%
+                                      </div>
+                                      <div className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                                        {sentimentLabel}
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            })()}
+                          </div>
+                        </div>
                       </div>
                     </section>
                 </div>
