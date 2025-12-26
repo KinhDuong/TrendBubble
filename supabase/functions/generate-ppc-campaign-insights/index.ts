@@ -159,10 +159,10 @@ Deno.serve(async (req: Request) => {
 
     const { data: keywords, error: keywordsError } = await supabase
       .from("brand_keyword_data")
-      .select(`keyword, competition, "Avg. monthly searches", "Top of page bid (low range)", "Top of page bid (high range)"`)
+      .select('keyword, competition, "Avg. monthly searches", "Top of page bid (low range)", "Top of page bid (high range)"')
       .eq("brand", brandPage.brand)
       .eq("user_id", user.id)
-      .not("Top of page bid (low range)", "is", null);
+      .not('"Top of page bid (low range)"', "is", null);
 
     if (keywordsError) {
       throw keywordsError;
