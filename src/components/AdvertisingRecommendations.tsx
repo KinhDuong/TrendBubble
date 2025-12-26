@@ -334,7 +334,7 @@ export default function AdvertisingRecommendations({ keywordData, brandName, the
       .slice(0, 10);
 
     const defensiveKeywords = scoredKeywords
-      .filter(kw => isDefensiveKeyword(kw) && kw.avgCPC > 0 && !isBrandKeyword(kw))
+      .filter(kw => isDefensiveKeyword(kw) && kw.avgCPC > 0)
       .map(kw => ({ ...kw, score: calculateDefensive(kw) }))
       .sort((a, b) => b.score - a.score)
       .slice(0, 10);
