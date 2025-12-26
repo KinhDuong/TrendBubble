@@ -90,7 +90,10 @@ export default function SEOStrategyInsights({ brandName, theme, userId, isOwner 
           'Authorization': `Bearer ${session.access_token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ brand: brandName }),
+        body: JSON.stringify({
+          brand: brandName,
+          forceRegenerate: !!strategy
+        }),
       });
 
       const result = await response.json();

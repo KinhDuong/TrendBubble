@@ -54,13 +54,13 @@ Deno.serve(async (req: Request) => {
       throw new Error("Unauthorized");
     }
 
-    const { brand } = await req.json();
+    const { brand, forceRegenerate } = await req.json();
 
     if (!brand) {
       throw new Error("Brand name is required");
     }
 
-    console.log(`Generating SEO strategy for brand: ${brand}`);
+    console.log(`Generating SEO strategy for brand: ${brand}${forceRegenerate ? ' (force regenerate)' : ''}`);
 
     // Check if strategy already exists
     const { data: existingStrategy } = await supabaseClient
@@ -70,7 +70,15 @@ Deno.serve(async (req: Request) => {
       .eq("user_id", user.id)
       .maybeSingle();
 
-    if (existingStrategy) {
+    // If forcing regeneration, delete the existing strategy
+    if (forceRegenerate && existingStrategy) {
+      console.log(`Deleting existing strategy for ${brand} before regeneration`);
+      await supabaseClient
+        .from("brand_seo_strategy")
+        .delete()
+        .eq("brand_name", brand)
+        .eq("user_id", user.id);
+    } else if (existingStrategy && !forceRegenerate) {
       // For cached strategies, recalculate top50 data for display
       // Fetch keyword data with monthly columns
       const monthlyColumns = [
