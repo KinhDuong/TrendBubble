@@ -5,7 +5,7 @@ import { useAuth } from '../hooks/useAuth';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import Login from '../components/Login';
-import { Trash2, Search, Download, RefreshCw, Filter, Sparkles, Eye, EyeOff, Globe, Lock, ExternalLink } from 'lucide-react';
+import { Trash2, Search, Download, RefreshCw, Filter, Sparkles, Eye, EyeOff, Globe, Lock, ExternalLink, AlertCircle } from 'lucide-react';
 
 interface BrandKeywordData {
   id: string;
@@ -56,6 +56,7 @@ export default function BrandDataManager() {
   const [aiMessage, setAiMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
   const [brandPage, setBrandPage] = useState<{ id: string; is_public: boolean } | null>(null);
   const [togglingPublic, setTogglingPublic] = useState(false);
+  const [creatingPage, setCreatingPage] = useState(false);
 
   const fetchBrands = async () => {
     try {
@@ -149,6 +150,48 @@ export default function BrandDataManager() {
       setTimeout(() => setAiMessage(null), 5000);
     } finally {
       setTogglingPublic(false);
+    }
+  };
+
+  const createBrandPage = async () => {
+    if (!brandName) return;
+
+    setCreatingPage(true);
+    try {
+      const decodedBrand = decodeURIComponent(brandName);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not authenticated');
+
+      const { data: newPage, error } = await supabase
+        .from('brand_pages')
+        .insert({
+          brand: decodedBrand,
+          meta_title: `${decodedBrand} - Brand Insights & Keyword Analysis`,
+          meta_description: `Explore comprehensive keyword analysis and search trends for ${decodedBrand}. View top keywords, performance metrics, and strategic insights.`,
+          intro_text: `Discover the search landscape for ${decodedBrand}.`,
+          user_id: user.id,
+          is_public: false
+        })
+        .select('id, is_public')
+        .single();
+
+      if (error) throw error;
+
+      setBrandPage(newPage);
+      setAiMessage({
+        type: 'success',
+        text: 'Brand page created successfully! The page is currently private. You can make it public when ready.'
+      });
+      setTimeout(() => setAiMessage(null), 5000);
+    } catch (error: any) {
+      console.error('Error creating brand page:', error);
+      setAiMessage({
+        type: 'error',
+        text: error.message || 'Failed to create brand page'
+      });
+      setTimeout(() => setAiMessage(null), 5000);
+    } finally {
+      setCreatingPage(false);
     }
   };
 
@@ -763,6 +806,39 @@ export default function BrandDataManager() {
                   </div>
                 </div>
               </div>
+
+              {!brandPage && (
+                <div className="mb-4 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <AlertCircle className="w-5 h-5 text-amber-600" />
+                      <div>
+                        <h3 className="font-semibold text-amber-900">No Page Created</h3>
+                        <p className="text-sm text-amber-700">
+                          Create a brand insights page to showcase your keyword analysis publicly
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={createBrandPage}
+                      disabled={creatingPage}
+                      className="flex items-center gap-2 px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {creatingPage ? (
+                        <>
+                          <RefreshCw className="w-4 h-4 animate-spin" />
+                          Creating...
+                        </>
+                      ) : (
+                        <>
+                          <Globe className="w-4 h-4" />
+                          Create Page
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              )}
 
               {brandPage && (
                 <div className={`mb-4 p-4 rounded-lg border ${
