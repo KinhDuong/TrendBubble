@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { DollarSign, TrendingUp, AlertTriangle, Target } from 'lucide-react';
+import { supabase } from '../lib/supabase';
+import { DollarSign, TrendingUp, AlertTriangle, Target, Sparkles } from 'lucide-react';
 
 interface PPCInsights {
   summary: {
@@ -35,6 +36,11 @@ interface PPCInsights {
     }>;
     warnings: string[];
   };
+  metadata?: {
+    id: string;
+    created_at: string;
+    updated_at: string;
+  };
 }
 
 interface PPCCampaignInsightsProps {
@@ -56,76 +62,133 @@ export default function PPCCampaignInsights({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchInsights = async () => {
+  useEffect(() => {
+    loadInsights();
+  }, [brandPageSlug, userId]);
+
+  const loadInsights = async () => {
+    if (!userId) return;
+
+    try {
+      const { data: brandPage } = await supabase
+        .from('brand_pages')
+        .select('id')
+        .eq('slug', brandPageSlug)
+        .maybeSingle();
+
+      if (!brandPage) return;
+
+      const { data: existingInsights } = await supabase
+        .from('brand_ppc_insights')
+        .select('*')
+        .eq('brand_page_id', brandPage.id)
+        .maybeSingle();
+
+      if (existingInsights) {
+        setInsights({
+          ...existingInsights.insights,
+          metadata: {
+            id: existingInsights.id,
+            created_at: existingInsights.created_at,
+            updated_at: existingInsights.updated_at
+          }
+        });
+      }
+    } catch (err) {
+      console.error('Error loading PPC insights:', err);
+    }
+  };
+
+  const handleGenerate = async () => {
     setLoading(true);
     setError(null);
 
     try {
-      const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-ppc-campaign-insights`;
-      const headers = {
-        'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-        'Content-Type': 'application/json',
-      };
+      const { data: { session } } = await supabase.auth.getSession();
 
+      if (!session) {
+        throw new Error('You must be logged in to generate PPC insights');
+      }
+
+      const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-ppc-campaign-insights`;
       const response = await fetch(apiUrl, {
         method: 'POST',
-        headers,
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({ brandPageSlug })
       });
 
       if (!response.ok) {
-        throw new Error('Failed to generate PPC insights');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to generate PPC insights');
       }
 
       const data = await response.json();
       setInsights(data);
     } catch (err) {
-      console.error('Error fetching PPC insights:', err);
-      setError(err instanceof Error ? err.message : 'Failed to load PPC insights');
+      console.error('Error generating PPC insights:', err);
+      setError(err instanceof Error ? err.message : 'Failed to generate PPC insights');
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchInsights();
-  }, [brandPageSlug]);
-
-  if (loading) {
-    return (
-      <div className="max-w-7xl mx-auto mt-8 px-2 md:px-0">
-        <div className={`rounded-lg p-6 ${theme === 'dark' ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-200'}`}>
-          <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="max-w-7xl mx-auto mt-8 px-2 md:px-0">
-        <div className={`rounded-lg p-6 ${theme === 'dark' ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-200'}`}>
-          <div className="text-center text-red-600 py-4">{error}</div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!insights) {
-    return null;
-  }
-
   return (
     <div className="max-w-7xl mx-auto mt-8 px-2 md:px-0">
-      <div className={`rounded-lg p-6 ${theme === 'dark' ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-200'}`}>
-        <div className="flex items-center gap-3 mb-6">
-          <DollarSign className="w-6 h-6 text-green-600" />
-          <h2 className={`text-2xl font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-            PPC / Google Ads Campaigns (Paid Traffic & ROAS)
-          </h2>
+      <div className={`rounded-lg p-6 shadow-md ${theme === 'dark' ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-200'}`}>
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <DollarSign className="w-6 h-6 text-green-600" />
+            <h2 className={`text-2xl font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+              PPC / Google Ads Campaigns (Paid Traffic & ROAS)
+            </h2>
+          </div>
+          {isOwner && (
+            <button
+              onClick={handleGenerate}
+              disabled={loading}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all transform hover:scale-105 ${
+                loading
+                  ? theme === 'dark'
+                    ? 'bg-gray-700 text-gray-400 cursor-not-allowed'
+                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  : theme === 'dark'
+                    ? 'bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white shadow-lg'
+                    : 'bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white shadow-md'
+              }`}
+            >
+              <Sparkles className="w-4 h-4" />
+              {loading ? 'Generating...' : insights ? 'Regenerate' : 'Generate'}
+            </button>
+          )}
         </div>
+
+        {error && (
+          <div className={`mb-6 p-4 rounded-lg border ${theme === 'dark' ? 'bg-red-900/20 border-red-800/30' : 'bg-red-50 border-red-200'}`}>
+            <div className="flex items-start gap-3">
+              <AlertTriangle className={`w-5 h-5 flex-shrink-0 mt-0.5 ${theme === 'dark' ? 'text-red-400' : 'text-red-600'}`} />
+              <p className={`text-sm ${theme === 'dark' ? 'text-red-300' : 'text-red-600'}`}>{error}</p>
+            </div>
+          </div>
+        )}
+
+        {loading && (
+          <div className="flex items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          </div>
+        )}
+
+        {!loading && !insights && !error && (
+          <div className={`text-center py-8 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+            <p>Click "Generate" to create PPC campaign insights for {brandName}.</p>
+            <p className="text-sm mt-2">This will analyze your keyword data and provide advertising recommendations.</p>
+          </div>
+        )}
+
+        {!loading && insights && (
+          <div>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
           <div className={`p-4 rounded-lg ${theme === 'dark' ? 'bg-gray-700' : 'bg-blue-50'}`}>
@@ -341,6 +404,20 @@ export default function PPCCampaignInsights({
                 </tbody>
               </table>
             </div>
+          </div>
+        )}
+
+        {insights?.metadata && (
+          <p className={`text-sm mt-6 ${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>
+            Generated on {new Date(insights.metadata.updated_at || insights.metadata.created_at).toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+            })}
+          </p>
+        )}
           </div>
         )}
       </div>

@@ -112,9 +112,27 @@ Deno.serve(async (req: Request) => {
       );
     }
 
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: "Authorization header is required" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
+
+    const token = authHeader.replace("Bearer ", "");
+    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+
+    if (userError || !user) {
+      return new Response(
+        JSON.stringify({ error: "Invalid authorization token" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
     const { data: brandPage, error: pageError } = await supabase
       .from("brand_pages")
@@ -126,6 +144,13 @@ Deno.serve(async (req: Request) => {
       return new Response(
         JSON.stringify({ error: "Brand page not found" }),
         { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    if (brandPage.user_id !== user.id) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized to generate insights for this brand" }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
@@ -241,8 +266,54 @@ Deno.serve(async (req: Request) => {
       );
     }
 
+    const { data: existingInsights } = await supabase
+      .from("brand_ppc_insights")
+      .select("id")
+      .eq("brand_page_id", brandPage.id)
+      .maybeSingle();
+
+    let savedInsights;
+    if (existingInsights) {
+      const { data, error: updateError } = await supabase
+        .from("brand_ppc_insights")
+        .update({
+          insights,
+          updated_at: new Date().toISOString()
+        })
+        .eq("brand_page_id", brandPage.id)
+        .select("id, created_at, updated_at")
+        .single();
+
+      if (updateError) {
+        throw updateError;
+      }
+      savedInsights = data;
+    } else {
+      const { data, error: insertError } = await supabase
+        .from("brand_ppc_insights")
+        .insert({
+          brand_page_id: brandPage.id,
+          user_id: user.id,
+          insights
+        })
+        .select("id, created_at, updated_at")
+        .single();
+
+      if (insertError) {
+        throw insertError;
+      }
+      savedInsights = data;
+    }
+
     return new Response(
-      JSON.stringify(insights),
+      JSON.stringify({
+        ...insights,
+        metadata: {
+          id: savedInsights.id,
+          created_at: savedInsights.created_at,
+          updated_at: savedInsights.updated_at
+        }
+      }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
 
