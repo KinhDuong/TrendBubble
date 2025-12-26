@@ -100,7 +100,23 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    const keywordSummary = keywords.map(kw => {
+    // Filter out location-based keywords (not suitable for traditional Google Ads campaigns)
+    const locationTerms = ["near me", "nearby", "close by", "close to me", "around me", "in my area", "local", "closest"];
+    const filteredKeywords = keywords.filter(kw => {
+      const keywordLower = kw.keyword.toLowerCase();
+      return !locationTerms.some(term => keywordLower.includes(term));
+    });
+
+    if (!filteredKeywords || filteredKeywords.length === 0) {
+      return new Response(
+        JSON.stringify({
+          insights_markdown: "No suitable keywords available for PPC analysis after filtering location-based terms. Location keywords like 'near me' are better suited for Google Business Profile / Local Services Ads."
+        }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const keywordSummary = filteredKeywords.map(kw => {
       const lowBid = kw['Top of page bid (low range)'] || 0;
       const highBid = kw['Top of page bid (high range)'] || 0;
       const avgCpc = lowBid && highBid ? ((lowBid + highBid) / 2).toFixed(2) : (lowBid || highBid || 0).toFixed(2);
@@ -111,7 +127,11 @@ Deno.serve(async (req: Request) => {
 
     const prompt = `You are an expert PPC strategist and Google Ads specialist with deep experience optimizing for ROAS using Keyword Planner data.
 
-I am providing a keyword dataset from Google Keyword Planner for the ${brandPage.brand} brand/niche. Key highlights:
+I am providing a keyword dataset from Google Keyword Planner for the ${brandPage.brand} brand/niche.
+
+**IMPORTANT NOTE:** Location-based keywords (e.g., "near me", "nearby", "close by", "local") have been EXCLUDED from this analysis. These keywords are better suited for Google Business Profile and Local Services Ads, not traditional Search campaigns.
+
+Key highlights from filtered dataset:
 
 ${keywordSummary}
 
