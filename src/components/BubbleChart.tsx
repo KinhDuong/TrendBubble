@@ -678,12 +678,25 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
       const displayCount = Math.min(maxDisplay, topics.length);
       const densityFactor = Math.min(1, Math.sqrt(50 / displayCount));
 
-      // Apply square root to maintain proper area proportionality
-      const sqrtVolume = Math.sqrt(searchVolume);
-      const sqrtMin = Math.sqrt(minVolume);
-      const sqrtMax = Math.sqrt(maxSearchVolume);
+      let normalizedScale: number;
 
-      const normalizedScale = (sqrtVolume - sqrtMin) / (sqrtMax - sqrtMin || 1);
+      // Use logarithmic scale for keyword data (better separation across wide ranges)
+      // Use square root for general trending topics (maintains area proportionality)
+      if (keywordPerformanceData.length > 0) {
+        // Logarithmic scale - better for wide ranges of search volumes
+        const logVolume = Math.log10(Math.max(1, searchVolume));
+        const logMin = Math.log10(Math.max(1, minVolume));
+        const logMax = Math.log10(Math.max(1, maxSearchVolume));
+
+        normalizedScale = (logVolume - logMin) / (logMax - logMin || 1);
+      } else {
+        // Square root scale - maintains proper area proportionality
+        const sqrtVolume = Math.sqrt(searchVolume);
+        const sqrtMin = Math.sqrt(minVolume);
+        const sqrtMax = Math.sqrt(maxSearchVolume);
+
+        normalizedScale = (sqrtVolume - sqrtMin) / (sqrtMax - sqrtMin || 1);
+      }
 
       // For extreme ranges, use much wider size range to show differences
       let baseMin, baseMax;
