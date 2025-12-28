@@ -5,6 +5,7 @@ import { supabase } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import BrandKeywordUpload from '../components/BrandKeywordUpload';
 import { TrendingUp, Calendar, Database, BarChart3, AlertCircle, CheckCircle, ArrowRight, Table, Lock, Unlock, Loader2 } from 'lucide-react';
 
 interface BrandMetadata {
@@ -237,9 +238,11 @@ export default function InsightsMetaPage() {
             <h1 className={`text-3xl md:text-4xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
               Brand Insights Metadata
             </h1>
-            <p className={`text-lg ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+            <p className={`text-lg mb-6 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
               Browse data quality indicators and statistics for all tracked brands
             </p>
+
+            <BrandKeywordUpload onUploadComplete={loadBrandMetadata} theme={theme} />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
