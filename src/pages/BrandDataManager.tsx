@@ -56,7 +56,7 @@ export default function BrandDataManager() {
   const [aiAnalyzingBranded, setAiAnalyzingBranded] = useState(false);
   const [competitiveAnalyzing, setCompetitiveAnalyzing] = useState(false);
   const [aiMessage, setAiMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
-  const [brandPage, setBrandPage] = useState<{ id: string; is_public: boolean; page_id: string } | null>(null);
+  const [brandPage, setBrandPage] = useState<{ id: string; is_public: boolean; page_id: string; username?: string } | null>(null);
   const [togglingPublic, setTogglingPublic] = useState(false);
   const [creatingPage, setCreatingPage] = useState(false);
   const [selectedKeywords, setSelectedKeywords] = useState<string[]>([]);
@@ -131,13 +131,27 @@ export default function BrandDataManager() {
 
       const { data: pageData, error } = await supabase
         .from('brand_pages')
-        .select('id, is_public, page_id')
+        .select('id, is_public, page_id, user_id')
         .eq('brand', decodedBrand)
         .eq('user_id', user.id)
         .maybeSingle();
 
       if (error) throw error;
-      setBrandPage(pageData);
+
+      if (pageData) {
+        const { data: profileData } = await supabase
+          .from('user_profiles')
+          .select('username')
+          .eq('id', pageData.user_id)
+          .maybeSingle();
+
+        setBrandPage({
+          ...pageData,
+          username: profileData?.username
+        });
+      } else {
+        setBrandPage(null);
+      }
     } catch (error) {
       console.error('Error fetching brand page:', error);
     }
@@ -190,12 +204,21 @@ export default function BrandDataManager() {
           user_id: user.id,
           is_public: false
         })
-        .select('id, is_public')
+        .select('id, is_public, page_id, user_id')
         .single();
 
       if (error) throw error;
 
-      setBrandPage(newPage);
+      const { data: profileData } = await supabase
+        .from('user_profiles')
+        .select('username')
+        .eq('id', user.id)
+        .maybeSingle();
+
+      setBrandPage({
+        ...newPage,
+        username: profileData?.username
+      });
       setAiMessage({
         type: 'success',
         text: 'Brand page created successfully! The page is currently private. You can make it public when ready.'
@@ -996,7 +1019,7 @@ export default function BrandDataManager() {
                     <div className="flex items-center gap-2">
                       {brandPage.is_public && (
                         <a
-                          href={`/insights/${brandPage.id}/${brandPage.page_id}/`}
+                          href={`/insights/${brandPage.username || user?.id}/${brandPage.page_id}/`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="flex items-center gap-2 px-3 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
