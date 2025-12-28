@@ -560,13 +560,13 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light' }
         />
       </div>
 
-      <label className={`flex items-center justify-center w-full px-4 py-6 border-2 border-dashed rounded-lg cursor-pointer hover:border-blue-500 transition-colors ${
+      <label className={`flex items-center justify-center w-full px-4 py-3 border-2 border-dashed rounded-lg cursor-pointer hover:border-blue-500 transition-colors ${
         theme === 'dark'
           ? 'border-gray-600 hover:bg-gray-750'
           : 'border-gray-300 hover:bg-gray-50'
       }`}>
         <div className="flex flex-col items-center">
-          <Upload className={`w-8 h-8 mb-2 ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`} />
+          <Upload className={`w-5 h-5 mb-1 ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`} />
           <span className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
             {uploading ? 'Uploading...' : 'Click to upload CSV file'}
           </span>
