@@ -2222,7 +2222,7 @@ export default function BrandInsightPage() {
 
               {keywordData.length > 0 && pageOwnerId && (
                 <SEOStrategyInsights
-                  brandName={decodedBrand}
+                  brandName={brandPageData?.brand || decodedBrand}
                   theme={theme}
                   userId={pageOwnerId}
                   isOwner={user ? (user.id === pageOwnerId || isAdmin) : false}
@@ -2232,7 +2232,7 @@ export default function BrandInsightPage() {
               {keywordData.length > 0 && pageOwnerId && brandName && (
                 <PPCCampaignInsights
                   brandPageSlug={brandName}
-                  brandName={decodedBrand}
+                  brandName={brandPageData?.brand || decodedBrand}
                   theme={theme}
                   userId={pageOwnerId}
                   isOwner={user ? (user.id === pageOwnerId || isAdmin) : false}
