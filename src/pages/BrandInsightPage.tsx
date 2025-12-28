@@ -249,13 +249,9 @@ export default function BrandInsightPage() {
   const loadBrandData = async (ownerUserId?: string, actualBrandName?: string) => {
     const userIdToUse = ownerUserId || pageOwnerId;
     const brandToQuery = actualBrandName || (brandPageData?.brand);
-    if (!brandToQuery || !userIdToUse) {
-      console.log('loadBrandData: Missing required params', { brandToQuery, userIdToUse });
-      return;
-    }
+    if (!brandToQuery || !userIdToUse) return;
 
     try {
-      console.log('loadBrandData: Fetching monthly data for', { brand: brandToQuery, user_id: userIdToUse });
       const { data, error } = await supabase
         .from('brand_keyword_monthly_data')
         .select('*')
@@ -265,7 +261,6 @@ export default function BrandInsightPage() {
 
       if (error) throw error;
 
-      console.log('loadBrandData: Received data', { count: data?.length || 0 });
       if (data && data.length > 0) {
         setMonthlyData(data);
       } else {
@@ -1466,7 +1461,7 @@ export default function BrandInsightPage() {
                 {
                   "@type": "ListItem",
                   "position": 3,
-                  "name": decodedBrand,
+                  "name": brandPageData?.brand || decodedBrand,
                   "item": pageUrl
                 }
               ]
@@ -1508,8 +1503,8 @@ export default function BrandInsightPage() {
       </Helmet>
 
       <ToolSchema
-        name={`${decodedBrand} Keyword Analysis Tool`}
-        description={`Interactive keyword research and SEO analysis tool for ${decodedBrand}. Visualize search trends, analyze keyword performance, and track search volume data.`}
+        name={`${brandPageData?.brand || decodedBrand} Keyword Analysis Tool`}
+        description={`Interactive keyword research and SEO analysis tool for ${brandPageData?.brand || decodedBrand}. Visualize search trends, analyze keyword performance, and track search volume data.`}
         url={pageUrl}
         applicationCategory="BusinessApplication"
         screenshot={[
@@ -1806,7 +1801,7 @@ export default function BrandInsightPage() {
                   <section className="w-full" aria-labelledby="top-keywords-heading">
                       <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-lg border p-6 shadow-md`}>
                         <h2 id="top-keywords-heading" className={`text-xl md:text-2xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                          Top {rankingFilteredTopics.length} Keywords for {decodedBrand}
+                          Top {rankingFilteredTopics.length} Keywords for {brandPageData?.brand || decodedBrand}
                         </h2>
                         {brandPageData.intro_text && (
                           <div
@@ -2139,7 +2134,7 @@ export default function BrandInsightPage() {
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                           {/* Chart Section */}
                           <div className="lg:col-span-2">
-                            <KeywordChart data={monthlyData} selectedBrand={decodedBrand} />
+                            <KeywordChart data={monthlyData} selectedBrand={brandPageData?.brand || null} />
                           </div>
 
                           {/* Overall Sentiment Section */}
@@ -2248,7 +2243,7 @@ export default function BrandInsightPage() {
                 <div className="max-w-7xl mx-auto mt-8 px-2 md:px-0">
                   <AdvertisingRecommendations
                     keywordData={keywordData}
-                    brandName={decodedBrand}
+                    brandName={brandPageData?.brand || decodedBrand}
                     theme={theme}
                   />
                 </div>
@@ -2533,7 +2528,7 @@ export default function BrandInsightPage() {
                     Frequently Asked Questions
                   </h2>
                   <p className={`text-sm mb-6 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                    Find answers to common questions about {decodedBrand} keyword trends and SEO insights.
+                    Find answers to common questions about {brandPageData?.brand || decodedBrand} keyword trends and SEO insights.
                   </p>
                   <div className="space-y-6">
                     {faqs.map((faq) => (
