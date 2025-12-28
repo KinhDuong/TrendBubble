@@ -117,8 +117,26 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light' }
           });
         });
 
+        const fieldsToAverage = new Set([
+          'YoY change',
+          'Three month change',
+          'Competition (indexed value)',
+          'Top of page bid (low range)',
+          'Top of page bid (high range)'
+        ]);
+
         numericFields.forEach(field => {
-          mergedData[field] = similar.reduce((sum, item) => sum + (item[field] || 0), 0);
+          if (fieldsToAverage.has(field)) {
+            const validValues = similar
+              .map(item => item[field])
+              .filter(v => v !== undefined && v !== null && !isNaN(v));
+
+            if (validValues.length > 0) {
+              mergedData[field] = validValues.reduce((sum, val) => sum + val, 0) / validValues.length;
+            }
+          } else {
+            mergedData[field] = similar.reduce((sum, item) => sum + (item[field] || 0), 0);
+          }
         });
 
         Object.keys(similar[0]).forEach(key => {
