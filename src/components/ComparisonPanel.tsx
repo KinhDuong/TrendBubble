@@ -52,8 +52,16 @@ export default function ComparisonPanel({ topics, theme, onClose, onRemoveTopic 
           </button>
         </div>
 
-        <div className="overflow-x-auto pb-2">
-          <div className="flex items-end justify-center gap-4 py-8 min-h-[280px]">
+        <div
+          className="overflow-x-auto pb-2 scroll-smooth"
+          style={{ WebkitOverflowScrolling: 'touch' }}
+        >
+          <div className="flex items-end justify-start gap-4 py-8 min-h-[280px] px-4 md:px-8"
+            style={{
+              minWidth: 'fit-content',
+              margin: '0 auto'
+            }}
+          >
             {sortedTopics.map((topic) => {
               const size = getBubbleSize(topic.searchVolume);
               const fontSize = getFontSize(size);
