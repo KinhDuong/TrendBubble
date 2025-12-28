@@ -16,6 +16,16 @@ interface MergeGroup {
   originalData: any[];
 }
 
+function generateSlug(brandName: string): string {
+  return brandName
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
 export default function BrandKeywordUpload({ onUploadComplete, theme = 'light' }: BrandKeywordUploadProps) {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -501,11 +511,14 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light' }
 
     console.log('Successfully inserted monthly data:', insertedData);
 
+    const pageId = generateSlug(brandName.trim());
+
     const { error: brandPageError } = await supabase
       .from('brand_pages')
       .upsert({
         user_id: user.id,
         brand: brandName.trim(),
+        page_id: pageId,
         meta_title: `${brandName.trim()} - Keyword Search Trends & SEO Insights`,
         meta_description: `Analyze ${brandName.trim()} keyword search volume trends and SEO performance data.`,
         updated_at: new Date().toISOString()
