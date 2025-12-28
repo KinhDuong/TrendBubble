@@ -44,8 +44,8 @@ export default function SEOStrategyInsights({ brandName, theme, userId, isOwner 
   }, [brandName, userId]);
 
   const loadStrategy = async () => {
-    if (!userId) {
-      console.log('SEO Strategy: No userId provided, skipping load');
+    if (!userId || !brandName) {
+      console.log('SEO Strategy: No userId or brandName provided, skipping load');
       return;
     }
 

@@ -149,16 +149,16 @@ export default function PPCCampaignInsights({
 
   useEffect(() => {
     loadInsights();
-  }, [brandPageSlug, userId]);
+  }, [brandName, userId]);
 
   const loadInsights = async () => {
-    if (!userId) return;
+    if (!userId || !brandName) return;
 
     try {
       const { data: brandPage } = await supabase
         .from('brand_pages')
         .select('id')
-        .eq('brand', brandPageSlug)
+        .eq('brand', brandName)
         .maybeSingle();
 
       if (!brandPage) return;
@@ -202,7 +202,7 @@ export default function PPCCampaignInsights({
           'Authorization': `Bearer ${session.access_token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ brandPageSlug })
+        body: JSON.stringify({ brandName })
       });
 
       if (!response.ok) {

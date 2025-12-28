@@ -21,11 +21,12 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    const { brandPageSlug } = await req.json();
+    const { brandName, brandPageSlug } = await req.json();
+    const brandToQuery = brandName || brandPageSlug;
 
-    if (!brandPageSlug) {
+    if (!brandToQuery) {
       return new Response(
-        JSON.stringify({ error: "brandPageSlug is required" }),
+        JSON.stringify({ error: "brandName is required" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -63,7 +64,7 @@ Deno.serve(async (req: Request) => {
     const { data: brandPage, error: pageError } = await supabase
       .from("brand_pages")
       .select("id, brand, user_id")
-      .eq("brand", brandPageSlug)
+      .eq("brand", brandToQuery)
       .maybeSingle();
 
     if (pageError || !brandPage) {
