@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Upload, AlertCircle, CheckCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import KeywordMergeReview from './KeywordMergeReview';
+import KeywordDuplicateReview from './KeywordDuplicateReview';
 
 interface BrandKeywordUploadProps {
   onUploadComplete: () => void;
@@ -14,6 +15,12 @@ interface MergeGroup {
   variants: string[];
   mergedData: any;
   originalData: any[];
+}
+
+interface DuplicateGroup {
+  id: string;
+  keywords: string[];
+  sharedData: any;
 }
 
 function generateSlug(brandName: string): string {
@@ -34,6 +41,8 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light' }
   const [mergeGroups, setMergeGroups] = useState<MergeGroup[]>([]);
   const [showMergeReview, setShowMergeReview] = useState(false);
   const [pendingData, setPendingData] = useState<any[]>([]);
+  const [duplicateGroups, setDuplicateGroups] = useState<DuplicateGroup[]>([]);
+  const [showDuplicateReview, setShowDuplicateReview] = useState(false);
 
   const levenshteinDistance = (str1: string, str2: string): number => {
     const len1 = str1.length;
@@ -74,6 +83,42 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light' }
     const distance = levenshteinDistance(s1, s2);
     const maxLen = Math.max(s1.length, s2.length);
     return 1 - distance / maxLen;
+  };
+
+  const detectDuplicates = (data: Array<Record<string, any>>): DuplicateGroup[] => {
+    const groups: DuplicateGroup[] = [];
+    const dataSignatureMap = new Map<string, string[]>();
+
+    data.forEach((record) => {
+      const signature = JSON.stringify(
+        Object.keys(record)
+          .filter(key => key !== 'keyword')
+          .sort()
+          .reduce((obj, key) => {
+            obj[key] = record[key];
+            return obj;
+          }, {} as Record<string, any>)
+      );
+
+      if (!dataSignatureMap.has(signature)) {
+        dataSignatureMap.set(signature, []);
+      }
+      dataSignatureMap.get(signature)!.push(record.keyword);
+    });
+
+    let groupId = 1;
+    dataSignatureMap.forEach((keywords, signature) => {
+      if (keywords.length > 1) {
+        const sharedData = JSON.parse(signature);
+        groups.push({
+          id: String(groupId++),
+          keywords: keywords,
+          sharedData: sharedData
+        });
+      }
+    });
+
+    return groups;
   };
 
   const detectMergeGroups = (data: Array<Record<string, any>>): MergeGroup[] => {
@@ -396,6 +441,16 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light' }
         throw new Error('No valid data found in CSV');
       }
 
+      const detectedDuplicates = detectDuplicates(data);
+
+      if (detectedDuplicates.length > 0) {
+        setDuplicateGroups(detectedDuplicates);
+        setShowDuplicateReview(true);
+        setUploading(false);
+        event.target.value = '';
+        return;
+      }
+
       const detectedMerges = detectMergeGroups(data);
 
       if (detectedMerges.length > 0) {
@@ -436,6 +491,12 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light' }
     setShowMergeReview(false);
     setPendingData([]);
     setMergeGroups([]);
+    setUploading(false);
+  };
+
+  const handleDuplicateCancel = () => {
+    setShowDuplicateReview(false);
+    setDuplicateGroups([]);
     setUploading(false);
   };
 
@@ -592,6 +653,14 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light' }
 
   return (
     <>
+      {showDuplicateReview && (
+        <KeywordDuplicateReview
+          duplicateGroups={duplicateGroups}
+          onCancel={handleDuplicateCancel}
+          theme={theme}
+        />
+      )}
+
       {showMergeReview && (
         <KeywordMergeReview
           mergeGroups={mergeGroups}
