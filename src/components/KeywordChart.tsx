@@ -202,6 +202,14 @@ export default function KeywordChart({ data, selectedBrand }: KeywordChartProps)
     return `Bar chart displaying top keywords by search volume for ${selectedBrand}`;
   };
 
+  if (!data.length) {
+    return (
+      <div className="flex items-center justify-center p-8 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+        <p className="text-gray-500 dark:text-gray-400">No search volume data available</p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
       <div>

@@ -249,9 +249,13 @@ export default function BrandInsightPage() {
   const loadBrandData = async (ownerUserId?: string, actualBrandName?: string) => {
     const userIdToUse = ownerUserId || pageOwnerId;
     const brandToQuery = actualBrandName || (brandPageData?.brand);
-    if (!brandToQuery || !userIdToUse) return;
+    if (!brandToQuery || !userIdToUse) {
+      console.log('loadBrandData: Missing required params', { brandToQuery, userIdToUse });
+      return;
+    }
 
     try {
+      console.log('loadBrandData: Fetching monthly data for', { brand: brandToQuery, user_id: userIdToUse });
       const { data, error } = await supabase
         .from('brand_keyword_monthly_data')
         .select('*')
@@ -261,6 +265,7 @@ export default function BrandInsightPage() {
 
       if (error) throw error;
 
+      console.log('loadBrandData: Received data', { count: data?.length || 0 });
       if (data && data.length > 0) {
         setMonthlyData(data);
       } else {
