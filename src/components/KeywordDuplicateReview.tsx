@@ -1,5 +1,5 @@
-import React from 'react';
-import { X, AlertTriangle, Copy } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, AlertTriangle, Copy, TrendingDown, CheckCircle } from 'lucide-react';
 
 interface DuplicateGroup {
   id: string;
@@ -7,17 +7,94 @@ interface DuplicateGroup {
   sharedData: any;
 }
 
+interface ZeroTrafficKeyword {
+  keyword: string;
+  data: any;
+}
+
 interface KeywordDuplicateReviewProps {
   duplicateGroups: DuplicateGroup[];
+  zeroTrafficKeywords: ZeroTrafficKeyword[];
+  allData: Array<Record<string, any>>;
+  onContinue: (filteredData: Array<Record<string, any>>) => void;
   onCancel: () => void;
   theme: 'dark' | 'light';
 }
 
 export default function KeywordDuplicateReview({
   duplicateGroups,
+  zeroTrafficKeywords,
+  allData,
+  onContinue,
   onCancel,
   theme,
 }: KeywordDuplicateReviewProps) {
+  // For each duplicate group, track which keyword to keep (null means keep all)
+  const [selectedKeywords, setSelectedKeywords] = useState<Record<string, string | null>>({});
+
+  // Track which zero-traffic keywords to exclude
+  const [excludedZeroTraffic, setExcludedZeroTraffic] = useState<Set<string>>(
+    new Set(zeroTrafficKeywords.map(k => k.keyword))
+  );
+
+  // Initialize all duplicate groups to "keep all"
+  useEffect(() => {
+    const initial: Record<string, string | null> = {};
+    duplicateGroups.forEach(group => {
+      initial[group.id] = null; // null = keep all
+    });
+    setSelectedKeywords(initial);
+  }, [duplicateGroups]);
+
+  const handleDuplicateSelection = (groupId: string, keyword: string | null) => {
+    setSelectedKeywords(prev => ({
+      ...prev,
+      [groupId]: keyword
+    }));
+  };
+
+  const toggleZeroTrafficKeyword = (keyword: string) => {
+    setExcludedZeroTraffic(prev => {
+      const next = new Set(prev);
+      if (next.has(keyword)) {
+        next.delete(keyword);
+      } else {
+        next.add(keyword);
+      }
+      return next;
+    });
+  };
+
+  const toggleAllZeroTraffic = () => {
+    if (excludedZeroTraffic.size === zeroTrafficKeywords.length) {
+      setExcludedZeroTraffic(new Set());
+    } else {
+      setExcludedZeroTraffic(new Set(zeroTrafficKeywords.map(k => k.keyword)));
+    }
+  };
+
+  const handleContinue = () => {
+    let filtered = [...allData];
+
+    // Filter out non-selected duplicates
+    duplicateGroups.forEach(group => {
+      const selected = selectedKeywords[group.id];
+      if (selected !== null) {
+        // Keep only the selected keyword, remove others in the group
+        const toRemove = group.keywords.filter(k => k !== selected);
+        filtered = filtered.filter(record => !toRemove.includes(record.keyword));
+      }
+      // If selected is null, keep all (do nothing)
+    });
+
+    // Filter out excluded zero-traffic keywords
+    filtered = filtered.filter(record => !excludedZeroTraffic.has(record.keyword));
+
+    onContinue(filtered);
+  };
+
+  const totalIssues = duplicateGroups.length + (zeroTrafficKeywords.length > 0 ? 1 : 0);
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div
@@ -25,10 +102,11 @@ export default function KeywordDuplicateReview({
           theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'
         } rounded-lg shadow-xl max-w-5xl w-full max-h-[90vh] overflow-hidden flex flex-col`}
       >
+        {/* Header */}
         <div className={`flex items-center justify-between p-6 border-b ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
           <div className="flex items-center gap-3">
-            <AlertTriangle className={`w-6 h-6 ${theme === 'dark' ? 'text-red-400' : 'text-red-600'}`} />
-            <h2 className="text-2xl font-bold">Duplicate Data Detected</h2>
+            <AlertTriangle className={`w-6 h-6 ${theme === 'dark' ? 'text-yellow-400' : 'text-yellow-600'}`} />
+            <h2 className="text-2xl font-bold">Review Data Quality Issues</h2>
           </div>
           <button
             onClick={onCancel}
@@ -38,83 +116,218 @@ export default function KeywordDuplicateReview({
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-6 space-y-4">
-          <div className={`p-4 rounded-lg border ${theme === 'dark' ? 'bg-red-900/20 border-red-800' : 'bg-red-50 border-red-200'}`}>
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+          {/* Summary */}
+          <div className={`p-4 rounded-lg border ${theme === 'dark' ? 'bg-yellow-900/20 border-yellow-800' : 'bg-yellow-50 border-yellow-200'}`}>
             <div className="flex items-start gap-3">
-              <AlertTriangle className={`w-5 h-5 ${theme === 'dark' ? 'text-red-400' : 'text-red-600'} mt-0.5 flex-shrink-0`} />
-              <div className={`text-sm ${theme === 'dark' ? 'text-red-300' : 'text-red-800'}`}>
-                <p className="font-semibold mb-1">Exact duplicate data found</p>
-                <p className="mb-2">
-                  We found {duplicateGroups.length} groups of keywords with identical data (search volumes, competition, bids, etc.).
-                  These appear to be data errors where the same data was duplicated with different keyword variations.
+              <AlertTriangle className={`w-5 h-5 ${theme === 'dark' ? 'text-yellow-400' : 'text-yellow-600'} mt-0.5 flex-shrink-0`} />
+              <div className={`text-sm ${theme === 'dark' ? 'text-yellow-300' : 'text-yellow-800'}`}>
+                <p className="font-semibold mb-1">Found {totalIssues} data quality issue{totalIssues !== 1 ? 's' : ''}</p>
+                <p>
+                  Review the issues below and choose how to handle them. You can select specific keywords to keep or exclude low-quality data before uploading.
                 </p>
-                <p className="font-semibold">Please remove these duplicates from your CSV file and re-upload.</p>
               </div>
             </div>
           </div>
 
-          {duplicateGroups.map((group) => (
-            <div
-              key={group.id}
-              className={`rounded-lg border ${
-                theme === 'dark'
-                  ? 'border-red-700 bg-red-900/10'
-                  : 'border-red-300 bg-red-50'
-              }`}
-            >
-              <div className="p-4">
-                <div className="flex items-start gap-3">
-                  <Copy className={`w-5 h-5 ${theme === 'dark' ? 'text-red-400' : 'text-red-600'} mt-0.5 flex-shrink-0`} />
-                  <div className="flex-1">
-                    <div className="mb-2">
-                      <span className="font-semibold text-lg">Duplicate Group {group.id}</span>
-                    </div>
-                    <div className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'} mb-3`}>
-                      <span className="font-medium">Keywords with identical data:</span>
-                      <ul className="mt-2 space-y-1 ml-4">
-                        {group.keywords.map((keyword, idx) => (
-                          <li key={idx} className="list-disc">{keyword}</li>
-                        ))}
-                      </ul>
-                    </div>
-                    <div className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} p-3 rounded ${theme === 'dark' ? 'bg-gray-900/50' : 'bg-gray-100'}`}>
-                      <div className="font-semibold mb-1">Shared data values:</div>
-                      <div className="grid grid-cols-2 gap-2">
-                        {group.sharedData['Avg. monthly searches'] && (
-                          <div>Avg. monthly searches: {group.sharedData['Avg. monthly searches'].toLocaleString()}</div>
-                        )}
-                        {group.sharedData['Competition (indexed value)'] !== undefined && (
-                          <div>Competition: {group.sharedData['Competition (indexed value)']}</div>
-                        )}
-                        {group.sharedData['Top of page bid (low range)'] !== undefined && (
-                          <div>Bid (low): {group.sharedData['Top of page bid (low range)']}</div>
-                        )}
-                        {group.sharedData['Top of page bid (high range)'] !== undefined && (
-                          <div>Bid (high): {group.sharedData['Top of page bid (high range)']}</div>
-                        )}
-                      </div>
+          {/* Duplicate Groups */}
+          {duplicateGroups.length > 0 && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Copy className={`w-5 h-5 ${theme === 'dark' ? 'text-red-400' : 'text-red-600'}`} />
+                <h3 className="text-lg font-semibold">
+                  Duplicate Data ({duplicateGroups.length} group{duplicateGroups.length !== 1 ? 's' : ''})
+                </h3>
+              </div>
+
+              {duplicateGroups.map((group) => (
+                <div
+                  key={group.id}
+                  className={`rounded-lg border p-4 ${
+                    theme === 'dark'
+                      ? 'border-red-700 bg-red-900/10'
+                      : 'border-red-200 bg-red-50'
+                  }`}
+                >
+                  <div className="mb-3">
+                    <span className="font-semibold">Group {group.id}</span>
+                    <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} mt-1`}>
+                      These keywords have identical search data. Select which one to keep, or keep all as separate entries.
+                    </p>
+                  </div>
+
+                  <div className="space-y-2 mb-3">
+                    {group.keywords.map((keyword) => (
+                      <label
+                        key={keyword}
+                        className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors ${
+                          selectedKeywords[group.id] === keyword
+                            ? theme === 'dark'
+                              ? 'bg-blue-900/30 border-2 border-blue-500'
+                              : 'bg-blue-50 border-2 border-blue-500'
+                            : theme === 'dark'
+                            ? 'bg-gray-700/50 border-2 border-transparent hover:bg-gray-700'
+                            : 'bg-white border-2 border-gray-200 hover:bg-gray-50'
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name={`duplicate-group-${group.id}`}
+                          checked={selectedKeywords[group.id] === keyword}
+                          onChange={() => handleDuplicateSelection(group.id, keyword)}
+                          className="w-4 h-4 text-blue-600"
+                        />
+                        <span className="flex-1">{keyword}</span>
+                      </label>
+                    ))}
+                  </div>
+
+                  <label
+                    className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors ${
+                      selectedKeywords[group.id] === null
+                        ? theme === 'dark'
+                          ? 'bg-blue-900/30 border-2 border-blue-500'
+                          : 'bg-blue-50 border-2 border-blue-500'
+                        : theme === 'dark'
+                        ? 'bg-gray-700/50 border-2 border-transparent hover:bg-gray-700'
+                        : 'bg-white border-2 border-gray-200 hover:bg-gray-50'
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name={`duplicate-group-${group.id}`}
+                      checked={selectedKeywords[group.id] === null}
+                      onChange={() => handleDuplicateSelection(group.id, null)}
+                      className="w-4 h-4 text-blue-600"
+                    />
+                    <span className="flex-1 font-medium">Keep all as separate keywords</span>
+                  </label>
+
+                  <div className={`mt-3 text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} p-3 rounded ${theme === 'dark' ? 'bg-gray-900/50' : 'bg-gray-100'}`}>
+                    <div className="font-semibold mb-1">Shared data:</div>
+                    <div className="grid grid-cols-2 gap-2">
+                      {group.sharedData['Avg. monthly searches'] !== undefined && (
+                        <div>Avg. monthly searches: {group.sharedData['Avg. monthly searches'].toLocaleString()}</div>
+                      )}
+                      {group.sharedData['Competition (indexed value)'] !== undefined && (
+                        <div>Competition: {group.sharedData['Competition (indexed value)']}</div>
+                      )}
+                      {group.sharedData['Top of page bid (low range)'] !== undefined && (
+                        <div>Bid (low): ${group.sharedData['Top of page bid (low range)']}</div>
+                      )}
+                      {group.sharedData['Top of page bid (high range)'] !== undefined && (
+                        <div>Bid (high): ${group.sharedData['Top of page bid (high range)']}</div>
+                      )}
                     </div>
                   </div>
                 </div>
+              ))}
+            </div>
+          )}
+
+          {/* Zero Traffic Keywords */}
+          {zeroTrafficKeywords.length > 0 && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <TrendingDown className={`w-5 h-5 ${theme === 'dark' ? 'text-orange-400' : 'text-orange-600'}`} />
+                <h3 className="text-lg font-semibold">
+                  Zero-Traffic Keywords ({zeroTrafficKeywords.length} found)
+                </h3>
+              </div>
+
+              <div
+                className={`rounded-lg border p-4 ${
+                  theme === 'dark'
+                    ? 'border-orange-700 bg-orange-900/10'
+                    : 'border-orange-200 bg-orange-50'
+                }`}
+              >
+                <p className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'} mb-3`}>
+                  These keywords have zero or no average monthly searches. They won't generate traffic and may clutter your data.
+                </p>
+
+                <label
+                  className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer mb-4 ${
+                    theme === 'dark'
+                      ? 'bg-gray-700 hover:bg-gray-600'
+                      : 'bg-white hover:bg-gray-50'
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={excludedZeroTraffic.size === zeroTrafficKeywords.length}
+                    onChange={toggleAllZeroTraffic}
+                    className="w-4 h-4 text-blue-600"
+                  />
+                  <span className="font-medium">
+                    {excludedZeroTraffic.size === zeroTrafficKeywords.length
+                      ? 'Uncheck all'
+                      : 'Exclude all zero-traffic keywords'}
+                  </span>
+                </label>
+
+                <div className={`space-y-1 max-h-60 overflow-y-auto p-2 rounded ${theme === 'dark' ? 'bg-gray-900/50' : 'bg-gray-100'}`}>
+                  {zeroTrafficKeywords.map((item) => (
+                    <label
+                      key={item.keyword}
+                      className={`flex items-center gap-3 p-2 rounded cursor-pointer text-sm ${
+                        theme === 'dark'
+                          ? 'hover:bg-gray-700'
+                          : 'hover:bg-gray-200'
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={excludedZeroTraffic.has(item.keyword)}
+                        onChange={() => toggleZeroTrafficKeyword(item.keyword)}
+                        className="w-4 h-4 text-blue-600"
+                      />
+                      <span className="flex-1">{item.keyword}</span>
+                      <span className={`text-xs ${theme === 'dark' ? 'text-orange-400' : 'text-orange-600'}`}>
+                        0 traffic
+                      </span>
+                    </label>
+                  ))}
+                </div>
               </div>
             </div>
-          ))}
+          )}
         </div>
 
+        {/* Footer */}
         <div className={`flex items-center justify-between p-6 border-t ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
           <div className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-            {duplicateGroups.reduce((sum, group) => sum + group.keywords.length, 0)} duplicate keywords found across {duplicateGroups.length} groups
+            {excludedZeroTraffic.size > 0 && (
+              <span>{excludedZeroTraffic.size} keyword{excludedZeroTraffic.size !== 1 ? 's' : ''} will be excluded</span>
+            )}
           </div>
-          <button
-            onClick={onCancel}
-            className={`px-6 py-2 rounded-lg transition-colors ${
-              theme === 'dark'
-                ? 'bg-red-600 hover:bg-red-700 text-white'
-                : 'bg-red-600 hover:bg-red-700 text-white'
-            }`}
-          >
-            Close & Fix CSV
-          </button>
+          <div className="flex gap-3">
+            <button
+              onClick={onCancel}
+              className={`px-6 py-2 rounded-lg transition-colors ${
+                theme === 'dark'
+                  ? 'bg-gray-700 hover:bg-gray-600 text-white'
+                  : 'bg-gray-200 hover:bg-gray-300 text-gray-900'
+              }`}
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleContinue}
+              className={`px-6 py-2 rounded-lg transition-colors flex items-center gap-2 ${
+                theme === 'dark'
+                  ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                  : 'bg-blue-600 hover:bg-blue-700 text-white'
+              }`}
+            >
+              <CheckCircle className="w-4 h-4" />
+              Continue with {allData.length - excludedZeroTraffic.size - duplicateGroups.reduce((sum, g) => {
+                const selected = selectedKeywords[g.id];
+                return sum + (selected !== null ? g.keywords.length - 1 : 0);
+              }, 0)} keywords
+            </button>
+          </div>
         </div>
       </div>
     </div>

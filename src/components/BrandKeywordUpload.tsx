@@ -23,6 +23,11 @@ interface DuplicateGroup {
   sharedData: any;
 }
 
+interface ZeroTrafficKeyword {
+  keyword: string;
+  data: any;
+}
+
 function generateSlug(brandName: string): string {
   return brandName
     .toLowerCase()
@@ -42,6 +47,7 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light' }
   const [showMergeReview, setShowMergeReview] = useState(false);
   const [pendingData, setPendingData] = useState<any[]>([]);
   const [duplicateGroups, setDuplicateGroups] = useState<DuplicateGroup[]>([]);
+  const [zeroTrafficKeywords, setZeroTrafficKeywords] = useState<ZeroTrafficKeyword[]>([]);
   const [showDuplicateReview, setShowDuplicateReview] = useState(false);
 
   const levenshteinDistance = (str1: string, str2: string): number => {
@@ -119,6 +125,23 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light' }
     });
 
     return groups;
+  };
+
+  const detectZeroTrafficKeywords = (data: Array<Record<string, any>>): ZeroTrafficKeyword[] => {
+    const zeroTraffic: ZeroTrafficKeyword[] = [];
+
+    data.forEach((record) => {
+      const avgSearches = record['Avg. monthly searches'];
+
+      if (avgSearches === undefined || avgSearches === null || avgSearches === 0 || avgSearches === '') {
+        zeroTraffic.push({
+          keyword: record.keyword,
+          data: record
+        });
+      }
+    });
+
+    return zeroTraffic;
   };
 
   const detectMergeGroups = (data: Array<Record<string, any>>): MergeGroup[] => {
@@ -442,9 +465,12 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light' }
       }
 
       const detectedDuplicates = detectDuplicates(data);
+      const detectedZeroTraffic = detectZeroTrafficKeywords(data);
 
-      if (detectedDuplicates.length > 0) {
+      if (detectedDuplicates.length > 0 || detectedZeroTraffic.length > 0) {
         setDuplicateGroups(detectedDuplicates);
+        setZeroTrafficKeywords(detectedZeroTraffic);
+        setPendingData(data);
         setShowDuplicateReview(true);
         setUploading(false);
         event.target.value = '';
@@ -494,9 +520,36 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light' }
     setUploading(false);
   };
 
+  const handleDuplicateReviewContinue = async (filteredData: Array<Record<string, any>>) => {
+    setShowDuplicateReview(false);
+    setUploading(true);
+
+    try {
+      const detectedMerges = detectMergeGroups(filteredData);
+
+      if (detectedMerges.length > 0) {
+        setMergeGroups(detectedMerges);
+        setPendingData(filteredData);
+        setShowMergeReview(true);
+        setUploading(false);
+      } else {
+        await processUpload(filteredData);
+      }
+    } catch (err) {
+      console.error('Duplicate review continue error:', err);
+      setError(err instanceof Error ? err.message : 'Failed to process data');
+    } finally {
+      setUploading(false);
+      setDuplicateGroups([]);
+      setZeroTrafficKeywords([]);
+    }
+  };
+
   const handleDuplicateCancel = () => {
     setShowDuplicateReview(false);
     setDuplicateGroups([]);
+    setZeroTrafficKeywords([]);
+    setPendingData([]);
     setUploading(false);
   };
 
@@ -656,6 +709,9 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light' }
       {showDuplicateReview && (
         <KeywordDuplicateReview
           duplicateGroups={duplicateGroups}
+          zeroTrafficKeywords={zeroTrafficKeywords}
+          allData={pendingData}
+          onContinue={handleDuplicateReviewContinue}
           onCancel={handleDuplicateCancel}
           theme={theme}
         />
