@@ -56,7 +56,7 @@ export default function BrandDataManager() {
   const [aiAnalyzingBranded, setAiAnalyzingBranded] = useState(false);
   const [competitiveAnalyzing, setCompetitiveAnalyzing] = useState(false);
   const [aiMessage, setAiMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
-  const [brandPage, setBrandPage] = useState<{ id: string; is_public: boolean; page_id: string } | null>(null);
+  const [brandPage, setBrandPage] = useState<{ id: string; is_public: boolean } | null>(null);
   const [togglingPublic, setTogglingPublic] = useState(false);
   const [creatingPage, setCreatingPage] = useState(false);
   const [selectedKeywords, setSelectedKeywords] = useState<string[]>([]);
@@ -131,7 +131,7 @@ export default function BrandDataManager() {
 
       const { data: pageData, error } = await supabase
         .from('brand_pages')
-        .select('id, is_public, page_id')
+        .select('id, is_public')
         .eq('brand', decodedBrand)
         .eq('user_id', user.id)
         .maybeSingle();
@@ -994,9 +994,9 @@ export default function BrandDataManager() {
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      {brandPage.is_public && (
+                      {brandPage.is_public && user && brandName && (
                         <a
-                          href={`/insights/${brandPage.id}/${brandPage.page_id}/`}
+                          href={`/insights/${user.id}/${encodeURIComponent(decodeURIComponent(brandName))}/`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="flex items-center gap-2 px-3 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
