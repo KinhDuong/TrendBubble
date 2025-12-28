@@ -190,8 +190,8 @@ export default function BrandInsightPage() {
 
     await Promise.all([
       loadMonthColumns(),
-      loadBrandData(brandPageData.user_id),
-      loadKeywordData(brandPageData.user_id),
+      loadBrandData(brandPageData.user_id, brandPageData.brand),
+      loadKeywordData(brandPageData.user_id, brandPageData.brand),
       loadLatestBrandPages(brandPageData.user_id),
       loadAIAnalysis(brandPageData.user_id)
     ]);
@@ -246,17 +246,16 @@ export default function BrandInsightPage() {
     }
   };
 
-  const loadBrandData = async (ownerUserId?: string) => {
+  const loadBrandData = async (ownerUserId?: string, actualBrandName?: string) => {
     const userIdToUse = ownerUserId || pageOwnerId;
-    if (!brandName || !userIdToUse) return;
+    const brandToQuery = actualBrandName || (brandPageData?.brand);
+    if (!brandToQuery || !userIdToUse) return;
 
     try {
-      const decodedBrand = decodeURIComponent(brandName);
-
       const { data, error } = await supabase
         .from('brand_keyword_monthly_data')
         .select('*')
-        .eq('brand', decodedBrand)
+        .eq('brand', brandToQuery)
         .eq('user_id', userIdToUse)
         .order('month', { ascending: true });
 
@@ -273,17 +272,16 @@ export default function BrandInsightPage() {
     }
   };
 
-  const loadKeywordData = async (ownerUserId?: string) => {
+  const loadKeywordData = async (ownerUserId?: string, actualBrandName?: string) => {
     const userIdToUse = ownerUserId || pageOwnerId;
-    if (!brandName || !userIdToUse) return;
+    const brandToQuery = actualBrandName || (brandPageData?.brand);
+    if (!brandToQuery || !userIdToUse) return;
 
     try {
-      const decodedBrand = decodeURIComponent(brandName);
-
       const { data, error } = await supabase
         .from('brand_keyword_data')
         .select('*')
-        .eq('brand', decodedBrand)
+        .eq('brand', brandToQuery)
         .eq('user_id', userIdToUse)
         .limit(5000);
 
