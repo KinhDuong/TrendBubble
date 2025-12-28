@@ -464,31 +464,27 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light' }
         throw new Error('No valid data found in CSV');
       }
 
-      // IMMEDIATELY filter out zero-traffic keywords (trash data)
-      const zeroTrafficKeywords = rawData.filter(record => {
-        const avgSearches = record['Avg. monthly searches'];
-        return avgSearches === undefined || avgSearches === null || avgSearches === 0 || avgSearches === '';
-      });
-
+      // IMMEDIATELY filter out zero-traffic keywords (trash data) - they are excluded from ALL processing
       const data = rawData.filter(record => {
         const avgSearches = record['Avg. monthly searches'];
         return avgSearches !== undefined && avgSearches !== null && avgSearches !== 0 && avgSearches !== '';
       });
 
-      console.log(`Filtered out ${zeroTrafficKeywords.length} zero-traffic keywords (trash)`);
-      console.log(`Processing ${data.length} keywords with valid traffic`);
+      const excludedCount = rawData.length - data.length;
+      console.log(`✓ Filtered out ${excludedCount} zero-traffic keywords (trash)`);
+      console.log(`✓ Processing ${data.length} keywords with valid traffic`);
 
       if (data.length === 0) {
         throw new Error('All keywords have zero traffic. Please upload a file with valid search volume data.');
       }
 
-      // Only detect duplicates and merges on valid traffic keywords
+      // Only run duplicate detection on valid traffic keywords (zero-traffic never included)
       const detectedDuplicates = detectDuplicates(data);
 
       if (detectedDuplicates.length > 0) {
         setDuplicateGroups(detectedDuplicates);
-        setZeroTrafficKeywords([]); // No zero-traffic keywords in review
-        setPendingData(data);
+        setZeroTrafficKeywords([]); // Zero-traffic keywords are NOT shown in review
+        setPendingData(data); // Only valid traffic keywords
         setShowDuplicateReview(true);
         setUploading(false);
         event.target.value = '';

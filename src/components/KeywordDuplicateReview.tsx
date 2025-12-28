@@ -93,7 +93,7 @@ export default function KeywordDuplicateReview({
     onContinue(filtered);
   };
 
-  const totalIssues = duplicateGroups.length + (zeroTrafficKeywords.length > 0 ? 1 : 0);
+  const totalIssues = duplicateGroups.length;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -298,8 +298,8 @@ export default function KeywordDuplicateReview({
         {/* Footer */}
         <div className={`flex items-center justify-between p-6 border-t ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
           <div className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-            {excludedZeroTraffic.size > 0 && (
-              <span>{excludedZeroTraffic.size} keyword{excludedZeroTraffic.size !== 1 ? 's' : ''} will be excluded</span>
+            {duplicateGroups.length > 0 && (
+              <span>Review {duplicateGroups.length} duplicate group{duplicateGroups.length !== 1 ? 's' : ''}</span>
             )}
           </div>
           <div className="flex gap-3">
@@ -322,7 +322,7 @@ export default function KeywordDuplicateReview({
               }`}
             >
               <CheckCircle className="w-4 h-4" />
-              Continue with {allData.length - excludedZeroTraffic.size - duplicateGroups.reduce((sum, g) => {
+              Continue with {allData.length - duplicateGroups.reduce((sum, g) => {
                 const selected = selectedKeywords[g.id];
                 return sum + (selected !== null ? g.keywords.length - 1 : 0);
               }, 0)} keywords
