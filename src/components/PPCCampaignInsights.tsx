@@ -159,6 +159,7 @@ export default function PPCCampaignInsights({
         .from('brand_pages')
         .select('id')
         .eq('brand', brandName)
+        .eq('user_id', userId)
         .maybeSingle();
 
       if (!brandPage) return;
