@@ -458,18 +458,36 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light' }
         reader.onerror = () => reject(new Error('Failed to read file'));
         reader.readAsText(file, 'UTF-8');
       });
-      const data = parseCSV(text);
+      const rawData = parseCSV(text);
 
-      if (data.length === 0) {
+      if (rawData.length === 0) {
         throw new Error('No valid data found in CSV');
       }
 
-      const detectedDuplicates = detectDuplicates(data);
-      const detectedZeroTraffic = detectZeroTrafficKeywords(data);
+      // IMMEDIATELY filter out zero-traffic keywords (trash data)
+      const zeroTrafficKeywords = rawData.filter(record => {
+        const avgSearches = record['Avg. monthly searches'];
+        return avgSearches === undefined || avgSearches === null || avgSearches === 0 || avgSearches === '';
+      });
 
-      if (detectedDuplicates.length > 0 || detectedZeroTraffic.length > 0) {
+      const data = rawData.filter(record => {
+        const avgSearches = record['Avg. monthly searches'];
+        return avgSearches !== undefined && avgSearches !== null && avgSearches !== 0 && avgSearches !== '';
+      });
+
+      console.log(`Filtered out ${zeroTrafficKeywords.length} zero-traffic keywords (trash)`);
+      console.log(`Processing ${data.length} keywords with valid traffic`);
+
+      if (data.length === 0) {
+        throw new Error('All keywords have zero traffic. Please upload a file with valid search volume data.');
+      }
+
+      // Only detect duplicates and merges on valid traffic keywords
+      const detectedDuplicates = detectDuplicates(data);
+
+      if (detectedDuplicates.length > 0) {
         setDuplicateGroups(detectedDuplicates);
-        setZeroTrafficKeywords(detectedZeroTraffic);
+        setZeroTrafficKeywords([]); // No zero-traffic keywords in review
         setPendingData(data);
         setShowDuplicateReview(true);
         setUploading(false);
