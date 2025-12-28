@@ -325,7 +325,7 @@ export default function BrandInsightPage() {
             .from('brand_pages')
             .select('*, user_id')
             .eq('user_id', decodedPageIdOrUserId)
-            .eq('brand', decodedBrand)
+            .eq('page_id', decodedBrand)
             .maybeSingle();
           data = result.data;
           error = result.error;
@@ -349,7 +349,7 @@ export default function BrandInsightPage() {
           .from('brand_pages')
           .select('*, user_id')
           .eq('user_id', profileData.id)
-          .eq('brand', decodedBrand)
+          .eq('page_id', decodedBrand)
           .maybeSingle();
         data = result.data;
         error = result.error;
