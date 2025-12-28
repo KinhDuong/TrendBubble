@@ -511,7 +511,38 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light' }
 
     console.log('Successfully inserted monthly data:', insertedData);
 
-    const pageId = generateSlug(brandName.trim());
+    const baseSlug = generateSlug(brandName.trim());
+
+    const { data: existingPage } = await supabase
+      .from('brand_pages')
+      .select('page_id')
+      .eq('user_id', user.id)
+      .eq('brand', brandName.trim())
+      .maybeSingle();
+
+    let pageId = baseSlug;
+
+    if (!existingPage) {
+      const { data: allPagesWithSlug } = await supabase
+        .from('brand_pages')
+        .select('page_id')
+        .like('page_id', `${baseSlug}%`)
+        .order('page_id');
+
+      if (allPagesWithSlug && allPagesWithSlug.length > 0) {
+        const existingPageIds = allPagesWithSlug.map(p => p.page_id);
+
+        let suffix = 2;
+        pageId = `${baseSlug}-${suffix}`;
+
+        while (existingPageIds.includes(pageId)) {
+          suffix++;
+          pageId = `${baseSlug}-${suffix}`;
+        }
+      }
+    } else {
+      pageId = existingPage.page_id;
+    }
 
     const { error: brandPageError } = await supabase
       .from('brand_pages')
