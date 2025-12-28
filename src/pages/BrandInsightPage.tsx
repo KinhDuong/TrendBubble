@@ -193,7 +193,7 @@ export default function BrandInsightPage() {
       loadBrandData(brandPageData.user_id, brandPageData.brand),
       loadKeywordData(brandPageData.user_id, brandPageData.brand),
       loadLatestBrandPages(brandPageData.user_id),
-      loadAIAnalysis(brandPageData.user_id)
+      loadAIAnalysis(brandPageData.user_id, brandPageData.brand)
     ]);
     setLoading(false);
   };
@@ -453,18 +453,17 @@ export default function BrandInsightPage() {
     }
   };
 
-  const loadAIAnalysis = async (ownerUserId?: string) => {
+  const loadAIAnalysis = async (ownerUserId?: string, actualBrandName?: string) => {
     const userIdToUse = ownerUserId || pageOwnerId;
-    if (!brandName || !userIdToUse) return;
+    const brandToQuery = actualBrandName || (brandPageData?.brand);
+    if (!brandToQuery || !userIdToUse) return;
 
     try {
-      const decodedBrand = decodeURIComponent(brandName);
-
       // Try to get user-specific analysis first, fallback to null user_id (legacy records)
       const { data, error } = await supabase
         .from('brand_ai_analysis')
         .select('*')
-        .eq('brand', decodedBrand)
+        .eq('brand', brandToQuery)
         .or(`user_id.eq.${userIdToUse},user_id.is.null`)
         .order('user_id', { ascending: false, nullsLast: true })
         .limit(1)
@@ -1200,15 +1199,14 @@ export default function BrandInsightPage() {
   };
 
   const handleExport = async () => {
-    if (!brandName) return;
+    const brandToQuery = brandPageData?.brand;
+    if (!brandToQuery) return;
 
     try {
-      const decodedBrand = decodeURIComponent(brandName);
-
       const { data, error } = await supabase
         .from('brand_keyword_data')
         .select('*')
-        .eq('brand', decodedBrand)
+        .eq('brand', brandToQuery)
         .order('keyword', { ascending: true })
         .limit(5000);
 
@@ -1233,7 +1231,7 @@ export default function BrandInsightPage() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `${decodedBrand}-keywords.csv`;
+      a.download = `${brandToQuery}-keywords.csv`;
       a.click();
       URL.revokeObjectURL(url);
     } catch (error) {
@@ -1242,7 +1240,8 @@ export default function BrandInsightPage() {
   };
 
   const handleAIAnalysis = async () => {
-    if (!brandName || keywordPerformanceData.length === 0) return;
+    const brandToQuery = brandPageData?.brand;
+    if (!brandToQuery || keywordPerformanceData.length === 0) return;
 
     const userIdToUse = pageOwnerId;
     if (!userIdToUse) {
@@ -1257,8 +1256,6 @@ export default function BrandInsightPage() {
     setAiSaveStatus('idle');
 
     try {
-      const decodedBrand = decodeURIComponent(brandName);
-
       const keywordsForAnalysis = keywordPerformanceData.slice(0, 50).map(kw => ({
         keyword: kw.keyword,
         searchVolume: kw.searchVolume || 0,
@@ -1276,7 +1273,7 @@ export default function BrandInsightPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          brand: decodedBrand,
+          brand: brandToQuery,
           keywords: keywordsForAnalysis,
           totalMonths: availableMonthsCount,
           avgVolume
@@ -1294,7 +1291,7 @@ export default function BrandInsightPage() {
         const { error: saveError } = await supabase
           .from('brand_ai_analysis')
           .upsert({
-            brand: decodedBrand,
+            brand: brandToQuery,
             analysis: result.analysis,
             keyword_count: keywordsForAnalysis.length,
             total_months: availableMonthsCount,
