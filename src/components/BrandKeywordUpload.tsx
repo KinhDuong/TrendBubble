@@ -560,32 +560,6 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light' }
         />
       </div>
 
-      <div className="mb-4">
-        <p className={`text-sm mb-2 font-semibold ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
-          Upload CSV/TSV file with keyword data
-        </p>
-        <div className={`text-xs space-y-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-          <div>
-            <p className="font-semibold">Required:</p>
-            <p>Must have a "Keyword" column</p>
-          </div>
-          <div>
-            <p className="font-semibold">Supported columns:</p>
-            <p className={theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}>
-              All columns will be imported as-is. Typical columns include:
-              Currency, Avg. monthly searches, Three month change, YoY change,
-              Competition, Competition (indexed value), Top of page bids,
-              and monthly search columns (Searches: MMM YYYY)
-            </p>
-          </div>
-          <div className="mt-2">
-            <p className={`italic ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
-              Note: First two rows (title and date) will be skipped automatically
-            </p>
-          </div>
-        </div>
-      </div>
-
       <label className={`flex items-center justify-center w-full px-4 py-6 border-2 border-dashed rounded-lg cursor-pointer hover:border-blue-500 transition-colors ${
         theme === 'dark'
           ? 'border-gray-600 hover:bg-gray-750'
