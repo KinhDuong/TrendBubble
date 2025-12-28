@@ -263,21 +263,25 @@ function BubbleTooltip({
         <div
           className={`fixed bottom-0 left-0 right-0 ${
             theme === 'dark' ? 'bg-gray-800' : 'bg-white'
-          } rounded-t-2xl shadow-2xl p-4 pb-6 animate-in slide-in-from-bottom duration-300`}
-          style={{ zIndex: 9999 }}
+          } rounded-t-2xl shadow-2xl animate-in slide-in-from-bottom duration-300 flex flex-col`}
+          style={{ zIndex: 9999, maxHeight: '85vh' }}
         >
-          <div className="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-4" />
-          <button
-            onClick={onClose}
-            className={`absolute top-4 right-4 p-2 rounded-full ${
-              theme === 'dark' ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-100 hover:bg-gray-200'
-            } transition-colors`}
+          <div className="flex-shrink-0 pt-4 px-4">
+            <div className="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-4" />
+            <button
+              onClick={onClose}
+              className={`absolute top-4 right-4 p-2 rounded-full ${
+                theme === 'dark' ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-100 hover:bg-gray-200'
+              } transition-colors`}
+            >
+              <X size={18} className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} />
+            </button>
+          </div>
+          <div
+            className="flex-1 overflow-y-auto px-4 pb-6 space-y-4"
+            style={{ WebkitOverflowScrolling: 'touch' }}
           >
-            <X size={18} className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} />
-          </button>
-          <div className="space-y-4">
-            <div>
-              <div className="flex items-center gap-3 mb-2">
+            <div className="flex items-center gap-3 mb-2">
                 <div
                   className="flex items-center justify-center rounded-full font-bold text-white shadow-lg"
                   style={{
@@ -304,7 +308,6 @@ function BubbleTooltip({
                   )}
                 </div>
               </div>
-            </div>
 
             <div className={`border-t ${
               theme === 'dark' ? 'border-gray-700' : 'border-gray-200'
