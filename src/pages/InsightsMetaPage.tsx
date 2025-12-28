@@ -80,7 +80,7 @@ export default function InsightsMetaPage() {
 
       const { data: brandPages, error: pagesError } = await supabase
         .from('brand_pages')
-        .select('id, brand, user_id, is_public')
+        .select('id, brand, user_id, is_public, page_id')
         .eq('user_id', user.id);
 
       if (pagesError) throw pagesError;
@@ -131,7 +131,7 @@ export default function InsightsMetaPage() {
           const metadata = brandMap.get(key)!;
           metadata.has_page = true;
           metadata.is_public = page.is_public;
-          metadata.page_id = page.id;
+          metadata.page_id = page.page_id;
         }
       });
 
@@ -433,8 +433,8 @@ export default function InsightsMetaPage() {
                           <button
                             onClick={() => {
                               const identifier = brand.username || brand.user_id;
-                              if (identifier && brand.has_page) {
-                                navigate(`/insights/${encodeURIComponent(identifier)}/${encodeURIComponent(brand.brand)}/`);
+                              if (identifier && brand.has_page && brand.page_id) {
+                                navigate(`/insights/${encodeURIComponent(identifier)}/${brand.page_id}/`);
                               }
                             }}
                             disabled={!brand.has_page}

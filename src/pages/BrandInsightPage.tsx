@@ -38,6 +38,7 @@ interface MonthlyData {
 interface BrandPageData {
   id: string;
   brand: string;
+  page_id: string;
   meta_title: string;
   meta_description: string;
   intro_text?: string;
@@ -326,7 +327,7 @@ export default function BrandInsightPage() {
             .from('brand_pages')
             .select('*, user_id')
             .eq('user_id', decodedPageIdOrUserId)
-            .eq('brand', decodedBrand)
+            .eq('page_id', decodedBrand)
             .maybeSingle();
           data = result.data;
           error = result.error;
@@ -350,7 +351,7 @@ export default function BrandInsightPage() {
           .from('brand_pages')
           .select('*, user_id')
           .eq('user_id', profileData.id)
-          .eq('brand', decodedBrand)
+          .eq('page_id', decodedBrand)
           .maybeSingle();
         data = result.data;
         error = result.error;
@@ -1390,7 +1391,7 @@ export default function BrandInsightPage() {
   const lastUpdated = new Date();
 
   const baseUrl = import.meta.env.VITE_BASE_URL || 'https://topbestcharts.com';
-  const pageUrl = pageOwnerUsername ? `${baseUrl}/insights/${encodeURIComponent(pageOwnerUsername)}/${encodeURIComponent(decodedBrand)}/` : `${baseUrl}/insights/`;
+  const pageUrl = pageOwnerUsername && brandPageData?.page_id ? `${baseUrl}/insights/${encodeURIComponent(pageOwnerUsername)}/${brandPageData.page_id}/` : `${baseUrl}/insights/`;
   const topTopicNames = topTopics.slice(0, 5).map(t => t.name).join(', ');
   const keywords = topTopics.slice(0, 10).map(t => t.name).join(', ') + ', keyword trends, search volume, SEO insights, brand analysis';
 
