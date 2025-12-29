@@ -50,10 +50,26 @@ Deno.serve(async (req: Request) => {
       );
     }
 
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      throw new Error("Missing authorization header");
+    }
+
     const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
+      {
+        global: {
+          headers: { Authorization: authHeader },
+        },
+      }
     );
+
+    const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
+
+    if (userError || !user) {
+      throw new Error("Unauthorized: Invalid user token");
+    }
 
     const { brand } = await req.json();
 
@@ -61,12 +77,13 @@ Deno.serve(async (req: Request) => {
       throw new Error("Brand name is required");
     }
 
-    console.log(`Fetching keyword counts for brand: ${brand}`);
+    console.log(`Fetching keyword counts for brand: ${brand}, user: ${user.id}`);
 
     const { count: totalCount } = await supabaseClient
       .from("brand_keyword_data")
       .select("*", { count: "exact", head: true })
-      .eq("brand", brand);
+      .eq("brand", brand)
+      .eq("user_id", user.id);
 
     console.log(`Total keywords for ${brand}: ${totalCount}`);
     console.log(`Fetching uncategorized keywords for brand: ${brand}`);
@@ -75,6 +92,7 @@ Deno.serve(async (req: Request) => {
       .from("brand_keyword_data")
       .select('id, keyword, "Avg. monthly searches", "Three month change", "YoY change", competition')
       .eq("brand", brand)
+      .eq("user_id", user.id)
       .is("ai_category", null)
       .order('"Avg. monthly searches"', { ascending: false });
 
