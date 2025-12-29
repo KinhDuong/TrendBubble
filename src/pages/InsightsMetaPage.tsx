@@ -131,7 +131,7 @@ export default function InsightsMetaPage() {
           const metadata = brandMap.get(key)!;
           metadata.has_page = true;
           metadata.is_public = page.is_public;
-          metadata.page_id = page.page_id;
+          metadata.page_id = page.id;
         }
       });
 
