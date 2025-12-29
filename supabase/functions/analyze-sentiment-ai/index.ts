@@ -20,14 +20,14 @@ interface SentimentResult {
 }
 
 Deno.serve(async (req: Request) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, {
-      status: 200,
-      headers: corsHeaders,
-    });
-  }
-
   try {
+    if (req.method === "OPTIONS") {
+      return new Response(null, {
+        status: 200,
+        headers: corsHeaders,
+      });
+    }
+
     const openaiApiKey = Deno.env.get("OPENAI_API_KEY");
     if (!openaiApiKey) {
       return new Response(
@@ -293,7 +293,7 @@ Respond with the JSON object now:`;
     return new Response(
       JSON.stringify({
         success: false,
-        error: error.message,
+        error: error?.message || String(error) || "Unknown error occurred",
       }),
       {
         status: 500,
