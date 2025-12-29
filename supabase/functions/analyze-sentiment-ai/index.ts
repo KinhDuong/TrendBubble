@@ -99,7 +99,7 @@ Deno.serve(async (req: Request) => {
 
     console.log(`Found ${keywords.length} keywords. Processing in batches...`);
 
-    const BATCH_SIZE = 100;
+    const BATCH_SIZE = 1000;
     const batches = [];
     for (let i = 0; i < keywords.length; i += BATCH_SIZE) {
       batches.push(keywords.slice(i, i + BATCH_SIZE));
@@ -107,7 +107,7 @@ Deno.serve(async (req: Request) => {
 
     console.log(`Created ${batches.length} batches of up to ${BATCH_SIZE} keywords each`);
 
-    const MAX_BATCHES_PER_RUN = 10;
+    const MAX_BATCHES_PER_RUN = 3;
     const batchesToProcess = Math.min(batches.length, MAX_BATCHES_PER_RUN);
 
     console.log(`Processing ${batchesToProcess} batches this run (max ${BATCH_SIZE * MAX_BATCHES_PER_RUN} keywords)`);
@@ -169,7 +169,7 @@ Respond with the JSON object now:`;
             }
           ],
           temperature: 0.3,
-          max_tokens: 4000,
+          max_tokens: 8000,
           response_format: { type: "json_object" }
         }),
       });
