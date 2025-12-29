@@ -353,6 +353,9 @@ export default function BrandDataManager() {
 
       const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/categorize-keywords-ai`;
 
+      console.log('Calling API:', apiUrl);
+      console.log('With token:', session.access_token ? 'EXISTS' : 'MISSING');
+
       const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
@@ -361,6 +364,8 @@ export default function BrandDataManager() {
         },
         body: JSON.stringify({ brand: selectedBrand })
       });
+
+      console.log('Response received:', response.status);
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -387,9 +392,14 @@ export default function BrandDataManager() {
       setTimeout(() => setAiMessage(null), 15000);
     } catch (error: any) {
       console.error('Error during AI categorization:', error);
+      console.error('Error details:', {
+        message: error.message,
+        name: error.name,
+        stack: error.stack
+      });
       setAiMessage({
         type: 'error',
-        text: error.message || 'Failed to categorize keywords. Please check console for details.'
+        text: `${error.name || 'Error'}: ${error.message || 'Failed to categorize keywords. Please check console for details.'}`
       });
       setTimeout(() => setAiMessage(null), 10000);
     } finally {
