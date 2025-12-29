@@ -166,7 +166,8 @@ export default function InsightsMetaPage() {
       const { error } = await supabase
         .from('brand_pages')
         .update({ is_public: !brand.is_public })
-        .eq('id', brand.page_id);
+        .eq('user_id', brand.user_id)
+        .eq('page_id', brand.page_id);
 
       if (error) throw error;
 
