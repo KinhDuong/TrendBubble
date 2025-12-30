@@ -70,11 +70,8 @@ export default function InsightsMetaPage() {
 
       if (monthlyError) throw monthlyError;
 
-      const { data: keywordData, error: keywordError } = await supabase
-        .from('brand_keyword_data')
-        .select('brand, keyword, user_id')
-        .eq('user_id', user.id)
-        .limit(5000);
+      const { data: keywordCounts, error: keywordError } = await supabase
+        .rpc('get_keyword_counts_by_brand', { p_user_id: user.id });
 
       if (keywordError) throw keywordError;
 
@@ -118,10 +115,10 @@ export default function InsightsMetaPage() {
         }
       });
 
-      keywordData?.forEach((row) => {
-        const key = `${row.user_id}:${row.brand}`;
+      keywordCounts?.forEach((row: { brand: string; keyword_count: number }) => {
+        const key = `${user.id}:${row.brand}`;
         if (brandMap.has(key)) {
-          brandMap.get(key)!.keyword_count++;
+          brandMap.get(key)!.keyword_count = row.keyword_count;
         }
       });
 
