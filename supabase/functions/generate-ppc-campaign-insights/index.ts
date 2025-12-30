@@ -61,24 +61,47 @@ Deno.serve(async (req: Request) => {
       );
     }
 
-    const { data: brandPage, error: pageError } = await supabase
+    let brandPage = (await supabase
       .from("brand_pages")
       .select("id, brand, user_id")
       .eq("brand", brandToQuery)
-      .maybeSingle();
+      .eq("user_id", user.id)
+      .maybeSingle()).data;
 
-    if (pageError || !brandPage) {
-      return new Response(
-        JSON.stringify({ error: "Brand page not found" }),
-        { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
+    if (!brandPage) {
+      const generatePageId = (brand: string): string => {
+        return brand
+          .toLowerCase()
+          .replace(/[^a-z0-9\s-]/g, '')
+          .replace(/\s+/g, '-')
+          .replace(/-+/g, '-')
+          .replace(/^-+|-+$/g, '');
+      };
 
-    if (brandPage.user_id !== user.id) {
-      return new Response(
-        JSON.stringify({ error: "Unauthorized to generate insights for this brand" }),
-        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      const pageId = generatePageId(brandToQuery);
+
+      const { data: newPage, error: insertError } = await supabase
+        .from("brand_pages")
+        .insert({
+          brand: brandToQuery,
+          meta_title: `${brandToQuery} - Brand Insights & Keyword Analysis`,
+          meta_description: `Explore comprehensive keyword analysis and search trends for ${brandToQuery}. View top keywords, performance metrics, and strategic insights.`,
+          intro_text: `Discover the search landscape for ${brandToQuery}.`,
+          user_id: user.id,
+          page_id: pageId,
+          is_public: false
+        })
+        .select("id, brand, user_id")
+        .single();
+
+      if (insertError) {
+        return new Response(
+          JSON.stringify({ error: `Failed to create brand page: ${insertError.message}` }),
+          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      brandPage = newPage;
     }
 
     const { data: keywords, error: keywordsError } = await supabase
