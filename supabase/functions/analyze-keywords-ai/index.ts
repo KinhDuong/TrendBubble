@@ -56,51 +56,135 @@ Deno.serve(async (req: Request) => {
       throw new Error("Brand and keywords are required");
     }
 
-    // Prepare keywords summary for GPT
-    const topKeywords = keywords.slice(0, 20).map((kw, idx) => {
+    // Prepare comprehensive dataset summary
+    const topKeywords = keywords.slice(0, 30).map((kw, idx) => {
       const parts = [
-        `${idx + 1}. ${kw.keyword}`,
-        `Volume: ${kw.searchVolume.toLocaleString()}`
+        `"${kw.keyword}"`,
+        `~${kw.searchVolume.toLocaleString()} searches`
       ];
-      
-      if (kw.threeMonthChange !== undefined && kw.threeMonthChange !== null) {
-        const change = (kw.threeMonthChange * 100).toFixed(1);
-        parts.push(`3-mo: ${change}%`);
+
+      if (kw.threeMonthChange !== undefined && kw.threeMonthChange !== null && Math.abs(kw.threeMonthChange) > 0.01) {
+        const change = (kw.threeMonthChange * 100).toFixed(0);
+        parts.push(`${kw.threeMonthChange > 0 ? '+' : ''}${change}% (3-mo)`);
       }
-      
-      if (kw.yoyChange !== undefined && kw.yoyChange !== null) {
-        const change = (kw.yoyChange * 100).toFixed(1);
-        parts.push(`YoY: ${change}%`);
+
+      if (kw.yoyChange !== undefined && kw.yoyChange !== null && Math.abs(kw.yoyChange) > 0.01) {
+        const change = (kw.yoyChange * 100).toFixed(0);
+        parts.push(`${kw.yoyChange > 0 ? '+' : ''}${change}% YoY`);
       }
-      
+
       if (kw.competition) {
-        parts.push(`Comp: ${kw.competition}`);
+        parts.push(`${kw.competition} competition`);
       }
-      
+
       if (kw.bidHigh && kw.bidHigh > 0) {
-        parts.push(`Bid: $${kw.bidHigh.toFixed(2)}`);
+        parts.push(`$${kw.bidHigh.toFixed(2)} CPC`);
       }
-      
-      return parts.join(' | ');
+
+      return `${idx + 1}. ${parts.join(', ')}`;
     }).join('\n');
 
-    const prompt = `You are an expert SEO and keyword research analyst. Analyze the following keyword data for the brand "${brand}" and provide actionable insights.
+    // Identify key patterns for dataset summary
+    const highGrowthKeywords = keywords.filter(kw =>
+      (kw.threeMonthChange && kw.threeMonthChange > 0.3) || (kw.yoyChange && kw.yoyChange > 0.5)
+    ).slice(0, 5);
 
-**Dataset Summary:**
-- Total Keywords: ${keywords.length}
+    const decliningKeywords = keywords.filter(kw =>
+      (kw.threeMonthChange && kw.threeMonthChange < -0.2) || (kw.yoyChange && kw.yoyChange < -0.3)
+    ).slice(0, 3);
+
+    const highVolumeKeywords = keywords.filter(kw => kw.searchVolume > avgVolume * 2).slice(0, 5);
+
+    const highValueKeywords = keywords.filter(kw => kw.bidHigh && kw.bidHigh > 5).slice(0, 5);
+
+    // Build comprehensive dataset highlights
+    let datasetHighlights = '';
+
+    if (highVolumeKeywords.length > 0) {
+      datasetHighlights += '\n**High-Volume Terms:**\n';
+      highVolumeKeywords.forEach(kw => {
+        datasetHighlights += `- "${kw.keyword}" (~${kw.searchVolume.toLocaleString()} searches)\n`;
+      });
+    }
+
+    if (highGrowthKeywords.length > 0) {
+      datasetHighlights += '\n**Rising Trends/Niches:**\n';
+      highGrowthKeywords.forEach(kw => {
+        const growth = kw.yoyChange ? `+${(kw.yoyChange * 100).toFixed(0)}%` : `+${(kw.threeMonthChange! * 100).toFixed(0)}%`;
+        datasetHighlights += `- "${kw.keyword}" (~${kw.searchVolume.toLocaleString()} searches, ${growth} growth)\n`;
+      });
+    }
+
+    if (decliningKeywords.length > 0) {
+      datasetHighlights += '\n**Declining Terms:**\n';
+      decliningKeywords.forEach(kw => {
+        const decline = kw.yoyChange ? `${(kw.yoyChange * 100).toFixed(0)}%` : `${(kw.threeMonthChange! * 100).toFixed(0)}%`;
+        datasetHighlights += `- "${kw.keyword}" (~${kw.searchVolume.toLocaleString()} searches, ${decline} decline)\n`;
+      });
+    }
+
+    if (highValueKeywords.length > 0) {
+      datasetHighlights += '\n**High-Value Keywords (CPC):**\n';
+      highValueKeywords.forEach(kw => {
+        datasetHighlights += `- "${kw.keyword}" ($${kw.bidHigh!.toFixed(2)} CPC, ${kw.competition} competition)\n`;
+      });
+    }
+
+    // Get current date
+    const today = new Date().toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+
+    const prompt = `You are an expert market research and digital marketing analyst with deep knowledge of interpreting Google Keyword Planner data as a proxy for consumer behavior.
+
+The current date is ${today}.
+
+I am providing a keyword dataset from Google Keyword Planner for the ${brand} niche. Key highlights include:
+
+**Dataset Overview:**
+- Total Keywords Analyzed: ${keywords.length}
 - Data Period: ${totalMonths} months
-- Average Monthly Volume: ${avgVolume.toLocaleString()}
+- Average Monthly Search Volume: ${avgVolume.toLocaleString()}
+${datasetHighlights}
 
-**Top 20 Keywords:**
+**Top 30 Keywords with Full Details:**
 ${topKeywords}
 
-**Analysis Required:**
-1. **Key Opportunities**: Identify 3-5 high-potential keywords to focus on (consider growth, volume, and competition)
-2. **Market Trends**: What do the trends reveal about the brand's market position and customer interests?
-3. **Strategic Recommendations**: Provide 3-4 specific, actionable recommendations for SEO and content strategy
-4. **Risk Areas**: Identify any declining keywords or competitive threats
+Based on this dataset, generate a list of key questions that can be answered using the data. Treat search volume and trends as proxies for customer demand, interest, and intent.
 
-IMPORTANT: Provide a clear, well-structured analysis using only bold text and bullet points. NEVER use markdown headings with # symbols. Do not use #, ##, or ### anywhere in your response. Instead, use **Bold Text:** to emphasize section titles. Be specific and reference actual keywords from the data. Keep the total response under 1000 words.`;
+Structure your response exactly like this, using markdown:
+
+### Key Questions Answerable from the ${brand} Dataset
+[Brief intro paragraph explaining how the dataset reveals consumer behavior]
+
+Then list the questions with this format:
+
+#### 1. What is the Customer Demand?
+**Answer from Dataset:** [concise summary based on search volumes and trends]
+**Why Valuable:** [brief explanation of business value]
+
+#### 2. What is the Customer Interest?
+**Answer from Dataset:** [concise summary based on emerging trends and growth rates]
+**Why Valuable:** [brief explanation of business value]
+
+#### Other Important Questions Answerable from the Dataset
+[8–10 additional questions, grouped into categories like Marketing & Strategy, Product & Trend, Competitive & Market, Forecasting & Business]
+
+For each additional question:
+- Question title (as #### heading)
+- **Answer from Dataset:** [summary based on actual data]
+- **Why Valuable:** [actionable benefit]
+
+End with a short closing paragraph offering to expand on any question.
+
+IMPORTANT:
+- Use actual keywords, search volumes, growth rates, and CPC data from the dataset provided
+- Be professional, actionable, and evidence-based
+- Use markdown headings (###, ####) as shown in the structure
+- Keep answers concise but data-driven
+- Total response should be comprehensive (1200-1500 words)`;
 
     console.log("Calling OpenAI API...");
 
@@ -115,7 +199,7 @@ IMPORTANT: Provide a clear, well-structured analysis using only bold text and bu
         messages: [
           {
             role: "system",
-            content: "You are an expert SEO analyst who provides clear, actionable insights based on keyword data. You focus on practical recommendations that businesses can implement."
+            content: "You are an expert market research and digital marketing analyst with deep expertise in interpreting Google Keyword Planner data as a proxy for consumer behavior. You provide data-driven insights that reveal customer demand, market trends, and strategic opportunities. Your analysis is professional, evidence-based, and actionable."
           },
           {
             role: "user",
@@ -123,7 +207,7 @@ IMPORTANT: Provide a clear, well-structured analysis using only bold text and bu
           }
         ],
         temperature: 0.7,
-        max_tokens: 2000,
+        max_tokens: 3000,
       }),
     });
 
