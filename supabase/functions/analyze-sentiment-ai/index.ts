@@ -117,7 +117,7 @@ Deno.serve(async (req: Request) => {
 
     console.log(`Found ${keywords.length} keywords. Processing in batches...`);
 
-    const BATCH_SIZE = 50;
+    const BATCH_SIZE = 100;
     const batches = [];
     for (let i = 0; i < keywords.length; i += BATCH_SIZE) {
       batches.push(keywords.slice(i, i + BATCH_SIZE));
