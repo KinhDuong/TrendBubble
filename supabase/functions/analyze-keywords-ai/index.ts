@@ -56,7 +56,6 @@ Deno.serve(async (req: Request) => {
       throw new Error("Brand and keywords are required");
     }
 
-    // Prepare comprehensive dataset summary
     const topKeywords = keywords.slice(0, 30).map((kw, idx) => {
       const parts = [
         `"${kw.keyword}"`,
@@ -84,7 +83,6 @@ Deno.serve(async (req: Request) => {
       return `${idx + 1}. ${parts.join(', ')}`;
     }).join('\n');
 
-    // Identify key patterns for dataset summary
     const highGrowthKeywords = keywords.filter(kw =>
       (kw.threeMonthChange && kw.threeMonthChange > 0.3) || (kw.yoyChange && kw.yoyChange > 0.5)
     ).slice(0, 5);
@@ -97,7 +95,6 @@ Deno.serve(async (req: Request) => {
 
     const highValueKeywords = keywords.filter(kw => kw.bidHigh && kw.bidHigh > 5).slice(0, 5);
 
-    // Build comprehensive dataset highlights
     let datasetHighlights = '';
 
     if (highVolumeKeywords.length > 0) {
@@ -130,7 +127,6 @@ Deno.serve(async (req: Request) => {
       });
     }
 
-    // Get current date
     const today = new Date().toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
@@ -184,7 +180,8 @@ IMPORTANT:
 - Be professional, actionable, and evidence-based
 - Use markdown headings (###, ####) as shown in the structure
 - Keep answers concise but data-driven
-- Total response should be comprehensive (1200-1500 words)`;
+- Total response should be comprehensive (1200-1500 words)
+- When identifying low-competition keyword opportunities, EXCLUDE any keywords with local search intent modifiers such as: "near me", "nearby", "close to me", "around me", "in [city]", or similar location-based terms. These require physical presence and local SEO strategies, making them unsuitable for most businesses.`;
 
     console.log("Calling OpenAI API...");
 
