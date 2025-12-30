@@ -27,7 +27,7 @@ function generateFooterHTML() {
   const currentYear = new Date().getFullYear();
   return `
     <!-- Footer for SEO -->
-    <footer style="background-color: #1f2937; border-top: 1px solid #374151; color: #d1d5db;">
+    <footer style="background-color: #f9fafb; border-top: 1px solid #e5e7eb; color: #4b5563;">
       <div style="max-width: 80rem; margin: 0 auto; padding: 2rem 1.5rem;">
         <div style="display: grid; grid-template-columns: 1fr; gap: 2rem;">
           <!-- Desktop grid layout -->
@@ -45,7 +45,7 @@ function generateFooterHTML() {
 
             <!-- Features Column -->
             <div>
-              <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.75rem; color: white;">
+              <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.75rem; color: #111827;">
                 Features
               </h3>
               <ul style="font-size: 0.875rem; list-style: none; padding: 0; margin: 0;">
@@ -59,7 +59,7 @@ function generateFooterHTML() {
 
             <!-- About Column -->
             <div>
-              <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.75rem; color: white;">
+              <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.75rem; color: #111827;">
                 About
               </h3>
               <p style="font-size: 0.875rem;">
@@ -71,7 +71,7 @@ function generateFooterHTML() {
         </div>
 
         <!-- Copyright -->
-        <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid #374151;">
+        <div style="margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid #e5e7eb;">
           <div style="text-align: center; font-size: 0.875rem;">
             <p>${currentYear} Top Best Charts. All rights reserved.</p>
           </div>
@@ -209,25 +209,25 @@ async function generateContentHTML(pageData, topics, sourceLabel) {
 
   let contentHTML = `
     <!-- Header Navigation for SEO -->
-    <header style="background-color: #111827; border-bottom: 1px solid #374151; padding: 0.5rem 1rem;">
+    <header style="background-color: #ffffff; border-bottom: 1px solid #e5e7eb; padding: 0.5rem 1rem;">
       <nav aria-label="Main navigation" style="max-width: 80rem; margin: 0 auto; display: flex; align-items: center; justify-content: space-between;">
         <a href="${BASE_URL}/" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none;">
           <span style="color: #2563eb; font-size: 1.5rem; font-weight: 700;">Top Best Charts</span>
         </a>
         <ul style="display: flex; gap: 1.5rem; list-style: none; margin: 0; padding: 0;">
-          <li><a href="${BASE_URL}/" style="color: #d1d5db; text-decoration: none;">Home</a></li>
-          <li><a href="${BASE_URL}/browse-topics" style="color: #d1d5db; text-decoration: none;">Browse Topics</a></li>
-          <li><a href="${BASE_URL}/trending-now" style="color: #d1d5db; text-decoration: none;">Trending Now</a></li>
-          <li><a href="${BASE_URL}/contact" style="color: #d1d5db; text-decoration: none;">Contact</a></li>
-          <li><a href="${BASE_URL}/about" style="color: #d1d5db; text-decoration: none;">About</a></li>
+          <li><a href="${BASE_URL}/" style="color: #4b5563; text-decoration: none;">Home</a></li>
+          <li><a href="${BASE_URL}/browse-topics" style="color: #4b5563; text-decoration: none;">Browse Topics</a></li>
+          <li><a href="${BASE_URL}/trending-now" style="color: #4b5563; text-decoration: none;">Trending Now</a></li>
+          <li><a href="${BASE_URL}/contact" style="color: #4b5563; text-decoration: none;">Contact</a></li>
+          <li><a href="${BASE_URL}/about" style="color: #4b5563; text-decoration: none;">About</a></li>
         </ul>
       </nav>
     </header>
 
     <!-- Filter Menu for SEO -->
-    <nav aria-label="Content filters" style="background-color: #1f2937; padding: 0.75rem 1rem; border-bottom: 1px solid #374151;">
+    <nav aria-label="Content filters" style="background-color: #f9fafb; padding: 0.75rem 1rem; border-bottom: 1px solid #e5e7eb;">
       <div style="max-width: 80rem; margin: 0 auto;">
-        <div style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; font-size: 0.875rem; color: #d1d5db;">
+        <div style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; font-size: 0.875rem; color: #4b5563;">
           <span>View Modes:</span>
           <a href="?view=bubble" style="color: #93c5fd; text-decoration: none;">Bubble Chart</a>
           <a href="?view=bar" style="color: #93c5fd; text-decoration: none;">Bar Chart</a>
@@ -244,14 +244,14 @@ async function generateContentHTML(pageData, topics, sourceLabel) {
     </nav>
 
     <article class="dynamic-page-article" style="max-width: 80rem; margin: 0 auto; padding: 0 0.5rem;">
-      <header class="page-header" style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; padding: 1.5rem; margin-bottom: 2rem; margin-top: 2rem;">
-        <h1 style="font-size: 1.875rem; font-weight: 700; color: white; margin-bottom: 0.75rem;">${pageData.meta_title}</h1>
-        <p style="color: #d1d5db; font-size: 1rem; line-height: 1.625; margin-bottom: 1rem;">${pageData.meta_description}</p>
+      <header class="page-header" style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 0.5rem; padding: 1.5rem; margin-bottom: 2rem; margin-top: 2rem;">
+        <h1 style="font-size: 1.875rem; font-weight: 700; color: #111827; margin-bottom: 0.75rem;">${pageData.meta_title}</h1>
+        <p style="color: #4b5563; font-size: 1rem; line-height: 1.625; margin-bottom: 1rem;">${pageData.meta_description}</p>
         <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; font-size: 0.875rem;">
-          <time style="color: #9ca3af;">
+          <time style="color: #6b7280;">
             Last updated: ${formattedDate} ET
           </time>
-          <a href="#top-trending-heading" style="padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; background-color: rgba(30, 64, 175, 0.3); color: #93c5fd; text-decoration: none; display: inline-block;">
+          <a href="#top-trending-heading" style="padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; background-color: #dbeafe; color: #1e40af; text-decoration: none; display: inline-block;">
             View Top ${topics.length} ${sourceLabel}
           </a>
         </div>
@@ -275,11 +275,11 @@ async function generateContentHTML(pageData, topics, sourceLabel) {
 
   contentHTML += `
     <section class="top-topics" aria-labelledby="top-trending-heading" itemscope itemtype="https://schema.org/ItemList" style="max-width: 80rem; margin: 2rem auto 1.5rem; padding: 0 0.5rem;">
-      <div style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; padding: 1.5rem;">
-        <h2 id="top-trending-heading" style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; color: white;">
+      <div style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 0.5rem; padding: 1.5rem;">
+        <h2 id="top-trending-heading" style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; color: #111827;">
           ${rankingTitle}
         </h2>
-        ${pageData.intro_text ? `<p style="color: #d1d5db; font-size: 0.875rem; line-height: 1.625; margin-bottom: 1rem;">${pageData.intro_text}</p>` : ''}
+        ${pageData.intro_text ? `<p style="color: #4b5563; font-size: 0.875rem; line-height: 1.625; margin-bottom: 1rem;">${pageData.intro_text}</p>` : ''}
         <ol class="topics-list" style="list-style: none; padding: 0; margin: 0;">
   `;
 
@@ -287,13 +287,13 @@ async function generateContentHTML(pageData, topics, sourceLabel) {
     const searchVolume = topic.search_volume_raw || topic.search_volume;
     const rank = index + 1;
     contentHTML += `
-          <li style="padding: 0.75rem 1rem; border-bottom: 1px solid #374151; display: flex; align-items: flex-start; gap: 0.75rem;" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+          <li style="padding: 0.75rem 1rem; border-bottom: 1px solid #e5e7eb; display: flex; align-items: flex-start; gap: 0.75rem;" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
             <meta itemprop="position" content="${rank}" />
-            <span style="color: #9ca3af; font-weight: 600; min-width: 2.5rem;">${rank}</span>
+            <span style="color: #6b7280; font-weight: 600; min-width: 2.5rem;">${rank}</span>
             <div style="flex: 1;" itemprop="item" itemscope itemtype="https://schema.org/Thing">
-              <h3 style="font-size: 1rem; font-weight: 600; color: white; margin: 0 0 0.25rem 0;" itemprop="name">${topic.name.replace(/"/g, '')}</h3>
-              <p style="color: #9ca3af; font-size: 0.875rem; margin: 0;" itemprop="description">${searchVolume.toString().replace(/"/g, '')}</p>
-              ${topic.category ? `<span style="display: inline-block; margin-top: 0.25rem; padding: 0.125rem 0.5rem; background-color: #374151; color: #d1d5db; font-size: 0.75rem; border-radius: 0.25rem;">${topic.category}</span>` : ''}
+              <h3 style="font-size: 1rem; font-weight: 600; color: #111827; margin: 0 0 0.25rem 0;" itemprop="name">${topic.name.replace(/"/g, '')}</h3>
+              <p style="color: #6b7280; font-size: 0.875rem; margin: 0;" itemprop="description">${searchVolume.toString().replace(/"/g, '')}</p>
+              ${topic.category ? `<span style="display: inline-block; margin-top: 0.25rem; padding: 0.125rem 0.5rem; background-color: #e5e7eb; color: #4b5563; font-size: 0.75rem; border-radius: 0.25rem;">${topic.category}</span>` : ''}
             </div>
           </li>
     `;
@@ -308,7 +308,7 @@ async function generateContentHTML(pageData, topics, sourceLabel) {
   if (pageData.summary) {
     contentHTML += `
       <section class="page-summary" aria-labelledby="page-summary" itemscope itemtype="https://schema.org/Article" style="max-width: 80rem; margin: 2rem auto 1.5rem; padding: 0 0.5rem;">
-        <div class="summary-container" style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; padding: 1.5rem;">
+        <div class="summary-container" style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 0.5rem; padding: 1.5rem;">
           ${pageData.cover_image ? `
           <div style="margin-bottom: 1.5rem; border-radius: 0.75rem; overflow: hidden;">
             <img src="${pageData.cover_image}" alt="${pageData.meta_title}" style="width: 100%; height: 24rem; object-fit: cover;" />
@@ -326,7 +326,7 @@ async function generateContentHTML(pageData, topics, sourceLabel) {
   if (pageData.faq) {
     contentHTML += `
       <section class="page-faq" aria-labelledby="page-faq" style="max-width: 80rem; margin: 2rem auto 1.5rem; padding: 0 0.5rem;">
-        <div class="faq-container" style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; padding: 1.5rem;">
+        <div class="faq-container" style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 0.5rem; padding: 1.5rem;">
           <div class="summary-content">
             ${pageData.faq}
           </div>
@@ -350,7 +350,7 @@ async function generateContentHTML(pageData, topics, sourceLabel) {
       contentHTML += `
         <section class="category-pages" aria-labelledby="category-pages-heading" style="max-width: 80rem; margin: 2rem auto 1.5rem; padding: 0 1rem;">
           <div style="position: relative; margin-bottom: 1.5rem;">
-            <h2 id="category-pages-heading" style="font-size: 1.5rem; font-weight: 700; color: white; display: inline-block; padding: 0.5rem 1rem; position: relative;">
+            <h2 id="category-pages-heading" style="font-size: 1.5rem; font-weight: 700; color: #111827; display: inline-block; padding: 0.5rem 1rem; position: relative;">
               <span style="position: relative; z-index: 10;">${categoryTitle}</span>
               <div style="position: absolute; inset: 0; background: linear-gradient(to right, #facc15, #f59e0b); transform: skewX(-12deg);"></div>
             </h2>
@@ -361,7 +361,7 @@ async function generateContentHTML(pageData, topics, sourceLabel) {
       categoryPages.forEach(page => {
         const pageDate = new Date(page.created_at).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
         contentHTML += `
-            <a href="${BASE_URL}${page.page_url}" style="display: flex; gap: 1rem; padding: 1rem; background-color: #1f2937; border-radius: 0.5rem; text-decoration: none; transition: all 0.3s;" onmouseover="this.style.boxShadow='0 10px 15px -3px rgba(0, 0, 0, 0.4)'" onmouseout="this.style.boxShadow='none'">
+            <a href="${BASE_URL}${page.page_url}" style="display: flex; gap: 1rem; padding: 1rem; background-color: #f9fafb; border-radius: 0.5rem; text-decoration: none; transition: all 0.3s; border: 1px solid #e5e7eb;" onmouseover="this.style.boxShadow='0 10px 15px -3px rgba(0, 0, 0, 0.1)'" onmouseout="this.style.boxShadow='none'">
               <div style="flex-shrink: 0; width: 8rem; height: 6rem; border-radius: 0.5rem; overflow: hidden;">
                 ${page.cover_image
                   ? `<img src="${page.cover_image}" alt="${page.meta_title}" style="width: 100%; height: 100%; object-fit: cover;" />`
@@ -372,7 +372,7 @@ async function generateContentHTML(pageData, topics, sourceLabel) {
                 <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; margin-bottom: 0.5rem;">
                   <span style="color: #60a5fa; font-weight: 600; text-transform: uppercase;">${pageData.category}</span>
                   <span style="color: #6b7280;">/</span>
-                  <span style="color: #9ca3af; display: flex; align-items: center; gap: 0.25rem;">
+                  <span style="color: #6b7280; display: flex; align-items: center; gap: 0.25rem;">
                     <svg style="width: 0.75rem; height: 0.75rem;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <circle cx="12" cy="12" r="10" stroke-width="2"/>
                       <path stroke-linecap="round" d="M12 6v6l4 2" stroke-width="2"/>
@@ -380,8 +380,8 @@ async function generateContentHTML(pageData, topics, sourceLabel) {
                     ${pageDate}
                   </span>
                 </div>
-                <h3 style="color: white; font-size: 1.125rem; font-weight: 700; margin-bottom: 0.5rem;">${page.meta_title}</h3>
-                ${page.meta_description ? `<p style="color: #9ca3af; font-size: 0.875rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${page.meta_description}</p>` : ''}
+                <h3 style="color: #111827; font-size: 1.125rem; font-weight: 700; margin-bottom: 0.5rem;">${page.meta_title}</h3>
+                ${page.meta_description ? `<p style="color: #6b7280; font-size: 0.875rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${page.meta_description}</p>` : ''}
               </div>
             </a>
         `;
@@ -548,17 +548,17 @@ async function prerenderExplorePage(baseHTML, distPath) {
 
   let exploreContentHTML = `
     <div class="explore-page-content">
-      <header style="background-color: #111827; border-bottom: 1px solid #374151; padding: 0.5rem 1rem;">
+      <header style="background-color: #ffffff; border-bottom: 1px solid #e5e7eb; padding: 0.5rem 1rem;">
         <nav aria-label="Main navigation" style="max-width: 80rem; margin: 0 auto; display: flex; align-items: center; justify-content: space-between;">
           <a href="${BASE_URL}/" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none;">
             <h1 style="color: #2563eb; font-size: 1.5rem; font-weight: 700; margin: 0;">Top Best Charts</h1>
           </a>
           <ul style="display: flex; gap: 1.5rem; list-style: none; margin: 0; padding: 0;">
-            <li><a href="${BASE_URL}/" style="color: #d1d5db; text-decoration: none;">Home</a></li>
-            <li><a href="${BASE_URL}/browse-topics" style="color: #d1d5db; text-decoration: none;">Browse Topics</a></li>
-            <li><a href="${BASE_URL}/trending-now" style="color: #d1d5db; text-decoration: none;">Trending Now</a></li>
-            <li><a href="${BASE_URL}/contact" style="color: #d1d5db; text-decoration: none;">Contact</a></li>
-            <li><a href="${BASE_URL}/about" style="color: #d1d5db; text-decoration: none;">About</a></li>
+            <li><a href="${BASE_URL}/" style="color: #4b5563; text-decoration: none;">Home</a></li>
+            <li><a href="${BASE_URL}/browse-topics" style="color: #4b5563; text-decoration: none;">Browse Topics</a></li>
+            <li><a href="${BASE_URL}/trending-now" style="color: #4b5563; text-decoration: none;">Trending Now</a></li>
+            <li><a href="${BASE_URL}/contact" style="color: #4b5563; text-decoration: none;">Contact</a></li>
+            <li><a href="${BASE_URL}/about" style="color: #4b5563; text-decoration: none;">About</a></li>
           </ul>
         </nav>
       </header>
@@ -572,12 +572,12 @@ async function prerenderExplorePage(baseHTML, distPath) {
 
     if (heroPage) {
       exploreContentHTML += `
-        <article style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; padding: 2rem; margin-bottom: 1.5rem;">
-          <span style="color: #60a5fa; font-size: 0.875rem; font-weight: 600; text-transform: uppercase;">Featured</span>
-          <h2 style="font-size: 1.5rem; font-weight: 700; color: white; margin: 0.5rem 0;">
+        <article style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 0.5rem; padding: 2rem; margin-bottom: 1.5rem;">
+          <span style="color: #2563eb; font-size: 0.875rem; font-weight: 600; text-transform: uppercase;">Featured</span>
+          <h2 style="font-size: 1.5rem; font-weight: 700; color: #111827; margin: 0.5rem 0;">
             <a href="${BASE_URL}${heroPage.page_url}" style="text-decoration: none; color: inherit;">${heroPage.meta_title}</a>
           </h2>
-          <p style="color: #d1d5db; font-size: 0.875rem;">${heroPage.meta_description}</p>
+          <p style="color: #4b5563; font-size: 0.875rem;">${heroPage.meta_description}</p>
         </article>
       `;
     }
@@ -586,12 +586,12 @@ async function prerenderExplorePage(baseHTML, distPath) {
       exploreContentHTML += `<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem;">`;
       topPages.forEach(page => {
         exploreContentHTML += `
-          <article style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; padding: 1.5rem;">
-            <span style="color: #34d399; font-size: 0.875rem; font-weight: 600; text-transform: uppercase;">Top</span>
-            <h3 style="font-size: 1.25rem; font-weight: 700; color: white; margin: 0.5rem 0;">
+          <article style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 0.5rem; padding: 1.5rem;">
+            <span style="color: #059669; font-size: 0.875rem; font-weight: 600; text-transform: uppercase;">Top</span>
+            <h3 style="font-size: 1.25rem; font-weight: 700; color: #111827; margin: 0.5rem 0;">
               <a href="${BASE_URL}${page.page_url}" style="text-decoration: none; color: inherit;">${page.meta_title}</a>
             </h3>
-            <p style="color: #d1d5db; font-size: 0.875rem;">${page.meta_description}</p>
+            <p style="color: #4b5563; font-size: 0.875rem;">${page.meta_description}</p>
           </article>
         `;
       });
@@ -604,19 +604,19 @@ async function prerenderExplorePage(baseHTML, distPath) {
   if (latestPages && latestPages.length > 0) {
     exploreContentHTML += `
       <section style="margin-bottom: 3rem;">
-        <h2 style="font-size: 1.5rem; font-weight: 700; color: white; margin-bottom: 1rem;">LATEST</h2>
+        <h2 style="font-size: 1.5rem; font-weight: 700; color: #111827; margin-bottom: 1rem;">LATEST</h2>
         <div style="display: flex; flex-direction: column; gap: 1rem;">
     `;
     latestPages.forEach(page => {
       const pageDate = new Date(page.created_at).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
       exploreContentHTML += `
-        <article style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; padding: 1rem; display: flex; gap: 1rem;">
+        <article style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 0.5rem; padding: 1rem; display: flex; gap: 1rem;">
           <div style="flex: 1;">
-            <span style="color: #60a5fa; font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">Page / ${pageDate}</span>
-            <h3 style="font-size: 1.125rem; font-weight: 700; color: white; margin: 0.5rem 0;">
+            <span style="color: #2563eb; font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">Page / ${pageDate}</span>
+            <h3 style="font-size: 1.125rem; font-weight: 700; color: #111827; margin: 0.5rem 0;">
               <a href="${BASE_URL}${page.page_url}" style="text-decoration: none; color: inherit;">${page.meta_title}</a>
             </h3>
-            ${page.meta_description ? `<p style="color: #d1d5db; font-size: 0.875rem;">${page.meta_description}</p>` : ''}
+            ${page.meta_description ? `<p style="color: #4b5563; font-size: 0.875rem;">${page.meta_description}</p>` : ''}
           </div>
         </article>
       `;
@@ -628,37 +628,37 @@ async function prerenderExplorePage(baseHTML, distPath) {
   exploreContentHTML += `
     <section style="margin-bottom: 3rem;">
       <div style="text-align: center; margin-bottom: 2rem;">
-        <h2 style="font-size: 2rem; font-weight: 700; color: white; margin-bottom: 1rem;">What Is Top Best Charts?</h2>
-        <p style="font-size: 1.125rem; color: #d1d5db; margin-bottom: 1rem;">Your Ultimate Data Visualization Hub</p>
-        <p style="color: #9ca3af; max-width: 60rem; margin: 0 auto;">
+        <h2 style="font-size: 2rem; font-weight: 700; color: #111827; margin-bottom: 1rem;">What Is Top Best Charts?</h2>
+        <p style="font-size: 1.125rem; color: #4b5563; margin-bottom: 1rem;">Your Ultimate Data Visualization Hub</p>
+        <p style="color: #6b7280; max-width: 60rem; margin: 0 auto;">
           Top Best Charts helps you explore the world's top-ranked items quickly and visually. From rankings to insights,
           our platform makes data easy to understand and engaging for everyone.
         </p>
       </div>
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
-        <div style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.75rem; padding: 1.5rem;">
-          <h3 style="font-size: 1.25rem; font-weight: 700; color: white; margin-bottom: 0.75rem;">Top List Rankings</h3>
-          <p style="color: #9ca3af; font-size: 0.875rem;">Browse the most popular items ranked by popularity, trends, and user engagement. Stay updated with what's trending now.</p>
+        <div style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 0.75rem; padding: 1.5rem;">
+          <h3 style="font-size: 1.25rem; font-weight: 700; color: #111827; margin-bottom: 0.75rem;">Top List Rankings</h3>
+          <p style="color: #6b7280; font-size: 0.875rem;">Browse the most popular items ranked by popularity, trends, and user engagement. Stay updated with what's trending now.</p>
         </div>
-        <div style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.75rem; padding: 1.5rem;">
-          <h3 style="font-size: 1.25rem; font-weight: 700; color: white; margin-bottom: 0.75rem;">Bubble Chart Analysis</h3>
-          <p style="color: #9ca3af; font-size: 0.875rem;">Analyze trends with interactive bubble charts that reveal relationships between data points at a glance.</p>
+        <div style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 0.75rem; padding: 1.5rem;">
+          <h3 style="font-size: 1.25rem; font-weight: 700; color: #111827; margin-bottom: 0.75rem;">Bubble Chart Analysis</h3>
+          <p style="color: #6b7280; font-size: 0.875rem;">Analyze trends with interactive bubble charts that reveal relationships between data points at a glance.</p>
         </div>
-        <div style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.75rem; padding: 1.5rem;">
-          <h3 style="font-size: 1.25rem; font-weight: 700; color: white; margin-bottom: 0.75rem;">Bar Chart Comparisons</h3>
-          <p style="color: #9ca3af; font-size: 0.875rem;">Compare values side-by-side with clear bar charts that make differences and patterns easy to spot.</p>
+        <div style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 0.75rem; padding: 1.5rem;">
+          <h3 style="font-size: 1.25rem; font-weight: 700; color: #111827; margin-bottom: 0.75rem;">Bar Chart Comparisons</h3>
+          <p style="color: #6b7280; font-size: 0.875rem;">Compare values side-by-side with clear bar charts that make differences and patterns easy to spot.</p>
         </div>
-        <div style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.75rem; padding: 1.5rem;">
-          <h3 style="font-size: 1.25rem; font-weight: 700; color: white; margin-bottom: 0.75rem;">Donut Chart Proportions</h3>
-          <p style="color: #9ca3af; font-size: 0.875rem;">Explore proportions and distributions with elegant donut charts that highlight key segments.</p>
+        <div style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 0.75rem; padding: 1.5rem;">
+          <h3 style="font-size: 1.25rem; font-weight: 700; color: #111827; margin-bottom: 0.75rem;">Donut Chart Proportions</h3>
+          <p style="color: #6b7280; font-size: 0.875rem;">Explore proportions and distributions with elegant donut charts that highlight key segments.</p>
         </div>
-        <div style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.75rem; padding: 1.5rem;">
-          <h3 style="font-size: 1.25rem; font-weight: 700; color: white; margin-bottom: 0.75rem;">Treemap Layout</h3>
-          <p style="color: #9ca3af; font-size: 0.875rem;">Understand hierarchical data with structured treemap layouts showing relationships and impact clearly.</p>
+        <div style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 0.75rem; padding: 1.5rem;">
+          <h3 style="font-size: 1.25rem; font-weight: 700; color: #111827; margin-bottom: 0.75rem;">Treemap Layout</h3>
+          <p style="color: #6b7280; font-size: 0.875rem;">Understand hierarchical data with structured treemap layouts showing relationships and impact clearly.</p>
         </div>
-        <div style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.75rem; padding: 1.5rem;">
-          <h3 style="font-size: 1.25rem; font-weight: 700; color: white; margin-bottom: 0.75rem;">For Everyone</h3>
-          <p style="color: #9ca3af; font-size: 0.875rem;">Perfect for researchers, marketers, and enthusiasts. Your go-to destination for fast, intuitive, and visually stunning data exploration.</p>
+        <div style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 0.75rem; padding: 1.5rem;">
+          <h3 style="font-size: 1.25rem; font-weight: 700; color: #111827; margin-bottom: 0.75rem;">For Everyone</h3>
+          <p style="color: #6b7280; font-size: 0.875rem;">Perfect for researchers, marketers, and enthusiasts. Your go-to destination for fast, intuitive, and visually stunning data exploration.</p>
         </div>
       </div>
     </section>
@@ -681,19 +681,19 @@ async function prerenderExplorePage(baseHTML, distPath) {
     categories.forEach(([category, categoryTopicsList]) => {
       exploreContentHTML += `
         <section style="margin-bottom: 3rem;">
-          <h2 style="font-size: 1.5rem; font-weight: 700; color: white; margin-bottom: 1rem; text-transform: uppercase;">${category}</h2>
+          <h2 style="font-size: 1.5rem; font-weight: 700; color: #111827; margin-bottom: 1rem; text-transform: uppercase;">${category}</h2>
           <div style="display: flex; flex-direction: column; gap: 1rem;">
       `;
       categoryTopicsList.forEach(topic => {
         const searchVolume = topic.search_volume_raw || topic.search_volume;
         exploreContentHTML += `
-          <article style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; padding: 1rem;">
+          <article style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 0.5rem; padding: 1rem;">
             <div style="display: flex; gap: 1rem; align-items: flex-start;">
               <div style="flex: 1;">
-                <span style="color: #60a5fa; font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">${category}</span>
-                <h3 style="font-size: 1.125rem; font-weight: 700; color: white; margin: 0.5rem 0;">${topic.name.replace(/"/g, '')}</h3>
-                <p style="color: #9ca3af; font-size: 0.875rem;">${searchVolume.toString().replace(/"/g, '')} searches</p>
-                ${topic.source ? `<span style="padding: 0.25rem 0.5rem; background-color: #374151; color: #d1d5db; font-size: 0.75rem; border-radius: 0.25rem; display: inline-block; margin-top: 0.25rem;">${topic.source}</span>` : ''}
+                <span style="color: #2563eb; font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">${category}</span>
+                <h3 style="font-size: 1.125rem; font-weight: 700; color: #111827; margin: 0.5rem 0;">${topic.name.replace(/"/g, '')}</h3>
+                <p style="color: #6b7280; font-size: 0.875rem;">${searchVolume.toString().replace(/"/g, '')} searches</p>
+                ${topic.source ? `<span style="padding: 0.25rem 0.5rem; background-color: #e5e7eb; color: #4b5563; font-size: 0.75rem; border-radius: 0.25rem; display: inline-block; margin-top: 0.25rem;">${topic.source}</span>` : ''}
               </div>
             </div>
           </article>
@@ -710,17 +710,17 @@ async function prerenderExplorePage(baseHTML, distPath) {
     if (featuredPages && featuredPages.length > 0) {
       exploreContentHTML += `
         <section style="margin-bottom: 2rem;">
-          <h2 style="font-size: 1.25rem; font-weight: 700; color: white; margin-bottom: 1rem;">FEATURED</h2>
+          <h2 style="font-size: 1.25rem; font-weight: 700; color: #111827; margin-bottom: 1rem;">FEATURED</h2>
           <div style="display: flex; flex-direction: column; gap: 1rem;">
       `;
       featuredPages.forEach((page, index) => {
         exploreContentHTML += `
-          <article style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; padding: 1rem;">
-            <span style="color: #60a5fa; font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">Featured #${index + 1}</span>
-            <h3 style="font-size: 1rem; font-weight: 600; color: white; margin: 0.5rem 0;">
+          <article style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 0.5rem; padding: 1rem;">
+            <span style="color: #2563eb; font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">Featured #${index + 1}</span>
+            <h3 style="font-size: 1rem; font-weight: 600; color: #111827; margin: 0.5rem 0;">
               <a href="${BASE_URL}${page.page_url}" style="text-decoration: none; color: inherit;">${page.meta_title}</a>
             </h3>
-            ${page.meta_description ? `<p style="color: #9ca3af; font-size: 0.875rem;">${page.meta_description}</p>` : ''}
+            ${page.meta_description ? `<p style="color: #6b7280; font-size: 0.875rem;">${page.meta_description}</p>` : ''}
           </article>
         `;
       });
@@ -730,17 +730,17 @@ async function prerenderExplorePage(baseHTML, distPath) {
     if (popularPages && popularPages.length > 0) {
       exploreContentHTML += `
         <section style="margin-bottom: 2rem;">
-          <h2 style="font-size: 1.25rem; font-weight: 700; color: white; margin-bottom: 1rem;">POPULAR</h2>
+          <h2 style="font-size: 1.25rem; font-weight: 700; color: #111827; margin-bottom: 1rem;">POPULAR</h2>
           <div style="display: flex; flex-direction: column; gap: 1rem;">
       `;
       popularPages.forEach((page, index) => {
         exploreContentHTML += `
-          <article style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; padding: 1rem;">
-            <span style="color: #ec4899; font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">Popular #${index + 1}</span>
-            <h3 style="font-size: 1rem; font-weight: 600; color: white; margin: 0.5rem 0;">
+          <article style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 0.5rem; padding: 1rem;">
+            <span style="color: #db2777; font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">Popular #${index + 1}</span>
+            <h3 style="font-size: 1rem; font-weight: 600; color: #111827; margin: 0.5rem 0;">
               <a href="${BASE_URL}${page.page_url}" style="text-decoration: none; color: inherit;">${page.meta_title}</a>
             </h3>
-            ${page.meta_description ? `<p style="color: #9ca3af; font-size: 0.875rem;">${page.meta_description}</p>` : ''}
+            ${page.meta_description ? `<p style="color: #6b7280; font-size: 0.875rem;">${page.meta_description}</p>` : ''}
           </article>
         `;
       });
@@ -863,25 +863,25 @@ async function prerenderTrendingNowPage(baseHTML, distPath) {
   let homeContentHTML = `
     <div class="trending-now-page-content">
       <!-- Header Navigation for SEO -->
-      <header style="background-color: #111827; border-bottom: 1px solid #374151; padding: 0.5rem 1rem;">
+      <header style="background-color: #ffffff; border-bottom: 1px solid #e5e7eb; padding: 0.5rem 1rem;">
         <nav aria-label="Main navigation" style="max-width: 80rem; margin: 0 auto; display: flex; align-items: center; justify-content: space-between;">
           <a href="${BASE_URL}/" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none;">
             <span style="color: #2563eb; font-size: 1.5rem; font-weight: 700;">Top Best Charts</span>
           </a>
           <ul style="display: flex; gap: 1.5rem; list-style: none; margin: 0; padding: 0;">
-            <li><a href="${BASE_URL}/" style="color: #d1d5db; text-decoration: none;">Home</a></li>
-            <li><a href="${BASE_URL}/browse-topics" style="color: #d1d5db; text-decoration: none;">Browse Topics</a></li>
-            <li><a href="${BASE_URL}/trending-now" style="color: #d1d5db; text-decoration: none;">Trending Now</a></li>
-            <li><a href="${BASE_URL}/contact" style="color: #d1d5db; text-decoration: none;">Contact</a></li>
-            <li><a href="${BASE_URL}/about" style="color: #d1d5db; text-decoration: none;">About</a></li>
+            <li><a href="${BASE_URL}/" style="color: #4b5563; text-decoration: none;">Home</a></li>
+            <li><a href="${BASE_URL}/browse-topics" style="color: #4b5563; text-decoration: none;">Browse Topics</a></li>
+            <li><a href="${BASE_URL}/trending-now" style="color: #4b5563; text-decoration: none;">Trending Now</a></li>
+            <li><a href="${BASE_URL}/contact" style="color: #4b5563; text-decoration: none;">Contact</a></li>
+            <li><a href="${BASE_URL}/about" style="color: #4b5563; text-decoration: none;">About</a></li>
           </ul>
         </nav>
       </header>
 
       <!-- Filter Menu for SEO -->
-      <nav aria-label="Content filters" style="background-color: #1f2937; padding: 0.75rem 1rem; border-bottom: 1px solid #374151;">
+      <nav aria-label="Content filters" style="background-color: #f9fafb; padding: 0.75rem 1rem; border-bottom: 1px solid #e5e7eb;">
         <div style="max-width: 80rem; margin: 0 auto;">
-          <div style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; font-size: 0.875rem; color: #d1d5db;">
+          <div style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; font-size: 0.875rem; color: #4b5563;">
             <span>View Modes:</span>
             <a href="?view=bubble" style="color: #93c5fd; text-decoration: none;">Bubble Chart</a>
             <a href="?view=bar" style="color: #93c5fd; text-decoration: none;">Bar Chart</a>
@@ -898,14 +898,14 @@ async function prerenderTrendingNowPage(baseHTML, distPath) {
       </nav>
 
       <article style="max-width: 80rem; margin: 0 auto; padding: 0 0.5rem;">
-        <header class="page-header" style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; padding: 1.5rem; margin-bottom: 2rem; margin-top: 2rem;">
-          <h1 style="font-size: 1.875rem; font-weight: 700; color: white; margin-bottom: 0.75rem;">Trending Now</h1>
-          <p style="color: #d1d5db; font-size: 1rem; line-height: 1.625; margin-bottom: 1rem;">Explore trending topics in real-time with interactive bubble charts. Watch search volumes grow and shrink with live Google Trends data.</p>
+        <header class="page-header" style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 0.5rem; padding: 1.5rem; margin-bottom: 2rem; margin-top: 2rem;">
+          <h1 style="font-size: 1.875rem; font-weight: 700; color: #111827; margin-bottom: 0.75rem;">Trending Now</h1>
+          <p style="color: #4b5563; font-size: 1rem; line-height: 1.625; margin-bottom: 1rem;">Explore trending topics in real-time with interactive bubble charts. Watch search volumes grow and shrink with live Google Trends data.</p>
           <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; font-size: 0.875rem;">
-            <time style="color: #9ca3af;">
+            <time style="color: #6b7280;">
               Last updated: ${formattedDate} ET
             </time>
-            <a href="#top-trending-heading" style="padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; background-color: rgba(30, 64, 175, 0.3); color: #93c5fd; text-decoration: none; display: inline-block;">
+            <a href="#top-trending-heading" style="padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; background-color: #dbeafe; color: #1e40af; text-decoration: none; display: inline-block;">
               Top ${(topics || []).length} Google Trends
             </a>
           </div>
@@ -966,13 +966,13 @@ async function prerenderTrendingNowPage(baseHTML, distPath) {
 
     pages.forEach((page) => {
       homeContentHTML += `
-          <article style="padding: 1rem; background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem;">
-            <h3 style="font-size: 1.125rem; font-weight: 600; color: white; margin-bottom: 0.5rem;">
+          <article style="padding: 1rem; background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 0.5rem;">
+            <h3 style="font-size: 1.125rem; font-weight: 600; color: #111827; margin-bottom: 0.5rem;">
               <a href="${BASE_URL}${page.page_url}" style="text-decoration: none; color: inherit;">
                 ${page.meta_title}
               </a>
             </h3>
-            <p style="color: #d1d5db; font-size: 0.875rem;">${page.meta_description}</p>
+            <p style="color: #4b5563; font-size: 0.875rem;">${page.meta_description}</p>
           </article>
       `;
     });
@@ -1022,34 +1022,34 @@ async function prerenderContactPage(baseHTML, distPath) {
 
   const contactContentHTML = `
     <div class="contact-page-content">
-      <header style="background-color: #111827; border-bottom: 1px solid #374151; padding: 0.5rem 1rem;">
+      <header style="background-color: #ffffff; border-bottom: 1px solid #e5e7eb; padding: 0.5rem 1rem;">
         <nav aria-label="Main navigation" style="max-width: 80rem; margin: 0 auto; display: flex; align-items: center; justify-content: space-between;">
           <a href="${BASE_URL}/" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none;">
             <span style="color: #2563eb; font-size: 1.5rem; font-weight: 700;">Top Best Charts</span>
           </a>
           <ul style="display: flex; gap: 1.5rem; list-style: none; margin: 0; padding: 0;">
-            <li><a href="${BASE_URL}/" style="color: #d1d5db; text-decoration: none;">Home</a></li>
-            <li><a href="${BASE_URL}/browse-topics" style="color: #d1d5db; text-decoration: none;">Browse Topics</a></li>
-            <li><a href="${BASE_URL}/trending-now" style="color: #d1d5db; text-decoration: none;">Trending Now</a></li>
-            <li><a href="${BASE_URL}/contact" style="color: #d1d5db; text-decoration: none;">Contact</a></li>
-            <li><a href="${BASE_URL}/about" style="color: #d1d5db; text-decoration: none;">About</a></li>
+            <li><a href="${BASE_URL}/" style="color: #4b5563; text-decoration: none;">Home</a></li>
+            <li><a href="${BASE_URL}/browse-topics" style="color: #4b5563; text-decoration: none;">Browse Topics</a></li>
+            <li><a href="${BASE_URL}/trending-now" style="color: #4b5563; text-decoration: none;">Trending Now</a></li>
+            <li><a href="${BASE_URL}/contact" style="color: #4b5563; text-decoration: none;">Contact</a></li>
+            <li><a href="${BASE_URL}/about" style="color: #4b5563; text-decoration: none;">About</a></li>
           </ul>
         </nav>
       </header>
 
       <main style="max-width: 60rem; margin: 2rem auto; padding: 0 1rem;">
-        <article style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; padding: 2rem;">
-          <h1 style="font-size: 2.5rem; font-weight: 700; color: white; margin-bottom: 1rem; text-align: center;">Get in Touch</h1>
-          <p style="font-size: 1.125rem; line-height: 1.75; color: #d1d5db; margin-bottom: 2rem; text-align: center;">
+        <article style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 0.5rem; padding: 2rem;">
+          <h1 style="font-size: 2.5rem; font-weight: 700; color: #111827; margin-bottom: 1rem; text-align: center;">Get in Touch</h1>
+          <p style="font-size: 1.125rem; line-height: 1.75; color: #4b5563; margin-bottom: 2rem; text-align: center;">
             Have a question or feedback? We'd love to hear from you. Send us a message and we'll respond as soon as possible.
           </p>
 
-          <div style="background-color: #374151; border-radius: 0.5rem; padding: 2rem; text-align: center; margin: 2rem 0;">
-            <h2 style="font-size: 1.5rem; font-weight: 700; color: white; margin-bottom: 1rem;">Email Us</h2>
-            <p style="color: #d1d5db; font-size: 1.125rem;">Kinh@phenu.com</p>
+          <div style="background-color: #e5e7eb; border-radius: 0.5rem; padding: 2rem; text-align: center; margin: 2rem 0;">
+            <h2 style="font-size: 1.5rem; font-weight: 700; color: #111827; margin-bottom: 1rem;">Email Us</h2>
+            <p style="color: #4b5563; font-size: 1.125rem;">Kinh@phenu.com</p>
           </div>
 
-          <p style="font-size: 1rem; line-height: 1.75; color: #9ca3af; text-align: center; margin-top: 2rem;">
+          <p style="font-size: 1rem; line-height: 1.75; color: #6b7280; text-align: center; margin-top: 2rem;">
             We typically respond within 24 hours
           </p>
         </article>
@@ -1092,32 +1092,32 @@ async function prerenderInsightPage(baseHTML, distPath) {
 
   const insightContentHTML = `
     <div class="insight-page-content">
-      <header style="background-color: #111827; border-bottom: 1px solid #374151; padding: 0.5rem 1rem;">
+      <header style="background-color: #ffffff; border-bottom: 1px solid #e5e7eb; padding: 0.5rem 1rem;">
         <nav aria-label="Main navigation" style="max-width: 80rem; margin: 0 auto; display: flex; align-items: center; justify-content: space-between;">
           <a href="${BASE_URL}/" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none;">
             <span style="color: #2563eb; font-size: 1.5rem; font-weight: 700;">Top Best Charts</span>
           </a>
           <ul style="display: flex; gap: 1.5rem; list-style: none; margin: 0; padding: 0;">
-            <li><a href="${BASE_URL}/" style="color: #d1d5db; text-decoration: none;">Home</a></li>
-            <li><a href="${BASE_URL}/browse-topics" style="color: #d1d5db; text-decoration: none;">Browse Topics</a></li>
-            <li><a href="${BASE_URL}/trending-now" style="color: #d1d5db; text-decoration: none;">Trending Now</a></li>
-            <li><a href="${BASE_URL}/insights" style="color: #d1d5db; text-decoration: none;">Insights</a></li>
-            <li><a href="${BASE_URL}/contact" style="color: #d1d5db; text-decoration: none;">Contact</a></li>
-            <li><a href="${BASE_URL}/about" style="color: #d1d5db; text-decoration: none;">About</a></li>
+            <li><a href="${BASE_URL}/" style="color: #4b5563; text-decoration: none;">Home</a></li>
+            <li><a href="${BASE_URL}/browse-topics" style="color: #4b5563; text-decoration: none;">Browse Topics</a></li>
+            <li><a href="${BASE_URL}/trending-now" style="color: #4b5563; text-decoration: none;">Trending Now</a></li>
+            <li><a href="${BASE_URL}/insights" style="color: #4b5563; text-decoration: none;">Insights</a></li>
+            <li><a href="${BASE_URL}/contact" style="color: #4b5563; text-decoration: none;">Contact</a></li>
+            <li><a href="${BASE_URL}/about" style="color: #4b5563; text-decoration: none;">About</a></li>
           </ul>
         </nav>
       </header>
 
       <main style="max-width: 80rem; margin: 2rem auto; padding: 0 1rem;">
-        <article style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; padding: 2rem;">
-          <h1 style="font-size: 2.5rem; font-weight: 700; color: white; margin-bottom: 1rem;">Brand Keyword Insights</h1>
-          <p style="font-size: 1.125rem; line-height: 1.75; color: #d1d5db; margin-bottom: 2rem;">
+        <article style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 0.5rem; padding: 2rem;">
+          <h1 style="font-size: 2.5rem; font-weight: 700; color: #111827; margin-bottom: 1rem;">Brand Keyword Insights</h1>
+          <p style="font-size: 1.125rem; line-height: 1.75; color: #4b5563; margin-bottom: 2rem;">
             Upload and analyze keyword search volume data for your brands. Track performance over time with interactive visualizations.
           </p>
 
-          <div style="background-color: #374151; border-radius: 0.5rem; padding: 2rem; margin: 2rem 0;">
-            <h2 style="font-size: 1.5rem; font-weight: 700; color: white; margin-bottom: 1rem;">Features</h2>
-            <ul style="color: #d1d5db; font-size: 1rem; line-height: 1.75; list-style: disc; margin-left: 1.5rem;">
+          <div style="background-color: #e5e7eb; border-radius: 0.5rem; padding: 2rem; margin: 2rem 0;">
+            <h2 style="font-size: 1.5rem; font-weight: 700; color: #111827; margin-bottom: 1rem;">Features</h2>
+            <ul style="color: #4b5563; font-size: 1rem; line-height: 1.75; list-style: disc; margin-left: 1.5rem;">
               <li>Upload CSV files with brand keyword data</li>
               <li>Visualize search volume trends over time</li>
               <li>Compare multiple brands side-by-side</li>
@@ -1126,7 +1126,7 @@ async function prerenderInsightPage(baseHTML, distPath) {
             </ul>
           </div>
 
-          <p style="font-size: 1rem; line-height: 1.75; color: #9ca3af; text-align: center; margin-top: 2rem;">
+          <p style="font-size: 1rem; line-height: 1.75; color: #6b7280; text-align: center; margin-top: 2rem;">
             Sign in to start analyzing your brand keywords
           </p>
         </article>
@@ -1175,25 +1175,25 @@ async function prerenderBrowseTopicsPage(baseHTML, distPath) {
 
   let browseContentHTML = `
     <div class="browse-topics-page-content">
-      <header style="background-color: #111827; border-bottom: 1px solid #374151; padding: 0.5rem 1rem;">
+      <header style="background-color: #ffffff; border-bottom: 1px solid #e5e7eb; padding: 0.5rem 1rem;">
         <nav aria-label="Main navigation" style="max-width: 80rem; margin: 0 auto; display: flex; align-items: center; justify-content: space-between;">
           <a href="${BASE_URL}/" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none;">
             <span style="color: #2563eb; font-size: 1.5rem; font-weight: 700;">Top Best Charts</span>
           </a>
           <ul style="display: flex; gap: 1.5rem; list-style: none; margin: 0; padding: 0;">
-            <li><a href="${BASE_URL}/" style="color: #d1d5db; text-decoration: none;">Home</a></li>
-            <li><a href="${BASE_URL}/browse-topics" style="color: #d1d5db; text-decoration: none;">Browse Topics</a></li>
-            <li><a href="${BASE_URL}/trending-now" style="color: #d1d5db; text-decoration: none;">Trending Now</a></li>
-            <li><a href="${BASE_URL}/contact" style="color: #d1d5db; text-decoration: none;">Contact</a></li>
-            <li><a href="${BASE_URL}/about" style="color: #d1d5db; text-decoration: none;">About</a></li>
+            <li><a href="${BASE_URL}/" style="color: #4b5563; text-decoration: none;">Home</a></li>
+            <li><a href="${BASE_URL}/browse-topics" style="color: #4b5563; text-decoration: none;">Browse Topics</a></li>
+            <li><a href="${BASE_URL}/trending-now" style="color: #4b5563; text-decoration: none;">Trending Now</a></li>
+            <li><a href="${BASE_URL}/contact" style="color: #4b5563; text-decoration: none;">Contact</a></li>
+            <li><a href="${BASE_URL}/about" style="color: #4b5563; text-decoration: none;">About</a></li>
           </ul>
         </nav>
       </header>
 
       <main style="max-width: 80rem; margin: 2rem auto; padding: 0 1rem;">
         <div style="text-align: center; margin-bottom: 3rem;">
-          <h1 style="font-size: 2.5rem; font-weight: 700; color: white; margin-bottom: 1rem;">Browse Topics</h1>
-          <p style="font-size: 1.125rem; color: #d1d5db;">Explore our collection of topics organized by category</p>
+          <h1 style="font-size: 2.5rem; font-weight: 700; color: #111827; margin-bottom: 1rem;">Browse Topics</h1>
+          <p style="font-size: 1.125rem; color: #4b5563;">Explore our collection of topics organized by category</p>
         </div>
   `;
 
@@ -1212,22 +1212,22 @@ async function prerenderBrowseTopicsPage(baseHTML, distPath) {
     categories.forEach(([category, categoryPages]) => {
       browseContentHTML += `
         <section style="margin-bottom: 3rem;">
-          <h2 style="font-size: 1.875rem; font-weight: 700; color: white; margin-bottom: 1.5rem; text-transform: uppercase;">${category}</h2>
+          <h2 style="font-size: 1.875rem; font-weight: 700; color: #111827; margin-bottom: 1.5rem; text-transform: uppercase;">${category}</h2>
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
       `;
 
       categoryPages.forEach(page => {
         const pageDate = new Date(page.created_at).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
         browseContentHTML += `
-            <article style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; overflow: hidden;">
+            <article style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 0.5rem; overflow: hidden;">
               <div style="padding: 1.5rem;">
                 <div style="color: #6b7280; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; margin-bottom: 0.5rem;">
                   ${category} / ${pageDate}
                 </div>
-                <h3 style="font-size: 1.125rem; font-weight: 700; color: white; margin-bottom: 0.5rem;">
+                <h3 style="font-size: 1.125rem; font-weight: 700; color: #111827; margin-bottom: 0.5rem;">
                   <a href="${BASE_URL}${page.page_url}" style="text-decoration: none; color: inherit;">${page.meta_title}</a>
                 </h3>
-                ${page.meta_description ? `<p style="color: #9ca3af; font-size: 0.875rem;">${page.meta_description}</p>` : ''}
+                ${page.meta_description ? `<p style="color: #6b7280; font-size: 0.875rem;">${page.meta_description}</p>` : ''}
               </div>
             </article>
         `;
@@ -1240,7 +1240,7 @@ async function prerenderBrowseTopicsPage(baseHTML, distPath) {
     });
   } else {
     browseContentHTML += `
-      <div style="text-align: center; padding: 3rem; color: #9ca3af;">
+      <div style="text-align: center; padding: 3rem; color: #6b7280;">
         <p>No topics available yet.</p>
       </div>
     `;
@@ -1286,95 +1286,95 @@ async function prerenderAboutPage(baseHTML, distPath) {
 
   const aboutContentHTML = `
     <div class="about-page-content">
-      <header style="background-color: #111827; border-bottom: 1px solid #374151; padding: 0.5rem 1rem;">
+      <header style="background-color: #ffffff; border-bottom: 1px solid #e5e7eb; padding: 0.5rem 1rem;">
         <nav aria-label="Main navigation" style="max-width: 80rem; margin: 0 auto; display: flex; align-items: center; justify-content: space-between;">
           <a href="${BASE_URL}/" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none;">
             <span style="color: #2563eb; font-size: 1.5rem; font-weight: 700;">Top Best Charts</span>
           </a>
           <ul style="display: flex; gap: 1.5rem; list-style: none; margin: 0; padding: 0;">
-            <li><a href="${BASE_URL}/" style="color: #d1d5db; text-decoration: none;">Home</a></li>
-            <li><a href="${BASE_URL}/browse-topics" style="color: #d1d5db; text-decoration: none;">Browse Topics</a></li>
-            <li><a href="${BASE_URL}/trending-now" style="color: #d1d5db; text-decoration: none;">Trending Now</a></li>
-            <li><a href="${BASE_URL}/contact" style="color: #d1d5db; text-decoration: none;">Contact</a></li>
-            <li><a href="${BASE_URL}/about" style="color: #d1d5db; text-decoration: none;">About</a></li>
+            <li><a href="${BASE_URL}/" style="color: #4b5563; text-decoration: none;">Home</a></li>
+            <li><a href="${BASE_URL}/browse-topics" style="color: #4b5563; text-decoration: none;">Browse Topics</a></li>
+            <li><a href="${BASE_URL}/trending-now" style="color: #4b5563; text-decoration: none;">Trending Now</a></li>
+            <li><a href="${BASE_URL}/contact" style="color: #4b5563; text-decoration: none;">Contact</a></li>
+            <li><a href="${BASE_URL}/about" style="color: #4b5563; text-decoration: none;">About</a></li>
           </ul>
         </nav>
       </header>
 
       <main style="max-width: 80rem; margin: 2rem auto; padding: 0 1rem;">
-        <article style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; padding: 2rem;">
-          <h1 style="font-size: 2.5rem; font-weight: 700; color: white; margin-bottom: 1.5rem;">About Us – Top Best Charts</h1>
+        <article style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 0.5rem; padding: 2rem;">
+          <h1 style="font-size: 2.5rem; font-weight: 700; color: #111827; margin-bottom: 1.5rem;">About Us – Top Best Charts</h1>
 
-          <p style="font-size: 1.125rem; line-height: 1.75; color: #d1d5db; margin-bottom: 2rem;">
+          <p style="font-size: 1.125rem; line-height: 1.75; color: #4b5563; margin-bottom: 2rem;">
             At Top Best Charts, our mission is simple: to make data easy to understand, engaging, and visually stunning. We transform complex rankings and statistics into interactive charts and lists that anyone can explore, whether you're a researcher, marketer, student, or simply curious.
           </p>
 
-          <h2 style="font-size: 1.875rem; font-weight: 700; color: white; margin: 2rem 0 1.5rem;">Our Platform Features</h2>
+          <h2 style="font-size: 1.875rem; font-weight: 700; color: #111827; margin: 2rem 0 1.5rem;">Our Platform Features</h2>
 
-          <p style="font-size: 1.125rem; line-height: 1.75; color: #d1d5db; margin-bottom: 2rem;">
+          <p style="font-size: 1.125rem; line-height: 1.75; color: #4b5563; margin-bottom: 2rem;">
             Our platform features a variety of tools to help you visualize and analyze data effectively:
           </p>
 
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin: 2rem 0;">
-            <div style="background-color: #374151; border-radius: 0.5rem; padding: 1.5rem;">
-              <h3 style="font-size: 1.25rem; font-weight: 700; color: white; margin-bottom: 0.75rem;">Top List</h3>
-              <p style="color: #d1d5db;">Quickly browse the highest-ranked items in a clean, easy-to-read format.</p>
+            <div style="background-color: #e5e7eb; border-radius: 0.5rem; padding: 1.5rem;">
+              <h3 style="font-size: 1.25rem; font-weight: 700; color: #111827; margin-bottom: 0.75rem;">Top List</h3>
+              <p style="color: #4b5563;">Quickly browse the highest-ranked items in a clean, easy-to-read format.</p>
             </div>
-            <div style="background-color: #374151; border-radius: 0.5rem; padding: 1.5rem;">
-              <h3 style="font-size: 1.25rem; font-weight: 700; color: white; margin-bottom: 0.75rem;">Bubble Chart</h3>
-              <p style="color: #d1d5db;">Visualize trends and impact at a glance using scalable bubbles.</p>
+            <div style="background-color: #e5e7eb; border-radius: 0.5rem; padding: 1.5rem;">
+              <h3 style="font-size: 1.25rem; font-weight: 700; color: #111827; margin-bottom: 0.75rem;">Bubble Chart</h3>
+              <p style="color: #4b5563;">Visualize trends and impact at a glance using scalable bubbles.</p>
             </div>
-            <div style="background-color: #374151; border-radius: 0.5rem; padding: 1.5rem;">
-              <h3 style="font-size: 1.25rem; font-weight: 700; color: white; margin-bottom: 0.75rem;">Bar Chart</h3>
-              <p style="color: #d1d5db;">Compare items side-by-side with clarity and precision.</p>
+            <div style="background-color: #e5e7eb; border-radius: 0.5rem; padding: 1.5rem;">
+              <h3 style="font-size: 1.25rem; font-weight: 700; color: #111827; margin-bottom: 0.75rem;">Bar Chart</h3>
+              <p style="color: #4b5563;">Compare items side-by-side with clarity and precision.</p>
             </div>
-            <div style="background-color: #374151; border-radius: 0.5rem; padding: 1.5rem;">
-              <h3 style="font-size: 1.25rem; font-weight: 700; color: white; margin-bottom: 0.75rem;">Donut Chart</h3>
-              <p style="color: #d1d5db;">See proportional breakdowns in a modern, intuitive layout.</p>
+            <div style="background-color: #e5e7eb; border-radius: 0.5rem; padding: 1.5rem;">
+              <h3 style="font-size: 1.25rem; font-weight: 700; color: #111827; margin-bottom: 0.75rem;">Donut Chart</h3>
+              <p style="color: #4b5563;">See proportional breakdowns in a modern, intuitive layout.</p>
             </div>
-            <div style="background-color: #374151; border-radius: 0.5rem; padding: 1.5rem;">
-              <h3 style="font-size: 1.25rem; font-weight: 700; color: white; margin-bottom: 0.75rem;">Treemap</h3>
-              <p style="color: #d1d5db;">Explore hierarchical data with a clear and structured visual hierarchy.</p>
+            <div style="background-color: #e5e7eb; border-radius: 0.5rem; padding: 1.5rem;">
+              <h3 style="font-size: 1.25rem; font-weight: 700; color: #111827; margin-bottom: 0.75rem;">Treemap</h3>
+              <p style="color: #4b5563;">Explore hierarchical data with a clear and structured visual hierarchy.</p>
             </div>
           </div>
 
-          <p style="font-size: 1.125rem; line-height: 1.75; color: #d1d5db; margin: 2rem 0;">
+          <p style="font-size: 1.125rem; line-height: 1.75; color: #4b5563; margin: 2rem 0;">
             We believe that data should tell a story, not overwhelm you. That's why Top Best Charts combines simplicity, interactivity, and accuracy to help you discover patterns, trends, and insights across a wide range of topics.
           </p>
 
-          <p style="font-size: 1.125rem; line-height: 1.75; color: #d1d5db; margin: 2rem 0;">
+          <p style="font-size: 1.125rem; line-height: 1.75; color: #4b5563; margin: 2rem 0;">
             Whether you're tracking the most popular dog breeds, analyzing top salaries, or comparing products and trends, Top Best Charts turns raw numbers into actionable insights that are easy to understand and share.
           </p>
 
-          <h2 style="font-size: 1.875rem; font-weight: 700; color: white; margin: 2rem 0 1.5rem;">Our Vision</h2>
+          <h2 style="font-size: 1.875rem; font-weight: 700; color: #111827; margin: 2rem 0 1.5rem;">Our Vision</h2>
 
-          <p style="font-size: 1.125rem; line-height: 1.75; color: #d1d5db; margin-bottom: 2rem;">
+          <p style="font-size: 1.125rem; line-height: 1.75; color: #4b5563; margin-bottom: 2rem;">
             Our vision is to be the go-to hub for anyone seeking the most popular, top-performing, or trend-setting items in the world, presented in a way that's both informative and visually engaging.
           </p>
 
-          <h2 style="font-size: 1.875rem; font-weight: 700; color: white; margin: 2rem 0 1.5rem;">Our Commitment</h2>
+          <h2 style="font-size: 1.875rem; font-weight: 700; color: #111827; margin: 2rem 0 1.5rem;">Our Commitment</h2>
 
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin: 2rem 0;">
-            <div style="background-color: #374151; border-radius: 0.5rem; padding: 1.5rem; text-align: center;">
-              <h3 style="font-size: 1.25rem; font-weight: 700; color: white; margin-bottom: 0.75rem;">Accuracy & Reliability</h3>
-              <p style="color: #d1d5db;">All data sources are carefully verified for accuracy and reliability.</p>
+            <div style="background-color: #e5e7eb; border-radius: 0.5rem; padding: 1.5rem; text-align: center;">
+              <h3 style="font-size: 1.25rem; font-weight: 700; color: #111827; margin-bottom: 0.75rem;">Accuracy & Reliability</h3>
+              <p style="color: #4b5563;">All data sources are carefully verified for accuracy and reliability.</p>
             </div>
-            <div style="background-color: #374151; border-radius: 0.5rem; padding: 1.5rem; text-align: center;">
-              <h3 style="font-size: 1.25rem; font-weight: 700; color: white; margin-bottom: 0.75rem;">User-Friendly Design</h3>
-              <p style="color: #d1d5db;">Clear, interactive, and mobile-friendly design for everyone.</p>
+            <div style="background-color: #e5e7eb; border-radius: 0.5rem; padding: 1.5rem; text-align: center;">
+              <h3 style="font-size: 1.25rem; font-weight: 700; color: #111827; margin-bottom: 0.75rem;">User-Friendly Design</h3>
+              <p style="color: #4b5563;">Clear, interactive, and mobile-friendly design for everyone.</p>
             </div>
-            <div style="background-color: #374151; border-radius: 0.5rem; padding: 1.5rem; text-align: center;">
-              <h3 style="font-size: 1.25rem; font-weight: 700; color: white; margin-bottom: 0.75rem;">Instant Insights</h3>
-              <p style="color: #d1d5db;">Helping our users make sense of the numbers in seconds.</p>
+            <div style="background-color: #e5e7eb; border-radius: 0.5rem; padding: 1.5rem; text-align: center;">
+              <h3 style="font-size: 1.25rem; font-weight: 700; color: #111827; margin-bottom: 0.75rem;">Instant Insights</h3>
+              <p style="color: #4b5563;">Helping our users make sense of the numbers in seconds.</p>
             </div>
           </div>
 
-          <p style="font-size: 1.125rem; line-height: 1.75; color: #d1d5db; margin: 2rem 0;">
+          <p style="font-size: 1.125rem; line-height: 1.75; color: #4b5563; margin: 2rem 0;">
             Join us in exploring the world's top charts, uncovering trends, and making data fun, intuitive, and meaningful.
           </p>
 
           <div style="background: linear-gradient(to right, #1e3a8a, #0f766e); border-radius: 0.5rem; padding: 2rem; text-align: center; margin-top: 3rem;">
-            <p style="font-size: 1.5rem; font-weight: 700; color: white; margin-bottom: 0.5rem;">
+            <p style="font-size: 1.5rem; font-weight: 700; color: #111827; margin-bottom: 0.5rem;">
               Discover. Compare. Visualize.
             </p>
             <p style="font-size: 1.25rem; color: #93c5fd;">
@@ -1421,32 +1421,32 @@ async function prerenderInsightsMetaPage(baseHTML, distPath) {
 
   const insightsMetaContentHTML = `
     <div class="insights-meta-page-content">
-      <header style="background-color: #111827; border-bottom: 1px solid #374151; padding: 0.5rem 1rem;">
+      <header style="background-color: #ffffff; border-bottom: 1px solid #e5e7eb; padding: 0.5rem 1rem;">
         <nav aria-label="Main navigation" style="max-width: 80rem; margin: 0 auto; display: flex; align-items: center; justify-content: space-between;">
           <a href="${BASE_URL}/" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none;">
             <span style="color: #2563eb; font-size: 1.5rem; font-weight: 700;">Top Best Charts</span>
           </a>
           <ul style="display: flex; gap: 1.5rem; list-style: none; margin: 0; padding: 0;">
-            <li><a href="${BASE_URL}/" style="color: #d1d5db; text-decoration: none;">Home</a></li>
-            <li><a href="${BASE_URL}/browse-topics" style="color: #d1d5db; text-decoration: none;">Browse Topics</a></li>
-            <li><a href="${BASE_URL}/trending-now" style="color: #d1d5db; text-decoration: none;">Trending Now</a></li>
-            <li><a href="${BASE_URL}/insights" style="color: #d1d5db; text-decoration: none;">Insights</a></li>
-            <li><a href="${BASE_URL}/contact" style="color: #d1d5db; text-decoration: none;">Contact</a></li>
-            <li><a href="${BASE_URL}/about" style="color: #d1d5db; text-decoration: none;">About</a></li>
+            <li><a href="${BASE_URL}/" style="color: #4b5563; text-decoration: none;">Home</a></li>
+            <li><a href="${BASE_URL}/browse-topics" style="color: #4b5563; text-decoration: none;">Browse Topics</a></li>
+            <li><a href="${BASE_URL}/trending-now" style="color: #4b5563; text-decoration: none;">Trending Now</a></li>
+            <li><a href="${BASE_URL}/insights" style="color: #4b5563; text-decoration: none;">Insights</a></li>
+            <li><a href="${BASE_URL}/contact" style="color: #4b5563; text-decoration: none;">Contact</a></li>
+            <li><a href="${BASE_URL}/about" style="color: #4b5563; text-decoration: none;">About</a></li>
           </ul>
         </nav>
       </header>
 
       <main style="max-width: 80rem; margin: 2rem auto; padding: 0 1rem;">
-        <article style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; padding: 2rem;">
-          <h1 style="font-size: 2.5rem; font-weight: 700; color: white; margin-bottom: 1rem;">Brand Insights Metadata</h1>
-          <p style="font-size: 1.125rem; line-height: 1.75; color: #d1d5db; margin-bottom: 2rem;">
+        <article style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 0.5rem; padding: 2rem;">
+          <h1 style="font-size: 2.5rem; font-weight: 700; color: #111827; margin-bottom: 1rem;">Brand Insights Metadata</h1>
+          <p style="font-size: 1.125rem; line-height: 1.75; color: #4b5563; margin-bottom: 2rem;">
             Browse data quality indicators and statistics for all tracked brands. View available months of data, keyword counts, and performance metrics.
           </p>
 
-          <div style="background-color: #374151; border-radius: 0.5rem; padding: 2rem; margin: 2rem 0;">
-            <h2 style="font-size: 1.5rem; font-weight: 700; color: white; margin-bottom: 1rem;">About This Data</h2>
-            <ul style="color: #d1d5db; font-size: 1rem; line-height: 1.75; list-style: disc; margin-left: 1.5rem;">
+          <div style="background-color: #e5e7eb; border-radius: 0.5rem; padding: 2rem; margin: 2rem 0;">
+            <h2 style="font-size: 1.5rem; font-weight: 700; color: #111827; margin-bottom: 1rem;">About This Data</h2>
+            <ul style="color: #4b5563; font-size: 1rem; line-height: 1.75; list-style: disc; margin-left: 1.5rem;">
               <li>View all brands with tracked keyword data</li>
               <li>Data quality indicators (Full Data vs Limited)</li>
               <li>Date ranges and available months</li>
@@ -1603,18 +1603,18 @@ async function prerenderBrandInsightPages(baseHTML, distPath) {
     // Generate content HTML
     let contentHTML = `
     <div class="brand-insight-page-content">
-      <header style="background-color: #111827; border-bottom: 1px solid #374151; padding: 0.5rem 1rem;">
+      <header style="background-color: #ffffff; border-bottom: 1px solid #e5e7eb; padding: 0.5rem 1rem;">
         <nav aria-label="Main navigation" style="max-width: 80rem; margin: 0 auto; display: flex; align-items: center; justify-content: space-between;">
           <a href="${BASE_URL}/" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none;">
             <span style="color: #2563eb; font-size: 1.5rem; font-weight: 700;">Top Best Charts</span>
           </a>
           <ul style="display: flex; gap: 1.5rem; list-style: none; margin: 0; padding: 0;">
-            <li><a href="${BASE_URL}/" style="color: #d1d5db; text-decoration: none;">Home</a></li>
-            <li><a href="${BASE_URL}/browse-topics" style="color: #d1d5db; text-decoration: none;">Browse Topics</a></li>
-            <li><a href="${BASE_URL}/trending-now" style="color: #d1d5db; text-decoration: none;">Trending Now</a></li>
-            <li><a href="${BASE_URL}/insights" style="color: #d1d5db; text-decoration: none;">Insights</a></li>
-            <li><a href="${BASE_URL}/contact" style="color: #d1d5db; text-decoration: none;">Contact</a></li>
-            <li><a href="${BASE_URL}/about" style="color: #d1d5db; text-decoration: none;">About</a></li>
+            <li><a href="${BASE_URL}/" style="color: #4b5563; text-decoration: none;">Home</a></li>
+            <li><a href="${BASE_URL}/browse-topics" style="color: #4b5563; text-decoration: none;">Browse Topics</a></li>
+            <li><a href="${BASE_URL}/trending-now" style="color: #4b5563; text-decoration: none;">Trending Now</a></li>
+            <li><a href="${BASE_URL}/insights" style="color: #4b5563; text-decoration: none;">Insights</a></li>
+            <li><a href="${BASE_URL}/contact" style="color: #4b5563; text-decoration: none;">Contact</a></li>
+            <li><a href="${BASE_URL}/about" style="color: #4b5563; text-decoration: none;">About</a></li>
           </ul>
         </nav>
       </header>
@@ -1626,55 +1626,55 @@ async function prerenderBrandInsightPages(baseHTML, distPath) {
         </div>
         ` : ''}
 
-        <article style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; padding: 2rem; margin-bottom: 2rem;">
-          <h1 style="font-size: 2.5rem; font-weight: 700; color: white; margin-bottom: 1rem;">${brandPage.meta_title}</h1>
+        <article style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 0.5rem; padding: 2rem; margin-bottom: 2rem;">
+          <h1 style="font-size: 2.5rem; font-weight: 700; color: #111827; margin-bottom: 1rem;">${brandPage.meta_title}</h1>
 
           <div style="display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 2rem;">
-            <div style="background-color: #374151; padding: 1rem; border-radius: 0.5rem; flex: 1; min-width: 200px;">
-              <p style="color: #9ca3af; font-size: 0.875rem; margin-bottom: 0.25rem;">Total Keywords</p>
-              <p style="color: white; font-size: 2rem; font-weight: 700;">${totalKeywords.toLocaleString()}</p>
+            <div style="background-color: #e5e7eb; padding: 1rem; border-radius: 0.5rem; flex: 1; min-width: 200px;">
+              <p style="color: #6b7280; font-size: 0.875rem; margin-bottom: 0.25rem;">Total Keywords</p>
+              <p style="color: #111827; font-size: 2rem; font-weight: 700;">${totalKeywords.toLocaleString()}</p>
             </div>
-            <div style="background-color: #374151; padding: 1rem; border-radius: 0.5rem; flex: 1; min-width: 200px;">
-              <p style="color: #9ca3af; font-size: 0.875rem; margin-bottom: 0.25rem;">Avg. Search Volume</p>
-              <p style="color: white; font-size: 2rem; font-weight: 700;">${avgVolume.toLocaleString()}</p>
+            <div style="background-color: #e5e7eb; padding: 1rem; border-radius: 0.5rem; flex: 1; min-width: 200px;">
+              <p style="color: #6b7280; font-size: 0.875rem; margin-bottom: 0.25rem;">Avg. Search Volume</p>
+              <p style="color: #111827; font-size: 2rem; font-weight: 700;">${avgVolume.toLocaleString()}</p>
             </div>
-            <div style="background-color: #374151; padding: 1rem; border-radius: 0.5rem; flex: 1; min-width: 200px;">
-              <p style="color: #9ca3af; font-size: 0.875rem; margin-bottom: 0.25rem;">Months Tracked</p>
-              <p style="color: white; font-size: 2rem; font-weight: 700;">${totalMonths}</p>
+            <div style="background-color: #e5e7eb; padding: 1rem; border-radius: 0.5rem; flex: 1; min-width: 200px;">
+              <p style="color: #6b7280; font-size: 0.875rem; margin-bottom: 0.25rem;">Months Tracked</p>
+              <p style="color: #111827; font-size: 2rem; font-weight: 700;">${totalMonths}</p>
             </div>
           </div>
 
           ${brandPage.intro_text ? `
           <div style="margin-bottom: 2rem;">
-            <h2 style="font-size: 1.5rem; font-weight: 700; color: white; margin-bottom: 1rem;">Overview</h2>
-            <div style="color: #d1d5db; line-height: 1.75;">${brandPage.intro_text}</div>
+            <h2 style="font-size: 1.5rem; font-weight: 700; color: #111827; margin-bottom: 1rem;">Overview</h2>
+            <div style="color: #4b5563; line-height: 1.75;">${brandPage.intro_text}</div>
           </div>
           ` : ''}
 
           ${brandPage.summary ? `
           <div style="margin-bottom: 2rem;">
-            <h2 style="font-size: 1.5rem; font-weight: 700; color: white; margin-bottom: 1rem;">Summary</h2>
-            <div style="color: #d1d5db; line-height: 1.75;">${brandPage.summary}</div>
+            <h2 style="font-size: 1.5rem; font-weight: 700; color: #111827; margin-bottom: 1rem;">Summary</h2>
+            <div style="color: #4b5563; line-height: 1.75;">${brandPage.summary}</div>
           </div>
           ` : ''}
         </article>
 
         ${keywords.length > 0 ? `
-        <section style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; padding: 2rem; margin-bottom: 2rem;">
-          <h2 style="font-size: 1.5rem; font-weight: 700; color: white; margin-bottom: 1.5rem;">Top ${keywords.length} Keywords for ${brandPage.brand}</h2>
+        <section style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 0.5rem; padding: 2rem; margin-bottom: 2rem;">
+          <h2 style="font-size: 1.5rem; font-weight: 700; color: #111827; margin-bottom: 1.5rem;">Top ${keywords.length} Keywords for ${brandPage.brand}</h2>
 
           <div style="margin-bottom: 1.5rem;">
-            <h3 style="font-size: 0.875rem; font-weight: 600; color: #d1d5db; margin-bottom: 0.75rem;">Filter by Performance</h3>
+            <h3 style="font-size: 0.875rem; font-weight: 600; color: #4b5563; margin-bottom: 0.75rem;">Filter by Performance</h3>
             <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem;">
-              <button style="padding: 0.375rem 0.75rem; border-radius: 0.5rem; font-size: 0.875rem; background-color: #2563eb; color: white; border: none;">All Keywords (${keywords.length})</button>
-              <button style="padding: 0.375rem 0.75rem; border-radius: 0.5rem; font-size: 0.875rem; background-color: #374151; color: #d1d5db; border: none;">🎯 Top 10 per Category</button>
-              <button style="padding: 0.375rem 0.75rem; border-radius: 0.5rem; font-size: 0.875rem; background-color: #374151; color: #d1d5db; border: none;">🔥 Ultra Growth</button>
-              <button style="padding: 0.375rem 0.75rem; border-radius: 0.5rem; font-size: 0.875rem; background-color: #374151; color: #d1d5db; border: none;">🚀 Extreme Growth</button>
-              <button style="padding: 0.375rem 0.75rem; border-radius: 0.5rem; font-size: 0.875rem; background-color: #374151; color: #d1d5db; border: none;">📈 High Growth</button>
-              <button style="padding: 0.375rem 0.75rem; border-radius: 0.5rem; font-size: 0.875rem; background-color: #374151; color: #d1d5db; border: none;">⭐ Rising Star</button>
-              <button style="padding: 0.375rem 0.75rem; border-radius: 0.5rem; font-size: 0.875rem; background-color: #374151; color: #d1d5db; border: none;">🎯 Great Potential</button>
-              <button style="padding: 0.375rem 0.75rem; border-radius: 0.5rem; font-size: 0.875rem; background-color: #374151; color: #d1d5db; border: none;">👑 High Value</button>
-              <button style="padding: 0.375rem 0.75rem; border-radius: 0.5rem; font-size: 0.875rem; background-color: #374151; color: #d1d5db; border: none;">⚡ Quick Win</button>
+              <button style="padding: 0.375rem 0.75rem; border-radius: 0.5rem; font-size: 0.875rem; background-color: #2563eb; color: #111827; border: none;">All Keywords (${keywords.length})</button>
+              <button style="padding: 0.375rem 0.75rem; border-radius: 0.5rem; font-size: 0.875rem; background-color: #e5e7eb; color: #4b5563; border: none;">🎯 Top 10 per Category</button>
+              <button style="padding: 0.375rem 0.75rem; border-radius: 0.5rem; font-size: 0.875rem; background-color: #e5e7eb; color: #4b5563; border: none;">🔥 Ultra Growth</button>
+              <button style="padding: 0.375rem 0.75rem; border-radius: 0.5rem; font-size: 0.875rem; background-color: #e5e7eb; color: #4b5563; border: none;">🚀 Extreme Growth</button>
+              <button style="padding: 0.375rem 0.75rem; border-radius: 0.5rem; font-size: 0.875rem; background-color: #e5e7eb; color: #4b5563; border: none;">📈 High Growth</button>
+              <button style="padding: 0.375rem 0.75rem; border-radius: 0.5rem; font-size: 0.875rem; background-color: #e5e7eb; color: #4b5563; border: none;">⭐ Rising Star</button>
+              <button style="padding: 0.375rem 0.75rem; border-radius: 0.5rem; font-size: 0.875rem; background-color: #e5e7eb; color: #4b5563; border: none;">🎯 Great Potential</button>
+              <button style="padding: 0.375rem 0.75rem; border-radius: 0.5rem; font-size: 0.875rem; background-color: #e5e7eb; color: #4b5563; border: none;">👑 High Value</button>
+              <button style="padding: 0.375rem 0.75rem; border-radius: 0.5rem; font-size: 0.875rem; background-color: #e5e7eb; color: #4b5563; border: none;">⚡ Quick Win</button>
             </div>
           </div>
 
@@ -1682,11 +1682,11 @@ async function prerenderBrandInsightPages(baseHTML, distPath) {
             <table style="width: 100%; border-collapse: collapse;">
               <thead>
                 <tr style="border-bottom: 2px solid #374151; background-color: rgba(55, 65, 81, 0.5);">
-                  <th style="padding: 0.75rem 0.5rem; text-align: left; font-size: 0.75rem; font-weight: 600; color: #d1d5db;">#</th>
-                  <th style="padding: 0.75rem 0.5rem; text-align: left; font-size: 0.75rem; font-weight: 600; color: #d1d5db;">Keyword</th>
-                  <th style="padding: 0.75rem 0.5rem; text-align: left; font-size: 0.75rem; font-weight: 600; color: #d1d5db;">Volume</th>
-                  <th style="padding: 0.75rem 0.5rem; text-align: left; font-size: 0.75rem; font-weight: 600; color: #d1d5db;">Sentiment</th>
-                  <th style="padding: 0.75rem 0.5rem; text-align: left; font-size: 0.75rem; font-weight: 600; color: #d1d5db;">Growth</th>
+                  <th style="padding: 0.75rem 0.5rem; text-align: left; font-size: 0.75rem; font-weight: 600; color: #4b5563;">#</th>
+                  <th style="padding: 0.75rem 0.5rem; text-align: left; font-size: 0.75rem; font-weight: 600; color: #4b5563;">Keyword</th>
+                  <th style="padding: 0.75rem 0.5rem; text-align: left; font-size: 0.75rem; font-weight: 600; color: #4b5563;">Volume</th>
+                  <th style="padding: 0.75rem 0.5rem; text-align: left; font-size: 0.75rem; font-weight: 600; color: #4b5563;">Sentiment</th>
+                  <th style="padding: 0.75rem 0.5rem; text-align: left; font-size: 0.75rem; font-weight: 600; color: #4b5563;">Growth</th>
                 </tr>
               </thead>
               <tbody>
@@ -1720,19 +1720,19 @@ async function prerenderBrandInsightPages(baseHTML, distPath) {
                   }
 
                   return `
-                  <tr style="border-bottom: 1px solid #374151;">
-                    <td style="padding: 0.75rem 0.5rem; color: #9ca3af; font-weight: 600;">${index + 1}</td>
+                  <tr style="border-bottom: 1px solid #e5e7eb;">
+                    <td style="padding: 0.75rem 0.5rem; color: #6b7280; font-weight: 600;">${index + 1}</td>
                     <td style="padding: 0.75rem 0.5rem;">
-                      <div style="font-weight: 700; color: white; margin-bottom: 0.25rem;">${keyword.keyword}</div>
-                      ${category ? `<span style="display: inline-block; padding: 0.125rem 0.5rem; background-color: #4b5563; color: #d1d5db; border-radius: 0.25rem; font-size: 0.75rem;">${category}</span>` : ''}
-                      <div style="font-size: 0.75rem; color: #9ca3af; margin-top: 0.25rem;">Comp: ${competition}${bidHigh > 0 ? ` • Bid: $${bidHigh.toFixed(2)}` : ''}</div>
+                      <div style="font-weight: 700; color: #111827; margin-bottom: 0.25rem;">${keyword.keyword}</div>
+                      ${category ? `<span style="display: inline-block; padding: 0.125rem 0.5rem; background-color: #4b5563; color: #4b5563; border-radius: 0.25rem; font-size: 0.75rem;">${category}</span>` : ''}
+                      <div style="font-size: 0.75rem; color: #6b7280; margin-top: 0.25rem;">Comp: ${competition}${bidHigh > 0 ? ` • Bid: $${bidHigh.toFixed(2)}` : ''}</div>
                     </td>
-                    <td style="padding: 0.75rem 0.5rem; color: #d1d5db; font-weight: 600;">${volume.toLocaleString()}</td>
+                    <td style="padding: 0.75rem 0.5rem; color: #4b5563; font-weight: 600;">${volume.toLocaleString()}</td>
                     <td style="padding: 0.75rem 0.5rem;">
                       ${sentimentLabel ? `<div style="display: flex; align-items: center; gap: 0.25rem; font-size: 0.75rem; color: ${sentimentColor};">
                         <span style="font-size: 1rem;">${sentimentEmoji}</span>
                         <span style="text-transform: capitalize;">${sentimentLabel}</span>
-                      </div>` : '<span style="color: #9ca3af; font-size: 0.75rem;">-</span>'}
+                      </div>` : '<span style="color: #6b7280; font-size: 0.75rem;">-</span>'}
                     </td>
                     <td style="padding: 0.75rem 0.5rem;">
                       <div style="font-size: 0.75rem;">
@@ -1748,16 +1748,16 @@ async function prerenderBrandInsightPages(baseHTML, distPath) {
           </div>
         </section>
 
-        <section style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; padding: 2rem; margin-bottom: 2rem;">
-          <h2 style="font-size: 1.5rem; font-weight: 700; color: white; margin-bottom: 1rem;">Search Volume Trends</h2>
-          <div style="background-color: #374151; border-radius: 0.5rem; padding: 2rem; text-align: center; color: #9ca3af;">
+        <section style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 0.5rem; padding: 2rem; margin-bottom: 2rem;">
+          <h2 style="font-size: 1.5rem; font-weight: 700; color: #111827; margin-bottom: 1rem;">Search Volume Trends</h2>
+          <div style="background-color: #e5e7eb; border-radius: 0.5rem; padding: 2rem; text-align: center; color: #6b7280;">
             <p>Interactive chart showing keyword search volume trends over time.</p>
             <p style="margin-top: 0.5rem; font-size: 0.875rem;">Load the full page to view the interactive chart.</p>
           </div>
         </section>
 
-        <section style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; padding: 2rem; margin-bottom: 2rem;">
-          <h2 style="font-size: 1.5rem; font-weight: 700; color: white; margin-bottom: 1rem;">Top Keywords for Advertising</h2>
+        <section style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 0.5rem; padding: 2rem; margin-bottom: 2rem;">
+          <h2 style="font-size: 1.5rem; font-weight: 700; color: #111827; margin-bottom: 1rem;">Top Keywords for Advertising</h2>
           ${(() => {
             const highValue = keywords.filter(k => (k['Avg. monthly searches'] || 0) > 1000 && (k['Top of page bid (high range)'] || 0) > 0)
               .sort((a, b) => (b['Avg. monthly searches'] || 0) * (b['Top of page bid (high range)'] || 0) - (a['Avg. monthly searches'] || 0) * (a['Top of page bid (high range)'] || 0))
@@ -1765,12 +1765,12 @@ async function prerenderBrandInsightPages(baseHTML, distPath) {
 
             return highValue.length > 0 ? `
             <div>
-              <h3 style="font-size: 1.125rem; font-weight: 600; color: white; margin-bottom: 1rem;">👑 Highest ROI Potential</h3>
+              <h3 style="font-size: 1.125rem; font-weight: 600; color: #111827; margin-bottom: 1rem;">👑 Highest ROI Potential</h3>
               <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem;">
                 ${highValue.map(k => `
-                  <div style="background-color: #374151; padding: 1rem; border-radius: 0.5rem; border: 1px solid #4b5563;">
-                    <h4 style="color: white; font-weight: 600; margin-bottom: 0.5rem;">${k.keyword}</h4>
-                    <div style="font-size: 0.75rem; color: #d1d5db;">
+                  <div style="background-color: #e5e7eb; padding: 1rem; border-radius: 0.5rem; border: 1px solid #4b5563;">
+                    <h4 style="color: #111827; font-weight: 600; margin-bottom: 0.5rem;">${k.keyword}</h4>
+                    <div style="font-size: 0.75rem; color: #4b5563;">
                       <div>Volume: ${(k['Avg. monthly searches'] || 0).toLocaleString()}</div>
                       <div>CPC: $${(k['Top of page bid (low range)'] || 0).toFixed(2)} - $${(k['Top of page bid (high range)'] || 0).toFixed(2)}</div>
                       <div>Competition: ${k.competition || 'N/A'}</div>
@@ -1779,40 +1779,40 @@ async function prerenderBrandInsightPages(baseHTML, distPath) {
                 `).join('')}
               </div>
             </div>
-            ` : '<p style="color: #9ca3af;">No high-value keywords found.</p>';
+            ` : '<p style="color: #6b7280;">No high-value keywords found.</p>';
           })()}
         </section>
 
-        <section style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; padding: 2rem; margin-bottom: 2rem;">
-          <h2 style="font-size: 1.5rem; font-weight: 700; color: white; margin-bottom: 1rem;">Summary and Analysis</h2>
+        <section style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 0.5rem; padding: 2rem; margin-bottom: 2rem;">
+          <h2 style="font-size: 1.5rem; font-weight: 700; color: #111827; margin-bottom: 1rem;">Summary and Analysis</h2>
           ${aiAnalysis && aiAnalysis.analysis ? `
             <div style="background: linear-gradient(135deg, rgba(37, 99, 235, 0.1) 0%, rgba(124, 58, 237, 0.1) 100%); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 0.5rem; padding: 2rem;">
               <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(96, 165, 250, 0.2);">
                 <span style="font-size: 1.5rem;">✨</span>
                 <div>
-                  <p style="font-size: 0.875rem; color: #9ca3af;">Generated analysis for ${brandPage.brand}</p>
+                  <p style="font-size: 0.875rem; color: #6b7280;">Generated analysis for ${brandPage.brand}</p>
                 </div>
               </div>
-              <div style="color: #d1d5db; line-height: 1.75; white-space: pre-wrap; font-size: 0.9375rem;">${aiAnalysis.analysis}</div>
+              <div style="color: #4b5563; line-height: 1.75; white-space: pre-wrap; font-size: 0.9375rem;">${aiAnalysis.analysis}</div>
               ${aiAnalysis.model ? `
                 <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid rgba(96, 165, 250, 0.2);">
-                  <p style="font-size: 0.75rem; color: #9ca3af;">Analysis generated using ${aiAnalysis.model} • ${new Date(aiAnalysis.created_at).toLocaleDateString()}</p>
+                  <p style="font-size: 0.75rem; color: #6b7280;">Analysis generated using ${aiAnalysis.model} • ${new Date(aiAnalysis.created_at).toLocaleDateString()}</p>
                 </div>
               ` : ''}
             </div>
           ` : `
-            <div style="background-color: #374151; border-radius: 0.5rem; padding: 2rem; text-align: center;">
-              <p style="color: #9ca3af; margin-bottom: 1rem;">Get AI insights and recommendations for your keyword strategy.</p>
-              <button style="padding: 0.75rem 1.5rem; border-radius: 0.5rem; font-weight: 600; background: linear-gradient(to right, #2563eb, #7c3aed); color: white; border: none;">✨ Generate AI Insights</button>
+            <div style="background-color: #e5e7eb; border-radius: 0.5rem; padding: 2rem; text-align: center;">
+              <p style="color: #6b7280; margin-bottom: 1rem;">Get AI insights and recommendations for your keyword strategy.</p>
+              <button style="padding: 0.75rem 1.5rem; border-radius: 0.5rem; font-weight: 600; background: linear-gradient(to right, #2563eb, #7c3aed); color: #111827; border: none;">✨ Generate AI Insights</button>
             </div>
           `}
         </section>
         ` : ''}
 
         ${brandPage.faq ? `
-        <section style="background-color: #1f2937; border: 1px solid #374151; border-radius: 0.5rem; padding: 2rem; margin-bottom: 2rem;">
-          <h2 style="font-size: 1.5rem; font-weight: 700; color: white; margin-bottom: 1rem;">Frequently Asked Questions</h2>
-          <div style="color: #d1d5db; line-height: 1.75;">${brandPage.faq}</div>
+        <section style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 0.5rem; padding: 2rem; margin-bottom: 2rem;">
+          <h2 style="font-size: 1.5rem; font-weight: 700; color: #111827; margin-bottom: 1rem;">Frequently Asked Questions</h2>
+          <div style="color: #4b5563; line-height: 1.75;">${brandPage.faq}</div>
         </section>
         ` : ''}
       </main>
