@@ -2366,8 +2366,11 @@ export default function BrandInsightPage() {
                             __html: (() => {
                               let html = aiAnalysis;
 
-                              // Remove markdown headers
-                              html = html.replace(/^#{1,6}\s+/gm, '');
+                              // Convert markdown headers to HTML with theme-aware colors
+                              const h2Color = theme === 'dark' ? 'text-white' : 'text-gray-900';
+                              const h3Color = theme === 'dark' ? 'text-gray-100' : 'text-gray-800';
+                              html = html.replace(/^##\s+(.+)$/gm, `<h2 class="text-2xl font-bold mt-8 mb-4 ${h2Color}">$1</h2>`);
+                              html = html.replace(/^###\s+(.+)$/gm, `<h3 class="text-xl font-semibold mt-6 mb-3 ${h3Color}">$1</h3>`);
 
                               // Convert bold and italic
                               html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
@@ -2447,13 +2450,15 @@ export default function BrandInsightPage() {
 
                               html = processed.join('\n');
 
-                              // Convert paragraphs (avoid wrapping list tags)
+                              // Convert paragraphs (avoid wrapping list and header tags)
                               html = html.replace(/\n\n+/g, '</p><p>');
                               html = html.split('\n').map(line => {
                                 const trimmed = line.trim();
                                 if (!trimmed || trimmed.startsWith('<ol>') || trimmed.startsWith('</ol>') ||
                                     trimmed.startsWith('<ul>') || trimmed.startsWith('</ul>') ||
-                                    trimmed.startsWith('<li>') || trimmed.startsWith('</li>')) {
+                                    trimmed.startsWith('<li>') || trimmed.startsWith('</li>') ||
+                                    trimmed.startsWith('<h2>') || trimmed.startsWith('</h2>') ||
+                                    trimmed.startsWith('<h3>') || trimmed.startsWith('</h3>')) {
                                   return line;
                                 }
                                 if (!line.startsWith('<p>')) {
