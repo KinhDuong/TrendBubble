@@ -6,7 +6,7 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import Login from '../components/Login';
 import KeywordMergeReview from '../components/KeywordMergeReview';
-import { Trash2, Search, Download, RefreshCw, Filter, Sparkles, Eye, EyeOff, Globe, Lock, ExternalLink, AlertCircle, GitMerge } from 'lucide-react';
+import { Trash2, Search, Download, RefreshCw, Filter, Sparkles, Eye, EyeOff, Globe, Lock, ExternalLink, AlertCircle, GitMerge, X } from 'lucide-react';
 
 interface BrandKeywordData {
   id: string;
@@ -175,11 +175,9 @@ export default function BrandDataManager() {
         type: 'success',
         text: `Brand page is now ${newStatus ? 'PUBLIC' : 'PRIVATE'}. ${newStatus ? 'Anyone can view your insights page.' : 'Only you can view your insights page.'}`
       });
-      setTimeout(() => setAiMessage(null), 5000);
     } catch (error) {
       console.error('Error toggling public status:', error);
       setAiMessage({ type: 'error', text: 'Failed to update public status' });
-      setTimeout(() => setAiMessage(null), 5000);
     } finally {
       setTogglingPublic(false);
     }
@@ -223,14 +221,12 @@ export default function BrandDataManager() {
         type: 'success',
         text: 'Brand page created successfully! The page is currently private. You can make it public when ready.'
       });
-      setTimeout(() => setAiMessage(null), 5000);
     } catch (error: any) {
       console.error('Error creating brand page:', error);
       setAiMessage({
         type: 'error',
         text: error.message || 'Failed to create brand page'
       });
-      setTimeout(() => setAiMessage(null), 5000);
     } finally {
       setCreatingPage(false);
     }
@@ -336,7 +332,6 @@ export default function BrandDataManager() {
   const handleAICategorization = async () => {
     if (selectedBrand === 'all') {
       setAiMessage({ type: 'error', text: 'Please select a specific brand to categorize' });
-      setTimeout(() => setAiMessage(null), 5000);
       return;
     }
 
@@ -388,8 +383,6 @@ export default function BrandDataManager() {
         type: 'success',
         text: result.message || `Successfully categorized ${result.updatedCount} of ${result.totalKeywords} keywords!${result.hasMoreToProcess ? ' Click again to continue processing.' : ''}`
       });
-
-      setTimeout(() => setAiMessage(null), 15000);
     } catch (error: any) {
       console.error('Error during AI categorization:', error);
       console.error('Error details:', {
@@ -401,7 +394,6 @@ export default function BrandDataManager() {
         type: 'error',
         text: `${error.name || 'Error'}: ${error.message || 'Failed to categorize keywords. Please check console for details.'}`
       });
-      setTimeout(() => setAiMessage(null), 10000);
     } finally {
       setAiCategorizing(false);
     }
@@ -410,7 +402,6 @@ export default function BrandDataManager() {
   const handleSentimentAnalysis = async () => {
     if (selectedBrand === 'all') {
       setAiMessage({ type: 'error', text: 'Please select a specific brand to analyze' });
-      setTimeout(() => setAiMessage(null), 5000);
       return;
     }
 
@@ -457,15 +448,12 @@ export default function BrandDataManager() {
         type: 'success',
         text: result.message || `Successfully analyzed ${result.updatedCount} of ${result.totalKeywords} keywords!${result.hasMoreToProcess ? ' Click again to continue processing.' : ''}`
       });
-
-      setTimeout(() => setAiMessage(null), 15000);
     } catch (error: any) {
       console.error('Error during sentiment analysis:', error);
       setAiMessage({
         type: 'error',
         text: error.message || 'Failed to analyze sentiment. Please check console for details.'
       });
-      setTimeout(() => setAiMessage(null), 10000);
     } finally {
       setAiAnalyzingSentiment(false);
     }
@@ -474,7 +462,6 @@ export default function BrandDataManager() {
   const handleBrandedAnalysis = async () => {
     if (selectedBrand === 'all') {
       setAiMessage({ type: 'error', text: 'Please select a specific brand to analyze' });
-      setTimeout(() => setAiMessage(null), 5000);
       return;
     }
 
@@ -521,15 +508,12 @@ export default function BrandDataManager() {
         type: 'success',
         text: result.message || `Successfully analyzed ${result.updatedCount} of ${result.totalKeywords} keywords!${result.hasMoreToProcess ? ' Click again to continue processing.' : ''}`
       });
-
-      setTimeout(() => setAiMessage(null), 15000);
     } catch (error: any) {
       console.error('Error during branded analysis:', error);
       setAiMessage({
         type: 'error',
         text: error.message || 'Failed to analyze branded keywords. Please check console for details.'
       });
-      setTimeout(() => setAiMessage(null), 10000);
     } finally {
       setAiAnalyzingBranded(false);
     }
@@ -538,7 +522,6 @@ export default function BrandDataManager() {
   const handleCompetitiveLogicAnalysis = async () => {
     if (selectedBrand === 'all') {
       setAiMessage({ type: 'error', text: 'Please select a specific brand to analyze' });
-      setTimeout(() => setAiMessage(null), 5000);
       return;
     }
 
@@ -585,15 +568,12 @@ export default function BrandDataManager() {
         type: 'success',
         text: result.message + volumeInfo
       });
-
-      setTimeout(() => setAiMessage(null), 20000);
     } catch (error: any) {
       console.error('Error during competitive logic analysis:', error);
       setAiMessage({
         type: 'error',
         text: error.message || 'Failed to analyze competitive logic. Please check console for details.'
       });
-      setTimeout(() => setAiMessage(null), 10000);
     } finally {
       setCompetitiveAnalyzing(false);
     }
@@ -880,7 +860,18 @@ export default function BrandDataManager() {
             <>
               {aiMessage && (
                 <div className={`mb-4 p-4 rounded-lg ${aiMessage.type === 'success' ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200'}`}>
-                  {aiMessage.text}
+                  <div className="flex items-start justify-between gap-3">
+                    <p className="flex-1">{aiMessage.text}</p>
+                    <button
+                      onClick={() => setAiMessage(null)}
+                      className={`flex-shrink-0 p-1 rounded hover:bg-opacity-20 transition-colors ${
+                        aiMessage.type === 'success' ? 'hover:bg-green-800' : 'hover:bg-red-800'
+                      }`}
+                      aria-label="Close message"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
                 </div>
               )}
 
