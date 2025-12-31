@@ -232,7 +232,8 @@ export default function SEOStrategyInsights({ brandName, theme, userId, isOwner 
     let currentAnalysis = '';
 
     for (const line of lines) {
-      if (line.match(/^### \d+\./)) {
+      // Match lines starting with ### followed by a number and a dot
+      if (line.match(/^###\s+\d+\./)) {
         if (currentAnalysis.trim()) {
           analyses.push(currentAnalysis.trim());
         }
@@ -514,8 +515,9 @@ export default function SEOStrategyInsights({ brandName, theme, userId, isOwner 
                         </div>
                         <div className="space-y-3">
                           {keywordAnalyses.map((analysis, idx) => {
-                            const titleMatch = analysis.match(/^### (\d+\..+?)$/m);
-                            const keywordTitle = titleMatch ? titleMatch[1] : `Keyword ${idx + 1}`;
+                            // Extract the keyword title - match "### 1. keyword name" and capture everything after the number
+                            const titleMatch = analysis.match(/^###\s+(\d+\.\s*.+?)$/m);
+                            const keywordTitle = titleMatch ? titleMatch[1].trim() : `Keyword ${idx + 1}`;
 
                             return (
                               <details
