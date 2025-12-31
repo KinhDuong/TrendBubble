@@ -23,6 +23,39 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 const BASE_URL = process.env.VITE_BASE_URL || 'https://topbestcharts.com';
 
+function convertMarkdownToHTML(markdown) {
+  if (!markdown) return '';
+
+  let html = markdown;
+
+  // Convert headers
+  html = html.replace(/^### (.*$)/gim, '<h3 style="font-size: 1.25rem; font-weight: 700; color: #111827; margin-top: 1.5rem; margin-bottom: 0.75rem;">$1</h3>');
+  html = html.replace(/^## (.*$)/gim, '<h2 style="font-size: 1.5rem; font-weight: 700; color: #111827; margin-top: 2rem; margin-bottom: 1rem;">$1</h2>');
+  html = html.replace(/^# (.*$)/gim, '<h1 style="font-size: 2rem; font-weight: 700; color: #111827; margin-top: 2rem; margin-bottom: 1rem;">$1</h1>');
+
+  // Convert bold text
+  html = html.replace(/\*\*(.*?)\*\*/g, '<strong style="font-weight: 600; color: #111827;">$1</strong>');
+
+  // Convert unordered lists
+  html = html.replace(/^\s*[-*]\s+(.*)$/gim, '<li style="margin-left: 1.5rem; margin-bottom: 0.5rem;">$1</li>');
+  html = html.replace(/(<li[^>]*>.*<\/li>\n?)+/gs, '<ul style="list-style-type: disc; margin-bottom: 1rem;">$&</ul>');
+
+  // Convert numbered lists
+  html = html.replace(/^\s*\d+\.\s+(.*)$/gim, '<li style="margin-left: 1.5rem; margin-bottom: 0.5rem;">$1</li>');
+
+  // Convert paragraphs (double line breaks)
+  html = html.split('\n\n').map(para => {
+    para = para.trim();
+    if (!para) return '';
+    if (para.startsWith('<h') || para.startsWith('<ul') || para.startsWith('<ol') || para.startsWith('<li')) {
+      return para;
+    }
+    return `<p style="margin-bottom: 1rem; line-height: 1.75;">${para.replace(/\n/g, '<br>')}</p>`;
+  }).join('\n');
+
+  return html;
+}
+
 function generateFooterHTML() {
   const currentYear = new Date().getFullYear();
   return `
@@ -1793,7 +1826,7 @@ async function prerenderBrandInsightPages(baseHTML, distPath) {
                   <p style="font-size: 0.875rem; color: #6b7280;">Generated analysis for ${brandPage.brand}</p>
                 </div>
               </div>
-              <div style="color: #4b5563; line-height: 1.75; white-space: pre-wrap; font-size: 0.9375rem;">${aiAnalysis.analysis}</div>
+              <div style="color: #4b5563; line-height: 1.75; font-size: 0.9375rem;">${convertMarkdownToHTML(aiAnalysis.analysis)}</div>
               ${aiAnalysis.model ? `
                 <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid rgba(96, 165, 250, 0.2);">
                   <p style="font-size: 0.75rem; color: #6b7280;">Analysis generated using ${aiAnalysis.model} • ${new Date(aiAnalysis.created_at).toLocaleDateString()}</p>
