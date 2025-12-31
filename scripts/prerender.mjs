@@ -1557,17 +1557,33 @@ async function prerenderBrandInsightPages(baseHTML, distPath) {
     const pageUrl = `/insights/${encodeURIComponent(username)}/${brandPage.page_id}/`;
     console.log(`Pre-rendering: ${pageUrl}`);
 
-    // Fetch keyword data for this brand
-    const { data: keywordData, error: keywordError } = await supabase
-      .from('brand_keyword_data')
-      .select('*')
-      .eq('user_id', brandPage.user_id)
-      .eq('brand', brandPage.brand)
-      .order('"Avg. monthly searches"', { ascending: false })
-      .limit(10000);
+    // Fetch all keywords using pagination
+    let keywordData = [];
+    let from = 0;
+    const pageSize = 1000;
+    let hasMore = true;
 
-    if (keywordError) {
-      console.error(`Error fetching keyword data for ${brandPage.brand}:`, keywordError);
+    while (hasMore) {
+      const { data, error } = await supabase
+        .from('brand_keyword_data')
+        .select('*')
+        .eq('user_id', brandPage.user_id)
+        .eq('brand', brandPage.brand)
+        .order('"Avg. monthly searches"', { ascending: false })
+        .range(from, from + pageSize - 1);
+
+      if (error) {
+        console.error(`Error fetching keyword data for ${brandPage.brand}:`, error);
+        break;
+      }
+
+      if (data && data.length > 0) {
+        keywordData = [...keywordData, ...data];
+        from += pageSize;
+        hasMore = data.length === pageSize;
+      } else {
+        hasMore = false;
+      }
     }
 
     // Fetch monthly data

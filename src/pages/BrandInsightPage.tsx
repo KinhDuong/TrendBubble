@@ -278,20 +278,33 @@ export default function BrandInsightPage() {
     if (!brandToQuery || !userIdToUse) return;
 
     try {
-      const { data, error } = await supabase
-        .from('brand_keyword_data')
-        .select('*')
-        .eq('brand', brandToQuery)
-        .eq('user_id', userIdToUse)
-        .limit(10000);
+      // Fetch all keywords using pagination to bypass 1000-row limit
+      let allData: any[] = [];
+      let from = 0;
+      const pageSize = 1000;
+      let hasMore = true;
 
-      if (error) throw error;
+      while (hasMore) {
+        const { data, error } = await supabase
+          .from('brand_keyword_data')
+          .select('*')
+          .eq('brand', brandToQuery)
+          .eq('user_id', userIdToUse)
+          .range(from, from + pageSize - 1);
 
-      if (data && data.length > 0) {
-        setKeywordData(data);
-      } else {
-        setKeywordData([]);
+        if (error) throw error;
+
+        if (data && data.length > 0) {
+          allData = [...allData, ...data];
+          from += pageSize;
+          hasMore = data.length === pageSize;
+        } else {
+          hasMore = false;
+        }
       }
+
+      console.log(`Loaded ${allData.length} keywords for brand: ${brandToQuery}`);
+      setKeywordData(allData);
     } catch (error) {
       console.error('Error loading keyword data:', error);
       setKeywordData([]);
@@ -1203,18 +1216,34 @@ export default function BrandInsightPage() {
     if (!brandToQuery) return;
 
     try {
-      const { data, error } = await supabase
-        .from('brand_keyword_data')
-        .select('*')
-        .eq('brand', brandToQuery)
-        .order('keyword', { ascending: true })
-        .limit(10000);
+      // Fetch all keywords using pagination
+      let allData: any[] = [];
+      let from = 0;
+      const pageSize = 1000;
+      let hasMore = true;
 
-      if (error) throw error;
+      while (hasMore) {
+        const { data, error } = await supabase
+          .from('brand_keyword_data')
+          .select('*')
+          .eq('brand', brandToQuery)
+          .order('keyword', { ascending: true })
+          .range(from, from + pageSize - 1);
+
+        if (error) throw error;
+
+        if (data && data.length > 0) {
+          allData = [...allData, ...data];
+          from += pageSize;
+          hasMore = data.length === pageSize;
+        } else {
+          hasMore = false;
+        }
+      }
 
       const csv = [
         ['Brand', 'Keyword', 'Avg. Monthly Searches', 'Three Month Change', 'YoY Change', 'Competition', 'Top of Page Bid (High)'].join(','),
-        ...data.map(row =>
+        ...allData.map(row =>
           [
             row.brand,
             row.keyword,
