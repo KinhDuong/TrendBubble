@@ -2,6 +2,7 @@ import { TrendingTopic, CryptoTimeframe } from '../types';
 import { TrendingUp, Tag, Pin, X, DollarSign, Target, TrendingDown, BarChart3 } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { useState, useEffect, memo } from 'react';
+import { formatCompactNumber } from '../utils/formatNumber';
 
 interface KeywordPerformanceData {
   keyword: string;
@@ -410,9 +411,7 @@ function BubbleTooltip({
                           }}
                           title={`${formatMonthYear(monthData.month)}: ${monthData.volume.toLocaleString()}`}
                         >
-                          {monthData.volume >= 1000
-                            ? `${(monthData.volume / 1000).toFixed(1)}K`
-                            : monthData.volume}
+                          {formatCompactNumber(monthData.volume)}
                         </div>
                         <span className={`text-xs mt-1 text-center ${
                           theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
@@ -685,9 +684,7 @@ function BubbleTooltip({
                       }}
                       title={`${formatMonthYear(monthData.month)}: ${monthData.volume.toLocaleString()}`}
                     >
-                      {monthData.volume >= 1000
-                        ? `${(monthData.volume / 1000).toFixed(1)}K`
-                        : monthData.volume}
+                      {formatCompactNumber(monthData.volume)}
                     </div>
                     <span className={`text-xs mt-1 text-center ${
                       theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
