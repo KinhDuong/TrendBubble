@@ -539,12 +539,12 @@ export default function BrandInsightPage() {
           }
         });
 
-        const maxVolume = monthlyVolumes.length > 0 ? Math.max(...monthlyVolumes) : (kw['Avg. monthly searches'] || 0);
+        const avgVolume = kw['Avg. monthly searches'] || 0;
 
         return {
           name: kw.keyword,
-          searchVolume: maxVolume,
-          searchVolumeRaw: maxVolume.toLocaleString(),
+          searchVolume: avgVolume,
+          searchVolumeRaw: avgVolume.toLocaleString(),
           url: '',
           createdAt: now,
           pubDate: now,
