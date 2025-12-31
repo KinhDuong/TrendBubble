@@ -1,7 +1,6 @@
 import React, { useMemo } from 'react';
 import { AlertCircle, TrendingUp, TrendingDown, Minus, Target, Award, Zap } from 'lucide-react';
 import AdvertisingRecommendations from './AdvertisingRecommendations';
-import { formatLargeNumber } from '../utils/formatNumber';
 
 interface KeywordData {
   keyword: string;
@@ -235,21 +234,21 @@ export default function KeywordAnalysis({ keywords, theme = 'light', brandName =
           <div className={`p-4 rounded-lg ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-50'}`}>
             <div className={`text-sm mb-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>Total Keywords</div>
             <div className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-              {formatLargeNumber(analysis.stats.total)}
+              {analysis.stats.total.toLocaleString()}
             </div>
           </div>
 
           <div className={`p-4 rounded-lg ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-50'}`}>
             <div className={`text-sm mb-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>Avg Volume</div>
             <div className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-              {formatLargeNumber(analysis.stats.avgVolume)}
+              {analysis.stats.avgVolume.toLocaleString()}
             </div>
           </div>
 
           <div className={`p-4 rounded-lg ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-50'}`}>
             <div className={`text-sm mb-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>Median Volume</div>
             <div className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-              {formatLargeNumber(analysis.stats.medianVolume)}
+              {analysis.stats.medianVolume.toLocaleString()}
             </div>
           </div>
 
@@ -282,7 +281,7 @@ export default function KeywordAnalysis({ keywords, theme = 'light', brandName =
                     </span>
                   </div>
                   <span className={`text-sm font-semibold ml-2 ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`}>
-                    {formatLargeNumber(kw['Avg. monthly searches'])}
+                    {kw['Avg. monthly searches'].toLocaleString()}
                   </span>
                 </div>
               ))}
@@ -309,7 +308,7 @@ export default function KeywordAnalysis({ keywords, theme = 'light', brandName =
                     </span>
                     <div className="flex items-center gap-2 ml-2">
                       <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                        Vol: {formatLargeNumber(kw['Avg. monthly searches'])}
+                        Vol: {kw['Avg. monthly searches'].toLocaleString()}
                       </span>
                       <span className={`text-xs ${theme === 'dark' ? 'text-yellow-400' : 'text-yellow-700'}`}>
                         Comp: {kw['Competition (indexed value)']?.toFixed(0)}
@@ -339,7 +338,7 @@ export default function KeywordAnalysis({ keywords, theme = 'light', brandName =
                 className={`p-3 rounded border ${theme === 'dark' ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`}
               >
                 <div className={`text-sm font-semibold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                  Group {i + 1} - Combined Volume: {formatLargeNumber(group.totalVolume)}
+                  Group {i + 1} - Combined Volume: {group.totalVolume.toLocaleString()}
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {group.variants.map((v, j) => (
@@ -374,7 +373,7 @@ export default function KeywordAnalysis({ keywords, theme = 'light', brandName =
               >
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm font-semibold">{pattern.type}</span>
-                  <span className="text-xs">Avg: {formatLargeNumber(pattern.avgVolume)}</span>
+                  <span className="text-xs">Avg: {pattern.avgVolume.toLocaleString()}</span>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {pattern.keywords.map((kw, j) => (

@@ -1,6 +1,5 @@
 import React, { useEffect, useRef } from 'react';
 import * as d3 from 'd3';
-import { formatLargeNumber } from '../utils/formatNumber';
 
 interface MonthlyData {
   brand: string;
@@ -83,7 +82,7 @@ export default function KeywordChart({ data, selectedBrand }: KeywordChartProps)
       .style('font-size', '12px');
 
     g.append('g')
-      .call(d3.axisLeft(y).ticks(5).tickFormat(d => formatLargeNumber(d as number)))
+      .call(d3.axisLeft(y).ticks(5).tickFormat(d => `${(d as number / 1000).toFixed(0)}K`))
       .selectAll('text')
       .style('font-size', '12px');
 
@@ -114,7 +113,7 @@ export default function KeywordChart({ data, selectedBrand }: KeywordChartProps)
         .attr('r', 4)
         .attr('fill', colorScale(brand))
         .append('title')
-        .text(d => `${brand}\n${d.month}\n${formatLargeNumber(d.total_volume)} searches`);
+        .text(d => `${brand}\n${d.month}\n${d.total_volume.toLocaleString()} searches`);
     });
 
     const legend = g.append('g')
@@ -174,7 +173,7 @@ export default function KeywordChart({ data, selectedBrand }: KeywordChartProps)
       .attr('transform', 'rotate(-45)');
 
     g.append('g')
-      .call(d3.axisLeft(y).ticks(5).tickFormat(d => formatLargeNumber(d as number)))
+      .call(d3.axisLeft(y).ticks(5).tickFormat(d => `${(d as number / 1000).toFixed(0)}K`))
       .selectAll('text')
       .style('font-size', '12px');
 
@@ -189,7 +188,7 @@ export default function KeywordChart({ data, selectedBrand }: KeywordChartProps)
       .attr('height', d => height - y(d.volume))
       .attr('fill', '#3b82f6')
       .append('title')
-      .text(d => `${d.keyword}\n${formatLargeNumber(d.volume)} searches`);
+      .text(d => `${d.keyword}\n${d.volume.toLocaleString()} searches`);
   };
 
   const generateTrendAriaLabel = () => {
