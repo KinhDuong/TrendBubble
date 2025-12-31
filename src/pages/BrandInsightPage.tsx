@@ -62,11 +62,12 @@ export default function BrandInsightPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { isAdmin, user, logout } = useAuth();
+  const { isAdmin, user, logout, membershipTier, getKeywordLimit } = useAuth();
   const [isMobile, setIsMobile] = useState<boolean>(window.innerWidth < 768);
 
   const [monthlyData, setMonthlyData] = useState<MonthlyData[]>([]);
   const [keywordData, setKeywordData] = useState<any[]>([]);
+  const [totalKeywordCount, setTotalKeywordCount] = useState<number>(0);
   const [monthColumns, setMonthColumns] = useState<string[]>([]);
   const [brandPageData, setBrandPageData] = useState<BrandPageData | null>(null);
   const [latestBrandPages, setLatestBrandPages] = useState<LatestBrandPage[]>([]);
@@ -74,6 +75,7 @@ export default function BrandInsightPage() {
   const [loading, setLoading] = useState(true);
   const [pageOwnerId, setPageOwnerId] = useState<string | null>(null);
   const [pageOwnerUsername, setPageOwnerUsername] = useState<string | null>(null);
+  const [pageOwnerTier, setPageOwnerTier] = useState<number>(1);
   const [aiAnalysis, setAiAnalysis] = useState<string | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState<string | null>(null);
@@ -278,32 +280,61 @@ export default function BrandInsightPage() {
     if (!brandToQuery || !userIdToUse) return;
 
     try {
-      // Fetch all keywords using pagination to bypass 1000-row limit
+      // First, get the owner's tier
+      const { data: ownerProfile, error: profileError } = await supabase
+        .from('user_profiles')
+        .select('membership_tier')
+        .eq('id', userIdToUse)
+        .maybeSingle();
+
+      if (profileError) throw profileError;
+
+      const ownerTier = ownerProfile?.membership_tier || 1;
+      setPageOwnerTier(ownerTier);
+
+      // Get the keyword limit for this tier
+      const keywordLimit = getKeywordLimit(ownerTier);
+
+      // Get total count of keywords
+      const { count, error: countError } = await supabase
+        .from('brand_keyword_data')
+        .select('*', { count: 'exact', head: true })
+        .eq('brand', brandToQuery)
+        .eq('user_id', userIdToUse);
+
+      if (countError) throw countError;
+      setTotalKeywordCount(count || 0);
+
+      // Fetch keywords with tier limit applied (unless unlimited)
       let allData: any[] = [];
       let from = 0;
       const pageSize = 1000;
       let hasMore = true;
+      const effectiveLimit = keywordLimit === -1 ? Number.MAX_SAFE_INTEGER : keywordLimit;
 
-      while (hasMore) {
+      while (hasMore && allData.length < effectiveLimit) {
+        const remainingSlots = effectiveLimit - allData.length;
+        const fetchSize = Math.min(pageSize, remainingSlots);
+
         const { data, error } = await supabase
           .from('brand_keyword_data')
           .select('*')
           .eq('brand', brandToQuery)
           .eq('user_id', userIdToUse)
-          .range(from, from + pageSize - 1);
+          .range(from, from + fetchSize - 1);
 
         if (error) throw error;
 
         if (data && data.length > 0) {
           allData = [...allData, ...data];
-          from += pageSize;
-          hasMore = data.length === pageSize;
+          from += fetchSize;
+          hasMore = data.length === fetchSize && allData.length < effectiveLimit;
         } else {
           hasMore = false;
         }
       }
 
-      console.log(`Loaded ${allData.length} keywords for brand: ${brandToQuery}`);
+      console.log(`Loaded ${allData.length} keywords for brand: ${brandToQuery} (Tier ${ownerTier}, Limit: ${keywordLimit === -1 ? 'Unlimited' : keywordLimit}, Total: ${count})`);
       setKeywordData(allData);
     } catch (error) {
       console.error('Error loading keyword data:', error);
@@ -1391,7 +1422,12 @@ export default function BrandInsightPage() {
 
             {isAdmin && (
               <div className="mt-12">
-                <BrandKeywordUpload onUploadComplete={loadAllData} theme={theme} />
+                <BrandKeywordUpload
+                  onUploadComplete={loadAllData}
+                  theme={theme}
+                  membershipTier={membershipTier}
+                  getKeywordLimit={getKeywordLimit}
+                />
               </div>
             )}
           </div>
@@ -1645,6 +1681,32 @@ export default function BrandInsightPage() {
                       Export CSV
                     </button>
                   </div>
+
+                  {(() => {
+                    const effectiveTier = pageOwnerId === user?.id ? membershipTier : pageOwnerTier;
+                    const effectiveLimit = getKeywordLimit(effectiveTier);
+                    const isLimited = effectiveLimit !== -1 && totalKeywordCount > effectiveLimit;
+
+                    if (isLimited) {
+                      return (
+                        <div className={`${theme === 'dark' ? 'bg-amber-900/20 border-amber-700/50' : 'bg-amber-50 border-amber-300'} border rounded-lg p-4 mb-4 flex items-start gap-3`}>
+                          <AlertCircle className={`w-5 h-5 flex-shrink-0 mt-0.5 ${theme === 'dark' ? 'text-amber-400' : 'text-amber-600'}`} />
+                          <div className="flex-1">
+                            <p className={`text-sm font-semibold mb-1 ${theme === 'dark' ? 'text-amber-200' : 'text-amber-900'}`}>
+                              Tier {effectiveTier} Keyword Limit Reached
+                            </p>
+                            <p className={`text-sm ${theme === 'dark' ? 'text-amber-300' : 'text-amber-800'}`}>
+                              Showing {effectiveLimit.toLocaleString()} of {totalKeywordCount.toLocaleString()} keywords.
+                              {pageOwnerId === user?.id && effectiveTier < 5 && (
+                                <> Upgrade to Tier {effectiveTier + 1} to view {getKeywordLimit(effectiveTier + 1) === -1 ? 'unlimited' : `up to ${getKeywordLimit(effectiveTier + 1).toLocaleString()}`} keywords.</>
+                              )}
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    }
+                    return null;
+                  })()}
                 </header>
               </article>
 

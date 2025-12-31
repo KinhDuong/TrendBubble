@@ -13,6 +13,7 @@ interface UserData {
   created_at: string;
   last_sign_in_at: string | null;
   is_admin: boolean;
+  membership_tier: number;
 }
 
 export default function ManageUsersPage() {
@@ -103,6 +104,23 @@ export default function ManageUsersPage() {
     } catch (error: any) {
       console.error('Error toggling admin:', error);
       showMessage('error', error.message || 'Failed to update admin status');
+    }
+  };
+
+  const updateTier = async (userId: string, newTier: number) => {
+    try {
+      const { error } = await supabase
+        .from('user_profiles')
+        .update({ membership_tier: newTier })
+        .eq('id', userId);
+
+      if (error) throw error;
+
+      showMessage('success', `Membership tier updated to Tier ${newTier}`);
+      await loadUsers();
+    } catch (error: any) {
+      console.error('Error updating tier:', error);
+      showMessage('error', error.message || 'Failed to update tier');
     }
   };
 
@@ -296,6 +314,7 @@ export default function ManageUsersPage() {
                         <th className="text-left py-3 px-4 font-semibold text-gray-700">Created</th>
                         <th className="text-left py-3 px-4 font-semibold text-gray-700">Last Sign In</th>
                         <th className="text-left py-3 px-4 font-semibold text-gray-700">Role</th>
+                        <th className="text-left py-3 px-4 font-semibold text-gray-700">Tier</th>
                         <th className="text-right py-3 px-4 font-semibold text-gray-700">Actions</th>
                       </tr>
                     </thead>
@@ -325,6 +344,19 @@ export default function ManageUsersPage() {
                                 User
                               </span>
                             )}
+                          </td>
+                          <td className="py-4 px-4">
+                            <select
+                              value={userData.membership_tier || 1}
+                              onChange={(e) => updateTier(userData.id, parseInt(e.target.value))}
+                              className="px-3 py-1 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                            >
+                              <option value="1">Tier 1 (200)</option>
+                              <option value="2">Tier 2 (500)</option>
+                              <option value="3">Tier 3 (1K)</option>
+                              <option value="4">Tier 4 (10K)</option>
+                              <option value="5">Tier 5 (Unlimited)</option>
+                            </select>
                           </td>
                           <td className="py-4 px-4">
                             <div className="flex items-center justify-end gap-2">

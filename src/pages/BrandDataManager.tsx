@@ -38,7 +38,7 @@ interface BrandKeywordData {
 export default function BrandDataManager() {
   const { brandName } = useParams<{ brandName?: string }>();
   const navigate = useNavigate();
-  const { isAdmin, user, logout, isLoading: authLoading } = useAuth();
+  const { isAdmin, user, logout, isLoading: authLoading, membershipTier, getKeywordLimit } = useAuth();
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     const savedTheme = localStorage.getItem('theme');
     return (savedTheme === 'dark' || savedTheme === 'light') ? savedTheme : 'dark';

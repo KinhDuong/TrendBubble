@@ -12,6 +12,7 @@ interface UserData {
   created_at: string;
   last_sign_in_at: string | null;
   is_admin: boolean;
+  membership_tier: number;
 }
 
 Deno.serve(async (req: Request) => {
@@ -90,14 +91,24 @@ Deno.serve(async (req: Request) => {
         throw adminError;
       }
 
+      const { data: userProfiles, error: profileError } = await supabase
+        .from('user_profiles')
+        .select('id, membership_tier');
+
+      if (profileError) {
+        throw profileError;
+      }
+
       const adminIds = new Set(adminUsers?.map(a => a.id) || []);
+      const tierMap = new Map(userProfiles?.map(p => [p.id, p.membership_tier]) || []);
 
       const formattedUsers: UserData[] = (users || []).map(u => ({
         id: u.id,
         email: u.email || 'No email',
         created_at: u.created_at,
         last_sign_in_at: u.last_sign_in_at,
-        is_admin: adminIds.has(u.id)
+        is_admin: adminIds.has(u.id),
+        membership_tier: tierMap.get(u.id) || 1
       }));
 
       return new Response(

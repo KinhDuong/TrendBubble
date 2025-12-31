@@ -7,6 +7,8 @@ import KeywordDuplicateReview from './KeywordDuplicateReview';
 interface BrandKeywordUploadProps {
   onUploadComplete: () => void;
   theme?: 'dark' | 'light';
+  membershipTier?: number;
+  getKeywordLimit?: (tier: number) => number;
 }
 
 interface MergeGroup {
@@ -38,7 +40,7 @@ function generateSlug(brandName: string): string {
     .replace(/^-+|-+$/g, '');
 }
 
-export default function BrandKeywordUpload({ onUploadComplete, theme = 'light' }: BrandKeywordUploadProps) {
+export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', membershipTier = 1, getKeywordLimit }: BrandKeywordUploadProps) {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -49,6 +51,7 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light' }
   const [duplicateGroups, setDuplicateGroups] = useState<DuplicateGroup[]>([]);
   const [zeroTrafficKeywords, setZeroTrafficKeywords] = useState<ZeroTrafficKeyword[]>([]);
   const [showDuplicateReview, setShowDuplicateReview] = useState(false);
+  const [currentKeywordCount, setCurrentKeywordCount] = useState<number>(0);
 
   const levenshteinDistance = (str1: string, str2: string): number => {
     const len1 = str1.length;
@@ -573,6 +576,22 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light' }
       throw new Error('You must be logged in to upload data');
     }
 
+    // Check tier limits
+    if (getKeywordLimit) {
+      const keywordLimit = getKeywordLimit(membershipTier);
+      if (keywordLimit !== -1 && data.length > keywordLimit) {
+        const tierNames = ['', 'Free', 'Basic', 'Pro', 'Premium', 'Enterprise'];
+        const nextTier = membershipTier < 5 ? membershipTier + 1 : null;
+        const upgradeMessage = nextTier
+          ? ` Upgrade to Tier ${nextTier} (${tierNames[nextTier]}) to upload up to ${getKeywordLimit(nextTier) === -1 ? 'unlimited' : getKeywordLimit(nextTier).toLocaleString()} keywords.`
+          : '';
+        throw new Error(
+          `Your Tier ${membershipTier} (${tierNames[membershipTier]}) membership allows up to ${keywordLimit.toLocaleString()} keywords. ` +
+          `You are trying to upload ${data.length.toLocaleString()} keywords.${upgradeMessage}`
+        );
+      }
+    }
+
     console.log('Deleting existing data for brand:', brandName.trim());
     const { error: deleteError } = await supabase
       .from('brand_keyword_data')
@@ -760,6 +779,19 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light' }
           }`}
         />
       </div>
+
+      {getKeywordLimit && (
+        <div className={`mb-4 p-3 rounded-lg ${theme === 'dark' ? 'bg-blue-900/20 border border-blue-800 text-blue-300' : 'bg-blue-50 border border-blue-200 text-blue-700'}`}>
+          <p className="text-sm font-semibold mb-1">
+            Membership Tier {membershipTier}
+          </p>
+          <p className="text-sm">
+            {getKeywordLimit(membershipTier) === -1
+              ? 'Unlimited keyword uploads'
+              : `Upload limit: ${getKeywordLimit(membershipTier).toLocaleString()} keywords`}
+          </p>
+        </div>
+      )}
 
       <label className={`flex items-center justify-center w-full px-4 py-3 border-2 border-dashed rounded-lg cursor-pointer hover:border-blue-500 transition-colors ${
         theme === 'dark'

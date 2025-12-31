@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { User as UserIcon, Mail, Calendar, LogOut, LogIn as LoginIcon, Users } from 'lucide-react';
+import { User as UserIcon, Mail, Calendar, LogOut, LogIn as LoginIcon, Users, Award, TrendingUp } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -14,7 +14,7 @@ interface UserProfile {
 }
 
 export default function UserProfilePage() {
-  const { isAdmin, user, logout, isLoading } = useAuth();
+  const { isAdmin, user, logout, isLoading, membershipTier, getKeywordLimit } = useAuth();
   const [showLogin, setShowLogin] = useState(false);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [profileLoading, setProfileLoading] = useState(false);
@@ -204,6 +204,68 @@ export default function UserProfilePage() {
                     </div>
                   </div>
                 )}
+
+                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-6 shadow-sm">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-blue-100 rounded-lg">
+                        <Award size={24} className="text-blue-600" />
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-bold text-gray-900">Membership Tier {membershipTier}</h3>
+                        <p className="text-sm text-gray-600">
+                          {membershipTier === 1 && 'Free Tier'}
+                          {membershipTier === 2 && 'Basic Tier'}
+                          {membershipTier === 3 && 'Pro Tier'}
+                          {membershipTier === 4 && 'Premium Tier'}
+                          {membershipTier === 5 && 'Enterprise Tier'}
+                        </p>
+                      </div>
+                    </div>
+                    {membershipTier < 5 && (
+                      <button className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all font-semibold shadow-md hover:shadow-lg text-sm">
+                        <TrendingUp size={16} />
+                        Upgrade
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div className="bg-white rounded-lg p-4 border border-blue-100">
+                      <p className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
+                        Keyword Limit
+                      </p>
+                      <p className="text-2xl font-bold text-gray-900">
+                        {getKeywordLimit(membershipTier) === -1 ? 'Unlimited' : getKeywordLimit(membershipTier).toLocaleString()}
+                      </p>
+                      {getKeywordLimit(membershipTier) !== -1 && (
+                        <p className="text-xs text-gray-500 mt-1">keywords per brand</p>
+                      )}
+                    </div>
+
+                    {membershipTier < 5 && (
+                      <div className="bg-white rounded-lg p-4 border border-blue-100">
+                        <p className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
+                          Next Tier
+                        </p>
+                        <p className="text-lg font-bold text-blue-600">
+                          Tier {membershipTier + 1}
+                        </p>
+                        <p className="text-xs text-gray-600 mt-1">
+                          {getKeywordLimit(membershipTier + 1) === -1 ? 'Unlimited' : `${getKeywordLimit(membershipTier + 1).toLocaleString()} keywords`}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  {membershipTier < 5 && (
+                    <div className="mt-4 pt-4 border-t border-blue-200">
+                      <p className="text-sm text-gray-700">
+                        <strong>Upgrade benefits:</strong> Access to more keywords, advanced analytics, and priority support.
+                      </p>
+                    </div>
+                  )}
+                </div>
 
                 {isAdmin && (
                   <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">

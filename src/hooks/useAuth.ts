@@ -6,6 +6,7 @@ export function useAuth() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
+  const [membershipTier, setMembershipTier] = useState<number>(1);
 
   useEffect(() => {
     checkAuth();
@@ -18,6 +19,7 @@ export function useAuth() {
       } else if (event === 'SIGNED_OUT') {
         setIsAdmin(false);
         setUser(null);
+        setMembershipTier(1);
         setIsLoading(false);
       }
     });
@@ -34,6 +36,7 @@ export function useAuth() {
       if (!user) {
         setIsAdmin(false);
         setUser(null);
+        setMembershipTier(1);
         setIsLoading(false);
         return;
       }
@@ -42,7 +45,7 @@ export function useAuth() {
 
       const { data: profileData, error: profileError } = await supabase
         .from('user_profiles')
-        .select('id')
+        .select('id, membership_tier')
         .eq('id', user.id)
         .maybeSingle();
 
@@ -67,6 +70,10 @@ export function useAuth() {
             username: username,
             display_name: displayName
           });
+
+        setMembershipTier(1);
+      } else if (profileData) {
+        setMembershipTier(profileData.membership_tier || 1);
       }
 
       const { data: adminData, error } = await supabase
@@ -82,6 +89,7 @@ export function useAuth() {
       console.error('Error checking auth:', error);
       setIsAdmin(false);
       setUser(null);
+      setMembershipTier(1);
     } finally {
       setIsLoading(false);
     }
@@ -91,7 +99,19 @@ export function useAuth() {
     await supabase.auth.signOut();
     setIsAdmin(false);
     setUser(null);
+    setMembershipTier(1);
   };
 
-  return { isAdmin, isLoading, user, logout };
+  const getKeywordLimit = (tier: number = membershipTier): number => {
+    switch (tier) {
+      case 1: return 200;
+      case 2: return 500;
+      case 3: return 1000;
+      case 4: return 10000;
+      case 5: return -1;
+      default: return 200;
+    }
+  };
+
+  return { isAdmin, isLoading, user, logout, membershipTier, getKeywordLimit };
 }
