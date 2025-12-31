@@ -2,6 +2,7 @@ import { TrendingTopic, CryptoTimeframe } from '../types';
 import { TrendingUp, Tag, Pin, X, DollarSign, Target, TrendingDown, BarChart3 } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { useState, useEffect, memo } from 'react';
+import { formatLargeNumber } from '../utils/formatNumber';
 
 interface KeywordPerformanceData {
   keyword: string;
@@ -408,11 +409,9 @@ function BubbleTooltip({
                             backgroundColor: color,
                             fontSize: `${Math.max(8, size / 4)}px`
                           }}
-                          title={`${formatMonthYear(monthData.month)}: ${monthData.volume.toLocaleString()}`}
+                          title={`${formatMonthYear(monthData.month)}: ${formatLargeNumber(monthData.volume)}`}
                         >
-                          {monthData.volume >= 1000
-                            ? `${(monthData.volume / 1000).toFixed(1)}K`
-                            : monthData.volume}
+                          {formatLargeNumber(monthData.volume)}
                         </div>
                         <span className={`text-xs mt-1 text-center ${
                           theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
@@ -683,11 +682,9 @@ function BubbleTooltip({
                         backgroundColor: color,
                         fontSize: `${Math.max(7, size / 4)}px`
                       }}
-                      title={`${formatMonthYear(monthData.month)}: ${monthData.volume.toLocaleString()}`}
+                      title={`${formatMonthYear(monthData.month)}: ${formatLargeNumber(monthData.volume)}`}
                     >
-                      {monthData.volume >= 1000
-                        ? `${(monthData.volume / 1000).toFixed(1)}K`
-                        : monthData.volume}
+                      {formatLargeNumber(monthData.volume)}
                     </div>
                     <span className={`text-xs mt-1 text-center ${
                       theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
