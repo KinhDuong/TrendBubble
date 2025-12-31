@@ -27,6 +27,8 @@ export interface TrendingTopic {
   pubDate?: string;
   category?: string;
   source?: string;
+  brand?: string;
+  brandColor?: string;
   crypto_data?: CryptoData;
   note?: string;
   value?: number;

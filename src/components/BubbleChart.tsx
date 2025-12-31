@@ -1060,9 +1060,11 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
 
       const colorData = useCryptoColors
         ? { color: getCryptoColorByGain(cryptoValue, getCryptoDisplayText(topic)) }
-        : (keywordPerformanceData.length > 0
-            ? getKeywordColorAndRing(topic.name)
-            : { color: getRandomColor(topicIndex) });
+        : topic.brandColor
+            ? { color: topic.brandColor }
+            : (keywordPerformanceData.length > 0
+                ? getKeywordColorAndRing(topic.name)
+                : { color: getRandomColor(topicIndex) });
 
       const badges = keywordPerformanceData.length > 0 ? getKeywordBadges(topic.name) : undefined;
 

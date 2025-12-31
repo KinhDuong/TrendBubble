@@ -20,6 +20,7 @@ import BubbleTooltip from '../components/BubbleTooltip';
 import AdvertisingRecommendations from '../components/AdvertisingRecommendations';
 import SEOStrategyInsights from '../components/SEOStrategyInsights';
 import PPCCampaignInsights from '../components/PPCCampaignInsights';
+import BrandSelector, { getBrandColor } from '../components/BrandSelector';
 import { TrendingTopic, FAQ } from '../types';
 import { TrendingUp, Download, ArrowLeft, Search, X, ChevronsLeft, ChevronsRight, ArrowUpDown, ArrowUp, ArrowDown, Sparkles, AlertCircle } from 'lucide-react';
 import { formatCompactNumber } from '../utils/formatNumber';
@@ -72,6 +73,8 @@ export default function BrandInsightPage() {
   const [monthColumns, setMonthColumns] = useState<string[]>([]);
   const [brandPageData, setBrandPageData] = useState<BrandPageData | null>(null);
   const [latestBrandPages, setLatestBrandPages] = useState<LatestBrandPage[]>([]);
+  const [availableBrands, setAvailableBrands] = useState<string[]>([]);
+  const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
   const [faqs, setFaqs] = useState<FAQ[]>([]);
   const [loading, setLoading] = useState(true);
   const [pageOwnerId, setPageOwnerId] = useState<string | null>(null);
@@ -165,6 +168,12 @@ export default function BrandInsightPage() {
   }, [brandName, pageIdOrUserId]);
 
   useEffect(() => {
+    if (pageOwnerId && selectedBrands.length > 0) {
+      loadMultiBrandData(pageOwnerId, selectedBrands);
+    }
+  }, [selectedBrands, pageOwnerId]);
+
+  useEffect(() => {
     setCurrentPage(1);
   }, [searchQuery, topSearchQuery, rankingListFilter]);
 
@@ -191,11 +200,10 @@ export default function BrandInsightPage() {
 
     setPageOwnerId(brandPageData.user_id);
 
+    await loadLatestBrandPages(brandPageData.user_id, brandPageData.brand);
+
     await Promise.all([
       loadMonthColumns(),
-      loadBrandData(brandPageData.user_id, brandPageData.brand),
-      loadKeywordData(brandPageData.user_id, brandPageData.brand),
-      loadLatestBrandPages(brandPageData.user_id),
       loadAIAnalysis(brandPageData.user_id, brandPageData.brand)
     ]);
     setLoading(false);
@@ -246,6 +254,81 @@ export default function BrandInsightPage() {
       }
     } catch (error) {
       console.error('Error loading month columns:', error);
+    }
+  };
+
+  const loadMultiBrandData = async (ownerUserId: string, brands: string[]) => {
+    if (!ownerUserId || brands.length === 0) return;
+
+    try {
+      const monthlyDataPromises = brands.map(brand =>
+        supabase
+          .from('brand_keyword_monthly_data')
+          .select('*')
+          .eq('brand', brand)
+          .eq('user_id', ownerUserId)
+          .order('month', { ascending: true })
+      );
+
+      const monthlyResults = await Promise.all(monthlyDataPromises);
+      const allMonthlyData: MonthlyData[] = [];
+
+      monthlyResults.forEach(result => {
+        if (result.data) {
+          allMonthlyData.push(...result.data);
+        }
+      });
+
+      setMonthlyData(allMonthlyData);
+
+      const { data: ownerProfile, error: profileError } = await supabase
+        .from('user_profiles')
+        .select('membership_tier')
+        .eq('id', ownerUserId)
+        .maybeSingle();
+
+      if (profileError) throw profileError;
+
+      const ownerTier = ownerProfile?.membership_tier || 1;
+      setPageOwnerTier(ownerTier);
+
+      const keywordLimit = getKeywordLimit(ownerTier);
+
+      const keywordDataPromises = brands.map(brand =>
+        supabase
+          .from('brand_keyword_data')
+          .select('*', { count: 'exact', head: false })
+          .eq('brand', brand)
+          .eq('user_id', ownerUserId)
+      );
+
+      const keywordResults = await Promise.all(keywordDataPromises);
+      const allKeywordData: any[] = [];
+      let totalCount = 0;
+
+      for (const result of keywordResults) {
+        if (result.data) {
+          allKeywordData.push(...result.data);
+        }
+      }
+
+      const effectiveLimit = keywordLimit === -1 ? Number.MAX_SAFE_INTEGER : keywordLimit;
+      const limitedKeywordData = allKeywordData.slice(0, effectiveLimit);
+
+      keywordResults.forEach(result => {
+        if (result.count !== null) {
+          totalCount += result.count;
+        }
+      });
+
+      setTotalKeywordCount(totalCount);
+      setKeywordData(limitedKeywordData);
+
+      console.log(`Loaded ${limitedKeywordData.length} keywords for ${brands.length} brand(s) (Tier ${ownerTier}, Limit: ${keywordLimit === -1 ? 'Unlimited' : keywordLimit}, Total: ${totalCount})`);
+    } catch (error) {
+      console.error('Error loading multi-brand data:', error);
+      setMonthlyData([]);
+      setKeywordData([]);
     }
   };
 
@@ -444,7 +527,7 @@ export default function BrandInsightPage() {
     }
   };
 
-  const loadLatestBrandPages = async (ownerUserId?: string) => {
+  const loadLatestBrandPages = async (ownerUserId?: string, currentBrand?: string) => {
     const userIdToUse = ownerUserId || pageOwnerId;
     if (!userIdToUse) return;
 
@@ -466,8 +549,7 @@ export default function BrandInsightPage() {
       });
 
       const uniqueBrands = Array.from(brandMap.values())
-        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-        .slice(0, 10);
+        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
       const brandsWithMetadata = await Promise.all(
         uniqueBrands.map(async (item) => {
@@ -493,6 +575,17 @@ export default function BrandInsightPage() {
       );
 
       setLatestBrandPages(brandsWithMetadata);
+
+      const brandNames = brandsWithMetadata.map(b => b.brand);
+      setAvailableBrands(brandNames);
+
+      if (currentBrand && brandNames.includes(currentBrand)) {
+        setSelectedBrands([currentBrand]);
+        await loadMultiBrandData(userIdToUse, [currentBrand]);
+      } else if (brandNames.length > 0) {
+        setSelectedBrands([brandNames[0]]);
+        await loadMultiBrandData(userIdToUse, [brandNames[0]]);
+      }
     } catch (error) {
       console.error('Error loading latest brand pages:', error);
     }
@@ -585,6 +678,8 @@ export default function BrandInsightPage() {
         });
 
         const avgVolume = kw['Avg. monthly searches'] || 0;
+        const brandName = kw.brand || '';
+        const brandColor = getBrandColor(brandName, availableBrands);
 
         return {
           name: kw.keyword,
@@ -593,8 +688,10 @@ export default function BrandInsightPage() {
           url: '',
           createdAt: now,
           pubDate: now,
-          category: kw.brand || '',
+          category: brandName,
           source: 'brand_keywords',
+          brand: brandName,
+          brandColor: brandColor,
           monthlySearches: monthlyVolumes.map((vol, idx) => ({
             month: monthColumns[idx],
             volume: vol
@@ -605,6 +702,7 @@ export default function BrandInsightPage() {
       console.log('BrandInsightPage - transformToTopics:', {
         keywordDataCount: keywordData.length,
         resultCount: result.length,
+        selectedBrands: selectedBrands,
         sampleData: result.slice(0, 3)
       });
       return result;
@@ -612,7 +710,7 @@ export default function BrandInsightPage() {
       console.error('Error transforming topics:', error);
       return [];
     }
-  }, [keywordData, monthColumns]);
+  }, [keywordData, monthColumns, availableBrands, selectedBrands]);
 
   const keywordPerformanceData = useMemo(() => {
     try {
@@ -1244,32 +1342,34 @@ export default function BrandInsightPage() {
   };
 
   const handleExport = async () => {
-    const brandToQuery = brandPageData?.brand;
-    if (!brandToQuery) return;
+    if (!pageOwnerId || selectedBrands.length === 0) return;
 
     try {
-      // Fetch all keywords using pagination
       let allData: any[] = [];
-      let from = 0;
-      const pageSize = 1000;
-      let hasMore = true;
 
-      while (hasMore) {
-        const { data, error } = await supabase
-          .from('brand_keyword_data')
-          .select('*')
-          .eq('brand', brandToQuery)
-          .order('keyword', { ascending: true })
-          .range(from, from + pageSize - 1);
+      for (const brand of selectedBrands) {
+        let from = 0;
+        const pageSize = 1000;
+        let hasMore = true;
 
-        if (error) throw error;
+        while (hasMore) {
+          const { data, error } = await supabase
+            .from('brand_keyword_data')
+            .select('*')
+            .eq('brand', brand)
+            .eq('user_id', pageOwnerId)
+            .order('keyword', { ascending: true })
+            .range(from, from + pageSize - 1);
 
-        if (data && data.length > 0) {
-          allData = [...allData, ...data];
-          from += pageSize;
-          hasMore = data.length === pageSize;
-        } else {
-          hasMore = false;
+          if (error) throw error;
+
+          if (data && data.length > 0) {
+            allData = [...allData, ...data];
+            from += pageSize;
+            hasMore = data.length === pageSize;
+          } else {
+            hasMore = false;
+          }
         }
       }
 
@@ -1292,7 +1392,10 @@ export default function BrandInsightPage() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `${brandToQuery}-keywords.csv`;
+      const filename = selectedBrands.length === 1
+        ? `${selectedBrands[0]}-keywords.csv`
+        : `multi-brand-keywords.csv`;
+      a.download = filename;
       a.click();
       URL.revokeObjectURL(url);
     } catch (error) {
@@ -1638,9 +1741,20 @@ export default function BrandInsightPage() {
                         <ArrowLeft className="w-4 h-4" />
                         Back to Insights
                       </button>
-                      <h1 className={`text-lg md:text-3xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                        {brandPageData.meta_title}
-                      </h1>
+                      <div className="flex items-center gap-4 flex-wrap">
+                        <h1 className={`text-lg md:text-3xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                          {selectedBrands.length === 1 ? brandPageData.meta_title : 'Multi-Brand Keyword Insights'}
+                        </h1>
+                        {availableBrands.length > 1 && (
+                          <BrandSelector
+                            availableBrands={availableBrands}
+                            selectedBrands={selectedBrands}
+                            onSelectionChange={setSelectedBrands}
+                            theme={theme}
+                            disabled={loading}
+                          />
+                        )}
+                      </div>
                     </div>
                     {(viewMode === 'bubble' || viewMode === 'bar' || viewMode === 'treemap' || viewMode === 'donut') && transformToTopics.length > 0 && (
                       <div className="flex items-center gap-2">

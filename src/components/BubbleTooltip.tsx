@@ -295,18 +295,26 @@ function BubbleTooltip({
                   {rank}
                 </div>
                 <div className="flex items-center justify-between flex-1 gap-2">
-                  <h3 className={`font-bold text-lg ${
-                    theme === 'dark' ? 'text-white' : 'text-gray-900'
-                  }`}>
-                    {topic.name.replace(/"/g, '')}
-                  </h3>
-                  {topic.category && (
-                    <span className={`text-lg ${
-                      theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                  <div className="flex flex-col gap-1 flex-1 min-w-0">
+                    <h3 className={`font-bold text-lg ${
+                      theme === 'dark' ? 'text-white' : 'text-gray-900'
                     }`}>
-                      {topic.category}
-                    </span>
-                  )}
+                      {topic.name.replace(/"/g, '')}
+                    </h3>
+                    {topic.brand && (
+                      <div className="flex items-center gap-2">
+                        <div
+                          className="w-3 h-3 rounded-full flex-shrink-0"
+                          style={{ backgroundColor: topic.brandColor || '#3B82F6' }}
+                        />
+                        <span className={`text-sm font-medium ${
+                          theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                        }`}>
+                          {topic.brand}
+                        </span>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
 
