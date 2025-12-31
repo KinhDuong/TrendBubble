@@ -2220,35 +2220,6 @@ export default function BrandInsightPage() {
                 </div>
               )}
 
-              {keywordData.length > 0 && pageOwnerId && (
-                <SEOStrategyInsights
-                  brandName={brandPageData?.brand || decodedBrand}
-                  theme={theme}
-                  userId={pageOwnerId}
-                  isOwner={user ? (user.id === pageOwnerId || isAdmin) : false}
-                />
-              )}
-
-              {keywordData.length > 0 && pageOwnerId && brandName && (
-                <PPCCampaignInsights
-                  brandPageSlug={brandName}
-                  brandName={brandPageData?.brand || decodedBrand}
-                  theme={theme}
-                  userId={pageOwnerId}
-                  isOwner={user ? (user.id === pageOwnerId || isAdmin) : false}
-                />
-              )}
-
-              {keywordData.length > 0 && (
-                <div className="max-w-7xl mx-auto mt-8 px-2 md:px-0">
-                  <AdvertisingRecommendations
-                    keywordData={keywordData}
-                    brandName={brandPageData?.brand || decodedBrand}
-                    theme={theme}
-                  />
-                </div>
-              )}
-
               {keywordData.length > 0 && (
                 <div className="max-w-7xl mx-auto mt-8 px-2 md:px-0">
                   <div className={`rounded-lg p-6 ${theme === 'dark' ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-200'}`}>
@@ -2482,6 +2453,35 @@ export default function BrandInsightPage() {
                     )}
                     </div>
                   </div>
+                </div>
+              )}
+
+              {keywordData.length > 0 && pageOwnerId && (
+                <SEOStrategyInsights
+                  brandName={brandPageData?.brand || decodedBrand}
+                  theme={theme}
+                  userId={pageOwnerId}
+                  isOwner={user ? (user.id === pageOwnerId || isAdmin) : false}
+                />
+              )}
+
+              {keywordData.length > 0 && pageOwnerId && brandName && (
+                <PPCCampaignInsights
+                  brandPageSlug={brandName}
+                  brandName={brandPageData?.brand || decodedBrand}
+                  theme={theme}
+                  userId={pageOwnerId}
+                  isOwner={user ? (user.id === pageOwnerId || isAdmin) : false}
+                />
+              )}
+
+              {keywordData.length > 0 && (
+                <div className="max-w-7xl mx-auto mt-8 px-2 md:px-0">
+                  <AdvertisingRecommendations
+                    keywordData={keywordData}
+                    brandName={brandPageData?.brand || decodedBrand}
+                    theme={theme}
+                  />
                 </div>
               )}
 
