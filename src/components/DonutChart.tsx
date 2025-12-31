@@ -1,6 +1,7 @@
 import { TrendingTopic } from '../types';
 import { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
+import { formatCompactNumber } from '../utils/formatNumber';
 
 interface DonutChartProps {
   topics: TrendingTopic[];

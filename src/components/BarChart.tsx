@@ -1,6 +1,7 @@
 import { TrendingTopic } from '../types';
 import { useEffect, useRef, useState } from 'react';
 import BubbleTooltip from './BubbleTooltip';
+import { formatCompactNumber } from '../utils/formatNumber';
 
 interface KeywordPerformanceData {
   keyword: string;

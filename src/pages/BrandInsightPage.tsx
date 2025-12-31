@@ -22,6 +22,7 @@ import SEOStrategyInsights from '../components/SEOStrategyInsights';
 import PPCCampaignInsights from '../components/PPCCampaignInsights';
 import { TrendingTopic, FAQ } from '../types';
 import { TrendingUp, Download, ArrowLeft, Search, X, ChevronsLeft, ChevronsRight, ArrowUpDown, ArrowUp, ArrowDown, Sparkles, AlertCircle } from 'lucide-react';
+import { formatCompactNumber } from '../utils/formatNumber';
 
 type SortField = 'name' | 'searchVolume' | 'rank' | 'month' | 'threeMonth' | 'yoy';
 type SortDirection = 'asc' | 'desc';
@@ -588,7 +589,7 @@ export default function BrandInsightPage() {
         return {
           name: kw.keyword,
           searchVolume: avgVolume,
-          searchVolumeRaw: avgVolume.toLocaleString(),
+          searchVolumeRaw: formatCompactNumber(avgVolume),
           url: '',
           createdAt: now,
           pubDate: now,

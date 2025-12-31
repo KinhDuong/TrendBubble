@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import { TrendingTopic, CryptoTimeframe } from '../types';
 import BubbleTooltip from './BubbleTooltip';
+import { formatCompactNumber } from '../utils/formatNumber';
 
 interface KeywordPerformanceData {
   keyword: string;
