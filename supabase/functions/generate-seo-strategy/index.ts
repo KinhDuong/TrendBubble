@@ -696,7 +696,7 @@ Use current 2025 SEO best practices. Be EXTREMELY specific and actionable, avoid
           }
         ],
         temperature: 0.7,
-        max_tokens: 8000,
+        max_tokens: 16000,
       }),
     });
 

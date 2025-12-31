@@ -230,19 +230,25 @@ export default function SEOStrategyInsights({ brandName, theme, userId, isOwner 
     const analyses: string[] = [];
     const lines = content.split('\n');
     let currentAnalysis = '';
+    let foundFirstKeyword = false;
 
     for (const line of lines) {
       // Match lines starting with ### followed by a number and a dot
       if (line.match(/^###\s+\d+\./)) {
-        if (currentAnalysis.trim()) {
+        // If we've already found a keyword, save the previous one
+        if (foundFirstKeyword && currentAnalysis.trim()) {
           analyses.push(currentAnalysis.trim());
         }
+        // Mark that we've found the first keyword and start new analysis
+        foundFirstKeyword = true;
         currentAnalysis = line + '\n';
-      } else {
+      } else if (foundFirstKeyword) {
+        // Only accumulate content after we've found the first keyword heading
         currentAnalysis += line + '\n';
       }
+      // Skip any content before the first ### keyword heading
     }
-    if (currentAnalysis.trim()) {
+    if (foundFirstKeyword && currentAnalysis.trim()) {
       analyses.push(currentAnalysis.trim());
     }
 
