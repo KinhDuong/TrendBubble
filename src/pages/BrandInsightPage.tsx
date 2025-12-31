@@ -283,7 +283,7 @@ export default function BrandInsightPage() {
         .select('*')
         .eq('brand', brandToQuery)
         .eq('user_id', userIdToUse)
-        .limit(5000);
+        .limit(10000);
 
       if (error) throw error;
 
@@ -1208,7 +1208,7 @@ export default function BrandInsightPage() {
         .select('*')
         .eq('brand', brandToQuery)
         .order('keyword', { ascending: true })
-        .limit(5000);
+        .limit(10000);
 
       if (error) throw error;
 

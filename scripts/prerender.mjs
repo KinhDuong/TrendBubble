@@ -1564,7 +1564,7 @@ async function prerenderBrandInsightPages(baseHTML, distPath) {
       .eq('user_id', brandPage.user_id)
       .eq('brand', brandPage.brand)
       .order('"Avg. monthly searches"', { ascending: false })
-      .limit(1000);
+      .limit(10000);
 
     if (keywordError) {
       console.error(`Error fetching keyword data for ${brandPage.brand}:`, keywordError);
