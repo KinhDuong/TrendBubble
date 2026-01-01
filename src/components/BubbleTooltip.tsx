@@ -11,6 +11,7 @@ interface KeywordPerformanceData {
   monthly_searches?: number[];
   bid_high?: number;
   competition?: string | number;
+  competition_indexed?: number;
   searchVolume?: number;
   ai_insights?: string;
   sentiment?: number;
@@ -202,11 +203,26 @@ function BubbleTooltip({
     return 'text-red-500';
   };
 
-  const formatCompetition = (comp: string | number | undefined) => {
+  const formatCompetition = (comp: string | number | undefined, indexedValue?: number) => {
     if (comp === undefined || comp === null) return 'N/A';
+
+    let level: string;
     const numValue = typeof comp === 'number' ? comp : parseFloat(comp);
-    if (isNaN(numValue)) return comp?.toString() || 'N/A';
-    return numValue.toFixed(2);
+
+    if (isNaN(numValue)) {
+      level = comp?.toString() || 'N/A';
+    } else {
+      if (numValue >= 0.7) level = 'High';
+      else if (numValue >= 0.4) level = 'Medium';
+      else level = 'Low';
+    }
+
+    if (indexedValue !== undefined && indexedValue !== null) {
+      const indexed = Math.round(indexedValue);
+      return `${level} ${indexed}/100`;
+    }
+
+    return level;
   };
 
   const getCompetitionColor = (comp: string | number | undefined) => {
@@ -417,7 +433,7 @@ function BubbleTooltip({
                       </span>
                     </div>
                     <p className={`text-base font-bold ${getCompetitionColor(keywordData.competition)}`}>
-                      {formatCompetition(keywordData.competition)}
+                      {formatCompetition(keywordData.competition, keywordData.competition_indexed)}
                     </p>
                   </div>
 
@@ -705,7 +721,7 @@ function BubbleTooltip({
                   </span>
                 </div>
                 <p className={`text-lg font-bold ${getCompetitionColor(keywordData.competition)}`}>
-                  {formatCompetition(keywordData.competition)}
+                  {formatCompetition(keywordData.competition, keywordData.competition_indexed)}
                 </p>
               </div>
 

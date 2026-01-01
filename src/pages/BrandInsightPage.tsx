@@ -755,6 +755,7 @@ export default function BrandInsightPage() {
           monthly_searches: monthlySearches,
           bid_high: kw['Top of page bid (high range)'],
           competition: kw.competition,
+          competition_indexed: kw['Competition (indexed value)'],
           searchVolume: kw['Avg. monthly searches'] || 0,
           ai_insights: kw.ai_insights,
           sentiment: kw.sentiment,
