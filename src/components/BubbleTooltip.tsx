@@ -303,10 +303,10 @@ function BubbleTooltip({
                       {topic.name.replace(/"/g, '')}
                     </h3>
                     {keywordData?.search_variants && (
-                      <p className={`text-xs leading-relaxed ${
+                      <p className={`text-sm leading-relaxed ${
                         theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
                       }`}>
-                        <span className="font-semibold text-sm">Search Variants: </span>
+                        <span className="font-semibold">Search Variants: </span>
                         {keywordData.search_variants}
                       </p>
                     )}
@@ -545,10 +545,10 @@ function BubbleTooltip({
                   {topic.name.replace(/"/g, '')}
                 </h3>
                 {keywordData?.search_variants && (
-                  <p className={`text-xs leading-relaxed mt-1 ${
+                  <p className={`text-sm leading-relaxed mt-1 ${
                     theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
                   }`}>
-                    <span className="font-semibold text-sm">Search Variants: </span>
+                    <span className="font-semibold">Search Variants: </span>
                     {keywordData.search_variants}
                   </p>
                 )}
