@@ -365,7 +365,7 @@ function BubbleTooltip({
                     <div className="flex items-center gap-2 mb-1">
                       <TrendingUp size={14} className="text-blue-500" />
                       <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                        Search Volume
+                        Search
                       </span>
                     </div>
                     <p className={`text-base font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
@@ -377,7 +377,7 @@ function BubbleTooltip({
                     <div className="flex items-center gap-2 mb-1">
                       <TrendingUp size={14} className="text-blue-500" />
                       <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                        3-Month Change
+                        3-M Change
                       </span>
                     </div>
                     <p className={`text-base font-bold ${getChangeColor(keywordData.three_month_change)}`}>
@@ -413,7 +413,7 @@ function BubbleTooltip({
                     <div className="flex items-center gap-2 mb-1">
                       <Target size={14} className="text-orange-500" />
                       <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                        Competition
+                        Keyword Comp.
                       </span>
                     </div>
                     <p className={`text-base font-bold ${getCompetitionColor(keywordData.competition)}`}>
@@ -653,7 +653,7 @@ function BubbleTooltip({
                 <div className="flex items-center gap-2 mb-1">
                   <TrendingUp size={14} className="text-blue-500" />
                   <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                    Search Volume
+                    Search
                   </span>
                 </div>
                 <p className={`text-lg font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
@@ -665,7 +665,7 @@ function BubbleTooltip({
                 <div className="flex items-center gap-2 mb-1">
                   <TrendingUp size={14} className="text-blue-500" />
                   <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                    3-Month Change
+                    3-M Change
                   </span>
                 </div>
                 <p className={`text-lg font-bold ${getChangeColor(keywordData.three_month_change)}`}>
@@ -701,7 +701,7 @@ function BubbleTooltip({
                 <div className="flex items-center gap-2 mb-1">
                   <Target size={14} className="text-orange-500" />
                   <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                    Competition
+                    Keyword Comp.
                   </span>
                 </div>
                 <p className={`text-lg font-bold ${getCompetitionColor(keywordData.competition)}`}>
