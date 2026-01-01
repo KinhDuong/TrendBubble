@@ -2344,7 +2344,7 @@ export default function BrandInsightPage() {
                             <KeywordChart data={monthlyData} selectedBrand={brandPageData?.brand || null} />
                           </div>
 
-                          {/* Overall Sentiment Section */}
+                          {/* Sentiment Section */}
                           <div className="lg:col-span-1">
                             {(() => {
                               const keywordsWithSentiment = keywordData.filter(kw => kw.sentiment !== null && kw.sentiment !== undefined);
@@ -2359,34 +2359,96 @@ export default function BrandInsightPage() {
                                 );
                               }
 
+                              const getSentimentLabel = (percentage: number) => {
+                                if (percentage >= 70) return { label: 'Positive', emoji: '🤩' };
+                                if (percentage >= 55) return { label: 'Somewhat Positive', emoji: '😊' };
+                                if (percentage >= 45) return { label: 'Neutral', emoji: '😐' };
+                                if (percentage >= 30) return { label: 'Somewhat Negative', emoji: '😕' };
+                                return { label: 'Negative', emoji: '😢' };
+                              };
+
+                              const getSentimentColor = (percentage: number) => {
+                                if (percentage >= 70) return 'bg-green-500';
+                                if (percentage >= 55) return 'bg-green-400';
+                                if (percentage >= 45) return 'bg-yellow-400';
+                                if (percentage >= 30) return 'bg-orange-400';
+                                return 'bg-red-500';
+                              };
+
+                              if (selectedBrands.length > 1) {
+                                const brandSentiments = selectedBrands.map(brandName => {
+                                  const brandKeywords = keywordsWithSentiment.filter(kw => kw.brand === brandName);
+                                  if (brandKeywords.length === 0) return null;
+
+                                  const avgSentiment = brandKeywords.reduce((sum, kw) => sum + kw.sentiment, 0) / brandKeywords.length;
+                                  const percentage = Math.round(((avgSentiment + 1) / 2) * 100);
+                                  const sentiment = getSentimentLabel(percentage);
+                                  const brandColor = getBrandColor(brandName, availableBrands);
+
+                                  return {
+                                    brand: brandName,
+                                    percentage,
+                                    sentiment,
+                                    count: brandKeywords.length,
+                                    color: brandColor
+                                  };
+                                }).filter(Boolean);
+
+                                return (
+                                  <div className={`${theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-50'} rounded-lg p-4 h-full flex flex-col`}>
+                                    <h3 className={`text-base font-semibold mb-3 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                                      Brand Sentiment
+                                    </h3>
+                                    <div className="space-y-3 flex-1 overflow-y-auto">
+                                      {brandSentiments.map((bs) => (
+                                        <div key={bs.brand} className={`p-3 rounded-lg ${theme === 'dark' ? 'bg-gray-800/50' : 'bg-white'}`}>
+                                          <div className="flex items-center gap-2 mb-2">
+                                            <div
+                                              className="w-3 h-3 rounded-full flex-shrink-0"
+                                              style={{ backgroundColor: bs.color }}
+                                            />
+                                            <span className={`text-xs font-semibold truncate ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                                              {bs.brand}
+                                            </span>
+                                            <span className="text-lg ml-auto">{bs.sentiment.emoji}</span>
+                                          </div>
+                                          <div className="flex items-center gap-2 mb-1">
+                                            <div className="flex-1">
+                                              <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                                                <div
+                                                  className={`h-full transition-all ${getSentimentColor(bs.percentage)}`}
+                                                  style={{ width: `${bs.percentage}%` }}
+                                                />
+                                              </div>
+                                            </div>
+                                            <span className={`text-xs font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                                              {bs.percentage}%
+                                            </span>
+                                          </div>
+                                          <div className="flex items-center justify-between">
+                                            <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                                              {bs.sentiment.label}
+                                            </span>
+                                            <span className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>
+                                              {bs.count} keyword{bs.count !== 1 ? 's' : ''}
+                                            </span>
+                                          </div>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                );
+                              }
+
                               const avgSentiment = keywordsWithSentiment.reduce((sum, kw) => sum + kw.sentiment, 0) / keywordsWithSentiment.length;
                               const sentimentPercentage = Math.round(((avgSentiment + 1) / 2) * 100);
-
-                              let sentimentLabel = 'Neutral';
-                              let sentimentEmoji = '😐';
-
-                              if (sentimentPercentage >= 70) {
-                                sentimentLabel = 'Positive';
-                                sentimentEmoji = '🤩';
-                              } else if (sentimentPercentage >= 55) {
-                                sentimentLabel = 'Somewhat Positive';
-                                sentimentEmoji = '😊';
-                              } else if (sentimentPercentage >= 45) {
-                                sentimentLabel = 'Neutral';
-                                sentimentEmoji = '😐';
-                              } else if (sentimentPercentage >= 30) {
-                                sentimentLabel = 'Somewhat Negative';
-                                sentimentEmoji = '😕';
-                              } else {
-                                sentimentLabel = 'Negative';
-                                sentimentEmoji = '😢';
-                              }
+                              const sentimentInfo = getSentimentLabel(sentimentPercentage);
 
                               return (
                                 <div className={`${theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-50'} rounded-lg p-6 h-full flex flex-col justify-center`}>
                                   <div className="mb-4">
                                     <h3 className={`text-lg font-semibold mb-1 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                                      {sentimentEmoji} Sentiment
+                                      {sentimentInfo.emoji} Sentiment
                                     </h3>
                                     <p className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
                                       Average across {keywordsWithSentiment.length} keyword{keywordsWithSentiment.length !== 1 ? 's' : ''}
@@ -2397,13 +2459,7 @@ export default function BrandInsightPage() {
                                     <div className="flex-1">
                                       <div className="w-full h-8 bg-gray-200 rounded-full overflow-hidden">
                                         <div
-                                          className={`h-full transition-all ${
-                                            sentimentPercentage >= 70 ? 'bg-green-500' :
-                                            sentimentPercentage >= 55 ? 'bg-green-400' :
-                                            sentimentPercentage >= 45 ? 'bg-yellow-400' :
-                                            sentimentPercentage >= 30 ? 'bg-orange-400' :
-                                            'bg-red-500'
-                                          }`}
+                                          className={`h-full transition-all ${getSentimentColor(sentimentPercentage)}`}
                                           style={{ width: `${sentimentPercentage}%` }}
                                         />
                                       </div>
@@ -2413,7 +2469,7 @@ export default function BrandInsightPage() {
                                         {sentimentPercentage}%
                                       </div>
                                       <div className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                                        {sentimentLabel}
+                                        {sentimentInfo.label}
                                       </div>
                                     </div>
                                   </div>
