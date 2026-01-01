@@ -432,7 +432,7 @@ function BubbleTooltip({
                         Keyword Comp.
                       </span>
                     </div>
-                    <p className={`text-base font-bold ${getCompetitionColor(keywordData.competition)}`}>
+                    <p className={`text-base font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                       {formatCompetition(keywordData.competition, keywordData.competition_indexed)}
                     </p>
                   </div>
@@ -720,7 +720,7 @@ function BubbleTooltip({
                     Keyword Comp.
                   </span>
                 </div>
-                <p className={`text-lg font-bold ${getCompetitionColor(keywordData.competition)}`}>
+                <p className={`text-lg font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                   {formatCompetition(keywordData.competition, keywordData.competition_indexed)}
                 </p>
               </div>
