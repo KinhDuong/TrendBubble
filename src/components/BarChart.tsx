@@ -2,6 +2,7 @@ import { TrendingTopic } from '../types';
 import { useEffect, useRef, useState } from 'react';
 import BubbleTooltip from './BubbleTooltip';
 import { formatCompactNumber } from '../utils/formatNumber';
+import { getBrandColor } from './BrandSelector';
 
 interface KeywordPerformanceData {
   keyword: string;
@@ -22,6 +23,8 @@ interface BarChartProps {
   useCryptoColors?: boolean;
   cryptoTimeframe?: '1h' | '24h' | '7d' | '30d' | '1y';
   keywordPerformanceData?: KeywordPerformanceData[];
+  selectedBrands?: string[];
+  availableBrands?: string[];
 }
 
 interface TooltipData {
@@ -37,7 +40,9 @@ export default function BarChart({
   theme,
   useCryptoColors = false,
   cryptoTimeframe = '24h',
-  keywordPerformanceData = []
+  keywordPerformanceData = [],
+  selectedBrands = [],
+  availableBrands = []
 }: BarChartProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
@@ -134,6 +139,11 @@ export default function BarChart({
       if (change > 0) return theme === 'dark' ? '#10b981' : '#059669';
       if (change < 0) return theme === 'dark' ? '#ef4444' : '#dc2626';
       return theme === 'dark' ? '#6b7280' : '#9ca3af';
+    }
+
+    const useMultiBrandColors = selectedBrands.length > 1 && availableBrands.length > 0;
+    if (useMultiBrandColors && topic.brand) {
+      return getBrandColor(topic.brand, availableBrands);
     }
 
     const hue = (index * 360) / maxDisplay;

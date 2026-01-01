@@ -1970,6 +1970,8 @@ export default function BrandInsightPage() {
                             useCryptoColors={false}
                             cryptoTimeframe="24h"
                             keywordPerformanceData={keywordPerformanceData}
+                            selectedBrands={selectedBrands}
+                            availableBrands={availableBrands}
                           />
                         </div>
                       )}
