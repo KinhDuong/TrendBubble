@@ -14,6 +14,7 @@ interface KeywordPerformanceData {
   searchVolume?: number;
   ai_insights?: string;
   sentiment?: number;
+  search_variants?: string;
 }
 
 interface BubbleTooltipProps {
@@ -301,6 +302,13 @@ function BubbleTooltip({
                     }`}>
                       {topic.name.replace(/"/g, '')}
                     </h3>
+                    {keywordData?.search_variants && (
+                      <p className={`text-xs leading-relaxed ${
+                        theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                      }`}>
+                        {keywordData.search_variants}
+                      </p>
+                    )}
                     {topic.brand && (
                       <div className="flex items-center gap-2">
                         <div
@@ -531,9 +539,18 @@ function BubbleTooltip({
               {rank}
             </div>
             <div className="flex items-center justify-between flex-1 gap-2">
-              <h3 className={`font-bold text-lg ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                {topic.name.replace(/"/g, '')}
-              </h3>
+              <div className="flex-1">
+                <h3 className={`font-bold text-lg ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                  {topic.name.replace(/"/g, '')}
+                </h3>
+                {keywordData?.search_variants && (
+                  <p className={`text-xs leading-relaxed mt-1 ${
+                    theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                  }`}>
+                    {keywordData.search_variants}
+                  </p>
+                )}
+              </div>
               {topic.category && (
                 <span className={`text-lg ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
                   {topic.category}

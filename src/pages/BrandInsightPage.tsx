@@ -757,7 +757,8 @@ export default function BrandInsightPage() {
           competition: kw.competition,
           searchVolume: kw['Avg. monthly searches'] || 0,
           ai_insights: kw.ai_insights,
-          sentiment: kw.sentiment
+          sentiment: kw.sentiment,
+          search_variants: kw.search_variants
         };
       });
       console.log('BrandInsightPage - keywordPerformanceData sample:', result.slice(0, 5));
