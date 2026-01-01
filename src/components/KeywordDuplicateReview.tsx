@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, AlertTriangle, Copy, TrendingDown, CheckCircle } from 'lucide-react';
+import { X, AlertTriangle, Copy, TrendingDown, ArrowRight } from 'lucide-react';
 
 interface DuplicateGroup {
   id: string;
@@ -37,11 +37,11 @@ export default function KeywordDuplicateReview({
     new Set(zeroTrafficKeywords.map(k => k.keyword))
   );
 
-  // Initialize all duplicate groups to "keep all"
+  // Initialize all duplicate groups with first keyword auto-selected
   useEffect(() => {
     const initial: Record<string, string | null> = {};
     duplicateGroups.forEach(group => {
-      initial[group.id] = null; // null = keep all
+      initial[group.id] = group.keywords[0]; // Auto-select first keyword
     });
     setSelectedKeywords(initial);
   }, [duplicateGroups]);
@@ -76,15 +76,12 @@ export default function KeywordDuplicateReview({
   const handleContinue = () => {
     let filtered = [...allData];
 
-    // Filter out non-selected duplicates
+    // Filter out non-selected duplicates (always keep only selected keyword)
     duplicateGroups.forEach(group => {
       const selected = selectedKeywords[group.id];
-      if (selected !== null) {
-        // Keep only the selected keyword, remove others in the group
-        const toRemove = group.keywords.filter(k => k !== selected);
-        filtered = filtered.filter(record => !toRemove.includes(record.keyword));
-      }
-      // If selected is null, keep all (do nothing)
+      // Keep only the selected keyword, remove others in the group
+      const toRemove = group.keywords.filter(k => k !== selected);
+      filtered = filtered.filter(record => !toRemove.includes(record.keyword));
     });
 
     // Filter out excluded zero-traffic keywords
@@ -123,9 +120,9 @@ export default function KeywordDuplicateReview({
             <div className="flex items-start gap-3">
               <AlertTriangle className={`w-5 h-5 ${theme === 'dark' ? 'text-yellow-400' : 'text-yellow-600'} mt-0.5 flex-shrink-0`} />
               <div className={`text-sm ${theme === 'dark' ? 'text-yellow-300' : 'text-yellow-800'}`}>
-                <p className="font-semibold mb-1">Found {totalIssues} data quality issue{totalIssues !== 1 ? 's' : ''}</p>
+                <p className="font-semibold mb-1">Found {totalIssues} duplicate group{totalIssues !== 1 ? 's' : ''}</p>
                 <p>
-                  Review the issues below and choose how to handle them. You can select specific keywords to keep or exclude low-quality data before uploading.
+                  Review the duplicate keywords below. The first option in each group is auto-selected. Adjust your selections if needed, then click "Next" to proceed to the merge review step.
                 </p>
               </div>
             </div>
@@ -153,11 +150,11 @@ export default function KeywordDuplicateReview({
                   <div className="mb-3">
                     <span className="font-semibold">Group {group.id}</span>
                     <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} mt-1`}>
-                      These keywords have identical search data. Select which one to keep, or keep all as separate entries.
+                      These keywords have identical search data. Select which one to keep.
                     </p>
                   </div>
 
-                  <div className="space-y-2 mb-3">
+                  <div className="space-y-2">
                     {group.keywords.map((keyword) => (
                       <label
                         key={keyword}
@@ -179,30 +176,14 @@ export default function KeywordDuplicateReview({
                           className="w-4 h-4 text-blue-600"
                         />
                         <span className="flex-1">{keyword}</span>
+                        {selectedKeywords[group.id] === keyword && (
+                          <span className={`text-xs font-medium ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`}>
+                            SELECTED
+                          </span>
+                        )}
                       </label>
                     ))}
                   </div>
-
-                  <label
-                    className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors ${
-                      selectedKeywords[group.id] === null
-                        ? theme === 'dark'
-                          ? 'bg-blue-900/30 border-2 border-blue-500'
-                          : 'bg-blue-50 border-2 border-blue-500'
-                        : theme === 'dark'
-                        ? 'bg-gray-700/50 border-2 border-transparent hover:bg-gray-700'
-                        : 'bg-white border-2 border-gray-200 hover:bg-gray-50'
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      name={`duplicate-group-${group.id}`}
-                      checked={selectedKeywords[group.id] === null}
-                      onChange={() => handleDuplicateSelection(group.id, null)}
-                      className="w-4 h-4 text-blue-600"
-                    />
-                    <span className="flex-1 font-medium">Keep all as separate keywords</span>
-                  </label>
 
                   <div className={`mt-3 text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} p-3 rounded ${theme === 'dark' ? 'bg-gray-900/50' : 'bg-gray-100'}`}>
                     <div className="font-semibold mb-1">Shared data:</div>
@@ -298,9 +279,7 @@ export default function KeywordDuplicateReview({
         {/* Footer */}
         <div className={`flex items-center justify-between p-6 border-t ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
           <div className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-            {duplicateGroups.length > 0 && (
-              <span>Review {duplicateGroups.length} duplicate group{duplicateGroups.length !== 1 ? 's' : ''}</span>
-            )}
+            <span>Step 1: Review Duplicates</span>
           </div>
           <div className="flex gap-3">
             <button
@@ -315,17 +294,14 @@ export default function KeywordDuplicateReview({
             </button>
             <button
               onClick={handleContinue}
-              className={`px-6 py-2 rounded-lg transition-colors flex items-center gap-2 ${
+              className={`px-8 py-2.5 rounded-lg transition-colors flex items-center gap-2 font-medium ${
                 theme === 'dark'
                   ? 'bg-blue-600 hover:bg-blue-700 text-white'
                   : 'bg-blue-600 hover:bg-blue-700 text-white'
               }`}
             >
-              <CheckCircle className="w-4 h-4" />
-              Continue with {allData.length - duplicateGroups.reduce((sum, g) => {
-                const selected = selectedKeywords[g.id];
-                return sum + (selected !== null ? g.keywords.length - 1 : 0);
-              }, 0)} keywords
+              Next
+              <ArrowRight className="w-5 h-5" />
             </button>
           </div>
         </div>
