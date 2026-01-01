@@ -293,38 +293,59 @@ export default function BrandInsightPage() {
       setPageOwnerTier(ownerTier);
 
       const keywordLimit = getKeywordLimit(ownerTier);
+      const effectiveLimit = keywordLimit === -1 ? Number.MAX_SAFE_INTEGER : keywordLimit;
 
-      const keywordDataPromises = brands.map(brand =>
-        supabase
-          .from('brand_keyword_data')
-          .select('*', { count: 'exact', head: false })
-          .eq('brand', brand)
-          .eq('user_id', ownerUserId)
-      );
-
-      const keywordResults = await Promise.all(keywordDataPromises);
       const allKeywordData: any[] = [];
       let totalCount = 0;
 
-      for (const result of keywordResults) {
-        if (result.data) {
-          allKeywordData.push(...result.data);
+      for (const brand of brands) {
+        const { count, error: countError } = await supabase
+          .from('brand_keyword_data')
+          .select('*', { count: 'exact', head: true })
+          .eq('brand', brand)
+          .eq('user_id', ownerUserId);
+
+        if (countError) throw countError;
+        totalCount += count || 0;
+
+        let brandData: any[] = [];
+        let from = 0;
+        const pageSize = 1000;
+        let hasMore = true;
+        const remainingSlots = effectiveLimit - allKeywordData.length;
+
+        while (hasMore && brandData.length < remainingSlots) {
+          const fetchSize = Math.min(pageSize, remainingSlots - brandData.length);
+
+          const { data, error } = await supabase
+            .from('brand_keyword_data')
+            .select('*')
+            .eq('brand', brand)
+            .eq('user_id', ownerUserId)
+            .range(from, from + fetchSize - 1);
+
+          if (error) throw error;
+
+          if (data && data.length > 0) {
+            brandData = [...brandData, ...data];
+            from += fetchSize;
+            hasMore = data.length === fetchSize && brandData.length < remainingSlots;
+          } else {
+            hasMore = false;
+          }
+        }
+
+        allKeywordData.push(...brandData);
+
+        if (allKeywordData.length >= effectiveLimit) {
+          break;
         }
       }
 
-      const effectiveLimit = keywordLimit === -1 ? Number.MAX_SAFE_INTEGER : keywordLimit;
-      const limitedKeywordData = allKeywordData.slice(0, effectiveLimit);
-
-      keywordResults.forEach(result => {
-        if (result.count !== null) {
-          totalCount += result.count;
-        }
-      });
-
       setTotalKeywordCount(totalCount);
-      setKeywordData(limitedKeywordData);
+      setKeywordData(allKeywordData);
 
-      console.log(`Loaded ${limitedKeywordData.length} keywords for ${brands.length} brand(s) (Tier ${ownerTier}, Limit: ${keywordLimit === -1 ? 'Unlimited' : keywordLimit}, Total: ${totalCount})`);
+      console.log(`Loaded ${allKeywordData.length} keywords for ${brands.length} brand(s) (Tier ${ownerTier}, Limit: ${keywordLimit === -1 ? 'Unlimited' : keywordLimit}, Total: ${totalCount})`);
     } catch (error) {
       console.error('Error loading multi-brand data:', error);
       setMonthlyData([]);
