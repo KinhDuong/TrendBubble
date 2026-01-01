@@ -306,6 +306,7 @@ function BubbleTooltip({
                       <p className={`text-xs leading-relaxed ${
                         theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
                       }`}>
+                        <span className="font-semibold">Search Variants: </span>
                         {keywordData.search_variants}
                       </p>
                     )}
@@ -547,6 +548,7 @@ function BubbleTooltip({
                   <p className={`text-xs leading-relaxed mt-1 ${
                     theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
                   }`}>
+                    <span className="font-semibold">Search Variants: </span>
                     {keywordData.search_variants}
                   </p>
                 )}
