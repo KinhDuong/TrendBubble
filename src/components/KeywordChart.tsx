@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import * as d3 from 'd3';
+import { getBrandColor } from './BrandSelector';
 
 interface MonthlyData {
   brand: string;
@@ -11,37 +12,25 @@ interface MonthlyData {
 
 interface KeywordChartProps {
   data: MonthlyData[];
-  selectedBrand: string | null;
+  selectedBrands: string[];
+  availableBrands: string[];
 }
 
-export default function KeywordChart({ data, selectedBrand }: KeywordChartProps) {
+export default function KeywordChart({ data, selectedBrands, availableBrands }: KeywordChartProps) {
   const trendRef = useRef<SVGSVGElement>(null);
-  const keywordsRef = useRef<SVGSVGElement>(null);
 
   useEffect(() => {
     if (!data.length || !trendRef.current) return;
 
-    const filteredData = selectedBrand
-      ? data.filter(d => d.brand === selectedBrand)
+    const filteredData = selectedBrands.length > 0
+      ? data.filter(d => selectedBrands.includes(d.brand))
       : data;
 
     if (!filteredData.length) return;
 
     drawTrendChart(filteredData);
-  }, [data, selectedBrand]);
+  }, [data, selectedBrands, availableBrands]);
 
-  useEffect(() => {
-    if (!data.length || !keywordsRef.current || !selectedBrand) return;
-
-    const brandData = data.filter(d => d.brand === selectedBrand);
-    if (!brandData.length) return;
-
-    const latestMonth = brandData.sort((a, b) =>
-      new Date(b.month).getTime() - new Date(a.month).getTime()
-    )[0];
-
-    drawKeywordsChart(latestMonth.top_keywords);
-  }, [data, selectedBrand]);
 
   const drawTrendChart = (chartData: MonthlyData[]) => {
     const svg = d3.select(trendRef.current);
@@ -73,8 +62,6 @@ export default function KeywordChart({ data, selectedBrand }: KeywordChartProps)
       .nice()
       .range([height, 0]);
 
-    const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
-
     g.append('g')
       .attr('transform', `translate(0,${height})`)
       .call(d3.axisBottom(x).ticks(6))
@@ -96,11 +83,13 @@ export default function KeywordChart({ data, selectedBrand }: KeywordChartProps)
         parseDate(a.month).getTime() - parseDate(b.month).getTime()
       );
 
+      const brandColor = getBrandColor(brand, availableBrands);
+
       g.append('path')
         .datum(sortedData)
         .attr('fill', 'none')
-        .attr('stroke', colorScale(brand))
-        .attr('stroke-width', 2)
+        .attr('stroke', brandColor)
+        .attr('stroke-width', 2.5)
         .attr('d', line);
 
       g.selectAll(`.dot-${brand.replace(/\s/g, '-')}`)
@@ -111,95 +100,39 @@ export default function KeywordChart({ data, selectedBrand }: KeywordChartProps)
         .attr('cx', d => x(parseDate(d.month)))
         .attr('cy', d => y(d.total_volume))
         .attr('r', 4)
-        .attr('fill', colorScale(brand))
+        .attr('fill', brandColor)
         .append('title')
         .text(d => `${brand}\n${d.month}\n${d.total_volume.toLocaleString()} searches`);
     });
 
-    const legend = g.append('g')
-      .attr('transform', `translate(${width - 100}, 0)`);
+    if (groupedByBrand.size > 1) {
+      const legend = g.append('g')
+        .attr('transform', `translate(${width - 120}, 10)`);
 
-    Array.from(groupedByBrand.keys()).forEach((brand, i) => {
-      const legendRow = legend.append('g')
-        .attr('transform', `translate(0, ${i * 20})`);
+      Array.from(groupedByBrand.keys()).forEach((brand, i) => {
+        const brandColor = getBrandColor(brand, availableBrands);
+        const legendRow = legend.append('g')
+          .attr('transform', `translate(0, ${i * 20})`);
 
-      legendRow.append('rect')
-        .attr('width', 12)
-        .attr('height', 12)
-        .attr('fill', colorScale(brand));
+        legendRow.append('circle')
+          .attr('cx', 6)
+          .attr('cy', 6)
+          .attr('r', 5)
+          .attr('fill', brandColor);
 
-      legendRow.append('text')
-        .attr('x', 18)
-        .attr('y', 10)
-        .style('font-size', '11px')
-        .text(brand);
-    });
-  };
-
-  const drawKeywordsChart = (keywords: Array<{ keyword: string; volume: number }>) => {
-    const svg = d3.select(keywordsRef.current);
-    svg.selectAll('*').remove();
-
-    if (!keywords.length) return;
-
-    const margin = { top: 20, right: 30, bottom: 100, left: 60 };
-    const width = 800 - margin.left - margin.right;
-    const height = 300 - margin.top - margin.bottom;
-
-    const g = svg
-      .attr('width', width + margin.left + margin.right)
-      .attr('height', height + margin.top + margin.bottom)
-      .append('g')
-      .attr('transform', `translate(${margin.left},${margin.top})`);
-
-    const x = d3.scaleBand()
-      .domain(keywords.map(d => d.keyword))
-      .range([0, width])
-      .padding(0.2);
-
-    const y = d3.scaleLinear()
-      .domain([0, d3.max(keywords, d => d.volume) || 0])
-      .nice()
-      .range([height, 0]);
-
-    g.append('g')
-      .attr('transform', `translate(0,${height})`)
-      .call(d3.axisBottom(x))
-      .selectAll('text')
-      .style('text-anchor', 'end')
-      .style('font-size', '10px')
-      .attr('dx', '-.8em')
-      .attr('dy', '.15em')
-      .attr('transform', 'rotate(-45)');
-
-    g.append('g')
-      .call(d3.axisLeft(y).ticks(5).tickFormat(d => `${(d as number / 1000).toFixed(0)}K`))
-      .selectAll('text')
-      .style('font-size', '12px');
-
-    g.selectAll('.bar')
-      .data(keywords)
-      .enter()
-      .append('rect')
-      .attr('class', 'bar')
-      .attr('x', d => x(d.keyword) || 0)
-      .attr('y', d => y(d.volume))
-      .attr('width', x.bandwidth())
-      .attr('height', d => height - y(d.volume))
-      .attr('fill', '#3b82f6')
-      .append('title')
-      .text(d => `${d.keyword}\n${d.volume.toLocaleString()} searches`);
+        legendRow.append('text')
+          .attr('x', 18)
+          .attr('y', 10)
+          .style('font-size', '12px')
+          .style('font-weight', '500')
+          .text(brand);
+      });
+    }
   };
 
   const generateTrendAriaLabel = () => {
-    const brands = Array.from(new Set(data.map(d => d.brand)));
-    const brandList = selectedBrand || brands.join(', ');
+    const brandList = selectedBrands.join(', ');
     return `Line chart showing search volume trends over time for ${brandList}`;
-  };
-
-  const generateKeywordsAriaLabel = () => {
-    if (!selectedBrand) return '';
-    return `Bar chart displaying top keywords by search volume for ${selectedBrand}`;
   };
 
   if (!data.length) {

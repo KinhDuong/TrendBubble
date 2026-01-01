@@ -2341,7 +2341,11 @@ export default function BrandInsightPage() {
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                           {/* Chart Section */}
                           <div className="lg:col-span-2">
-                            <KeywordChart data={monthlyData} selectedBrand={brandPageData?.brand || null} />
+                            <KeywordChart
+                              data={monthlyData}
+                              selectedBrands={selectedBrands}
+                              availableBrands={availableBrands}
+                            />
                           </div>
 
                           {/* Sentiment Section */}
