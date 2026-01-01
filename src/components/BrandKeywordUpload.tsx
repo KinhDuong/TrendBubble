@@ -83,11 +83,31 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
     return matrix[len1][len2];
   };
 
+  const extractNumbers = (str: string): number[] => {
+    const matches = str.match(/\d+/g);
+    return matches ? matches.map(Number) : [];
+  };
+
+  const hasNumberMismatch = (str1: string, str2: string): boolean => {
+    const nums1 = extractNumbers(str1);
+    const nums2 = extractNumbers(str2);
+
+    if (nums1.length !== nums2.length) return true;
+    if (nums1.length === 0) return false;
+
+    nums1.sort((a, b) => a - b);
+    nums2.sort((a, b) => a - b);
+
+    return !nums1.every((num, idx) => num === nums2[idx]);
+  };
+
   const calculateSimilarity = (str1: string, str2: string): number => {
     const s1 = str1.toLowerCase().trim();
     const s2 = str2.toLowerCase().trim();
 
     if (s1 === s2) return 1;
+
+    if (hasNumberMismatch(str1, str2)) return 0;
 
     const distance = levenshteinDistance(s1, s2);
     const maxLen = Math.max(s1.length, s2.length);
