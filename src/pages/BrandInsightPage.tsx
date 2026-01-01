@@ -1956,6 +1956,7 @@ export default function BrandInsightPage() {
                           animationStyle={animationStyle}
                           shape={shape as Shape}
                           keywordPerformanceData={keywordPerformanceData}
+                          selectedBrandsCount={selectedBrands.length}
                         />
                         </div>
                       )}

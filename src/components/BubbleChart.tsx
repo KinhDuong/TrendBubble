@@ -32,6 +32,7 @@ interface BubbleChartProps {
   animationStyle?: AnimationStyle;
   shape?: Shape;
   keywordPerformanceData?: KeywordPerformanceData[];
+  selectedBrandsCount?: number;
 }
 
 interface Bubble {
@@ -65,7 +66,7 @@ interface Bubble {
   };
 }
 
-export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force', onBubbleTimingUpdate, comparingTopics: externalComparingTopics, onComparingTopicsChange, useCryptoColors = false, cryptoTimeframe = '1h', animationStyle = 'default', shape = 'bubble', keywordPerformanceData = [] }: BubbleChartProps) {
+export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force', onBubbleTimingUpdate, comparingTopics: externalComparingTopics, onComparingTopicsChange, useCryptoColors = false, cryptoTimeframe = '1h', animationStyle = 'default', shape = 'bubble', keywordPerformanceData = [], selectedBrandsCount = 0 }: BubbleChartProps) {
   const drawShape = (ctx: CanvasRenderingContext2D, x: number, y: number, radius: number, shapeType: Shape) => {
     ctx.beginPath();
 
@@ -1060,7 +1061,7 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
 
       const colorData = useCryptoColors
         ? { color: getCryptoColorByGain(cryptoValue, getCryptoDisplayText(topic)) }
-        : topic.brandColor
+        : (selectedBrandsCount > 1 && topic.brandColor)
             ? { color: topic.brandColor }
             : (keywordPerformanceData.length > 0
                 ? getKeywordColorAndRing(topic.name)
