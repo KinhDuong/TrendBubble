@@ -76,12 +76,21 @@ export default function KeywordDuplicateReview({
   const handleContinue = () => {
     let filtered = [...allData];
 
-    // Filter out non-selected duplicates (always keep only selected keyword)
+    // Process duplicate groups: store variants in search_variants, then remove non-selected
     duplicateGroups.forEach(group => {
       const selected = selectedKeywords[group.id];
-      // Keep only the selected keyword, remove others in the group
-      const toRemove = group.keywords.filter(k => k !== selected);
-      filtered = filtered.filter(record => !toRemove.includes(record.keyword));
+
+      // Get non-selected keywords (the variants to store)
+      const variants = group.keywords.filter(k => k !== selected);
+
+      // Find the selected keyword's record and add search_variants
+      const selectedRecord = filtered.find(record => record.keyword === selected);
+      if (selectedRecord && variants.length > 0) {
+        selectedRecord.search_variants = variants.join(', ');
+      }
+
+      // Remove non-selected keywords from the data
+      filtered = filtered.filter(record => !variants.includes(record.keyword));
     });
 
     // Filter out excluded zero-traffic keywords
