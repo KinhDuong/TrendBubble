@@ -3,6 +3,7 @@ import * as d3 from 'd3';
 import { TrendingTopic, CryptoTimeframe } from '../types';
 import BubbleTooltip from './BubbleTooltip';
 import { formatCompactNumber } from '../utils/formatNumber';
+import { getBrandColor } from './BrandSelector';
 
 interface KeywordPerformanceData {
   keyword: string;
@@ -23,6 +24,8 @@ interface TreemapProps {
   useCryptoColors?: boolean;
   cryptoTimeframe?: CryptoTimeframe;
   keywordPerformanceData?: KeywordPerformanceData[];
+  selectedBrands?: string[];
+  availableBrands?: string[];
 }
 
 interface TreeNode {
@@ -38,7 +41,7 @@ interface TooltipData {
   rank: number;
 }
 
-export default function Treemap({ topics, maxDisplay, theme, useCryptoColors = false, cryptoTimeframe = '1h', keywordPerformanceData = [] }: TreemapProps) {
+export default function Treemap({ topics, maxDisplay, theme, useCryptoColors = false, cryptoTimeframe = '1h', keywordPerformanceData = [], selectedBrands = [], availableBrands = [] }: TreemapProps) {
   const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [tooltipData, setTooltipData] = useState<TooltipData | null>(null);
@@ -146,16 +149,24 @@ export default function Treemap({ topics, maxDisplay, theme, useCryptoColors = f
       .join('g')
       .attr('transform', d => `translate(${d.x0},${d.y0})`);
 
+    const useMultiBrandColors = selectedBrands.length > 1 && availableBrands.length > 0;
+
     leaf.append('rect')
       .attr('id', (d, i) => `rect-${i}`)
       .attr('width', d => d.x1 - d.x0)
       .attr('height', d => d.y1 - d.y0)
       .attr('fill', (d, i) => {
         const nodeData = d.data as TreeNode;
+
         if (useCryptoColors) {
           const cryptoColor = getCryptoColor(nodeData.topic);
           return cryptoColor || color(i);
         }
+
+        if (useMultiBrandColors && nodeData.topic.brand) {
+          return getBrandColor(nodeData.topic.brand, availableBrands);
+        }
+
         return color(i);
       })
       .attr('fill-opacity', theme === 'dark' ? 0.8 : 0.9)
@@ -287,7 +298,7 @@ export default function Treemap({ topics, maxDisplay, theme, useCryptoColors = f
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
 
-  }, [topics, maxDisplay, theme, useCryptoColors, cryptoTimeframe]);
+  }, [topics, maxDisplay, theme, useCryptoColors, cryptoTimeframe, selectedBrands, availableBrands]);
 
   const displayTopics = topics.slice(0, maxDisplay);
 
