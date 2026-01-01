@@ -327,59 +327,17 @@ function BubbleTooltip({
                 </div>
               </div>
 
-            <div className={`border-t ${
-              theme === 'dark' ? 'border-gray-700' : 'border-gray-200'
-            } pt-4 space-y-3`}>
-              <div className="flex items-center justify-between">
-                <span className={`text-sm ${
-                  theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-                }`}>
-                  Search Volume
-                </span>
-                <div className="flex items-center gap-1">
-                  <TrendingUp size={16} className="text-blue-500" />
-                  <span className={`font-semibold text-base ${
-                    theme === 'dark' ? 'text-white' : 'text-gray-900'
-                  }`}>
-                    {getDisplayVolume()}
-                  </span>
-                </div>
-              </div>
-
-              {topic.note && (
+            {topic.note && (
+              <div className={`border-t ${
+                theme === 'dark' ? 'border-gray-700' : 'border-gray-200'
+              } pt-4`}>
                 <p className={`text-sm leading-relaxed ${
                   theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
                 }`}>
                   <span className="font-bold">Note:</span> {topic.note}
                 </p>
-              )}
-
-              {keywordData?.sentiment !== undefined && keywordData?.sentiment !== null && (
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                      Sentiment
-                    </span>
-                    <span className={`text-sm font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                      {getSentimentLabel(keywordData.sentiment)}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="flex-1">
-                      <div className="w-full h-6 bg-gray-200 rounded-full overflow-hidden">
-                        <div
-                          className={`h-full ${getSentimentColor(keywordData.sentiment)} transition-all`}
-                          style={{ width: `${Math.round(((keywordData.sentiment + 1) / 2) * 100)}%` }}
-                        />
-                      </div>
-                    </div>
-                    <span className={`text-base font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                      {formatSentiment(keywordData.sentiment)}
-                    </span>
-                  </div>
-                </div>
-              )}
-            </div>
+              </div>
+            )}
 
             {keywordData?.ai_insights && (
               <div className={`border-t ${
@@ -390,6 +348,108 @@ function BubbleTooltip({
                 } whitespace-pre-wrap`}>
                   {keywordData.ai_insights}
                 </p>
+              </div>
+            )}
+
+            {keywordData && (
+              <div className={`border-t ${
+                theme === 'dark' ? 'border-gray-700' : 'border-gray-200'
+              } pt-4`}>
+                <h4 className={`text-sm font-semibold mb-3 ${
+                  theme === 'dark' ? 'text-white' : 'text-gray-900'
+                }`}>
+                  Performance Metrics
+                </h4>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className={`${theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-50'} rounded-lg p-3`}>
+                    <div className="flex items-center gap-2 mb-1">
+                      <TrendingUp size={14} className="text-blue-500" />
+                      <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                        Search Volume
+                      </span>
+                    </div>
+                    <p className={`text-base font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                      {getDisplayVolume()}
+                    </p>
+                  </div>
+
+                  <div className={`${theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-50'} rounded-lg p-3`}>
+                    <div className="flex items-center gap-2 mb-1">
+                      <TrendingUp size={14} className="text-blue-500" />
+                      <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                        3-Month Change
+                      </span>
+                    </div>
+                    <p className={`text-base font-bold ${getChangeColor(keywordData.three_month_change)}`}>
+                      {formatChange(keywordData.three_month_change)}
+                    </p>
+                  </div>
+
+                  <div className={`${theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-50'} rounded-lg p-3`}>
+                    <div className="flex items-center gap-2 mb-1">
+                      <BarChart3 size={14} className="text-purple-500" />
+                      <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                        YoY Change
+                      </span>
+                    </div>
+                    <p className={`text-base font-bold ${getChangeColor(keywordData.yoy_change)}`}>
+                      {formatChange(keywordData.yoy_change)}
+                    </p>
+                  </div>
+
+                  <div className={`${theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-50'} rounded-lg p-3`}>
+                    <div className="flex items-center gap-2 mb-1">
+                      <DollarSign size={14} className="text-green-500" />
+                      <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                        Top Bid (High)
+                      </span>
+                    </div>
+                    <p className={`text-base font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                      {keywordData.bid_high ? `$${keywordData.bid_high.toFixed(2)}` : 'N/A'}
+                    </p>
+                  </div>
+
+                  <div className={`${theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-50'} rounded-lg p-3`}>
+                    <div className="flex items-center gap-2 mb-1">
+                      <Target size={14} className="text-orange-500" />
+                      <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                        Competition
+                      </span>
+                    </div>
+                    <p className={`text-base font-bold ${getCompetitionColor(keywordData.competition)}`}>
+                      {formatCompetition(keywordData.competition)}
+                    </p>
+                  </div>
+
+                  {keywordData.sentiment !== undefined && keywordData.sentiment !== null && (
+                    <div className={`${theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-50'} rounded-lg p-3 col-span-2`}>
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-sm">{getSentimentEmoji(keywordData.sentiment)}</span>
+                        <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                          Sentiment
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="flex-1">
+                          <div className="w-full h-6 bg-gray-200 rounded-full overflow-hidden">
+                            <div
+                              className={`h-full ${getSentimentColor(keywordData.sentiment)} transition-all`}
+                              style={{ width: `${Math.round(((keywordData.sentiment + 1) / 2) * 100)}%` }}
+                            />
+                          </div>
+                        </div>
+                        <div className="flex flex-col items-end">
+                          <span className={`text-base font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                            {formatSentiment(keywordData.sentiment)}
+                          </span>
+                          <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                            {getSentimentLabel(keywordData.sentiment)}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
 
@@ -562,28 +622,16 @@ function BubbleTooltip({
           </div>
         </div>
 
-        <div className={`border-t ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'} pt-3 space-y-2`}>
-          <div className="flex items-center justify-between">
-            <h4 className={`text-sm font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-              Search Volume
-            </h4>
-            <div className="flex items-center gap-1">
-              <TrendingUp size={14} className="text-blue-500" />
-              <span className={`font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                {getDisplayVolume()}
-              </span>
-            </div>
-          </div>
-
-          {topic.note && (
+        {topic.note && (
+          <div className={`border-t ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'} pt-3`}>
             <p className={`text-sm leading-relaxed ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
               <span className="font-bold">Note:</span> {topic.note}
             </p>
-          )}
-        </div>
+          </div>
+        )}
 
         {keywordData?.ai_insights && (
-          <div>
+          <div className={`border-t ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'} pt-3`}>
             <p className={`text-sm leading-relaxed ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'} whitespace-pre-wrap`}>
               {keywordData.ai_insights}
             </p>
@@ -592,6 +640,7 @@ function BubbleTooltip({
 
         {isExpanded && keywordData && (
           <div
+            className={`border-t ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'} pt-3`}
             style={{
               animation: 'slideDown 0.35s cubic-bezier(0.4, 0, 0.2, 1)',
             }}
@@ -599,7 +648,19 @@ function BubbleTooltip({
             <h4 className={`text-sm font-semibold mb-3 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
               Performance Metrics
             </h4>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-5 gap-3">
+              <div className={`${theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-50'} rounded-lg p-3`}>
+                <div className="flex items-center gap-2 mb-1">
+                  <TrendingUp size={14} className="text-blue-500" />
+                  <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                    Search Volume
+                  </span>
+                </div>
+                <p className={`text-lg font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                  {getDisplayVolume()}
+                </p>
+              </div>
+
               <div className={`${theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-50'} rounded-lg p-3`}>
                 <div className="flex items-center gap-2 mb-1">
                   <TrendingUp size={14} className="text-blue-500" />
@@ -649,7 +710,7 @@ function BubbleTooltip({
               </div>
 
               {keywordData.sentiment !== undefined && keywordData.sentiment !== null && (
-                <div className={`${theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-50'} rounded-lg p-3 col-span-2`}>
+                <div className={`${theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-50'} rounded-lg p-3 col-span-5`}>
                   <div className="flex items-center gap-2 mb-2">
                     <span className="text-sm">{getSentimentEmoji(keywordData.sentiment)}</span>
                     <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
