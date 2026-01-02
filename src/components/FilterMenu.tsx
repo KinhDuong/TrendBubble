@@ -1,9 +1,9 @@
-import { X, Play, Pause, Moon, Sun, Circle, BarChart3, List, LayoutGrid, PieChart } from 'lucide-react';
+import { X, Play, Pause, Moon, Sun, Circle, BarChart3, List, LayoutGrid, PieChart, Cloud } from 'lucide-react';
 import { CryptoTimeframe } from '../types';
 
 export type BubbleLayout = 'force' | 'hierarchical' | 'grid' | 'circular' | 'timeline' | 'packed' | 'scatter' | 'importance';
 
-export type ViewMode = 'bubble' | 'bar' | 'list' | 'treemap' | 'donut';
+export type ViewMode = 'bubble' | 'bar' | 'list' | 'treemap' | 'donut' | 'wordcloud';
 
 export type Shape = 'bubble' | 'square' | 'rounded-square' | 'hexagon' | 'diamond' | 'triangle' | 'star' | 'shark';
 
@@ -95,7 +95,7 @@ export default function FilterMenu({
           <div className="flex items-center justify-center">
             <div className="overflow-x-auto">
               <div className="flex items-center gap-2 md:gap-4">
-                {(viewMode === 'bubble' || viewMode === 'bar' || viewMode === 'treemap' || viewMode === 'donut') && maxBubbles !== undefined && onMaxBubblesChange && (
+                {(viewMode === 'bubble' || viewMode === 'bar' || viewMode === 'treemap' || viewMode === 'donut' || viewMode === 'wordcloud') && maxBubbles !== undefined && onMaxBubblesChange && (
                   <>
                     <button
                       onClick={() => onMaxBubblesChange(10)}
@@ -348,6 +348,18 @@ export default function FilterMenu({
                       <PieChart size={14} />
                       Donut
                     </button>
+                    <button
+                      onClick={() => onViewModeChange('wordcloud')}
+                      className={`flex items-center gap-1.5 px-2 md:px-3 py-1 md:py-1.5 text-xs md:text-sm font-medium rounded transition-colors ${
+                        viewMode === 'wordcloud'
+                          ? 'bg-blue-600 text-white'
+                          : theme === 'dark' ? 'text-gray-300 hover:text-gray-100' : 'text-gray-600 hover:text-gray-900'
+                      }`}
+                      aria-label="Word Cloud View"
+                    >
+                      <Cloud size={14} />
+                      Cloud
+                    </button>
                   </div>
                   {onPauseToggle && (
                     <button
@@ -466,6 +478,18 @@ export default function FilterMenu({
                   <PieChart size={14} />
                   Donut
                 </button>
+                <button
+                  onClick={() => onViewModeChange('wordcloud')}
+                  className={`flex items-center gap-1.5 px-2 py-1.5 text-xs font-medium rounded transition-colors whitespace-nowrap ${
+                    viewMode === 'wordcloud'
+                      ? 'bg-blue-600 text-white'
+                      : theme === 'dark' ? 'text-gray-300 hover:text-gray-100' : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                  aria-label="Word Cloud View"
+                >
+                  <Cloud size={14} />
+                  Cloud
+                </button>
               </div>
               {onRefresh && nextBubbleIn !== undefined && bubbleProgress !== undefined && (
                 <button
@@ -552,7 +576,7 @@ export default function FilterMenu({
                   <Divider />
                 </>
               )}
-              {(viewMode === 'bubble' || viewMode === 'bar' || viewMode === 'treemap' || viewMode === 'donut') && maxBubbles !== undefined && onMaxBubblesChange && (
+              {(viewMode === 'bubble' || viewMode === 'bar' || viewMode === 'treemap' || viewMode === 'donut' || viewMode === 'wordcloud') && maxBubbles !== undefined && onMaxBubblesChange && (
                 <>
                   <div className="flex items-center gap-2">
                     <button

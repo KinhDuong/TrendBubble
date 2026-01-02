@@ -10,6 +10,7 @@ import BubbleChart, { Shape } from '../components/BubbleChart';
 import BarChart from '../components/BarChart';
 import Treemap from '../components/Treemap';
 import DonutChart from '../components/DonutChart';
+import WordCloud from '../components/WordCloud';
 import FilterMenu, { BubbleLayout, ViewMode, Shape as FilterShape } from '../components/FilterMenu';
 import ShareSnapshot from '../components/ShareSnapshot';
 import AnimationSelector, { AnimationStyle } from '../components/AnimationSelector';
@@ -125,6 +126,7 @@ export default function BrandInsightPage() {
   const treemapChartRef = useRef<HTMLDivElement>(null);
   const donutChartRef = useRef<HTMLDivElement>(null);
   const barChartRef = useRef<HTMLDivElement>(null);
+  const wordCloudRef = useRef<HTMLDivElement>(null);
 
   const itemsPerPage = 10;
 
@@ -1779,7 +1781,7 @@ export default function BrandInsightPage() {
                         )}
                       </div>
                     </div>
-                    {(viewMode === 'bubble' || viewMode === 'bar' || viewMode === 'treemap' || viewMode === 'donut') && transformToTopics.length > 0 && (
+                    {(viewMode === 'bubble' || viewMode === 'bar' || viewMode === 'treemap' || viewMode === 'donut' || viewMode === 'wordcloud') && transformToTopics.length > 0 && (
                       <div className="flex items-center gap-2">
                         {viewMode === 'bubble' && (
                           <AnimationSelector
@@ -1794,6 +1796,7 @@ export default function BrandInsightPage() {
                             viewMode === 'bubble' ? bubbleChartRef :
                             viewMode === 'treemap' ? treemapChartRef :
                             viewMode === 'donut' ? donutChartRef :
+                            viewMode === 'wordcloud' ? wordCloudRef :
                             barChartRef
                           }
                           variant="inline"
@@ -1881,7 +1884,7 @@ export default function BrandInsightPage() {
                 </div>
               )}
 
-              {transformToTopics.length > 0 && (viewMode === 'bubble' || viewMode === 'bar' || viewMode === 'treemap' || viewMode === 'donut') && (
+              {transformToTopics.length > 0 && (viewMode === 'bubble' || viewMode === 'bar' || viewMode === 'treemap' || viewMode === 'donut' || viewMode === 'wordcloud') && (
                 <>
                   <div className="max-w-7xl mx-auto mb-6">
                     <div>
@@ -2025,12 +2028,28 @@ export default function BrandInsightPage() {
                           />
                         </div>
                       )}
+
+                      {viewMode === 'wordcloud' && (
+                        <div ref={wordCloudRef} className="max-w-7xl mx-auto">
+                          <WordCloud
+                            data={filteredTopics.slice(0, maxBubbles).map(topic => ({
+                              keyword: topic.name,
+                              searchVolume: topic.searchVolume,
+                              isBranded: keywordData.find(kd => kd.keyword === topic.name)?.is_branded
+                            }))}
+                            maxWords={maxBubbles}
+                            colorScheme="default"
+                            brandColor={getBrandColor(brandPageData?.brand || decodedBrand)}
+                            className={theme === 'dark' ? 'bg-gray-800' : 'bg-white'}
+                          />
+                        </div>
+                      )}
                     </>
                   )}
                 </>
               )}
 
-              {transformToTopics.length > 0 && (viewMode === 'bubble' || viewMode === 'bar' || viewMode === 'treemap' || viewMode === 'donut') && (
+              {transformToTopics.length > 0 && (viewMode === 'bubble' || viewMode === 'bar' || viewMode === 'treemap' || viewMode === 'donut' || viewMode === 'wordcloud') && (
                 <div className="max-w-7xl mx-auto mt-8 mb-0 md:mb-8">
                   <section className="w-full" aria-labelledby="top-keywords-heading">
                       <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-lg border p-6 shadow-md`}>
