@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Check, ChevronDown } from 'lucide-react';
+import { Check, ChevronDown, X } from 'lucide-react';
 
 interface Brand {
   name: string;
@@ -13,6 +13,8 @@ interface BrandSelectorProps {
   theme: 'dark' | 'light';
   disabled?: boolean;
 }
+
+const MAX_BRANDS = 5;
 
 const BRAND_COLORS = [
   '#3B82F6', // blue
@@ -62,12 +64,10 @@ export default function BrandSelector({
         onSelectionChange(selectedBrands.filter(b => b !== brandName));
       }
     } else {
-      onSelectionChange([...selectedBrands, brandName]);
+      if (selectedBrands.length < MAX_BRANDS) {
+        onSelectionChange([...selectedBrands, brandName]);
+      }
     }
-  };
-
-  const handleSelectAll = () => {
-    onSelectionChange(availableBrands);
   };
 
   const handleDeselectAll = () => {
@@ -112,17 +112,7 @@ export default function BrandSelector({
           <div className={`sticky top-0 p-2 border-b ${
             theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
           }`}>
-            <div className="flex gap-2">
-              <button
-                onClick={handleSelectAll}
-                className={`flex-1 px-3 py-1.5 text-xs font-medium rounded transition-colors ${
-                  theme === 'dark'
-                    ? 'bg-gray-700 hover:bg-gray-600 text-white'
-                    : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
-                }`}
-              >
-                Select All
-              </button>
+            <div className="flex items-center justify-between gap-2">
               <button
                 onClick={handleDeselectAll}
                 className={`flex-1 px-3 py-1.5 text-xs font-medium rounded transition-colors ${
@@ -133,6 +123,17 @@ export default function BrandSelector({
               >
                 Clear
               </button>
+              <button
+                onClick={() => setIsOpen(false)}
+                className={`px-2 py-1.5 rounded transition-colors ${
+                  theme === 'dark'
+                    ? 'hover:bg-gray-700 text-gray-400'
+                    : 'hover:bg-gray-100 text-gray-600'
+                }`}
+                aria-label="Close dropdown"
+              >
+                <X className="w-4 h-4" />
+              </button>
             </div>
           </div>
 
@@ -141,14 +142,15 @@ export default function BrandSelector({
               const isSelected = selectedBrands.includes(brand);
               const brandColor = getBrandColor(brand, availableBrands);
               const isOnlySelected = selectedBrands.length === 1 && isSelected;
+              const isLimitReached = !isSelected && selectedBrands.length >= MAX_BRANDS;
 
               return (
                 <button
                   key={brand}
                   onClick={() => handleToggleBrand(brand)}
-                  disabled={isOnlySelected}
+                  disabled={isOnlySelected || isLimitReached}
                   className={`w-full flex items-center justify-between gap-3 px-3 py-2 rounded-lg transition-colors text-left ${
-                    isOnlySelected
+                    isOnlySelected || isLimitReached
                       ? theme === 'dark'
                         ? 'bg-gray-900 cursor-not-allowed opacity-50'
                         : 'bg-gray-100 cursor-not-allowed opacity-50'

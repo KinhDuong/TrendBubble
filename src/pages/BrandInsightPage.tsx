@@ -1773,13 +1773,18 @@ export default function BrandInsightPage() {
                           {selectedBrands.length === 1 ? brandPageData.meta_title : 'Multi-Brand Keyword Insights'}
                         </h1>
                         {availableBrands.length > 1 && (
-                          <BrandSelector
-                            availableBrands={availableBrands}
-                            selectedBrands={selectedBrands}
-                            onSelectionChange={setSelectedBrands}
-                            theme={theme}
-                            disabled={loading}
-                          />
+                          <div className="flex items-center gap-2">
+                            <span className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                              Compare Multiple Brands:
+                            </span>
+                            <BrandSelector
+                              availableBrands={availableBrands}
+                              selectedBrands={selectedBrands}
+                              onSelectionChange={setSelectedBrands}
+                              theme={theme}
+                              disabled={loading}
+                            />
+                          </div>
                         )}
                       </div>
                     </div>
