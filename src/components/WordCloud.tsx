@@ -273,7 +273,7 @@ const WordCloud: React.FC<WordCloudProps> = ({
           topic={{
             name: tooltipData.keyword.keyword,
             searchVolume: tooltipData.keyword.searchVolume,
-            searchVolumeRaw: tooltipData.keyword.searchVolume.toString(),
+            searchVolumeRaw: formatCompactNumber(tooltipData.keyword.searchVolume),
             category: null,
             source: 'user_upload',
             url: null,
