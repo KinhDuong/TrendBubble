@@ -1,4 +1,5 @@
 import React, { useMemo, useState, useEffect, useRef } from 'react';
+import cloud from 'd3-cloud';
 import { formatCompactNumber } from '../utils/formatNumber';
 
 interface KeywordData {
@@ -18,13 +19,13 @@ interface WordCloudProps {
   className?: string;
 }
 
-interface WordItem {
+interface CloudWord {
   text: string;
   size: number;
+  x?: number;
+  y?: number;
+  rotate?: number;
   volume: number;
-  x: number;
-  y: number;
-  rotation: number;
   color: string;
   data: KeywordData;
 }
@@ -39,13 +40,14 @@ const WordCloud: React.FC<WordCloudProps> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
+  const [words, setWords] = useState<CloudWord[]>([]);
   const [hoveredWord, setHoveredWord] = useState<string | null>(null);
 
   useEffect(() => {
     const updateDimensions = () => {
       if (containerRef.current) {
         const { width } = containerRef.current.getBoundingClientRect();
-        const height = Math.min(width * 0.6, 700);
+        const height = Math.min(width * 0.65, 650);
         setDimensions({ width: Math.max(width, 400), height: Math.max(height, 400) });
       }
     };
@@ -55,14 +57,16 @@ const WordCloud: React.FC<WordCloudProps> = ({
     return () => window.removeEventListener('resize', updateDimensions);
   }, []);
 
-  const words = useMemo(() => {
+  useEffect(() => {
     if (!data || data.length === 0) {
-      return [];
+      setWords([]);
+      return;
     }
 
     const validData = data.filter(item => item && item.keyword && item.searchVolume > 0);
     if (validData.length === 0) {
-      return [];
+      setWords([]);
+      return;
     }
 
     const sortedData = [...validData]
@@ -70,7 +74,6 @@ const WordCloud: React.FC<WordCloudProps> = ({
       .slice(0, maxWords);
 
     const maxVolume = sortedData[0]?.searchVolume || 1;
-    const minVolume = sortedData[sortedData.length - 1]?.searchVolume || 1;
 
     const getColor = (index: number, isBranded: boolean): string => {
       if (colorScheme === 'mono') {
@@ -109,52 +112,37 @@ const WordCloud: React.FC<WordCloudProps> = ({
       return colors[index % colors.length];
     };
 
-    const wordItems: WordItem[] = [];
-    const centerX = dimensions.width / 2;
-    const centerY = dimensions.height / 2;
-    const maxRadius = Math.min(dimensions.width, dimensions.height) * 0.42;
-
-    sortedData.forEach((item, index) => {
+    const cloudWords: CloudWord[] = sortedData.map((item, index) => {
       const normalizedSize = Math.log(item.searchVolume + 1) / Math.log(maxVolume + 1);
-      const fontSize = 14 + normalizedSize * 52;
+      const fontSize = 12 + normalizedSize * 64;
 
-      let x: number, y: number;
-
-      if (index === 0) {
-        x = centerX;
-        y = centerY;
-      } else {
-        const spiralTightness = 0.15;
-        const angle = index * 0.5;
-        const radius = Math.sqrt(index) * spiralTightness * maxRadius;
-
-        const jitterX = (Math.random() - 0.5) * 20;
-        const jitterY = (Math.random() - 0.5) * 20;
-
-        x = centerX + (radius * Math.cos(angle)) + jitterX;
-        y = centerY + (radius * Math.sin(angle)) + jitterY;
-      }
-
-      const rotation = Math.random() > 0.85 ? (Math.random() > 0.5 ? -15 : 15) : 0;
-
-      wordItems.push({
+      return {
         text: item.keyword,
         size: fontSize,
         volume: item.searchVolume,
-        x,
-        y,
-        rotation,
         color: getColor(index, item.isBranded || false),
         data: item
-      });
+      };
     });
 
-    return wordItems;
+    const layout = cloud()
+      .size([dimensions.width, dimensions.height])
+      .words(cloudWords as any)
+      .padding(4)
+      .rotate(() => (Math.random() > 0.7 ? (Math.random() > 0.5 ? 90 : -90) : 0))
+      .font('system-ui, -apple-system, sans-serif')
+      .fontSize(d => (d as CloudWord).size)
+      .spiral('archimedean')
+      .on('end', (computedWords) => {
+        setWords(computedWords as CloudWord[]);
+      });
+
+    layout.start();
   }, [data, maxWords, dimensions, colorScheme, brandColor]);
 
   const hasData = data && data.length > 0 && data.some(item => item && item.keyword && item.searchVolume > 0);
 
-  if (!hasData || words.length === 0) {
+  if (!hasData) {
     return (
       <div className={`flex items-center justify-center min-h-[400px] h-[500px] rounded-lg ${className}`}>
         <div className="text-center">
@@ -165,40 +153,51 @@ const WordCloud: React.FC<WordCloudProps> = ({
     );
   }
 
+  if (words.length === 0) {
+    return (
+      <div className={`flex items-center justify-center min-h-[400px] h-[500px] rounded-lg ${className}`}>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+          <p className="text-gray-500 text-sm mt-4">Generating word cloud...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div ref={containerRef} className={`relative w-full min-h-[400px] h-[500px] rounded-lg overflow-hidden border ${className}`}>
+    <div ref={containerRef} className={`relative w-full min-h-[400px] h-[500px] rounded-lg overflow-hidden border bg-white ${className}`}>
       <svg
         width="100%"
         height="100%"
         viewBox={`0 0 ${dimensions.width} ${dimensions.height}`}
         preserveAspectRatio="xMidYMid meet"
         className="w-full h-full"
-        style={{ cursor: onWordClick ? 'pointer' : 'default' }}
       >
-        {words.map((word, index) => (
-          <text
-            key={`${word.text}-${index}`}
-            x={word.x}
-            y={word.y}
-            fontSize={word.size}
-            fill={hoveredWord === word.text ? '#000' : word.color}
-            textAnchor="middle"
-            dominantBaseline="middle"
-            transform={`rotate(${word.rotation} ${word.x} ${word.y})`}
-            className="transition-all duration-200 select-none"
-            style={{
-              fontWeight: hoveredWord === word.text ? 700 : 600,
-              opacity: hoveredWord === word.text ? 1 : 0.9,
-              cursor: onWordClick ? 'pointer' : 'default',
-              fontFamily: 'system-ui, -apple-system, sans-serif'
-            }}
-            onMouseEnter={() => setHoveredWord(word.text)}
-            onMouseLeave={() => setHoveredWord(null)}
-            onClick={() => onWordClick?.(word.data)}
-          >
-            {word.text}
-          </text>
-        ))}
+        <g transform={`translate(${dimensions.width / 2},${dimensions.height / 2})`}>
+          {words.map((word, index) => (
+            <text
+              key={`${word.text}-${index}`}
+              x={word.x || 0}
+              y={word.y || 0}
+              fontSize={word.size}
+              fill={hoveredWord === word.text ? '#000' : word.color}
+              textAnchor="middle"
+              transform={`rotate(${word.rotate || 0})`}
+              className="transition-all duration-200 select-none"
+              style={{
+                fontWeight: hoveredWord === word.text ? 700 : 600,
+                opacity: hoveredWord === word.text ? 1 : 0.85,
+                cursor: onWordClick ? 'pointer' : 'default',
+                fontFamily: 'system-ui, -apple-system, sans-serif'
+              }}
+              onMouseEnter={() => setHoveredWord(word.text)}
+              onMouseLeave={() => setHoveredWord(null)}
+              onClick={() => onWordClick?.(word.data)}
+            >
+              {word.text}
+            </text>
+          ))}
+        </g>
       </svg>
 
       {hoveredWord && (
