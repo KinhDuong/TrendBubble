@@ -1782,26 +1782,17 @@ export default function BrandInsightPage() {
                       </div>
                     </div>
                     {(viewMode === 'bubble' || viewMode === 'bar' || viewMode === 'treemap' || viewMode === 'donut' || viewMode === 'wordcloud') && transformToTopics.length > 0 && (
-                      <div className="flex items-center gap-2">
-                        {viewMode === 'bubble' && (
-                          <AnimationSelector
-                            theme={theme}
-                            selectedAnimation={animationStyle}
-                            onAnimationChange={setAnimationStyle}
-                          />
-                        )}
-                        <ShareSnapshot
-                          theme={theme}
-                          canvasRef={
-                            viewMode === 'bubble' ? bubbleChartRef :
-                            viewMode === 'treemap' ? treemapChartRef :
-                            viewMode === 'donut' ? donutChartRef :
-                            viewMode === 'wordcloud' ? wordCloudRef :
-                            barChartRef
-                          }
-                          variant="inline"
-                        />
-                      </div>
+                      <ShareSnapshot
+                        theme={theme}
+                        canvasRef={
+                          viewMode === 'bubble' ? bubbleChartRef :
+                          viewMode === 'treemap' ? treemapChartRef :
+                          viewMode === 'donut' ? donutChartRef :
+                          viewMode === 'wordcloud' ? wordCloudRef :
+                          barChartRef
+                        }
+                        variant="inline"
+                      />
                     )}
                   </div>
                   <div className={`flex flex-wrap items-center gap-3 mb-4 text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
