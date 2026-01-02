@@ -44,7 +44,8 @@ const WordCloud: React.FC<WordCloudProps> = ({
   useEffect(() => {
     const updateDimensions = () => {
       if (containerRef.current) {
-        const { width, height } = containerRef.current.getBoundingClientRect();
+        const { width } = containerRef.current.getBoundingClientRect();
+        const height = Math.min(width * 0.6, 700);
         setDimensions({ width: Math.max(width, 400), height: Math.max(height, 400) });
       }
     };
@@ -111,20 +112,30 @@ const WordCloud: React.FC<WordCloudProps> = ({
     const wordItems: WordItem[] = [];
     const centerX = dimensions.width / 2;
     const centerY = dimensions.height / 2;
-    const maxRadius = Math.min(dimensions.width, dimensions.height) * 0.4;
+    const maxRadius = Math.min(dimensions.width, dimensions.height) * 0.42;
 
     sortedData.forEach((item, index) => {
       const normalizedSize = Math.log(item.searchVolume + 1) / Math.log(maxVolume + 1);
-      const fontSize = 16 + normalizedSize * 48;
+      const fontSize = 14 + normalizedSize * 52;
 
-      const angle = (index / sortedData.length) * Math.PI * 2 * 3;
-      const radiusFactor = Math.sqrt(index / sortedData.length);
-      const radius = radiusFactor * maxRadius;
+      let x: number, y: number;
 
-      const x = centerX + radius * Math.cos(angle);
-      const y = centerY + radius * Math.sin(angle);
+      if (index === 0) {
+        x = centerX;
+        y = centerY;
+      } else {
+        const spiralTightness = 0.15;
+        const angle = index * 0.5;
+        const radius = Math.sqrt(index) * spiralTightness * maxRadius;
 
-      const rotation = Math.random() > 0.9 ? (Math.random() > 0.5 ? -30 : 30) : 0;
+        const jitterX = (Math.random() - 0.5) * 20;
+        const jitterY = (Math.random() - 0.5) * 20;
+
+        x = centerX + (radius * Math.cos(angle)) + jitterX;
+        y = centerY + (radius * Math.sin(angle)) + jitterY;
+      }
+
+      const rotation = Math.random() > 0.85 ? (Math.random() > 0.5 ? -15 : 15) : 0;
 
       wordItems.push({
         text: item.keyword,
@@ -145,7 +156,7 @@ const WordCloud: React.FC<WordCloudProps> = ({
 
   if (!hasData || words.length === 0) {
     return (
-      <div className={`flex items-center justify-center min-h-[500px] h-[600px] rounded-lg ${className}`}>
+      <div className={`flex items-center justify-center min-h-[400px] h-[500px] rounded-lg ${className}`}>
         <div className="text-center">
           <p className="text-gray-500 text-lg font-medium">No keywords available</p>
           <p className="text-gray-400 text-sm mt-2">Please select a different filter or add keyword data</p>
@@ -155,7 +166,7 @@ const WordCloud: React.FC<WordCloudProps> = ({
   }
 
   return (
-    <div ref={containerRef} className={`relative w-full min-h-[500px] h-[600px] rounded-lg overflow-hidden border ${className}`}>
+    <div ref={containerRef} className={`relative w-full min-h-[400px] h-[500px] rounded-lg overflow-hidden border ${className}`}>
       <svg
         width="100%"
         height="100%"
