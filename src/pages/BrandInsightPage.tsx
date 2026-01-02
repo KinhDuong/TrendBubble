@@ -1888,17 +1888,6 @@ export default function BrandInsightPage() {
                 <>
                   <div className="max-w-7xl mx-auto mb-6">
                     <div>
-                      <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
-                        <h3 className={`text-sm font-semibold ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                          Filter by Performance
-                        </h3>
-                        <div className="flex items-center gap-2">
-                          <div className={`text-xs px-3 py-1 rounded-full ${theme === 'dark' ? 'bg-gray-700 text-gray-300' : 'bg-gray-200 text-gray-600'}`}>
-                            {availableMonthsCount} months of data
-                            {!hasYoYData && <span className="ml-1 text-amber-500">• Limited filters</span>}
-                          </div>
-                        </div>
-                      </div>
                       {!hasYoYData && (
                         <div className={`mb-3 text-xs px-3 py-2 rounded-lg ${theme === 'dark' ? 'bg-amber-900/20 text-amber-400 border border-amber-800/30' : 'bg-amber-50 text-amber-700 border border-amber-200'}`}>
                           <strong>Note:</strong> Some filters use year-over-year comparisons and require 24+ months of data. With {availableMonthsCount} months available, filters are based on 3-month trends and performance patterns.
@@ -2084,17 +2073,6 @@ export default function BrandInsightPage() {
                         )}
 
                         <div className="mb-4">
-                          <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
-                            <h3 className={`text-sm font-semibold ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                              Filter by Performance
-                            </h3>
-                            <div className="flex items-center gap-2">
-                              <div className={`text-xs px-3 py-1 rounded-full ${theme === 'dark' ? 'bg-gray-700 text-gray-300' : 'bg-gray-200 text-gray-600'}`}>
-                                {availableMonthsCount} months of data
-                                {!hasYoYData && <span className="ml-1 text-amber-500">• Limited filters</span>}
-                              </div>
-                            </div>
-                          </div>
                           {!hasYoYData && (
                             <div className={`mb-3 text-xs px-3 py-2 rounded-lg ${theme === 'dark' ? 'bg-amber-900/20 text-amber-400 border border-amber-800/30' : 'bg-amber-50 text-amber-700 border border-amber-200'}`}>
                               <strong>Note:</strong> Some filters use year-over-year comparisons and require 24+ months of data. With {availableMonthsCount} months available, filters are based on 3-month trends and performance patterns.
