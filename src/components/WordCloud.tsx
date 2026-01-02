@@ -113,8 +113,8 @@ const WordCloud: React.FC<WordCloudProps> = ({
     };
 
     const cloudWords: CloudWord[] = sortedData.map((item, index) => {
-      const normalizedSize = Math.log(item.searchVolume + 1) / Math.log(maxVolume + 1);
-      const fontSize = 12 + normalizedSize * 64;
+      const normalizedSize = Math.sqrt(item.searchVolume) / Math.sqrt(maxVolume);
+      const fontSize = 16 + normalizedSize * 72;
 
       return {
         text: item.keyword,
