@@ -1734,6 +1734,8 @@ export default function BrandInsightPage() {
         showCryptoTimeframe={false}
         showDateFilter={false}
         showCategoryFilter={false}
+        showShapeSelector={false}
+        showSearchBubbles={false}
         onViewModeChange={setViewMode}
         onDateFilterChange={() => {}}
         onCategoryFilterChange={() => {}}
