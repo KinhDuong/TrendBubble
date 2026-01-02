@@ -223,7 +223,7 @@ export default function ShareSnapshot({ theme, canvasRef, variant = 'floating' }
         ) : (
           <>
             <Camera size={20} />
-            <span className="hidden md:inline">Snapshot & Share</span>
+            <span className="hidden md:inline">Share</span>
           </>
         )}
       </button>
