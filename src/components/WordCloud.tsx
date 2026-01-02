@@ -1,8 +1,6 @@
 import React, { useMemo, useState, useEffect, useRef } from 'react';
 import cloud from 'd3-cloud';
 import { formatCompactNumber } from '../utils/formatNumber';
-import BubbleTooltip from './BubbleTooltip';
-import { TrendingTopic } from '../types';
 
 interface KeywordData {
   keyword: string;
@@ -11,15 +9,6 @@ interface KeywordData {
   cpcHigh?: number;
   isBranded?: boolean;
   brandColor?: string;
-  three_month_change?: number;
-  yoy_change?: number;
-  monthly_searches?: number[];
-  bid_high?: number;
-  competition?: string | number;
-  competition_indexed?: number;
-  ai_insights?: string;
-  sentiment?: number;
-  search_variants?: string;
 }
 
 interface WordCloudProps {
@@ -56,20 +45,6 @@ const WordCloud: React.FC<WordCloudProps> = ({
   const [dimensions, setDimensions] = useState({ width: 1200, height: 500 });
   const [words, setWords] = useState<CloudWord[]>([]);
   const [hoveredWord, setHoveredWord] = useState<string | null>(null);
-  const [selectedWord, setSelectedWord] = useState<{ word: CloudWord; x: number; y: number; rank: number } | null>(null);
-  const [isDarkMode, setIsDarkMode] = useState(false);
-
-  useEffect(() => {
-    const checkDarkMode = () => {
-      setIsDarkMode(document.documentElement.classList.contains('dark'));
-    };
-
-    checkDarkMode();
-    const observer = new MutationObserver(checkDarkMode);
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
-
-    return () => observer.disconnect();
-  }, []);
 
   useEffect(() => {
     const updateDimensions = () => {
@@ -208,42 +183,6 @@ const WordCloud: React.FC<WordCloudProps> = ({
     );
   }
 
-  const handleWordClick = (word: CloudWord, event: React.MouseEvent, rank: number) => {
-    event.stopPropagation();
-    const rect = containerRef.current?.getBoundingClientRect();
-    if (rect) {
-      setSelectedWord({
-        word,
-        x: event.clientX,
-        y: event.clientY,
-        rank
-      });
-    }
-    onWordClick?.(word.data);
-  };
-
-  const convertToTrendingTopic = (word: CloudWord, rank: number): TrendingTopic => {
-    return {
-      id: word.text,
-      name: word.text,
-      searchVolume: word.volume,
-      searchVolumeRaw: word.volume.toString(),
-      rank,
-      source: 'user_upload',
-      category: null,
-      url: null,
-      note: null,
-      pub_date: null,
-      created_at: new Date().toISOString(),
-      user_id: null,
-      brandColor: word.data.brandColor,
-      monthlySearches: word.data.monthly_searches?.map((vol, idx) => ({
-        month: new Date(new Date().setMonth(new Date().getMonth() - idx)).toISOString().slice(0, 7),
-        volume: vol
-      }))
-    };
-  };
-
   return (
     <div ref={containerRef} className={`relative w-full min-h-[500px] h-[600px] rounded-lg overflow-hidden border ${className}`}>
       <svg
@@ -260,19 +199,19 @@ const WordCloud: React.FC<WordCloudProps> = ({
               x={word.x || 0}
               y={word.y || 0}
               fontSize={word.size}
-              fill={hoveredWord === word.text ? (isDarkMode ? '#fff' : '#000') : word.color}
+              fill={hoveredWord === word.text ? '#000' : word.color}
               textAnchor="middle"
               transform={`rotate(${word.rotate || 0})`}
               className="transition-all duration-200 select-none"
               style={{
                 fontWeight: hoveredWord === word.text ? 700 : 600,
                 opacity: hoveredWord === word.text ? 1 : 0.85,
-                cursor: 'pointer',
+                cursor: onWordClick ? 'pointer' : 'default',
                 fontFamily: 'system-ui, -apple-system, sans-serif'
               }}
               onMouseEnter={() => setHoveredWord(word.text)}
               onMouseLeave={() => setHoveredWord(null)}
-              onClick={(e) => handleWordClick(word, e, index + 1)}
+              onClick={() => onWordClick?.(word.data)}
             >
               {word.text}
             </text>
@@ -280,7 +219,7 @@ const WordCloud: React.FC<WordCloudProps> = ({
         </g>
       </svg>
 
-      {hoveredWord && !selectedWord && (
+      {hoveredWord && (
         <div
           className="absolute bottom-4 left-4 bg-gray-900/95 px-4 py-3 rounded-lg shadow-xl border border-gray-700 backdrop-blur-sm"
           style={{ pointerEvents: 'none' }}
@@ -292,34 +231,6 @@ const WordCloud: React.FC<WordCloudProps> = ({
             Search Volume: {formatCompactNumber(words.find(w => w.text === hoveredWord)?.volume || 0)}
           </p>
         </div>
-      )}
-
-      {selectedWord && (
-        <BubbleTooltip
-          topic={convertToTrendingTopic(selectedWord.word, selectedWord.rank)}
-          x={selectedWord.x}
-          y={selectedWord.y}
-          rank={selectedWord.rank}
-          theme={isDarkMode ? 'dark' : 'light'}
-          isPinned={false}
-          onTogglePin={() => {}}
-          onCompare={() => {}}
-          isComparing={false}
-          onClose={() => setSelectedWord(null)}
-          keywordData={{
-            keyword: selectedWord.word.text,
-            searchVolume: selectedWord.word.volume,
-            three_month_change: selectedWord.word.data.three_month_change,
-            yoy_change: selectedWord.word.data.yoy_change,
-            monthly_searches: selectedWord.word.data.monthly_searches,
-            bid_high: selectedWord.word.data.bid_high,
-            competition: selectedWord.word.data.competition,
-            competition_indexed: selectedWord.word.data.competition_indexed,
-            ai_insights: selectedWord.word.data.ai_insights,
-            sentiment: selectedWord.word.data.sentiment,
-            search_variants: selectedWord.word.data.search_variants
-          }}
-        />
       )}
     </div>
   );
