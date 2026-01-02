@@ -2033,11 +2033,12 @@ export default function BrandInsightPage() {
                         <div ref={wordCloudRef} className="max-w-7xl mx-auto my-8">
                           <WordCloud
                             data={filteredTopics.slice(0, maxBubbles).map(topic => {
-                              const kd = keywordData.find(kd => kd.keyword === topic.name);
+                              const rawKd = keywordData.find(kd => kd.keyword === topic.name);
+                              const kd = keywordPerformanceData.find(kd => kd.keyword === topic.name);
                               return {
                                 keyword: topic.name,
                                 searchVolume: topic.searchVolume,
-                                isBranded: kd?.is_branded,
+                                isBranded: rawKd?.is_branded,
                                 brandColor: topic.brandColor,
                                 brand: topic.brand,
                                 three_month_change: kd?.three_month_change,
