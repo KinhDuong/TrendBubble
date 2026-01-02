@@ -125,20 +125,17 @@ const WordCloud: React.FC<WordCloudProps> = ({
       };
     });
 
-    // Custom elliptical spiral function
+    // Custom elliptical spiral function for pronounced oval shape
     const ellipticalSpiral = (size: [number, number]) => {
-      const e = size[0] / size[1]; // ellipse ratio
+      const horizontalStretch = 1.6; // Makes it wider (oval)
+      const verticalCompress = 0.8; // Makes it less tall
 
       return (t: number) => {
-        const dt = 4;
-        const dy = 12;
-        const dx = dy * e;
-
-        t += 1;
-        const angle = t * dt;
+        const angle = t * 0.1;
+        const radius = t * 3;
         return [
-          e * (dy * t) * Math.cos(angle),
-          (dy * t) * Math.sin(angle)
+          radius * Math.cos(angle) * horizontalStretch,
+          radius * Math.sin(angle) * verticalCompress
         ];
       };
     };
