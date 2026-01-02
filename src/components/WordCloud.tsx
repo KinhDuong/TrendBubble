@@ -8,6 +8,7 @@ interface KeywordData {
   cpcLow?: number;
   cpcHigh?: number;
   isBranded?: boolean;
+  brandColor?: string;
 }
 
 interface WordCloudProps {
@@ -120,7 +121,7 @@ const WordCloud: React.FC<WordCloudProps> = ({
         text: item.keyword,
         size: fontSize,
         volume: item.searchVolume,
-        color: getColor(index, item.isBranded || false),
+        color: item.brandColor || getColor(index, item.isBranded || false),
         data: item
       };
     });

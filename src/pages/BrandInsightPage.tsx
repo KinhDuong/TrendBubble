@@ -2035,7 +2035,8 @@ export default function BrandInsightPage() {
                             data={filteredTopics.slice(0, maxBubbles).map(topic => ({
                               keyword: topic.name,
                               searchVolume: topic.searchVolume,
-                              isBranded: keywordData.find(kd => kd.keyword === topic.name)?.is_branded
+                              isBranded: keywordData.find(kd => kd.keyword === topic.name)?.is_branded,
+                              brandColor: topic.brandColor
                             }))}
                             maxWords={maxBubbles}
                             colorScheme="default"
