@@ -1797,24 +1797,6 @@ export default function BrandInsightPage() {
                       />
                     )}
                   </div>
-                  <div className={`flex flex-wrap items-center gap-3 mb-4 text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                    <time dateTime={lastUpdated.toISOString()}>
-                      Last updated: {lastUpdated.toLocaleString('en-US', {
-                        timeZone: 'America/New_York',
-                        month: 'short',
-                        day: 'numeric',
-                        year: 'numeric',
-                        hour12: true
-                      })} ET
-                    </time>
-                    <button
-                      onClick={handleExport}
-                      className={`flex items-center gap-2 px-2 py-1 rounded text-xs cursor-pointer transition-all hover:scale-105 ${theme === 'dark' ? 'bg-blue-900/30 text-blue-400 hover:bg-blue-900/50' : 'bg-blue-100 text-blue-700 hover:bg-blue-200'}`}
-                    >
-                      <Download className="w-3 h-3" />
-                      Export CSV
-                    </button>
-                  </div>
 
                   {(() => {
                     const effectiveTier = pageOwnerId === user?.id ? membershipTier : pageOwnerTier;
@@ -2056,6 +2038,24 @@ export default function BrandInsightPage() {
                         <h2 id="top-keywords-heading" className={`text-xl md:text-2xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                           Top {rankingFilteredTopics.length} Keywords for {brandPageData?.brand || decodedBrand}
                         </h2>
+                        <div className={`flex flex-wrap items-center gap-3 mb-4 text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                          <time dateTime={lastUpdated.toISOString()}>
+                            Last updated: {lastUpdated.toLocaleString('en-US', {
+                              timeZone: 'America/New_York',
+                              month: 'short',
+                              day: 'numeric',
+                              year: 'numeric',
+                              hour12: true
+                            })} ET
+                          </time>
+                          <button
+                            onClick={handleExport}
+                            className={`flex items-center gap-2 px-2 py-1 rounded text-xs cursor-pointer transition-all hover:scale-105 ${theme === 'dark' ? 'bg-blue-900/30 text-blue-400 hover:bg-blue-900/50' : 'bg-blue-100 text-blue-700 hover:bg-blue-200'}`}
+                          >
+                            <Download className="w-3 h-3" />
+                            Export CSV
+                          </button>
+                        </div>
                         {brandPageData.intro_text && (
                           <div
                             className={`mb-4 text-sm leading-relaxed rich-text-content ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}
