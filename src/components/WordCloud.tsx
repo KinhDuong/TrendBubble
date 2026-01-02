@@ -55,9 +55,16 @@ const WordCloud: React.FC<WordCloudProps> = ({
   }, []);
 
   const words = useMemo(() => {
-    if (!data || data.length === 0) return [];
+    if (!data || data.length === 0) {
+      return [];
+    }
 
-    const sortedData = [...data]
+    const validData = data.filter(item => item && item.keyword && item.searchVolume > 0);
+    if (validData.length === 0) {
+      return [];
+    }
+
+    const sortedData = [...validData]
       .sort((a, b) => b.searchVolume - a.searchVolume)
       .slice(0, maxWords);
 
@@ -102,32 +109,29 @@ const WordCloud: React.FC<WordCloudProps> = ({
     };
 
     const wordItems: WordItem[] = [];
-    const spiral = (angle: number) => {
-      const radius = angle * 2;
-      return {
-        x: dimensions.width / 2 + radius * Math.cos(angle),
-        y: dimensions.height / 2 + radius * Math.sin(angle)
-      };
-    };
-
-    let angle = 0;
-    const angleStep = 0.5;
+    const centerX = dimensions.width / 2;
+    const centerY = dimensions.height / 2;
+    const maxRadius = Math.min(dimensions.width, dimensions.height) * 0.4;
 
     sortedData.forEach((item, index) => {
       const normalizedSize = Math.log(item.searchVolume + 1) / Math.log(maxVolume + 1);
-      const fontSize = 12 + normalizedSize * 60;
+      const fontSize = 16 + normalizedSize * 48;
 
-      const position = spiral(angle);
-      angle += angleStep;
+      const angle = (index / sortedData.length) * Math.PI * 2 * 3;
+      const radiusFactor = Math.sqrt(index / sortedData.length);
+      const radius = radiusFactor * maxRadius;
 
-      const rotation = Math.random() > 0.85 ? (Math.random() > 0.5 ? -45 : 45) : 0;
+      const x = centerX + radius * Math.cos(angle);
+      const y = centerY + radius * Math.sin(angle);
+
+      const rotation = Math.random() > 0.9 ? (Math.random() > 0.5 ? -30 : 30) : 0;
 
       wordItems.push({
         text: item.keyword,
         size: fontSize,
         volume: item.searchVolume,
-        x: position.x,
-        y: position.y,
+        x,
+        y,
         rotation,
         color: getColor(index, item.isBranded || false),
         data: item
@@ -137,19 +141,26 @@ const WordCloud: React.FC<WordCloudProps> = ({
     return wordItems;
   }, [data, maxWords, dimensions, colorScheme, brandColor]);
 
-  if (!data || data.length === 0) {
+  const hasData = data && data.length > 0 && data.some(item => item && item.keyword && item.searchVolume > 0);
+
+  if (!hasData || words.length === 0) {
     return (
-      <div className={`flex items-center justify-center h-96 bg-gray-50 rounded-lg ${className}`}>
-        <p className="text-gray-500">No data available for word cloud</p>
+      <div className={`flex items-center justify-center min-h-[500px] h-[600px] rounded-lg ${className}`}>
+        <div className="text-center">
+          <p className="text-gray-500 text-lg font-medium">No keywords available</p>
+          <p className="text-gray-400 text-sm mt-2">Please select a different filter or add keyword data</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div ref={containerRef} className={`relative w-full h-[600px] bg-white rounded-lg overflow-hidden ${className}`}>
+    <div ref={containerRef} className={`relative w-full min-h-[500px] h-[600px] rounded-lg overflow-hidden border ${className}`}>
       <svg
-        width={dimensions.width}
-        height={dimensions.height}
+        width="100%"
+        height="100%"
+        viewBox={`0 0 ${dimensions.width} ${dimensions.height}`}
+        preserveAspectRatio="xMidYMid meet"
         className="w-full h-full"
         style={{ cursor: onWordClick ? 'pointer' : 'default' }}
       >
@@ -166,8 +177,9 @@ const WordCloud: React.FC<WordCloudProps> = ({
             className="transition-all duration-200 select-none"
             style={{
               fontWeight: hoveredWord === word.text ? 700 : 600,
-              opacity: hoveredWord === word.text ? 1 : 0.85,
-              cursor: onWordClick ? 'pointer' : 'default'
+              opacity: hoveredWord === word.text ? 1 : 0.9,
+              cursor: onWordClick ? 'pointer' : 'default',
+              fontFamily: 'system-ui, -apple-system, sans-serif'
             }}
             onMouseEnter={() => setHoveredWord(word.text)}
             onMouseLeave={() => setHoveredWord(null)}
@@ -180,13 +192,13 @@ const WordCloud: React.FC<WordCloudProps> = ({
 
       {hoveredWord && (
         <div
-          className="absolute bottom-4 left-4 bg-white/95 px-4 py-2 rounded-lg shadow-lg border border-gray-200"
+          className="absolute bottom-4 left-4 bg-gray-900/95 px-4 py-3 rounded-lg shadow-xl border border-gray-700 backdrop-blur-sm"
           style={{ pointerEvents: 'none' }}
         >
-          <p className="text-sm font-semibold text-gray-900">
+          <p className="text-sm font-bold text-white">
             {hoveredWord}
           </p>
-          <p className="text-xs text-gray-600">
+          <p className="text-xs text-gray-300 mt-1">
             Search Volume: {formatCompactNumber(words.find(w => w.text === hoveredWord)?.volume || 0)}
           </p>
         </div>

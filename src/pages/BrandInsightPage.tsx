@@ -2030,17 +2030,17 @@ export default function BrandInsightPage() {
                       )}
 
                       {viewMode === 'wordcloud' && (
-                        <div ref={wordCloudRef} className="max-w-7xl mx-auto">
+                        <div ref={wordCloudRef} className="max-w-7xl mx-auto my-8">
                           <WordCloud
                             data={filteredTopics.slice(0, maxBubbles).map(topic => ({
                               keyword: topic.name,
                               searchVolume: topic.searchVolume,
                               isBranded: keywordData.find(kd => kd.keyword === topic.name)?.is_branded
                             }))}
-                            maxWords={maxBubbles}
+                            maxWords={Math.min(maxBubbles, 200)}
                             colorScheme="default"
                             brandColor={getBrandColor(brandPageData?.brand || decodedBrand)}
-                            className={theme === 'dark' ? 'bg-gray-800' : 'bg-white'}
+                            className={theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}
                           />
                         </div>
                       )}
