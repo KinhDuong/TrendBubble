@@ -27,9 +27,12 @@ const BRAND_COLORS = [
   '#84CC16', // lime
 ];
 
-export function getBrandColor(brandName: string, allBrands: string[]): string {
+export function getBrandColor(brandName: string, allBrands: string[] = []): string {
+  if (!allBrands || allBrands.length === 0) {
+    return BRAND_COLORS[0];
+  }
   const index = allBrands.indexOf(brandName);
-  return BRAND_COLORS[index % BRAND_COLORS.length];
+  return BRAND_COLORS[index >= 0 ? index % BRAND_COLORS.length : 0];
 }
 
 export default function BrandSelector({

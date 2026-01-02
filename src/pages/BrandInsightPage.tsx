@@ -2039,7 +2039,7 @@ export default function BrandInsightPage() {
                             }))}
                             maxWords={Math.min(maxBubbles, 200)}
                             colorScheme="default"
-                            brandColor={getBrandColor(brandPageData?.brand || decodedBrand)}
+                            brandColor={getBrandColor(brandPageData?.brand || decodedBrand, availableBrands)}
                             className={theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}
                           />
                         </div>
