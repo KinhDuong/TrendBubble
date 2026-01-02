@@ -1,6 +1,8 @@
 import React, { useMemo, useState, useEffect, useRef } from 'react';
 import cloud from 'd3-cloud';
 import { formatCompactNumber } from '../utils/formatNumber';
+import BubbleTooltip from './BubbleTooltip';
+import { TrendingTopic } from '../types';
 
 interface KeywordData {
   keyword: string;
@@ -9,6 +11,17 @@ interface KeywordData {
   cpcHigh?: number;
   isBranded?: boolean;
   brandColor?: string;
+  three_month_change?: number;
+  yoy_change?: number;
+  monthly_searches?: number[];
+  bid_high?: number;
+  competition?: string | number;
+  competition_indexed?: number;
+  ai_insights?: string;
+  sentiment?: number;
+  search_variants?: string;
+  brand?: string;
+  monthlySearches?: { month: string; volume: number }[];
 }
 
 interface WordCloudProps {
@@ -19,6 +32,7 @@ interface WordCloudProps {
   onWordClick?: (keyword: KeywordData) => void;
   className?: string;
   useMultiBrandColors?: boolean;
+  theme?: 'dark' | 'light';
 }
 
 interface CloudWord {
@@ -32,6 +46,13 @@ interface CloudWord {
   data: KeywordData;
 }
 
+interface TooltipData {
+  keyword: KeywordData;
+  x: number;
+  y: number;
+  rank: number;
+}
+
 const WordCloud: React.FC<WordCloudProps> = ({
   data,
   maxWords = 100,
@@ -39,12 +60,16 @@ const WordCloud: React.FC<WordCloudProps> = ({
   brandColor = '#3b82f6',
   onWordClick,
   className = '',
-  useMultiBrandColors = false
+  useMultiBrandColors = false,
+  theme = 'light'
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({ width: 1200, height: 500 });
   const [words, setWords] = useState<CloudWord[]>([]);
   const [hoveredWord, setHoveredWord] = useState<string | null>(null);
+  const [tooltipData, setTooltipData] = useState<TooltipData | null>(null);
+  const [pinnedKeywords, setPinnedKeywords] = useState<Set<string>>(new Set());
+  const [comparingKeywords, setComparingKeywords] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     const updateDimensions = () => {
@@ -211,7 +236,17 @@ const WordCloud: React.FC<WordCloudProps> = ({
               }}
               onMouseEnter={() => setHoveredWord(word.text)}
               onMouseLeave={() => setHoveredWord(null)}
-              onClick={() => onWordClick?.(word.data)}
+              onClick={(e) => {
+                const rect = (e.target as SVGTextElement).getBoundingClientRect();
+                const rank = words.findIndex(w => w.text === word.text) + 1;
+                setTooltipData({
+                  keyword: word.data,
+                  x: rect.left + rect.width / 2,
+                  y: rect.top,
+                  rank: rank
+                });
+                onWordClick?.(word.data);
+              }}
             >
               {word.text}
             </text>
@@ -219,7 +254,7 @@ const WordCloud: React.FC<WordCloudProps> = ({
         </g>
       </svg>
 
-      {hoveredWord && (
+      {hoveredWord && !tooltipData && (
         <div
           className="absolute bottom-4 left-4 bg-gray-900/95 px-4 py-3 rounded-lg shadow-xl border border-gray-700 backdrop-blur-sm"
           style={{ pointerEvents: 'none' }}
@@ -231,6 +266,65 @@ const WordCloud: React.FC<WordCloudProps> = ({
             Search Volume: {formatCompactNumber(words.find(w => w.text === hoveredWord)?.volume || 0)}
           </p>
         </div>
+      )}
+
+      {tooltipData && (
+        <BubbleTooltip
+          topic={{
+            name: tooltipData.keyword.keyword,
+            searchVolume: tooltipData.keyword.searchVolume,
+            searchVolumeRaw: tooltipData.keyword.searchVolume.toString(),
+            category: null,
+            source: 'user_upload',
+            url: null,
+            brand: tooltipData.keyword.brand || null,
+            brandColor: tooltipData.keyword.brandColor || null,
+            monthlySearches: tooltipData.keyword.monthlySearches || null,
+            note: null
+          } as TrendingTopic}
+          x={tooltipData.x}
+          y={tooltipData.y}
+          rank={tooltipData.rank}
+          theme={theme}
+          isPinned={pinnedKeywords.has(tooltipData.keyword.keyword)}
+          onTogglePin={() => {
+            setPinnedKeywords(prev => {
+              const newSet = new Set(prev);
+              if (newSet.has(tooltipData.keyword.keyword)) {
+                newSet.delete(tooltipData.keyword.keyword);
+              } else {
+                newSet.add(tooltipData.keyword.keyword);
+              }
+              return newSet;
+            });
+          }}
+          onCompare={() => {
+            setComparingKeywords(prev => {
+              const newSet = new Set(prev);
+              if (newSet.has(tooltipData.keyword.keyword)) {
+                newSet.delete(tooltipData.keyword.keyword);
+              } else {
+                newSet.add(tooltipData.keyword.keyword);
+              }
+              return newSet;
+            });
+          }}
+          isComparing={comparingKeywords.has(tooltipData.keyword.keyword)}
+          onClose={() => setTooltipData(null)}
+          keywordData={{
+            keyword: tooltipData.keyword.keyword,
+            three_month_change: tooltipData.keyword.three_month_change,
+            yoy_change: tooltipData.keyword.yoy_change,
+            monthly_searches: tooltipData.keyword.monthly_searches,
+            bid_high: tooltipData.keyword.bid_high,
+            competition: tooltipData.keyword.competition,
+            competition_indexed: tooltipData.keyword.competition_indexed,
+            searchVolume: tooltipData.keyword.searchVolume,
+            ai_insights: tooltipData.keyword.ai_insights,
+            sentiment: tooltipData.keyword.sentiment,
+            search_variants: tooltipData.keyword.search_variants
+          }}
+        />
       )}
     </div>
   );

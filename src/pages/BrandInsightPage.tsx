@@ -2032,16 +2032,31 @@ export default function BrandInsightPage() {
                       {viewMode === 'wordcloud' && (
                         <div ref={wordCloudRef} className="max-w-7xl mx-auto my-8">
                           <WordCloud
-                            data={filteredTopics.slice(0, maxBubbles).map(topic => ({
-                              keyword: topic.name,
-                              searchVolume: topic.searchVolume,
-                              isBranded: keywordData.find(kd => kd.keyword === topic.name)?.is_branded,
-                              brandColor: topic.brandColor
-                            }))}
+                            data={filteredTopics.slice(0, maxBubbles).map(topic => {
+                              const kd = keywordData.find(kd => kd.keyword === topic.name);
+                              return {
+                                keyword: topic.name,
+                                searchVolume: topic.searchVolume,
+                                isBranded: kd?.is_branded,
+                                brandColor: topic.brandColor,
+                                brand: topic.brand,
+                                three_month_change: kd?.three_month_change,
+                                yoy_change: kd?.yoy_change,
+                                monthly_searches: kd?.monthly_searches,
+                                bid_high: kd?.bid_high,
+                                competition: kd?.competition,
+                                competition_indexed: kd?.competition_indexed,
+                                ai_insights: kd?.ai_insights,
+                                sentiment: kd?.sentiment,
+                                search_variants: kd?.search_variants,
+                                monthlySearches: topic.monthlySearches
+                              };
+                            })}
                             maxWords={maxBubbles}
                             colorScheme="default"
                             brandColor={getBrandColor(brandPageData?.brand || decodedBrand, availableBrands)}
                             useMultiBrandColors={selectedBrands.length > 1}
+                            theme={theme}
                             className={theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}
                           />
                         </div>
