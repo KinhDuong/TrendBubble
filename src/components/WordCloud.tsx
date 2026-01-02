@@ -184,7 +184,7 @@ const WordCloud: React.FC<WordCloudProps> = ({
   }
 
   return (
-    <div ref={containerRef} className={`relative w-full min-h-[500px] h-[600px] rounded-lg overflow-hidden border bg-white ${className}`}>
+    <div ref={containerRef} className={`relative w-full min-h-[500px] h-[600px] rounded-lg overflow-hidden border ${className}`}>
       <svg
         width="100%"
         height="100%"
