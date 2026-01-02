@@ -1759,48 +1759,46 @@ export default function BrandInsightPage() {
             <>
               <article className="max-w-7xl mx-auto mb-8">
                 <header>
-                  <div className="flex items-center justify-between gap-4 mb-4">
-                    <div className="flex-1">
-                      <button
-                        onClick={() => navigate('/insights')}
-                        className={`inline-flex items-center gap-2 text-sm mb-2 transition-colors ${theme === 'dark' ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'}`}
-                      >
-                        <ArrowLeft className="w-4 h-4" />
-                        Back to Insights
-                      </button>
-                      <div className="flex items-center gap-4 flex-wrap">
-                        <h1 className={`text-lg md:text-3xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                          {selectedBrands.length === 1 ? brandPageData.meta_title : 'Multi-Brand Keyword Insights'}
-                        </h1>
-                        {availableBrands.length > 1 && (
-                          <div className="flex items-center gap-2">
-                            <span className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                              Compare Multiple Brands:
-                            </span>
-                            <BrandSelector
-                              availableBrands={availableBrands}
-                              selectedBrands={selectedBrands}
-                              onSelectionChange={setSelectedBrands}
-                              theme={theme}
-                              disabled={loading}
-                            />
-                          </div>
-                        )}
-                      </div>
+                  <div className="mb-4">
+                    <button
+                      onClick={() => navigate('/insights')}
+                      className={`inline-flex items-center gap-2 text-sm mb-2 transition-colors ${theme === 'dark' ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'}`}
+                    >
+                      <ArrowLeft className="w-4 h-4" />
+                      Back to Insights
+                    </button>
+                    <h1 className={`text-lg md:text-3xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'} mb-3`}>
+                      {selectedBrands.length === 1 ? brandPageData.meta_title : 'Multi-Brand Keyword Insights'}
+                    </h1>
+                    <div className={`flex items-center gap-4 ${availableBrands.length > 1 ? 'justify-between' : 'justify-end'}`}>
+                      {availableBrands.length > 1 && (
+                        <div className="flex items-center gap-2">
+                          <span className={`text-sm font-medium ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                            Compare Multiple Brands:
+                          </span>
+                          <BrandSelector
+                            availableBrands={availableBrands}
+                            selectedBrands={selectedBrands}
+                            onSelectionChange={setSelectedBrands}
+                            theme={theme}
+                            disabled={loading}
+                          />
+                        </div>
+                      )}
+                      {(viewMode === 'bubble' || viewMode === 'bar' || viewMode === 'treemap' || viewMode === 'donut' || viewMode === 'wordcloud') && transformToTopics.length > 0 && (
+                        <ShareSnapshot
+                          theme={theme}
+                          canvasRef={
+                            viewMode === 'bubble' ? bubbleChartRef :
+                            viewMode === 'treemap' ? treemapChartRef :
+                            viewMode === 'donut' ? donutChartRef :
+                            viewMode === 'wordcloud' ? wordCloudRef :
+                            barChartRef
+                          }
+                          variant="inline"
+                        />
+                      )}
                     </div>
-                    {(viewMode === 'bubble' || viewMode === 'bar' || viewMode === 'treemap' || viewMode === 'donut' || viewMode === 'wordcloud') && transformToTopics.length > 0 && (
-                      <ShareSnapshot
-                        theme={theme}
-                        canvasRef={
-                          viewMode === 'bubble' ? bubbleChartRef :
-                          viewMode === 'treemap' ? treemapChartRef :
-                          viewMode === 'donut' ? donutChartRef :
-                          viewMode === 'wordcloud' ? wordCloudRef :
-                          barChartRef
-                        }
-                        variant="inline"
-                      />
-                    )}
                   </div>
 
                   {(() => {
