@@ -125,32 +125,33 @@ const WordCloud: React.FC<WordCloudProps> = ({
       };
     });
 
-    // Custom spiral function for oval shape
-    const ovalSpiral = (size: [number, number]) => {
-      const a = size[0] / 2; // semi-major axis
-      const b = size[1] / 2; // semi-minor axis
+    // Custom elliptical spiral function
+    const ellipticalSpiral = (size: [number, number]) => {
+      const e = size[0] / size[1]; // ellipse ratio
 
       return (t: number) => {
-        const angle = t * 0.1;
-        const radius = t * 2;
-        const x = radius * Math.cos(angle);
-        const y = radius * Math.sin(angle);
+        const dt = 4;
+        const dy = 12;
+        const dx = dy * e;
 
-        // Scale to fit oval
-        const scale = Math.min(1, Math.sqrt(1 / ((x * x) / (a * a) + (y * y) / (b * b)) || 1));
-
-        return [x * scale * 0.9, y * scale * 0.9];
+        t += 1;
+        const angle = t * dt;
+        return [
+          e * (dy * t) * Math.cos(angle),
+          (dy * t) * Math.sin(angle)
+        ];
       };
     };
 
     const layout = cloud()
       .size([dimensions.width, dimensions.height])
       .words(cloudWords as any)
-      .padding(4)
+      .padding(6)
       .rotate(() => 0)
       .font('system-ui, -apple-system, sans-serif')
       .fontSize(d => (d as CloudWord).size)
-      .spiral(ovalSpiral)
+      .spiral(ellipticalSpiral)
+      .timeInterval(10)
       .on('end', (computedWords) => {
         setWords(computedWords as CloudWord[]);
       });
