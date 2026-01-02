@@ -39,7 +39,7 @@ const WordCloud: React.FC<WordCloudProps> = ({
   className = ''
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
+  const [dimensions, setDimensions] = useState({ width: 1200, height: 500 });
   const [words, setWords] = useState<CloudWord[]>([]);
   const [hoveredWord, setHoveredWord] = useState<string | null>(null);
 
@@ -47,8 +47,8 @@ const WordCloud: React.FC<WordCloudProps> = ({
     const updateDimensions = () => {
       if (containerRef.current) {
         const { width } = containerRef.current.getBoundingClientRect();
-        const height = Math.min(width * 0.65, 650);
-        setDimensions({ width: Math.max(width, 400), height: Math.max(height, 400) });
+        const height = Math.min(width * 0.42, 700);
+        setDimensions({ width: Math.max(width, 600), height: Math.max(height, 500) });
       }
     };
 
@@ -114,7 +114,7 @@ const WordCloud: React.FC<WordCloudProps> = ({
 
     const cloudWords: CloudWord[] = sortedData.map((item, index) => {
       const normalizedSize = Math.sqrt(item.searchVolume) / Math.sqrt(maxVolume);
-      const fontSize = 16 + normalizedSize * 72;
+      const fontSize = 12 + normalizedSize * 48;
 
       return {
         text: item.keyword,
@@ -127,8 +127,8 @@ const WordCloud: React.FC<WordCloudProps> = ({
 
     // Custom elliptical spiral function for pronounced oval shape
     const ellipticalSpiral = (size: [number, number]) => {
-      const horizontalStretch = 1.6; // Makes it wider (oval)
-      const verticalCompress = 0.8; // Makes it less tall
+      const horizontalStretch = 2.4; // Makes it wider (oval)
+      const verticalCompress = 0.55; // Makes it less tall
 
       return (t: number) => {
         const angle = t * 0.1;
@@ -143,12 +143,12 @@ const WordCloud: React.FC<WordCloudProps> = ({
     const layout = cloud()
       .size([dimensions.width, dimensions.height])
       .words(cloudWords as any)
-      .padding(6)
+      .padding(3)
       .rotate(() => 0)
       .font('system-ui, -apple-system, sans-serif')
       .fontSize(d => (d as CloudWord).size)
       .spiral(ellipticalSpiral)
-      .timeInterval(10)
+      .timeInterval(50)
       .on('end', (computedWords) => {
         setWords(computedWords as CloudWord[]);
       });
@@ -160,7 +160,7 @@ const WordCloud: React.FC<WordCloudProps> = ({
 
   if (!hasData) {
     return (
-      <div className={`flex items-center justify-center min-h-[400px] h-[500px] rounded-lg ${className}`}>
+      <div className={`flex items-center justify-center min-h-[500px] h-[600px] rounded-lg ${className}`}>
         <div className="text-center">
           <p className="text-gray-500 text-lg font-medium">No keywords available</p>
           <p className="text-gray-400 text-sm mt-2">Please select a different filter or add keyword data</p>
@@ -171,7 +171,7 @@ const WordCloud: React.FC<WordCloudProps> = ({
 
   if (words.length === 0) {
     return (
-      <div className={`flex items-center justify-center min-h-[400px] h-[500px] rounded-lg ${className}`}>
+      <div className={`flex items-center justify-center min-h-[500px] h-[600px] rounded-lg ${className}`}>
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
           <p className="text-gray-500 text-sm mt-4">Generating word cloud...</p>
@@ -181,7 +181,7 @@ const WordCloud: React.FC<WordCloudProps> = ({
   }
 
   return (
-    <div ref={containerRef} className={`relative w-full min-h-[400px] h-[500px] rounded-lg overflow-hidden border bg-white ${className}`}>
+    <div ref={containerRef} className={`relative w-full min-h-[500px] h-[600px] rounded-lg overflow-hidden border bg-white ${className}`}>
       <svg
         width="100%"
         height="100%"
