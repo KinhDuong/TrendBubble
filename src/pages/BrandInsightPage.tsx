@@ -2041,6 +2041,7 @@ export default function BrandInsightPage() {
                             maxWords={maxBubbles}
                             colorScheme="default"
                             brandColor={getBrandColor(brandPageData?.brand || decodedBrand, availableBrands)}
+                            useMultiBrandColors={selectedBrands.length > 1}
                             className={theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}
                           />
                         </div>

@@ -18,6 +18,7 @@ interface WordCloudProps {
   brandColor?: string;
   onWordClick?: (keyword: KeywordData) => void;
   className?: string;
+  useMultiBrandColors?: boolean;
 }
 
 interface CloudWord {
@@ -37,7 +38,8 @@ const WordCloud: React.FC<WordCloudProps> = ({
   colorScheme = 'default',
   brandColor = '#3b82f6',
   onWordClick,
-  className = ''
+  className = '',
+  useMultiBrandColors = false
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({ width: 1200, height: 500 });
@@ -121,7 +123,7 @@ const WordCloud: React.FC<WordCloudProps> = ({
         text: item.keyword,
         size: fontSize,
         volume: item.searchVolume,
-        color: item.brandColor || getColor(index, item.isBranded || false),
+        color: (useMultiBrandColors && item.brandColor) ? item.brandColor : getColor(index, item.isBranded || false),
         data: item
       };
     });
