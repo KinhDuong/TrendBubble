@@ -129,7 +129,7 @@ const WordCloud: React.FC<WordCloudProps> = ({
       .size([dimensions.width, dimensions.height])
       .words(cloudWords as any)
       .padding(4)
-      .rotate(() => (Math.random() > 0.7 ? (Math.random() > 0.5 ? 90 : -90) : 0))
+      .rotate(() => 0)
       .font('system-ui, -apple-system, sans-serif')
       .fontSize(d => (d as CloudWord).size)
       .spiral('archimedean')
