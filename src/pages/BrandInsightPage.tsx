@@ -1775,7 +1775,7 @@ export default function BrandInsightPage() {
                         {availableBrands.length > 1 && (
                           <div className="flex items-center gap-2">
                             <span className={`text-sm font-medium whitespace-nowrap ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                              Compare Multiple Brands:
+                              Compare Brands:
                             </span>
                             <BrandSelector
                               availableBrands={availableBrands}
