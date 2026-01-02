@@ -2037,7 +2037,7 @@ export default function BrandInsightPage() {
                               searchVolume: topic.searchVolume,
                               isBranded: keywordData.find(kd => kd.keyword === topic.name)?.is_branded
                             }))}
-                            maxWords={Math.min(maxBubbles, 200)}
+                            maxWords={maxBubbles}
                             colorScheme="default"
                             brandColor={getBrandColor(brandPageData?.brand || decodedBrand, availableBrands)}
                             className={theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}
