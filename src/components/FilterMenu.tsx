@@ -644,32 +644,6 @@ export default function FilterMenu({
                   <Divider />
                 </>
               )}
-              {viewMode === 'bubble' && onShapeChange && (
-                <>
-                  <div className="flex items-center gap-2">
-                    <label htmlFor="shape" className={`text-xs font-medium whitespace-nowrap ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                      Shape:
-                    </label>
-                    <select
-                      id="shape"
-                      value={shape}
-                      onChange={(e) => onShapeChange(e.target.value as Shape)}
-                      className={`flex-1 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'} border rounded px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500`}
-                      aria-label="Select bubble shape"
-                    >
-                      <option value="bubble">Bubble</option>
-                      <option value="square">Square</option>
-                      <option value="rounded-square">Rounded Square</option>
-                      <option value="hexagon">Hexagon</option>
-                      <option value="diamond">Diamond</option>
-                      <option value="triangle">Triangle</option>
-                      <option value="star">Star</option>
-                      <option value="shark">Shark</option>
-                    </select>
-                  </div>
-                  <Divider />
-                </>
-              )}
               <div className="flex items-center gap-2">
                 <div className={`flex-1 flex items-center gap-1 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'} rounded p-1`}>
                   <button
@@ -696,34 +670,6 @@ export default function FilterMenu({
                   </button>
                 </div>
               </div>
-              <Divider />
-              {onSearchQueryChange && onSearchClear && (
-                <div className="flex items-center gap-1">
-                  <input
-                    id="searchQuery"
-                    type="text"
-                    value={searchQuery || ''}
-                    onChange={(e) => {
-                      onSearchQueryChange(e.target.value);
-                      if (e.target.value.trim()) {
-                        onViewModeChange('list');
-                      }
-                    }}
-                    placeholder="Search bubbles..."
-                    className={`flex-1 ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'} border rounded px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[140px]`}
-                    aria-label="Search trending topics"
-                  />
-                  {searchQuery && (
-                    <button
-                      onClick={onSearchClear}
-                      className={`p-1 ${theme === 'dark' ? 'hover:bg-gray-600 text-white' : 'hover:bg-gray-200 text-gray-900'} rounded transition-colors`}
-                      aria-label="Clear search and return to bubble view"
-                    >
-                      <X size={14} />
-                    </button>
-                  )}
-                </div>
-              )}
             </div>
           </div>
         </div>
