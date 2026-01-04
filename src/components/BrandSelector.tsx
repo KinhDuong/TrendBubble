@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Check, ChevronDown, X } from 'lucide-react';
+import { CheckSquare, Square, ChevronDown, X } from 'lucide-react';
 
 interface Brand {
   name: string;
@@ -160,8 +160,15 @@ export default function BrandSelector({
                   }`}
                 >
                   <div className="flex items-center gap-3 flex-1 min-w-0">
+                    {isSelected ? (
+                      <CheckSquare className="w-5 h-5 flex-shrink-0 text-green-500" />
+                    ) : (
+                      <Square className={`w-5 h-5 flex-shrink-0 ${
+                        theme === 'dark' ? 'text-gray-500' : 'text-gray-400'
+                      }`} />
+                    )}
                     <div
-                      className="w-4 h-4 rounded-full flex-shrink-0"
+                      className="w-3 h-3 rounded-full flex-shrink-0"
                       style={{ backgroundColor: brandColor }}
                     />
                     <span
@@ -172,9 +179,6 @@ export default function BrandSelector({
                       {brand}
                     </span>
                   </div>
-                  {isSelected && (
-                    <Check className="w-4 h-4 flex-shrink-0 text-green-500" />
-                  )}
                 </button>
               );
             })}
