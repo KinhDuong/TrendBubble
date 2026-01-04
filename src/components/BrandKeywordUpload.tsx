@@ -192,9 +192,11 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
       }
 
       if (similar.length > 1) {
-        const primaryKeyword = similar.reduce((longest, current) =>
-          current.keyword.length > longest.keyword.length ? current : longest
-        ).keyword;
+        const primaryKeyword = similar.reduce((highest, current) => {
+          const currentVolume = current['Avg. monthly searches'] || 0;
+          const highestVolume = highest['Avg. monthly searches'] || 0;
+          return currentVolume > highestVolume ? current : highest;
+        }).keyword;
 
         const mergedData: any = {
           keyword: primaryKeyword,
