@@ -729,12 +729,21 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
       pageId = existingPage.page_id;
     }
 
+    // Calculate average monthly searches across all keywords
+    const avgMonthlySearches = Math.round(
+      data.reduce((sum, record) => {
+        const searches = record['Avg. monthly searches'];
+        return sum + (typeof searches === 'number' ? searches : 0);
+      }, 0) / data.length
+    );
+
     const { error: brandPageError } = await supabase
       .from('brand_pages')
       .upsert({
         user_id: user.id,
         brand: brandName.trim(),
         page_id: pageId,
+        avg_monthly_searches: avgMonthlySearches,
         meta_title: `${brandName.trim()} - Keyword Search Trends & SEO Insights`,
         meta_description: `Analyze ${brandName.trim()} keyword search volume trends and SEO performance data.`,
         updated_at: new Date().toISOString()
