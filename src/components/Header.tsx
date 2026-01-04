@@ -73,8 +73,6 @@ function Header({ theme, isAdmin, isLoggedIn = false, onLoginClick, onLogout, ti
       }
 
       try {
-        console.log('Searching for:', searchQuery);
-
         // Execute both queries in parallel
         const [pagesResult, brandPagesResult] = await Promise.all([
           supabase
@@ -84,30 +82,29 @@ function Header({ theme, isAdmin, isLoggedIn = false, onLoginClick, onLogout, ti
             .limit(6),
           supabase
             .from('brand_pages')
-            .select(`
-              id,
-              brand,
-              meta_title,
-              meta_description,
-              page_id,
-              user_id,
-              user_profiles!inner(username)
-            `)
+            .select('id, brand, meta_title, meta_description, page_id, user_id')
             .eq('is_public', true)
             .or(`brand.ilike.%${searchQuery}%,meta_title.ilike.%${searchQuery}%,meta_description.ilike.%${searchQuery}%`)
             .limit(6)
         ]);
 
-        console.log('Pages result:', pagesResult);
-        console.log('Brand pages result:', brandPagesResult);
+        if (pagesResult.error) throw pagesResult.error;
+        if (brandPagesResult.error) throw brandPagesResult.error;
 
-        if (pagesResult.error) {
-          console.error('Pages query error:', pagesResult.error);
-          throw pagesResult.error;
-        }
-        if (brandPagesResult.error) {
-          console.error('Brand pages query error:', brandPagesResult.error);
-          throw brandPagesResult.error;
+        // Fetch usernames for brand pages
+        let brandPagesWithUsernames: any[] = [];
+        if (brandPagesResult.data && brandPagesResult.data.length > 0) {
+          const userIds = brandPagesResult.data.map(bp => bp.user_id);
+          const { data: profiles } = await supabase
+            .from('user_profiles')
+            .select('id, username')
+            .in('id', userIds);
+
+          const profileMap = new Map(profiles?.map(p => [p.id, p.username]) || []);
+          brandPagesWithUsernames = brandPagesResult.data.map(bp => ({
+            ...bp,
+            username: profileMap.get(bp.user_id) || ''
+          }));
         }
 
         // Transform pages to search results
@@ -121,11 +118,11 @@ function Header({ theme, isAdmin, isLoggedIn = false, onLoginClick, onLogout, ti
         }));
 
         // Transform brand pages to search results
-        const brandResults: SearchResult[] = (brandPagesResult.data || []).map((brandPage: any) => ({
+        const brandResults: SearchResult[] = brandPagesWithUsernames.map((brandPage: any) => ({
           id: `brand-${brandPage.id}`,
           title: brandPage.meta_title,
           description: brandPage.meta_description || '',
-          url: `/insights/${brandPage.user_profiles.username}/${brandPage.page_id}/`,
+          url: `/insights/${brandPage.username}/${brandPage.page_id}/`,
           type: 'brand' as const,
           source: brandPage.brand
         }));
