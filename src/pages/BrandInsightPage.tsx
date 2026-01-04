@@ -1896,7 +1896,12 @@ export default function BrandInsightPage() {
                           { id: 'cost-effective', label: 'Cost-Effective', emoji: '💰', requiresYoY: false },
                           { id: 'start-declining', label: 'Start Declining', emoji: '⚠️', requiresYoY: false },
                           { id: 'declining', label: 'Declining', emoji: '📉', requiresYoY: false },
-                        ].filter(filter => !filter.requiresYoY || hasYoYData).map((filter) => (
+                        ].filter(filter => {
+                          const alwaysShow = ['all', 'ultra-growth', 'ultra-high-growth', 'high-growth', 'rising-star', 'steady-growth', 'has-potential', 'momentum-building', 'hidden-gem'];
+                          const hasYoYCheck = !filter.requiresYoY || hasYoYData;
+                          const hasCount = getFilterCount(filter.id) > 0 || alwaysShow.includes(filter.id);
+                          return hasYoYCheck && hasCount;
+                        }).map((filter) => (
                           <button
                             key={filter.id}
                             onClick={() => setPerformanceFilter(filter.id)}
@@ -2096,7 +2101,12 @@ export default function BrandInsightPage() {
                               { id: 'high-volume', label: 'High Volume', emoji: '🏔️', requiresYoY: false },
                               { id: 'start-declining', label: 'Start Declining', emoji: '⚠️', requiresYoY: false },
                               { id: 'declining', label: 'Declining', emoji: '📉', requiresYoY: false },
-                            ].filter(filter => !filter.requiresYoY || hasYoYData).map((filter) => (
+                            ].filter(filter => {
+                              const alwaysShow = ['all', 'ultra-growth', 'ultra-high-growth', 'high-growth', 'rising-star', 'steady-growth', 'has-potential', 'momentum-building', 'hidden-gem'];
+                              const hasYoYCheck = !filter.requiresYoY || hasYoYData;
+                              const hasCount = getFilterCount(filter.id) > 0 || alwaysShow.includes(filter.id);
+                              return hasYoYCheck && hasCount;
+                            }).map((filter) => (
                               <button
                                 key={filter.id}
                                 onClick={() => setRankingListFilter(filter.id)}
