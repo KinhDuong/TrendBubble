@@ -23,6 +23,7 @@ import SEOStrategyInsights from '../components/SEOStrategyInsights';
 import PPCCampaignInsights from '../components/PPCCampaignInsights';
 import BrandSelector, { getBrandColor } from '../components/BrandSelector';
 import BrandKeywordStats from '../components/BrandKeywordStats';
+import BrandComparisonTable, { calculateBrandStats } from '../components/BrandComparisonTable';
 import { TrendingTopic, FAQ } from '../types';
 import { TrendingUp, Download, ArrowLeft, Search, X, ChevronsLeft, ChevronsRight, ArrowUpDown, ArrowUp, ArrowDown, Sparkles, AlertCircle } from 'lucide-react';
 import { formatCompactNumber } from '../utils/formatNumber';
@@ -644,12 +645,27 @@ export default function BrandInsightPage() {
       const brandNames = brandsWithMetadata.map(b => b.brand);
       setAvailableBrands(brandNames);
 
-      if (currentBrand && brandNames.includes(currentBrand)) {
-        setSelectedBrands([currentBrand]);
-        await loadMultiBrandData(userIdToUse, [currentBrand]);
-      } else if (brandNames.length > 0) {
-        setSelectedBrands([brandNames[0]]);
-        await loadMultiBrandData(userIdToUse, [brandNames[0]]);
+      const brandsParam = searchParams.get('brands');
+      let brandsToSelect: string[] = [];
+
+      if (brandsParam) {
+        const requestedBrands = brandsParam.split(',').filter(b => brandNames.includes(b));
+        if (requestedBrands.length > 0) {
+          brandsToSelect = requestedBrands;
+        }
+      }
+
+      if (brandsToSelect.length === 0) {
+        if (currentBrand && brandNames.includes(currentBrand)) {
+          brandsToSelect = [currentBrand];
+        } else if (brandNames.length > 0) {
+          brandsToSelect = [brandNames[0]];
+        }
+      }
+
+      if (brandsToSelect.length > 0) {
+        setSelectedBrands(brandsToSelect);
+        await loadMultiBrandData(userIdToUse, brandsToSelect);
       }
     } catch (error) {
       console.error('Error loading latest brand pages:', error);
@@ -718,6 +734,17 @@ export default function BrandInsightPage() {
     });
   };
 
+  const handleBrandSelectionChange = (brands: string[]) => {
+    setSelectedBrands(brands);
+    const params = new URLSearchParams(location.search);
+    if (brands.length > 0) {
+      params.set('brands', brands.join(','));
+    } else {
+      params.delete('brands');
+    }
+    navigate(location.pathname + '?' + params.toString(), { replace: true });
+  };
+
   const handleToggleCompare = (topicName: string) => {
     setComparingTopics(prev => {
       const newSet = new Set(prev);
@@ -784,6 +811,13 @@ export default function BrandInsightPage() {
       return [];
     }
   }, [keywordData, monthColumns, availableBrands, selectedBrands]);
+
+  const brandComparisonStats = useMemo(() => {
+    if (selectedBrands.length < 2 || keywordData.length === 0) {
+      return [];
+    }
+    return selectedBrands.map(brand => calculateBrandStats(keywordData, brand));
+  }, [selectedBrands, keywordData]);
 
   const keywordPerformanceData = useMemo(() => {
     try {
@@ -1838,7 +1872,7 @@ export default function BrandInsightPage() {
                             <BrandSelector
                               availableBrands={availableBrands}
                               selectedBrands={selectedBrands}
-                              onSelectionChange={setSelectedBrands}
+                              onSelectionChange={handleBrandSelectionChange}
                               theme={theme}
                               disabled={loading}
                             />
@@ -1860,6 +1894,14 @@ export default function BrandInsightPage() {
                       </div>
                     </div>
                   </div>
+
+                  {selectedBrands.length >= 2 && brandComparisonStats.length >= 2 && (
+                    <BrandComparisonTable
+                      brandStats={brandComparisonStats}
+                      availableBrands={availableBrands}
+                      theme={theme}
+                    />
+                  )}
 
                   {(() => {
                     const effectiveTier = pageOwnerId === user?.id ? membershipTier : pageOwnerTier;
