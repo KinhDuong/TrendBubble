@@ -536,19 +536,45 @@ export default function BrandInsightPage() {
         if (profileError) throw profileError;
 
         if (!profileData) {
-          return null;
+          // If no user profile found, try to find a public brand page with matching page_id
+          const publicPageResult = await supabase
+            .from('brand_pages')
+            .select('*, user_id, avg_monthly_searches')
+            .eq('page_id', decodedBrand)
+            .eq('is_public', true)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+
+          if (publicPageResult.data) {
+            data = publicPageResult.data;
+            error = publicPageResult.error;
+
+            // Load the username for the owner
+            const { data: ownerProfile } = await supabase
+              .from('user_profiles')
+              .select('username')
+              .eq('id', publicPageResult.data.user_id)
+              .maybeSingle();
+
+            if (ownerProfile) {
+              setPageOwnerUsername(ownerProfile.username);
+            }
+          } else {
+            return null;
+          }
+        } else {
+          setPageOwnerUsername(profileData.username);
+
+          const result = await supabase
+            .from('brand_pages')
+            .select('*, user_id, avg_monthly_searches')
+            .eq('user_id', profileData.id)
+            .eq('page_id', decodedBrand)
+            .maybeSingle();
+          data = result.data;
+          error = result.error;
         }
-
-        setPageOwnerUsername(profileData.username);
-
-        const result = await supabase
-          .from('brand_pages')
-          .select('*, user_id, avg_monthly_searches')
-          .eq('user_id', profileData.id)
-          .eq('page_id', decodedBrand)
-          .maybeSingle();
-        data = result.data;
-        error = result.error;
       }
 
       if (error) throw error;
