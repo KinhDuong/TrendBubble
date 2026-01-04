@@ -78,7 +78,7 @@ function Header({ theme, isAdmin, isLoggedIn = false, onLoginClick, onLogout, ti
           supabase
             .from('pages')
             .select('*')
-            .or(`meta_title.ilike.%${searchQuery}%,meta_description.ilike.%${searchQuery}%,page_url.ilike.%${searchQuery}%`)
+            .or(`meta_title.ilike.*${searchQuery}*,meta_description.ilike.*${searchQuery}*,page_url.ilike.*${searchQuery}*`)
             .limit(6),
           supabase
             .from('brand_pages')
@@ -92,7 +92,7 @@ function Header({ theme, isAdmin, isLoggedIn = false, onLoginClick, onLogout, ti
               user_profiles!inner(username)
             `)
             .eq('is_public', true)
-            .or(`brand.ilike.%${searchQuery}%,meta_title.ilike.%${searchQuery}%,meta_description.ilike.%${searchQuery}%`)
+            .or(`brand.ilike.*${searchQuery}*,meta_title.ilike.*${searchQuery}*,meta_description.ilike.*${searchQuery}*`)
             .limit(6)
         ]);
 
