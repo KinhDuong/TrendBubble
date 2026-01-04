@@ -73,12 +73,14 @@ function Header({ theme, isAdmin, isLoggedIn = false, onLoginClick, onLogout, ti
       }
 
       try {
+        console.log('Searching for:', searchQuery);
+
         // Execute both queries in parallel
         const [pagesResult, brandPagesResult] = await Promise.all([
           supabase
             .from('pages')
             .select('*')
-            .or(`meta_title.ilike.*${searchQuery}*,meta_description.ilike.*${searchQuery}*,page_url.ilike.*${searchQuery}*`)
+            .or(`meta_title.ilike.%${searchQuery}%,meta_description.ilike.%${searchQuery}%,page_url.ilike.%${searchQuery}%`)
             .limit(6),
           supabase
             .from('brand_pages')
@@ -92,12 +94,21 @@ function Header({ theme, isAdmin, isLoggedIn = false, onLoginClick, onLogout, ti
               user_profiles!inner(username)
             `)
             .eq('is_public', true)
-            .or(`brand.ilike.*${searchQuery}*,meta_title.ilike.*${searchQuery}*,meta_description.ilike.*${searchQuery}*`)
+            .or(`brand.ilike.%${searchQuery}%,meta_title.ilike.%${searchQuery}%,meta_description.ilike.%${searchQuery}%`)
             .limit(6)
         ]);
 
-        if (pagesResult.error) throw pagesResult.error;
-        if (brandPagesResult.error) throw brandPagesResult.error;
+        console.log('Pages result:', pagesResult);
+        console.log('Brand pages result:', brandPagesResult);
+
+        if (pagesResult.error) {
+          console.error('Pages query error:', pagesResult.error);
+          throw pagesResult.error;
+        }
+        if (brandPagesResult.error) {
+          console.error('Brand pages query error:', brandPagesResult.error);
+          throw brandPagesResult.error;
+        }
 
         // Transform pages to search results
         const pageResults: SearchResult[] = (pagesResult.data || []).map(page => ({
