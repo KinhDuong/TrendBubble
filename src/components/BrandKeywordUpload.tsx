@@ -685,42 +685,43 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
 
     console.log('Aggregated data:', aggregatedData);
 
-    if (aggregatedData.length === 0) {
-      throw new Error('No monthly data could be aggregated. Please check that your CSV has "Searches: MMM YYYY" columns with valid data.');
+    // Monthly data is optional - only insert if we have it
+    if (aggregatedData.length > 0) {
+      const monthlyRecords = aggregatedData.map(record => ({
+        ...record,
+        user_id: user.id,
+        created_at: new Date().toISOString()
+      }));
+
+      console.log('Inserting monthly records:', monthlyRecords);
+      console.log('First record sample:', JSON.stringify(monthlyRecords[0], null, 2));
+
+      console.log('Deleting existing monthly data for brand:', brandName.trim());
+      const { error: monthlyDeleteError } = await supabase
+        .from('brand_keyword_monthly_data')
+        .delete()
+        .eq('brand', brandName.trim())
+        .eq('user_id', user.id);
+
+      if (monthlyDeleteError) {
+        console.error('Monthly delete error:', monthlyDeleteError);
+      }
+
+      const { data: insertedData, error: monthlyInsertError } = await supabase
+        .from('brand_keyword_monthly_data')
+        .insert(monthlyRecords)
+        .select();
+
+      if (monthlyInsertError) {
+        console.error('Monthly data insert error:', monthlyInsertError);
+        console.error('Error details:', JSON.stringify(monthlyInsertError, null, 2));
+        throw new Error(`Failed to save monthly data: ${monthlyInsertError.message}`);
+      }
+
+      console.log('Successfully inserted monthly data:', insertedData);
+    } else {
+      console.log('⚠ No monthly breakdown columns found in CSV - skipping monthly data aggregation');
     }
-
-    const monthlyRecords = aggregatedData.map(record => ({
-      ...record,
-      user_id: user.id,
-      created_at: new Date().toISOString()
-    }));
-
-    console.log('Inserting monthly records:', monthlyRecords);
-    console.log('First record sample:', JSON.stringify(monthlyRecords[0], null, 2));
-
-    console.log('Deleting existing monthly data for brand:', brandName.trim());
-    const { error: monthlyDeleteError } = await supabase
-      .from('brand_keyword_monthly_data')
-      .delete()
-      .eq('brand', brandName.trim())
-      .eq('user_id', user.id);
-
-    if (monthlyDeleteError) {
-      console.error('Monthly delete error:', monthlyDeleteError);
-    }
-
-    const { data: insertedData, error: monthlyInsertError } = await supabase
-      .from('brand_keyword_monthly_data')
-      .insert(monthlyRecords)
-      .select();
-
-    if (monthlyInsertError) {
-      console.error('Monthly data insert error:', monthlyInsertError);
-      console.error('Error details:', JSON.stringify(monthlyInsertError, null, 2));
-      throw new Error(`Failed to save monthly data: ${monthlyInsertError.message}`);
-    }
-
-    console.log('Successfully inserted monthly data:', insertedData);
 
     const baseSlug = generateSlug(brandName.trim());
 
@@ -802,7 +803,11 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
       throw new Error(`Failed to create brand page: ${brandPageError.message}`);
     }
 
-    setSuccess(`Successfully uploaded data for ${brandName.trim()}: ${data.length} keywords with ${aggregatedData.length} months of trend data`);
+    const successMessage = aggregatedData.length > 0
+      ? `Successfully uploaded data for ${brandName.trim()}: ${data.length} keywords with ${aggregatedData.length} months of trend data`
+      : `Successfully uploaded data for ${brandName.trim()}: ${data.length} keywords`;
+
+    setSuccess(successMessage);
     onUploadComplete();
 
     setTimeout(() => {
