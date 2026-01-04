@@ -21,6 +21,23 @@ interface Page {
   source: string;
 }
 
+interface TrendingTopic {
+  id: string;
+  name: string;
+  category: string;
+  url?: string;
+  source: string;
+}
+
+interface SearchResult {
+  id: string;
+  title: string;
+  description: string;
+  url: string;
+  type: 'page' | 'topic';
+  source: string;
+}
+
 const TITLE_STYLE = {
   fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
   fontWeight: 700,
@@ -30,7 +47,7 @@ const TITLE_STYLE = {
 function Header({ theme, isAdmin, isLoggedIn = false, onLoginClick, onLogout, title = 'Top Best Charts', useH1 = false, snapshotButton }: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState<Page[]>([]);
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
@@ -48,28 +65,60 @@ function Header({ theme, isAdmin, isLoggedIn = false, onLoginClick, onLogout, ti
   }, []);
 
   useEffect(() => {
-    const searchPages = async () => {
+    const searchAll = async () => {
       if (searchQuery.trim().length < 2) {
         setSearchResults([]);
         return;
       }
 
       try {
-        const { data, error } = await supabase
-          .from('pages')
-          .select('*')
-          .or(`meta_title.ilike.%${searchQuery}%,meta_description.ilike.%${searchQuery}%,page_url.ilike.%${searchQuery}%`)
-          .limit(10);
+        // Execute both queries in parallel
+        const [pagesResult, topicsResult] = await Promise.all([
+          supabase
+            .from('pages')
+            .select('*')
+            .or(`meta_title.ilike.%${searchQuery}%,meta_description.ilike.%${searchQuery}%,page_url.ilike.%${searchQuery}%`)
+            .limit(6),
+          supabase
+            .from('trending_topics')
+            .select('id, name, category, url, source')
+            .ilike('name', `%${searchQuery}%`)
+            .limit(6)
+        ]);
 
-        if (error) throw error;
-        setSearchResults(data || []);
+        if (pagesResult.error) throw pagesResult.error;
+        if (topicsResult.error) throw topicsResult.error;
+
+        // Transform pages to search results
+        const pageResults: SearchResult[] = (pagesResult.data || []).map(page => ({
+          id: `page-${page.id}`,
+          title: page.meta_title,
+          description: page.meta_description || '',
+          url: page.page_url,
+          type: 'page' as const,
+          source: page.source
+        }));
+
+        // Transform topics to search results
+        const topicResults: SearchResult[] = (topicsResult.data || []).map(topic => ({
+          id: `topic-${topic.id}`,
+          title: topic.name,
+          description: `${topic.category} • ${topic.source}`,
+          url: topic.url || `/trending-now/?topic=${encodeURIComponent(topic.name)}`,
+          type: 'topic' as const,
+          source: topic.source
+        }));
+
+        // Combine and limit to 10 total results
+        const combinedResults = [...topicResults, ...pageResults].slice(0, 10);
+        setSearchResults(combinedResults);
       } catch (error) {
-        console.error('Error searching pages:', error);
+        console.error('Error searching:', error);
         setSearchResults([]);
       }
     };
 
-    const debounceTimer = setTimeout(searchPages, 300);
+    const debounceTimer = setTimeout(searchAll, 300);
     return () => clearTimeout(debounceTimer);
   }, [searchQuery]);
 
@@ -214,18 +263,29 @@ function Header({ theme, isAdmin, isLoggedIn = false, onLoginClick, onLogout, ti
 
               {isSearchOpen && searchResults.length > 0 && (
                 <div className={`absolute top-full right-0 mt-2 w-72 md:w-96 ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto`}>
-                  {searchResults.map((page) => (
+                  {searchResults.map((result) => (
                     <a
-                      key={page.id}
-                      href={page.page_url}
+                      key={result.id}
+                      href={result.url}
                       onClick={handleSearchResultClick}
                       className={`block px-4 py-3 ${theme === 'dark' ? 'hover:bg-gray-700 border-gray-700' : 'hover:bg-gray-50 border-gray-200'} border-b last:border-b-0 transition-colors`}
                     >
-                      <div className={`font-semibold text-sm mb-1 ${theme === 'dark' ? 'text-gray-200' : 'text-gray-900'}`}>
-                        {page.meta_title}
+                      <div className="flex items-start gap-2 mb-1">
+                        <span
+                          className={`text-xs font-semibold px-2 py-0.5 rounded ${
+                            result.type === 'topic'
+                              ? 'bg-blue-100 text-blue-700'
+                              : 'bg-green-100 text-green-700'
+                          }`}
+                        >
+                          {result.type === 'topic' ? 'Topic' : 'Page'}
+                        </span>
+                        <div className={`font-semibold text-sm flex-1 ${theme === 'dark' ? 'text-gray-200' : 'text-gray-900'}`}>
+                          {result.title}
+                        </div>
                       </div>
                       <div className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} line-clamp-2`}>
-                        {page.meta_description}
+                        {result.description}
                       </div>
                     </a>
                   ))}
@@ -234,7 +294,7 @@ function Header({ theme, isAdmin, isLoggedIn = false, onLoginClick, onLogout, ti
 
               {isSearchOpen && searchQuery.length >= 2 && searchResults.length === 0 && (
                 <div className={`absolute top-full right-0 mt-2 w-72 md:w-96 ${theme === 'dark' ? 'bg-gray-800 border-gray-700 text-gray-400' : 'bg-white border-gray-200 text-gray-600'} border rounded-lg shadow-lg z-50 px-4 py-3 text-sm`}>
-                  No pages found
+                  No results found
                 </div>
               )}
             </div>
