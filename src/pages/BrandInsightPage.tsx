@@ -165,6 +165,7 @@ export default function BrandInsightPage() {
   const donutChartRef = useRef<HTMLDivElement>(null);
   const barChartRef = useRef<HTMLDivElement>(null);
   const wordCloudRef = useRef<HTMLDivElement>(null);
+  const comparisonTableRef = useRef<HTMLDivElement>(null);
 
   const itemsPerPage = 10;
 
@@ -1921,11 +1922,23 @@ export default function BrandInsightPage() {
                   </div>
 
                   {selectedBrands.length >= 2 && brandComparisonStats.length >= 2 && (
-                    <BrandComparisonTable
-                      brandStats={brandComparisonStats}
-                      availableBrands={availableBrands}
-                      theme={theme}
-                    />
+                    <div ref={comparisonTableRef}>
+                      <div className="flex items-center justify-between mb-4">
+                        <h2 className={`text-xl font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                          Brand Comparison
+                        </h2>
+                        <ShareSnapshot
+                          theme={theme}
+                          canvasRef={comparisonTableRef}
+                          variant="inline"
+                        />
+                      </div>
+                      <BrandComparisonTable
+                        brandStats={brandComparisonStats}
+                        availableBrands={availableBrands}
+                        theme={theme}
+                      />
+                    </div>
                   )}
 
                   {(() => {
