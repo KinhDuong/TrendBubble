@@ -23,7 +23,7 @@ import SEOStrategyInsights from '../components/SEOStrategyInsights';
 import PPCCampaignInsights from '../components/PPCCampaignInsights';
 import BrandSelector, { getBrandColor } from '../components/BrandSelector';
 import BrandKeywordStats from '../components/BrandKeywordStats';
-import BrandComparisonTable, { calculateBrandStats } from '../components/BrandComparisonTable';
+import BrandComparisonTable from '../components/BrandComparisonTable';
 import { TrendingTopic, FAQ } from '../types';
 import { TrendingUp, Download, ArrowLeft, Search, X, ChevronsLeft, ChevronsRight, ArrowUpDown, ArrowUp, ArrowDown, Sparkles, AlertCircle } from 'lucide-react';
 import { formatCompactNumber } from '../utils/formatNumber';
@@ -114,6 +114,7 @@ export default function BrandInsightPage() {
   const [latestBrandPages, setLatestBrandPages] = useState<LatestBrandPage[]>([]);
   const [availableBrands, setAvailableBrands] = useState<string[]>([]);
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
+  const [brandComparisonStats, setBrandComparisonStats] = useState<any[]>([]);
   const [faqs, setFaqs] = useState<FAQ[]>([]);
   const [loading, setLoading] = useState(true);
   const [pageOwnerId, setPageOwnerId] = useState<string | null>(null);
@@ -837,12 +838,34 @@ export default function BrandInsightPage() {
     }
   }, [keywordData, monthColumns, availableBrands, selectedBrands]);
 
-  const brandComparisonStats = useMemo(() => {
-    if (selectedBrands.length < 2 || keywordData.length === 0) {
-      return [];
+  useEffect(() => {
+    async function fetchBrandComparisonStats() {
+      if (selectedBrands.length < 2 || !pageOwnerId) {
+        setBrandComparisonStats([]);
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase.rpc('calculate_brand_comparison_stats', {
+          brand_names: selectedBrands,
+          p_user_id: pageOwnerId
+        });
+
+        if (error) {
+          console.error('Error fetching brand comparison stats:', error);
+          setBrandComparisonStats([]);
+          return;
+        }
+
+        setBrandComparisonStats(data || []);
+      } catch (error) {
+        console.error('Error in fetchBrandComparisonStats:', error);
+        setBrandComparisonStats([]);
+      }
     }
-    return selectedBrands.map(brand => calculateBrandStats(keywordData, brand, latestBrandPages));
-  }, [selectedBrands, keywordData, latestBrandPages]);
+
+    fetchBrandComparisonStats();
+  }, [selectedBrands, pageOwnerId]);
 
   const keywordPerformanceData = useMemo(() => {
     try {
