@@ -359,10 +359,10 @@ export default function BrandInsightPage() {
         let from = 0;
         const pageSize = 1000;
         let hasMore = true;
-        const remainingSlots = effectiveLimit - allKeywordData.length;
 
-        while (hasMore && brandData.length < remainingSlots) {
-          const fetchSize = Math.min(pageSize, remainingSlots - brandData.length);
+        // Apply keyword limit per brand, not cumulatively
+        while (hasMore && brandData.length < effectiveLimit) {
+          const fetchSize = Math.min(pageSize, effectiveLimit - brandData.length);
 
           const { data, error } = await supabase
             .from('brand_keyword_data')
@@ -376,17 +376,13 @@ export default function BrandInsightPage() {
           if (data && data.length > 0) {
             brandData = [...brandData, ...data];
             from += fetchSize;
-            hasMore = data.length === fetchSize && brandData.length < remainingSlots;
+            hasMore = data.length === fetchSize && brandData.length < effectiveLimit;
           } else {
             hasMore = false;
           }
         }
 
         allKeywordData.push(...brandData);
-
-        if (allKeywordData.length >= effectiveLimit) {
-          break;
-        }
       }
 
       setTotalKeywordCount(totalCount);
@@ -1903,6 +1899,7 @@ export default function BrandInsightPage() {
                               onSelectionChange={handleBrandSelectionChange}
                               theme={theme}
                               disabled={loading}
+                              membershipTier={pageOwnerId === user?.id ? membershipTier : pageOwnerTier}
                             />
                           </div>
                         )}

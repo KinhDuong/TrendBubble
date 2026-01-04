@@ -12,9 +12,12 @@ interface BrandSelectorProps {
   onSelectionChange: (brands: string[]) => void;
   theme: 'dark' | 'light';
   disabled?: boolean;
+  membershipTier?: number;
 }
 
-const MAX_BRANDS = 5;
+const getMaxBrands = (tier: number): number => {
+  return tier === 1 ? 2 : 5;
+};
 
 const BRAND_COLORS = [
   '#3B82F6', // blue
@@ -42,10 +45,12 @@ export default function BrandSelector({
   selectedBrands,
   onSelectionChange,
   theme,
-  disabled = false
+  disabled = false,
+  membershipTier = 1
 }: BrandSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const maxBrands = getMaxBrands(membershipTier);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -64,7 +69,7 @@ export default function BrandSelector({
         onSelectionChange(selectedBrands.filter(b => b !== brandName));
       }
     } else {
-      if (selectedBrands.length < MAX_BRANDS) {
+      if (selectedBrands.length < maxBrands) {
         onSelectionChange([...selectedBrands, brandName]);
       }
     }
@@ -142,7 +147,7 @@ export default function BrandSelector({
               const isSelected = selectedBrands.includes(brand);
               const brandColor = getBrandColor(brand, availableBrands);
               const isOnlySelected = selectedBrands.length === 1 && isSelected;
-              const isLimitReached = !isSelected && selectedBrands.length >= MAX_BRANDS;
+              const isLimitReached = !isSelected && selectedBrands.length >= maxBrands;
 
               return (
                 <button
@@ -185,6 +190,18 @@ export default function BrandSelector({
               );
             })}
           </div>
+
+          {selectedBrands.length >= maxBrands && membershipTier === 1 && (
+            <div className={`p-3 border-t ${
+              theme === 'dark' ? 'border-gray-700 bg-amber-900/20' : 'border-gray-200 bg-amber-50'
+            }`}>
+              <p className={`text-xs ${
+                theme === 'dark' ? 'text-amber-300' : 'text-amber-800'
+              }`}>
+                Free tier: You can compare up to 2 brands. Upgrade to unlock more comparisons.
+              </p>
+            </div>
+          )}
         </div>
       )}
     </div>
