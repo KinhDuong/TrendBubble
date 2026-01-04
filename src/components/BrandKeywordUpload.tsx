@@ -52,6 +52,8 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
   const [zeroTrafficKeywords, setZeroTrafficKeywords] = useState<ZeroTrafficKeyword[]>([]);
   const [showDuplicateReview, setShowDuplicateReview] = useState(false);
   const [currentKeywordCount, setCurrentKeywordCount] = useState<number>(0);
+  const [showBrandSelector, setShowBrandSelector] = useState(false);
+  const [brandSelectorKeywords, setBrandSelectorKeywords] = useState<Array<Record<string, any>>>([]);
 
   const levenshteinDistance = (str1: string, str2: string): number => {
     const len1 = str1.length;
@@ -590,7 +592,31 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
     setUploading(false);
   };
 
-  const processUpload = async (data: Array<Record<string, any>>) => {
+  const handleBrandSelection = async (selectedKeyword: Record<string, any>) => {
+    setShowBrandSelector(false);
+    setUploading(true);
+
+    try {
+      const selectedAvgMonthlySearches = selectedKeyword['Avg. monthly searches'];
+      await processUpload(pendingData, selectedAvgMonthlySearches);
+    } catch (err) {
+      console.error('Brand selection error:', err);
+      setError(err instanceof Error ? err.message : 'Failed to process upload');
+    } finally {
+      setUploading(false);
+      setBrandSelectorKeywords([]);
+      setPendingData([]);
+    }
+  };
+
+  const handleBrandSelectionCancel = () => {
+    setShowBrandSelector(false);
+    setBrandSelectorKeywords([]);
+    setPendingData([]);
+    setUploading(false);
+  };
+
+  const processUpload = async (data: Array<Record<string, any>>, manualAvgMonthlySearches?: number) => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       throw new Error('You must be logged in to upload data');
@@ -729,13 +755,33 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
       pageId = existingPage.page_id;
     }
 
-    // Calculate average monthly searches across all keywords
-    const avgMonthlySearches = Math.round(
-      data.reduce((sum, record) => {
-        const searches = record['Avg. monthly searches'];
-        return sum + (typeof searches === 'number' ? searches : 0);
-      }, 0) / data.length
-    );
+    let avgMonthlySearches: number | undefined;
+
+    // If manually selected value is provided, use it
+    if (manualAvgMonthlySearches !== undefined) {
+      avgMonthlySearches = manualAvgMonthlySearches;
+      console.log(`✓ Using manually selected brand value: ${avgMonthlySearches?.toLocaleString()} avg monthly searches`);
+    } else {
+      // Find exact match for brand name (case-insensitive)
+      const brandLower = brandName.trim().toLowerCase();
+      const brandMatch = data.find(record =>
+        record.keyword.toLowerCase() === brandLower
+      );
+
+      if (brandMatch) {
+        // Use the exact match value
+        avgMonthlySearches = brandMatch['Avg. monthly searches'];
+        console.log(`✓ Found exact match for brand "${brandName}": ${avgMonthlySearches?.toLocaleString()} avg monthly searches`);
+      } else {
+        // No exact match found - show first 10 rows for user selection
+        console.log(`⚠ No exact match found for brand "${brandName}"`);
+        const first10 = data.slice(0, 10);
+        setBrandSelectorKeywords(first10);
+        setPendingData(data); // Store data for later
+        setShowBrandSelector(true);
+        return; // Stop here, wait for user selection
+      }
+    }
 
     const { error: brandPageError } = await supabase
       .from('brand_pages')
@@ -768,6 +814,68 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
 
   return (
     <>
+      {showBrandSelector && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className={`max-w-3xl w-full max-h-[80vh] overflow-auto rounded-lg shadow-xl ${
+            theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'
+          }`}>
+            <div className={`sticky top-0 p-6 border-b ${
+              theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
+            }`}>
+              <h3 className="text-lg font-semibold mb-2">Select Brand Keyword</h3>
+              <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                No exact match found for "{brandName}". Please select which keyword represents the brand:
+              </p>
+            </div>
+
+            <div className="p-6">
+              <div className="space-y-2">
+                {brandSelectorKeywords.map((keyword, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handleBrandSelection(keyword)}
+                    className={`w-full text-left p-4 rounded-lg border-2 transition-colors ${
+                      theme === 'dark'
+                        ? 'border-gray-700 hover:border-blue-500 hover:bg-gray-750'
+                        : 'border-gray-200 hover:border-blue-500 hover:bg-gray-50'
+                    }`}
+                  >
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <div className="font-semibold mb-1">{keyword.keyword}</div>
+                        <div className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                          Avg. Monthly Searches: {keyword['Avg. monthly searches']?.toLocaleString() || 'N/A'}
+                        </div>
+                      </div>
+                      {index === 0 && (
+                        <span className={`text-xs px-2 py-1 rounded ${
+                          theme === 'dark' ? 'bg-blue-900/30 text-blue-300' : 'bg-blue-100 text-blue-700'
+                        }`}>
+                          Recommended
+                        </span>
+                      )}
+                    </div>
+                  </button>
+                ))}
+              </div>
+
+              <div className="mt-6 flex gap-3">
+                <button
+                  onClick={handleBrandSelectionCancel}
+                  className={`flex-1 px-4 py-2 rounded-lg border transition-colors ${
+                    theme === 'dark'
+                      ? 'border-gray-700 hover:bg-gray-750 text-gray-300'
+                      : 'border-gray-300 hover:bg-gray-50 text-gray-700'
+                  }`}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {showDuplicateReview && (
         <KeywordDuplicateReview
           duplicateGroups={duplicateGroups}
