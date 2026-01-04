@@ -10,12 +10,22 @@ interface BrandKeywordStatsProps {
 export default function BrandKeywordStats({ keyword, monthColumns, theme }: BrandKeywordStatsProps) {
   if (!keyword) return null;
 
+  const parseNumericValue = (value: any): number => {
+    if (value === null || value === undefined) return 0;
+    if (typeof value === 'number') return value;
+    if (typeof value === 'string') {
+      const parsed = parseFloat(value);
+      return isNaN(parsed) ? 0 : parsed;
+    }
+    return 0;
+  };
+
   const searchVolume = keyword['Avg. monthly searches'] || 0;
-  const competition = keyword['Competition'] || 0;
-  const lowTopBid = keyword['Top of page bid (low range)'] || 0;
-  const highTopBid = keyword['Top of page bid (high range)'] || 0;
-  const yoyChange = keyword['Year-over-year change'] || 0;
-  const threeMonthChange = keyword['Three month change'] || 0;
+  const competition = parseNumericValue(keyword['Competition (indexed value)']);
+  const lowTopBid = parseNumericValue(keyword['Top of page bid (low range)']);
+  const highTopBid = parseNumericValue(keyword['Top of page bid (high range)']);
+  const yoyChange = parseNumericValue(keyword['YoY change']);
+  const threeMonthChange = parseNumericValue(keyword['Three month change']);
 
   const formatCurrency = (value: number) => {
     if (value === 0) return 'N/A';
