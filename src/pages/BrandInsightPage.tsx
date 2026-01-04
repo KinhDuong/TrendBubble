@@ -84,6 +84,7 @@ interface BrandPageData {
   summary?: string;
   faq?: string;
   cover_image?: string;
+  avg_monthly_searches?: number;
   created_at: string;
   updated_at: string;
 }
@@ -93,6 +94,7 @@ interface LatestBrandPage {
   brand: string;
   meta_title: string;
   meta_description: string;
+  avg_monthly_searches?: number;
   created_at: string;
 }
 
@@ -507,7 +509,7 @@ export default function BrandInsightPage() {
       if (isUUID) {
         const brandPageResult = await supabase
           .from('brand_pages')
-          .select('*, user_id')
+          .select('*, user_id, avg_monthly_searches')
           .eq('id', decodedPageIdOrUserId)
           .maybeSingle();
 
@@ -517,7 +519,7 @@ export default function BrandInsightPage() {
         } else {
           const result = await supabase
             .from('brand_pages')
-            .select('*, user_id')
+            .select('*, user_id, avg_monthly_searches')
             .eq('user_id', decodedPageIdOrUserId)
             .eq('page_id', decodedBrand)
             .maybeSingle();
@@ -541,7 +543,7 @@ export default function BrandInsightPage() {
 
         const result = await supabase
           .from('brand_pages')
-          .select('*, user_id')
+          .select('*, user_id, avg_monthly_searches')
           .eq('user_id', profileData.id)
           .eq('page_id', decodedBrand)
           .maybeSingle();
@@ -621,7 +623,7 @@ export default function BrandInsightPage() {
         uniqueBrands.map(async (item) => {
           const { data: pageData } = await supabase
             .from('brand_pages')
-            .select('id, brand, meta_title, meta_description, created_at')
+            .select('id, brand, meta_title, meta_description, avg_monthly_searches, created_at')
             .eq('user_id', userIdToUse)
             .eq('brand', item.brand)
             .maybeSingle();
@@ -816,8 +818,8 @@ export default function BrandInsightPage() {
     if (selectedBrands.length < 2 || keywordData.length === 0) {
       return [];
     }
-    return selectedBrands.map(brand => calculateBrandStats(keywordData, brand));
-  }, [selectedBrands, keywordData]);
+    return selectedBrands.map(brand => calculateBrandStats(keywordData, brand, latestBrandPages));
+  }, [selectedBrands, keywordData, latestBrandPages]);
 
   const keywordPerformanceData = useMemo(() => {
     try {

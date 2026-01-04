@@ -4,6 +4,7 @@ import { getBrandColor } from './BrandSelector';
 
 interface BrandStats {
   brand: string;
+  brandSearchVolume: number;
   totalKeywords: number;
   totalVolume: number;
   avgCompetition: number;
@@ -64,8 +65,9 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
   };
 
   const metrics = [
+    { label: 'Brand Search Volume', icon: TrendingUp, key: 'brandSearchVolume', format: (v: number) => formatCompactNumber(v) },
     { label: 'Total Keywords', icon: Search, key: 'totalKeywords', format: (v: number) => formatCompactNumber(v) },
-    { label: 'Search Volume', icon: TrendingUp, key: 'totalVolume', format: (v: number) => formatCompactNumber(v) },
+    { label: 'Keyword Search Volume', icon: TrendingUp, key: 'totalVolume', format: (v: number) => formatCompactNumber(v) },
     { label: 'Avg. Competition', icon: Target, key: 'avgCompetition', format: (v: number) => v.toFixed(2) },
     { label: 'Avg. CPC Range', icon: DollarSign, key: 'cpc', format: (_: number, stats: BrandStats) => formatCurrency(stats.avgCpcLow, stats.avgCpcHigh) },
     { label: '3-Month Change', icon: TrendingUp, key: 'threeMonthChange', format: (v: number) => formatPercentage(v), colorize: true },
@@ -177,8 +179,12 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
   );
 }
 
-export function calculateBrandStats(keywordData: any[], brand: string): BrandStats {
+export function calculateBrandStats(keywordData: any[], brand: string, brandPageData?: { brand: string; avg_monthly_searches?: number }[]): BrandStats {
   const brandKeywords = keywordData.filter(kw => kw.brand === brand);
+
+  // Get brand search volume from brand pages
+  const brandPage = brandPageData?.find(page => page.brand === brand);
+  const brandSearchVolume = brandPage?.avg_monthly_searches || 0;
 
   const parseNumericValue = (value: any): number => {
     if (value === null || value === undefined) return 0;
@@ -275,6 +281,7 @@ export function calculateBrandStats(keywordData: any[], brand: string): BrandSta
 
   return {
     brand,
+    brandSearchVolume,
     totalKeywords,
     totalVolume,
     avgCompetition,
