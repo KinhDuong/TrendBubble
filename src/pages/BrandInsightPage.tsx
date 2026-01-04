@@ -29,6 +29,40 @@ import { formatCompactNumber } from '../utils/formatNumber';
 type SortField = 'name' | 'searchVolume' | 'rank' | 'month' | 'threeMonth' | 'yoy';
 type SortDirection = 'asc' | 'desc';
 
+const chartTypeToViewMode = (chartType?: string): ViewMode => {
+  switch (chartType) {
+    case 'bubble-chart':
+      return 'bubble';
+    case 'bar-chart':
+      return 'bar';
+    case 'treemap':
+      return 'treemap';
+    case 'donut-chart':
+      return 'donut';
+    case 'word-cloud':
+      return 'wordcloud';
+    default:
+      return 'bubble';
+  }
+};
+
+const viewModeToChartType = (viewMode: ViewMode): string => {
+  switch (viewMode) {
+    case 'bubble':
+      return 'bubble-chart';
+    case 'bar':
+      return 'bar-chart';
+    case 'treemap':
+      return 'treemap';
+    case 'donut':
+      return 'donut-chart';
+    case 'wordcloud':
+      return 'word-cloud';
+    default:
+      return 'bubble-chart';
+  }
+};
+
 interface MonthlyData {
   id: string;
   brand: string;
@@ -61,7 +95,7 @@ interface LatestBrandPage {
 }
 
 export default function BrandInsightPage() {
-  const { userId: pageIdOrUserId, brandName } = useParams<{ userId: string; brandName: string }>();
+  const { userId: pageIdOrUserId, brandName, chartType } = useParams<{ userId: string; brandName: string; chartType?: string }>();
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -100,7 +134,7 @@ export default function BrandInsightPage() {
   };
 
   const [maxBubbles, setMaxBubbles] = useState<number>(getInitialMaxBubbles());
-  const [viewMode, setViewMode] = useState<ViewMode>('bubble');
+  const [viewMode, setViewMode] = useState<ViewMode>(() => chartTypeToViewMode(chartType));
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [topSearchQuery, setTopSearchQuery] = useState<string>('');
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -152,6 +186,13 @@ export default function BrandInsightPage() {
       navigate(pathname + '/' + search, { replace: true });
     }
   }, [location.pathname, location.search, navigate]);
+
+  useEffect(() => {
+    const newViewMode = chartTypeToViewMode(chartType);
+    if (newViewMode !== viewMode) {
+      setViewMode(newViewMode);
+    }
+  }, [chartType]);
 
   useEffect(() => {
     const topParam = searchParams.get('Top');
@@ -654,6 +695,14 @@ export default function BrandInsightPage() {
     const newSearchParams = new URLSearchParams(searchParams);
     newSearchParams.set('Top', newMax.toString());
     setSearchParams(newSearchParams, { replace: true });
+  };
+
+  const handleViewModeChange = (newViewMode: ViewMode) => {
+    setViewMode(newViewMode);
+    const chartTypeSlug = viewModeToChartType(newViewMode);
+    const basePath = `/insights/${pageIdOrUserId}/${brandName}`;
+    const newPath = `${basePath}/${chartTypeSlug}/`;
+    navigate(newPath + location.search, { replace: true });
   };
 
   const handleTogglePin = (topicName: string) => {
@@ -1736,7 +1785,7 @@ export default function BrandInsightPage() {
         showCategoryFilter={false}
         showShapeSelector={false}
         showSearchBubbles={false}
-        onViewModeChange={setViewMode}
+        onViewModeChange={handleViewModeChange}
         onDateFilterChange={() => {}}
         onCategoryFilterChange={() => {}}
         onSourceFilterChange={() => {}}
@@ -1745,7 +1794,7 @@ export default function BrandInsightPage() {
         onSearchQueryChange={setSearchQuery}
         onSearchClear={() => {
           setSearchQuery('');
-          setViewMode('bubble');
+          handleViewModeChange('bubble');
         }}
         onBubbleLayoutChange={setBubbleLayout}
         onShapeChange={setShape}

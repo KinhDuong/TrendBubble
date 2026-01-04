@@ -2242,6 +2242,8 @@ function App() {
         <Route path="/insights-meta/" element={<InsightsMetaPage />} />
         <Route path="/insights/:userId/:brandName" element={<BrandInsightPage />} />
         <Route path="/insights/:userId/:brandName/" element={<BrandInsightPage />} />
+        <Route path="/insights/:userId/:brandName/:chartType" element={<BrandInsightPage />} />
+        <Route path="/insights/:userId/:brandName/:chartType/" element={<BrandInsightPage />} />
         <Route path="/upload" element={<UploadPage />} />
         <Route path="/upload/" element={<UploadPage />} />
         <Route path="/profile" element={<UserProfilePage />} />
