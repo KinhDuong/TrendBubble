@@ -21,12 +21,13 @@ interface Page {
   source: string;
 }
 
-interface TrendingTopic {
+interface BrandPage {
   id: string;
-  name: string;
-  category: string;
-  url?: string;
-  source: string;
+  brand: string;
+  meta_title: string;
+  meta_description: string;
+  page_id: string;
+  category?: string;
 }
 
 interface SearchResult {
@@ -34,7 +35,7 @@ interface SearchResult {
   title: string;
   description: string;
   url: string;
-  type: 'page' | 'topic';
+  type: 'page' | 'brand';
   source: string;
 }
 
@@ -73,21 +74,30 @@ function Header({ theme, isAdmin, isLoggedIn = false, onLoginClick, onLogout, ti
 
       try {
         // Execute both queries in parallel
-        const [pagesResult, topicsResult] = await Promise.all([
+        const [pagesResult, brandPagesResult] = await Promise.all([
           supabase
             .from('pages')
             .select('*')
             .or(`meta_title.ilike.%${searchQuery}%,meta_description.ilike.%${searchQuery}%,page_url.ilike.%${searchQuery}%`)
             .limit(6),
           supabase
-            .from('trending_topics')
-            .select('id, name, category, url, source')
-            .ilike('name', `%${searchQuery}%`)
+            .from('brand_pages')
+            .select(`
+              id,
+              brand,
+              meta_title,
+              meta_description,
+              page_id,
+              user_id,
+              user_profiles!inner(username)
+            `)
+            .eq('is_public', true)
+            .or(`brand.ilike.%${searchQuery}%,meta_title.ilike.%${searchQuery}%,meta_description.ilike.%${searchQuery}%`)
             .limit(6)
         ]);
 
         if (pagesResult.error) throw pagesResult.error;
-        if (topicsResult.error) throw topicsResult.error;
+        if (brandPagesResult.error) throw brandPagesResult.error;
 
         // Transform pages to search results
         const pageResults: SearchResult[] = (pagesResult.data || []).map(page => ({
@@ -99,18 +109,18 @@ function Header({ theme, isAdmin, isLoggedIn = false, onLoginClick, onLogout, ti
           source: page.source
         }));
 
-        // Transform topics to search results
-        const topicResults: SearchResult[] = (topicsResult.data || []).map(topic => ({
-          id: `topic-${topic.id}`,
-          title: topic.name,
-          description: `${topic.category} • ${topic.source}`,
-          url: topic.url || `/trending-now/?topic=${encodeURIComponent(topic.name)}`,
-          type: 'topic' as const,
-          source: topic.source
+        // Transform brand pages to search results
+        const brandResults: SearchResult[] = (brandPagesResult.data || []).map((brandPage: any) => ({
+          id: `brand-${brandPage.id}`,
+          title: brandPage.meta_title,
+          description: brandPage.meta_description || '',
+          url: `/insights/${brandPage.user_profiles.username}/${brandPage.page_id}/`,
+          type: 'brand' as const,
+          source: brandPage.brand
         }));
 
         // Combine and limit to 10 total results
-        const combinedResults = [...topicResults, ...pageResults].slice(0, 10);
+        const combinedResults = [...pageResults, ...brandResults].slice(0, 10);
         setSearchResults(combinedResults);
       } catch (error) {
         console.error('Error searching:', error);
@@ -273,12 +283,12 @@ function Header({ theme, isAdmin, isLoggedIn = false, onLoginClick, onLogout, ti
                       <div className="flex items-start gap-2 mb-1">
                         <span
                           className={`text-xs font-semibold px-2 py-0.5 rounded ${
-                            result.type === 'topic'
-                              ? 'bg-blue-100 text-blue-700'
+                            result.type === 'brand'
+                              ? 'bg-purple-100 text-purple-700'
                               : 'bg-green-100 text-green-700'
                           }`}
                         >
-                          {result.type === 'topic' ? 'Topic' : 'Page'}
+                          {result.type === 'brand' ? 'Brand' : 'Page'}
                         </span>
                         <div className={`font-semibold text-sm flex-1 ${theme === 'dark' ? 'text-gray-200' : 'text-gray-900'}`}>
                           {result.title}
