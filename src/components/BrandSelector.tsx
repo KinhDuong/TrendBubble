@@ -161,7 +161,9 @@ export default function BrandSelector({
                 >
                   <div className="flex items-center gap-3 flex-1 min-w-0">
                     {isSelected ? (
-                      <CheckSquare className="w-5 h-5 flex-shrink-0 text-green-500" />
+                      <CheckSquare className={`w-5 h-5 flex-shrink-0 ${
+                        theme === 'dark' ? 'text-white' : 'text-black'
+                      }`} />
                     ) : (
                       <Square className={`w-5 h-5 flex-shrink-0 ${
                         theme === 'dark' ? 'text-gray-500' : 'text-gray-400'
