@@ -22,6 +22,7 @@ import AdvertisingRecommendations from '../components/AdvertisingRecommendations
 import SEOStrategyInsights from '../components/SEOStrategyInsights';
 import PPCCampaignInsights from '../components/PPCCampaignInsights';
 import BrandSelector, { getBrandColor } from '../components/BrandSelector';
+import BrandKeywordStats from '../components/BrandKeywordStats';
 import { TrendingTopic, FAQ } from '../types';
 import { TrendingUp, Download, ArrowLeft, Search, X, ChevronsLeft, ChevronsRight, ArrowUpDown, ArrowUp, ArrowDown, Sparkles, AlertCircle } from 'lucide-react';
 import { formatCompactNumber } from '../utils/formatNumber';
@@ -1199,6 +1200,14 @@ export default function BrandInsightPage() {
     }
   }, [transformToTopics, topSearchQuery, rankingListFilter, keywordPerformanceData, hasYoYData]);
 
+  const exactBrandKeyword = useMemo(() => {
+    if (!brandPageData || !keywordData || keywordData.length === 0) return null;
+    const brandName = brandPageData.brand.toLowerCase().trim();
+    return keywordData.find(kw =>
+      kw.keyword && kw.keyword.toLowerCase().trim() === brandName
+    );
+  }, [brandPageData, keywordData]);
+
   const topTopics = filteredTopics.filter(topic => {
     if (!topSearchQuery.trim()) return true;
     const query = topSearchQuery.toLowerCase();
@@ -2121,6 +2130,14 @@ export default function BrandInsightPage() {
                             dangerouslySetInnerHTML={{
                               __html: brandPageData.intro_text
                             }}
+                          />
+                        )}
+
+                        {exactBrandKeyword && selectedBrands.length === 1 && (
+                          <BrandKeywordStats
+                            keyword={exactBrandKeyword}
+                            monthColumns={monthColumns}
+                            theme={theme}
                           />
                         )}
 
