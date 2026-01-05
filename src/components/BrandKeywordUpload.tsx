@@ -519,10 +519,35 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
         avgMonthlySearches = brandMatch['Avg. monthly searches'];
         console.log(`✓ Found exact match for brand "${brandName}": ${avgMonthlySearches?.toLocaleString()} avg monthly searches`);
       } else {
-        // No exact match found - show first 10 rows for user selection
+        // No exact match found - show top 20 by volume + first 20 rows for user selection
         console.log(`⚠ No exact match found for brand "${brandName}"`);
-        const first10 = data.slice(0, 10);
-        setBrandSelectorKeywords(first10);
+
+        // Group 1: Top 20 by search volume
+        const top20ByVolume = [...data]
+          .sort((a, b) => (b['Avg. monthly searches'] || 0) - (a['Avg. monthly searches'] || 0))
+          .slice(0, 20);
+
+        // Group 2: First 20 from CSV
+        const first20 = data.slice(0, 20);
+
+        // Combine and remove duplicates (keeping top volume version)
+        const keywordMap = new Map<string, Record<string, any>>();
+
+        // Add top volume first (they take precedence)
+        top20ByVolume.forEach(kw => {
+          keywordMap.set(kw.keyword, { ...kw, group: 'top' });
+        });
+
+        // Add first 20, only if not already in map
+        first20.forEach(kw => {
+          if (!keywordMap.has(kw.keyword)) {
+            keywordMap.set(kw.keyword, { ...kw, group: 'first' });
+          }
+        });
+
+        const combinedKeywords = Array.from(keywordMap.values());
+
+        setBrandSelectorKeywords(combinedKeywords);
         setPendingData(data); // Store data for later processing
         setAvgMonthlySearchesCache(undefined); // Clear cache
         setShowBrandSelector(true);
@@ -872,35 +897,81 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
             </div>
 
             <div className="p-6">
-              <div className="space-y-2">
-                {brandSelectorKeywords.map((keyword, index) => (
-                  <button
-                    key={index}
-                    onClick={() => handleBrandSelection(keyword)}
-                    className={`w-full text-left p-4 rounded-lg border-2 transition-colors ${
-                      theme === 'dark'
-                        ? 'border-gray-700 hover:border-blue-500 hover:bg-gray-750'
-                        : 'border-gray-200 hover:border-blue-500 hover:bg-gray-50'
-                    }`}
-                  >
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <div className="font-semibold mb-1">{keyword.keyword}</div>
-                        <div className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                          Avg. Monthly Searches: {keyword['Avg. monthly searches']?.toLocaleString() || 'N/A'}
+              {(() => {
+                const topVolume = brandSelectorKeywords.filter(kw => kw.group === 'top');
+                const firstRows = brandSelectorKeywords.filter(kw => kw.group === 'first');
+
+                return (
+                  <>
+                    {topVolume.length > 0 && (
+                      <div className="mb-6">
+                        <h4 className={`text-sm font-semibold mb-3 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                          Top 20 by Search Volume
+                        </h4>
+                        <div className="space-y-2">
+                          {topVolume.map((keyword, index) => (
+                            <button
+                              key={`top-${index}`}
+                              onClick={() => handleBrandSelection(keyword)}
+                              className={`w-full text-left p-4 rounded-lg border-2 transition-colors ${
+                                theme === 'dark'
+                                  ? 'border-gray-700 hover:border-blue-500 hover:bg-gray-750'
+                                  : 'border-gray-200 hover:border-blue-500 hover:bg-gray-50'
+                              }`}
+                            >
+                              <div className="flex justify-between items-start">
+                                <div>
+                                  <div className="font-semibold mb-1">{keyword.keyword}</div>
+                                  <div className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                                    Avg. Monthly Searches: {keyword['Avg. monthly searches']?.toLocaleString() || 'N/A'}
+                                  </div>
+                                </div>
+                                {index === 0 && (
+                                  <span className={`text-xs px-2 py-1 rounded ${
+                                    theme === 'dark' ? 'bg-blue-900/30 text-blue-300' : 'bg-blue-100 text-blue-700'
+                                  }`}>
+                                    Highest Volume
+                                  </span>
+                                )}
+                              </div>
+                            </button>
+                          ))}
                         </div>
                       </div>
-                      {index === 0 && (
-                        <span className={`text-xs px-2 py-1 rounded ${
-                          theme === 'dark' ? 'bg-blue-900/30 text-blue-300' : 'bg-blue-100 text-blue-700'
-                        }`}>
-                          Recommended
-                        </span>
-                      )}
-                    </div>
-                  </button>
-                ))}
-              </div>
+                    )}
+
+                    {firstRows.length > 0 && (
+                      <div>
+                        <h4 className={`text-sm font-semibold mb-3 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                          First 20 from CSV
+                        </h4>
+                        <div className="space-y-2">
+                          {firstRows.map((keyword, index) => (
+                            <button
+                              key={`first-${index}`}
+                              onClick={() => handleBrandSelection(keyword)}
+                              className={`w-full text-left p-4 rounded-lg border-2 transition-colors ${
+                                theme === 'dark'
+                                  ? 'border-gray-700 hover:border-blue-500 hover:bg-gray-750'
+                                  : 'border-gray-200 hover:border-blue-500 hover:bg-gray-50'
+                              }`}
+                            >
+                              <div className="flex justify-between items-start">
+                                <div>
+                                  <div className="font-semibold mb-1">{keyword.keyword}</div>
+                                  <div className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                                    Avg. Monthly Searches: {keyword['Avg. monthly searches']?.toLocaleString() || 'N/A'}
+                                  </div>
+                                </div>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
 
               <div className="mt-6 flex gap-3">
                 <button
