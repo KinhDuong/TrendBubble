@@ -171,9 +171,20 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
   };
 
   const detectMergeGroups = (data: Array<Record<string, any>>): MergeGroup[] => {
+    console.time('detectMergeGroups');
     const groups: MergeGroup[] = [];
     const processed = new Set<string>();
     const threshold = 0.85;
+
+    // Pre-filter: only check keywords with same first character (case-insensitive)
+    const keywordsByFirstChar = new Map<string, Array<Record<string, any>>>();
+    data.forEach(record => {
+      const firstChar = record.keyword[0]?.toLowerCase() || '';
+      if (!keywordsByFirstChar.has(firstChar)) {
+        keywordsByFirstChar.set(firstChar, []);
+      }
+      keywordsByFirstChar.get(firstChar)!.push(record);
+    });
 
     data.forEach((record, i) => {
       if (processed.has(record.keyword)) return;
@@ -181,16 +192,26 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
       const similar: any[] = [record];
       processed.add(record.keyword);
 
-      for (let j = i + 1; j < data.length; j++) {
-        if (processed.has(data[j].keyword)) continue;
+      const firstChar = record.keyword[0]?.toLowerCase() || '';
+      const candidates = keywordsByFirstChar.get(firstChar) || [];
 
-        const similarity = calculateSimilarity(record.keyword, data[j].keyword);
+      // Only check candidates with same first character
+      candidates.forEach(candidate => {
+        if (processed.has(candidate.keyword)) return;
+        if (candidate.keyword === record.keyword) return;
+
+        // Quick length check: if lengths differ by more than 15%, skip
+        const lenDiff = Math.abs(candidate.keyword.length - record.keyword.length);
+        const maxLen = Math.max(candidate.keyword.length, record.keyword.length);
+        if (lenDiff / maxLen > 0.15) return;
+
+        const similarity = calculateSimilarity(record.keyword, candidate.keyword);
 
         if (similarity >= threshold) {
-          similar.push(data[j]);
-          processed.add(data[j].keyword);
+          similar.push(candidate);
+          processed.add(candidate.keyword);
         }
-      }
+      });
 
       if (similar.length > 1) {
         const primaryKeyword = similar.reduce((highest, current) => {
@@ -261,6 +282,8 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
       }
     });
 
+    console.timeEnd('detectMergeGroups');
+    console.log(`Found ${groups.length} merge groups`);
     return groups;
   };
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, AlertTriangle, Copy, TrendingDown, ArrowRight } from 'lucide-react';
+import { X, AlertTriangle, Copy, TrendingDown, ArrowRight, Loader2 } from 'lucide-react';
 
 interface DuplicateGroup {
   id: string;
@@ -36,6 +36,9 @@ export default function KeywordDuplicateReview({
   const [excludedZeroTraffic, setExcludedZeroTraffic] = useState<Set<string>>(
     new Set(zeroTrafficKeywords.map(k => k.keyword))
   );
+
+  // Track processing state
+  const [isProcessing, setIsProcessing] = useState(false);
 
   // Initialize all duplicate groups with first keyword auto-selected
   useEffect(() => {
@@ -74,43 +77,48 @@ export default function KeywordDuplicateReview({
   };
 
   const handleContinue = () => {
-    let filtered = [...allData];
+    setIsProcessing(true);
 
-    // Process duplicate groups: store variants in search_variants, then remove non-selected
-    duplicateGroups.forEach(group => {
-      const selected = selectedKeywords[group.id];
+    // Use setTimeout to allow UI to update before heavy processing
+    setTimeout(() => {
+      let filtered = [...allData];
 
-      // Safety check: if no selection, default to first keyword
-      if (!selected) {
-        console.warn(`No selection for group ${group.id}, defaulting to first keyword`);
-        return;
-      }
+      // Process duplicate groups: store variants in search_variants, then remove non-selected
+      duplicateGroups.forEach(group => {
+        const selected = selectedKeywords[group.id];
 
-      // Get non-selected keywords (the variants to store)
-      const variants = group.keywords.filter(k => k !== selected);
+        // Safety check: if no selection, default to first keyword
+        if (!selected) {
+          console.warn(`No selection for group ${group.id}, defaulting to first keyword`);
+          return;
+        }
 
-      // Find the selected keyword's record and add search_variants
-      const selectedRecord = filtered.find(record => record.keyword === selected);
-      if (selectedRecord && variants.length > 0) {
-        selectedRecord.search_variants = variants.join(', ');
-        console.log(`Added variants to "${selected}": ${variants.join(', ')}`);
-      }
+        // Get non-selected keywords (the variants to store)
+        const variants = group.keywords.filter(k => k !== selected);
 
-      // Remove non-selected keywords from the data
-      const beforeCount = filtered.length;
-      filtered = filtered.filter(record => !variants.includes(record.keyword));
-      const afterCount = filtered.length;
-      console.log(`Removed ${beforeCount - afterCount} duplicate keywords from group ${group.id}`);
-    });
+        // Find the selected keyword's record and add search_variants
+        const selectedRecord = filtered.find(record => record.keyword === selected);
+        if (selectedRecord && variants.length > 0) {
+          selectedRecord.search_variants = variants.join(', ');
+          console.log(`Added variants to "${selected}": ${variants.join(', ')}`);
+        }
 
-    // Filter out excluded zero-traffic keywords
-    const beforeZeroFilter = filtered.length;
-    filtered = filtered.filter(record => !excludedZeroTraffic.has(record.keyword));
-    const afterZeroFilter = filtered.length;
-    console.log(`Filtered out ${beforeZeroFilter - afterZeroFilter} zero-traffic keywords`);
+        // Remove non-selected keywords from the data
+        const beforeCount = filtered.length;
+        filtered = filtered.filter(record => !variants.includes(record.keyword));
+        const afterCount = filtered.length;
+        console.log(`Removed ${beforeCount - afterCount} duplicate keywords from group ${group.id}`);
+      });
 
-    console.log(`Final filtered data: ${filtered.length} keywords`);
-    onContinue(filtered);
+      // Filter out excluded zero-traffic keywords
+      const beforeZeroFilter = filtered.length;
+      filtered = filtered.filter(record => !excludedZeroTraffic.has(record.keyword));
+      const afterZeroFilter = filtered.length;
+      console.log(`Filtered out ${beforeZeroFilter - afterZeroFilter} zero-traffic keywords`);
+
+      console.log(`Final filtered data: ${filtered.length} keywords`);
+      onContinue(filtered);
+    }, 100);
   };
 
   const totalIssues = duplicateGroups.length;
@@ -307,8 +315,11 @@ export default function KeywordDuplicateReview({
           <div className="flex gap-3">
             <button
               onClick={onCancel}
+              disabled={isProcessing}
               className={`px-6 py-2 rounded-lg transition-colors ${
-                theme === 'dark'
+                isProcessing
+                  ? 'bg-gray-400 cursor-not-allowed opacity-50'
+                  : theme === 'dark'
                   ? 'bg-gray-700 hover:bg-gray-600 text-white'
                   : 'bg-gray-200 hover:bg-gray-300 text-gray-900'
               }`}
@@ -317,14 +328,26 @@ export default function KeywordDuplicateReview({
             </button>
             <button
               onClick={handleContinue}
+              disabled={isProcessing}
               className={`px-8 py-2.5 rounded-lg transition-colors flex items-center gap-2 font-medium ${
-                theme === 'dark'
+                isProcessing
+                  ? 'bg-gray-400 cursor-not-allowed'
+                  : theme === 'dark'
                   ? 'bg-blue-600 hover:bg-blue-700 text-white'
                   : 'bg-blue-600 hover:bg-blue-700 text-white'
               }`}
             >
-              Next
-              <ArrowRight className="w-5 h-5" />
+              {isProcessing ? (
+                <>
+                  Processing
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                </>
+              ) : (
+                <>
+                  Next
+                  <ArrowRight className="w-5 h-5" />
+                </>
+              )}
             </button>
           </div>
         </div>
