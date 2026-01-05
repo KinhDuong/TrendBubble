@@ -80,6 +80,12 @@ export default function KeywordDuplicateReview({
     duplicateGroups.forEach(group => {
       const selected = selectedKeywords[group.id];
 
+      // Safety check: if no selection, default to first keyword
+      if (!selected) {
+        console.warn(`No selection for group ${group.id}, defaulting to first keyword`);
+        return;
+      }
+
       // Get non-selected keywords (the variants to store)
       const variants = group.keywords.filter(k => k !== selected);
 
@@ -87,15 +93,23 @@ export default function KeywordDuplicateReview({
       const selectedRecord = filtered.find(record => record.keyword === selected);
       if (selectedRecord && variants.length > 0) {
         selectedRecord.search_variants = variants.join(', ');
+        console.log(`Added variants to "${selected}": ${variants.join(', ')}`);
       }
 
       // Remove non-selected keywords from the data
+      const beforeCount = filtered.length;
       filtered = filtered.filter(record => !variants.includes(record.keyword));
+      const afterCount = filtered.length;
+      console.log(`Removed ${beforeCount - afterCount} duplicate keywords from group ${group.id}`);
     });
 
     // Filter out excluded zero-traffic keywords
+    const beforeZeroFilter = filtered.length;
     filtered = filtered.filter(record => !excludedZeroTraffic.has(record.keyword));
+    const afterZeroFilter = filtered.length;
+    console.log(`Filtered out ${beforeZeroFilter - afterZeroFilter} zero-traffic keywords`);
 
+    console.log(`Final filtered data: ${filtered.length} keywords`);
     onContinue(filtered);
   };
 
