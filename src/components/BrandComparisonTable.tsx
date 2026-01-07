@@ -13,6 +13,7 @@ interface BrandStats {
   threeMonthChange: number;
   yoyChange: number;
   avgSentiment: number;
+  avgDemandScore: number;
   topPerformers: number;
   risingStars: number;
   declining: number;
@@ -64,10 +65,18 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
     return 'text-red-500';
   };
 
+  const getDemandScoreColor = (value: number) => {
+    if (value >= 40) return 'text-green-500';
+    if (value >= 30) return 'text-blue-500';
+    if (value >= 20) return 'text-yellow-500';
+    return theme === 'dark' ? 'text-gray-400' : 'text-gray-500';
+  };
+
   const metrics = [
     { label: 'Brand Search Volume', icon: TrendingUp, key: 'brandSearchVolume', format: (v: number) => formatCompactNumber(v) },
     { label: 'Total Keywords', icon: Search, key: 'totalKeywords', format: (v: number) => formatCompactNumber(v) },
     { label: 'Keyword Search Volume', icon: TrendingUp, key: 'totalVolume', format: (v: number) => formatCompactNumber(v) },
+    { label: 'Avg. Demand Score', icon: Zap, key: 'avgDemandScore', format: (v: number) => v > 0 ? `${v.toFixed(1)}/50` : 'N/A', colorize: 'demand' },
     { label: 'Avg. Competition', icon: Target, key: 'avgCompetition', format: (v: number) => v.toFixed(2) },
     { label: 'Avg. CPC Range', icon: DollarSign, key: 'cpc', format: (_: number, stats: BrandStats) => formatCurrency(stats.avgCpcLow, stats.avgCpcHigh) },
     { label: '3-Month Change', icon: TrendingUp, key: 'threeMonthChange', format: (v: number) => formatPercentage(v), colorize: true },
@@ -150,6 +159,8 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
                     textColor = getTrendColor(value);
                   } else if (metric.colorize === 'sentiment') {
                     textColor = getSentimentColor(value);
+                  } else if (metric.colorize === 'demand') {
+                    textColor = getDemandScoreColor(value);
                   }
 
                   return (

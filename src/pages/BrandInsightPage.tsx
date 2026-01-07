@@ -893,7 +893,9 @@ export default function BrandInsightPage() {
           searchVolume: kw['Avg. monthly searches'] || 0,
           ai_insights: kw.ai_insights,
           sentiment: kw.sentiment,
-          search_variants: kw.search_variants
+          search_variants: kw.search_variants,
+          demand_score: kw.demand_score,
+          intent_type: kw.intent_type
         };
       });
       console.log('BrandInsightPage - keywordPerformanceData sample:', result.slice(0, 5));
@@ -1455,7 +1457,9 @@ export default function BrandInsightPage() {
       bidHigh: kwData?.bid_high || 0,
       brand: topic.category,
       category: getKeywordCategory(topic.name),
-      sentiment: kwData?.sentiment
+      sentiment: kwData?.sentiment,
+      demandScore: kwData?.demand_score,
+      intentType: kwData?.intent_type
     };
   });
 
@@ -1539,12 +1543,14 @@ export default function BrandInsightPage() {
       }
 
       const csv = [
-        ['Brand', 'Keyword', 'Avg. Monthly Searches', 'Three Month Change', 'YoY Change', 'Competition', 'Top of Page Bid (High)'].join(','),
+        ['Brand', 'Keyword', 'Avg. Monthly Searches', 'Demand Score', 'Intent Type', 'Three Month Change', 'YoY Change', 'Competition', 'Top of Page Bid (High)'].join(','),
         ...allData.map(row =>
           [
             row.brand,
             row.keyword,
             row['Avg. monthly searches'] || 0,
+            row.demand_score || '',
+            row.intent_type || '',
             row['Three month change'] || '',
             row['YoY change'] || '',
             row.competition || '',
@@ -2438,6 +2444,19 @@ export default function BrandInsightPage() {
                                               {topic.searchVolumeRaw}
                                             </span>
                                           </div>
+                                          {topic.demandScore !== undefined && topic.demandScore !== null && (
+                                            <div>
+                                              <span className={`${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>Demand: </span>
+                                              <span className={`font-semibold ${
+                                                topic.demandScore >= 40 ? 'text-green-500' :
+                                                topic.demandScore >= 30 ? 'text-blue-500' :
+                                                topic.demandScore >= 20 ? 'text-yellow-500' :
+                                                'text-gray-500'
+                                              }`}>
+                                                {topic.demandScore.toFixed(1)}/50
+                                              </span>
+                                            </div>
+                                          )}
                                           <div>
                                             <span className={`${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>3-Month: </span>
                                             <span className={`font-semibold ${
@@ -2461,6 +2480,18 @@ export default function BrandInsightPage() {
                                                     : 'text-green-500'
                                               }`}>
                                                 {topic.yoyChange}
+                                              </span>
+                                            </div>
+                                          )}
+                                          {topic.intentType && (
+                                            <div>
+                                              <span className={`${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>Intent: </span>
+                                              <span className={`font-semibold ${
+                                                topic.intentType === 'Transactional' ? 'text-purple-500' :
+                                                topic.intentType === 'Commercial' ? 'text-blue-500' :
+                                                theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                                              }`}>
+                                                {topic.intentType}
                                               </span>
                                             </div>
                                           )}

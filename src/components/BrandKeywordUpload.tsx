@@ -724,6 +724,122 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
     setUploading(false);
   };
 
+  const extractMonthlySearches = (row: Record<string, any>): number[] => {
+    const monthlySearches: number[] = [];
+
+    // Extract all "Searches: Month Year" columns
+    Object.keys(row).forEach(key => {
+      if (key.toLowerCase().startsWith('searches:')) {
+        const value = row[key];
+        if (typeof value === 'number' && !isNaN(value)) {
+          monthlySearches.push(value);
+        }
+      }
+    });
+
+    return monthlySearches;
+  };
+
+  const calculateDemandScores = async (data: Array<Record<string, any>>): Promise<Array<Record<string, any>>> => {
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+    const { data: { session } } = await supabase.auth.getSession();
+
+    if (!session) {
+      console.warn('No session found, skipping demand score calculation');
+      return data;
+    }
+
+    try {
+      // Prepare batch data for edge functions
+      const keywordsForIntent = data.map(row => row.keyword);
+
+      // Step 1: Classify intent for all keywords
+      const intentResponse = await fetch(`${supabaseUrl}/functions/v1/classify-keyword-intent`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ keywords: keywordsForIntent }),
+      });
+
+      if (!intentResponse.ok) {
+        console.error('Intent classification failed:', await intentResponse.text());
+        return data;
+      }
+
+      const { results: intentResults } = await intentResponse.json();
+
+      // Create intent map for quick lookup
+      const intentMap = new Map<string, string>();
+      intentResults.forEach((result: any) => {
+        intentMap.set(result.keyword, result.intent);
+      });
+
+      // Step 2: Prepare data for demand score calculation
+      const keywordsForScoring = data.map(row => {
+        const monthlySearches = extractMonthlySearches(row);
+        const lowBid = row['Top of page bid (low range)'] || 0;
+        const highBid = row['Top of page bid (high range)'] || 0;
+        const avgCpc = (lowBid + highBid) / 2;
+        const competition = row['Competition (indexed value)'] || 0;
+        const intentType = intentMap.get(row.keyword) || 'Informational';
+
+        return {
+          keyword: row.keyword,
+          monthlySearches: monthlySearches,
+          competition: competition,
+          avgCpc: avgCpc,
+          intentType: intentType,
+        };
+      });
+
+      // Step 3: Calculate demand scores
+      const scoreResponse = await fetch(`${supabaseUrl}/functions/v1/calculate-demand-score`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ keywords: keywordsForScoring }),
+      });
+
+      if (!scoreResponse.ok) {
+        console.error('Demand score calculation failed:', await scoreResponse.text());
+        return data.map(row => ({
+          ...row,
+          intent_type: intentMap.get(row.keyword) || 'Informational',
+        }));
+      }
+
+      const { results: scoreResults } = await scoreResponse.json();
+
+      // Create score map for quick lookup
+      const scoreMap = new Map<string, any>();
+      scoreResults.forEach((result: any) => {
+        scoreMap.set(result.keyword, result);
+      });
+
+      // Step 4: Merge scores back into original data
+      const scoredData = data.map(row => {
+        const scoreResult = scoreMap.get(row.keyword);
+        return {
+          ...row,
+          intent_type: scoreResult?.breakdown ? intentMap.get(row.keyword) : 'Informational',
+          demand_score: scoreResult?.demandScore || null,
+        };
+      });
+
+      console.log('Demand score calculation complete');
+      return scoredData;
+    } catch (error) {
+      console.error('Error calculating demand scores:', error);
+      // Return data without scores if calculation fails
+      return data;
+    }
+  };
+
   const processUpload = async (data: Array<Record<string, any>>, manualAvgMonthlySearches?: number) => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
@@ -757,7 +873,11 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
       console.error('Delete error:', deleteError);
     }
 
-    const recordsToInsert = data.map(row => {
+    // Calculate demand scores for all keywords
+    console.log('Calculating demand scores...');
+    const scoredData = await calculateDemandScores(data);
+
+    const recordsToInsert = scoredData.map(row => {
       const mappedRow: Record<string, any> = {};
 
       // Map column names to match database schema
