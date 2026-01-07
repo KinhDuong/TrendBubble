@@ -1014,8 +1014,11 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
       : `Successfully uploaded data for ${brandName.trim()}: ${data.length} keywords`;
 
     setSuccess(successMessage);
-    setAvgMonthlySearchesCache(undefined); // Clear cache after successful upload
-    onUploadComplete();
+    setAvgMonthlySearchesCache(undefined);
+
+    setTimeout(() => {
+      onUploadComplete();
+    }, 500);
 
     setTimeout(() => {
       setBrandName('');
