@@ -70,7 +70,8 @@ export default function InsightsMetaPage() {
       const { data: monthlyData, error: monthlyError } = await supabase
         .from('brand_keyword_monthly_data')
         .select('brand, month, keyword_count, total_volume, user_id')
-        .eq('user_id', user.id);
+        .eq('user_id', user.id)
+        .range(0, 9999);
 
       if (monthlyError) throw monthlyError;
       console.log('InsightsMetaPage: Monthly data loaded, rows:', monthlyData?.length || 0);
