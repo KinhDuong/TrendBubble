@@ -48,13 +48,10 @@ export default function InsightsMetaPage() {
     setLoading(true);
     try {
       if (!user?.id) {
-        console.log('InsightsMetaPage: No user ID found');
         setBrandMetadata([]);
         setLoading(false);
         return;
       }
-
-      console.log('InsightsMetaPage: Loading data for user:', user.id);
 
       const { data: userProfile, error: profileError } = await supabase
         .from('user_profiles')
@@ -65,25 +62,6 @@ export default function InsightsMetaPage() {
       if (profileError) throw profileError;
 
       const username = userProfile?.username || null;
-      console.log('InsightsMetaPage: Username:', username);
-
-      const { data: monthlyData, error: monthlyError } = await supabase
-        .from('brand_keyword_monthly_data')
-        .select('brand, month, keyword_count, total_volume, user_id')
-        .eq('user_id', user.id)
-        .range(0, 9999);
-
-      if (monthlyError) throw monthlyError;
-      console.log('InsightsMetaPage: Monthly data loaded, rows:', monthlyData?.length || 0);
-
-      const uniqueBrands = new Set(monthlyData?.map(d => d.brand) || []);
-      console.log('InsightsMetaPage: Unique brands in monthly data:', Array.from(uniqueBrands));
-      console.log('InsightsMetaPage: Gong Cha in monthly data?', uniqueBrands.has('Gong Cha'));
-
-      const { data: keywordCounts, error: keywordError } = await supabase
-        .rpc('get_keyword_counts_by_brand', { p_user_id: user.id });
-
-      if (keywordError) throw keywordError;
 
       const { data: brandPages, error: pagesError } = await supabase
         .from('brand_pages')
@@ -92,78 +70,40 @@ export default function InsightsMetaPage() {
 
       if (pagesError) throw pagesError;
 
-      const brandMap = new Map<string, BrandMetadata>();
-
-      monthlyData?.forEach((row) => {
-        const key = `${row.user_id}:${row.brand}`;
-        if (!brandMap.has(key)) {
-          brandMap.set(key, {
-            brand: row.brand,
-            user_id: row.user_id,
-            username: username,
-            keyword_count: 0,
-            total_volume: 0,
-            available_months: 0,
-            latest_month: row.month,
-            oldest_month: row.month,
-            has_yoy_data: false,
-            has_page: false,
-            is_public: false,
-            page_id: undefined
-          });
-          if (row.brand === 'Gong Cha') {
-            console.log('InsightsMetaPage: Added Gong Cha to brandMap with key:', key);
-          }
-        }
-
-        const metadata = brandMap.get(key)!;
-        metadata.available_months++;
-        metadata.total_volume += row.total_volume;
-
-        if (new Date(row.month) > new Date(metadata.latest_month)) {
-          metadata.latest_month = row.month;
-        }
-        if (new Date(row.month) < new Date(metadata.oldest_month)) {
-          metadata.oldest_month = row.month;
-        }
-      });
-
-      keywordCounts?.forEach((row: { brand: string; keyword_count: number }) => {
-        const key = `${user.id}:${row.brand}`;
-        if (brandMap.has(key)) {
-          brandMap.get(key)!.keyword_count = row.keyword_count;
-        }
-      });
-
-      brandPages?.forEach((page) => {
-        const key = `${page.user_id}:${page.brand}`;
-        if (brandMap.has(key)) {
-          const metadata = brandMap.get(key)!;
-          metadata.has_page = true;
-          metadata.is_public = page.is_public;
-          metadata.page_id = page.page_id;
-        }
-      });
-
-      brandMap.forEach((metadata) => {
-        metadata.has_yoy_data = metadata.available_months >= 24;
-        metadata.total_volume = Math.round(metadata.total_volume / metadata.available_months);
-      });
-
-      console.log('InsightsMetaPage: BrandMap size before converting to array:', brandMap.size);
-      console.log('InsightsMetaPage: BrandMap keys:', Array.from(brandMap.keys()));
-      const gongChaKey = `${user.id}:Gong Cha`;
-      console.log('InsightsMetaPage: Looking for key:', gongChaKey);
-      console.log('InsightsMetaPage: Gong Cha in brandMap?', brandMap.has(gongChaKey));
-      if (brandMap.has(gongChaKey)) {
-        console.log('InsightsMetaPage: Gong Cha data:', brandMap.get(gongChaKey));
+      if (!brandPages || brandPages.length === 0) {
+        setBrandMetadata([]);
+        setLoading(false);
+        return;
       }
 
-      const result = Array.from(brandMap.values()).sort((a, b) =>
-        b.keyword_count - a.keyword_count
+      const { data: aggregatedData, error: aggregateError } = await supabase
+        .rpc('get_brand_metadata_by_user', { p_user_id: user.id });
+
+      if (aggregateError) throw aggregateError;
+
+      const statsMap = new Map(
+        aggregatedData?.map((row: any) => [row.brand, row]) || []
       );
 
-      console.log('InsightsMetaPage: Final brand list:', result.map(b => b.brand));
+      const result: BrandMetadata[] = brandPages.map(page => {
+        const stats = statsMap.get(page.brand);
+
+        return {
+          brand: page.brand,
+          user_id: page.user_id,
+          username: username,
+          keyword_count: stats ? Number(stats.keyword_count) : 0,
+          total_volume: stats ? Number(stats.total_volume) : 0,
+          available_months: stats ? Number(stats.available_months) : 0,
+          latest_month: stats?.latest_month || '',
+          oldest_month: stats?.oldest_month || '',
+          has_yoy_data: stats?.has_yoy_data || false,
+          has_page: true,
+          is_public: page.is_public,
+          page_id: page.page_id
+        };
+      }).sort((a, b) => b.keyword_count - a.keyword_count);
+
       setBrandMetadata(result);
     } catch (error) {
       console.error('Error loading brand metadata:', error);
