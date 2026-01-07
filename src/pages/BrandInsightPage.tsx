@@ -895,6 +895,7 @@ export default function BrandInsightPage() {
           sentiment: kw.sentiment,
           search_variants: kw.search_variants,
           demand_score: kw.demand_score,
+          interest_score: kw.interest_score,
           intent_type: kw.intent_type
         };
       });
@@ -1459,6 +1460,7 @@ export default function BrandInsightPage() {
       category: getKeywordCategory(topic.name),
       sentiment: kwData?.sentiment,
       demandScore: kwData?.demand_score,
+      interestScore: kwData?.interest_score,
       intentType: kwData?.intent_type
     };
   });
@@ -1543,13 +1545,14 @@ export default function BrandInsightPage() {
       }
 
       const csv = [
-        ['Brand', 'Keyword', 'Avg. Monthly Searches', 'Demand Score', 'Intent Type', 'Three Month Change', 'YoY Change', 'Competition', 'Top of Page Bid (High)'].join(','),
+        ['Brand', 'Keyword', 'Avg. Monthly Searches', 'Demand Score', 'Interest Score', 'Intent Type', 'Three Month Change', 'YoY Change', 'Competition', 'Top of Page Bid (High)'].join(','),
         ...allData.map(row =>
           [
             row.brand,
             row.keyword,
             row['Avg. monthly searches'] || 0,
             row.demand_score || '',
+            row.interest_score || '',
             row.intent_type || '',
             row['Three month change'] || '',
             row['YoY change'] || '',
@@ -2454,6 +2457,19 @@ export default function BrandInsightPage() {
                                                 'text-gray-500'
                                               }`}>
                                                 {topic.demandScore.toFixed(1)}/50
+                                              </span>
+                                            </div>
+                                          )}
+                                          {topic.interestScore !== undefined && topic.interestScore !== null && (
+                                            <div>
+                                              <span className={`${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>Interest: </span>
+                                              <span className={`font-semibold ${
+                                                topic.interestScore >= 40 ? 'text-purple-500' :
+                                                topic.interestScore >= 30 ? 'text-indigo-500' :
+                                                topic.interestScore >= 20 ? 'text-pink-500' :
+                                                'text-gray-500'
+                                              }`}>
+                                                {topic.interestScore.toFixed(1)}/50
                                               </span>
                                             </div>
                                           )}

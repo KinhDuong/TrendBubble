@@ -8,16 +8,17 @@ const corsHeaders = {
 
 interface KeywordData {
   keyword: string;
-  monthlySearches: number[]; // Array of up to 48 monthly volumes
-  competition: number; // 0-100
-  avgCpc: number; // Average of low/high bid
-  intentType: string; // Transactional, Commercial, Informational, Navigational
+  monthlySearches: number[];
+  competition: number;
+  avgCpc: number;
+  intentType: string;
 }
 
-interface DemandScoreResult {
+interface ScoreResult {
   keyword: string;
   demandScore: number;
-  breakdown: {
+  interestScore: number;
+  demandBreakdown: {
     volumeScore: number;
     trendScore: number;
     competitionScore: number;
@@ -26,7 +27,15 @@ interface DemandScoreResult {
     recentMomentum: number;
     seasonalityFlag: boolean;
   };
-  interpretation: string;
+  interestBreakdown: {
+    volumeScore: number;
+    trendScore: number;
+    competitionScore: number;
+    cpcScore: number;
+    intentScore: number;
+  };
+  demandInterpretation: string;
+  interestInterpretation: string;
 }
 
 // Linear regression calculation
@@ -42,7 +51,6 @@ function linearRegression(xValues: number[], yValues: number[]): { slope: number
   
   const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
   
-  // Calculate R-squared
   const meanY = sumY / n;
   const ssTotal = yValues.reduce((sum, y) => sum + Math.pow(y - meanY, 2), 0);
   const ssResidual = yValues.reduce((sum, y, i) => {
@@ -55,16 +63,16 @@ function linearRegression(xValues: number[], yValues: number[]): { slope: number
   return { slope, rSquared: Math.max(0, Math.min(1, rSquared)) };
 }
 
-// Score monthly search volume (0-10 points)
-function scoreVolume(avgVolume: number): number {
+// DEMAND SCORING FUNCTIONS
+
+function scoreVolumeDemand(avgVolume: number): number {
   if (avgVolume >= 50000) return 10;
   if (avgVolume >= 10000) return 7;
   if (avgVolume >= 1000) return 4;
   return 1;
 }
 
-// Score trend from historical data (0-10 points)
-function scoreTrend(monthlySearches: number[]): { score: number; slope: number; rSquared: number; monthlyGrowth: number } {
+function scoreTrendDemand(monthlySearches: number[]): { score: number; slope: number; rSquared: number; monthlyGrowth: number } {
   if (monthlySearches.length < 3) return { score: 4, slope: 0, rSquared: 0, monthlyGrowth: 0 };
   
   const xValues = monthlySearches.map((_, i) => i);
@@ -73,7 +81,7 @@ function scoreTrend(monthlySearches: number[]): { score: number; slope: number; 
   const avgVolume = monthlySearches.reduce((a, b) => a + b, 0) / monthlySearches.length;
   const monthlyGrowth = avgVolume > 0 ? (slope / avgVolume) * 100 : 0;
   
-  let score = 4; // Default: stable
+  let score = 4;
   
   if (monthlyGrowth >= 7 && rSquared > 0.8) score = 10;
   else if (monthlyGrowth >= 3 && monthlyGrowth < 7 && rSquared > 0.7) score = 8;
@@ -85,36 +93,84 @@ function scoreTrend(monthlySearches: number[]): { score: number; slope: number; 
   return { score, slope, rSquared, monthlyGrowth };
 }
 
-// Score competition (0-10 points, INVERSE scoring)
-function scoreCompetition(competition: number): number {
+function scoreCompetitionDemand(competition: number): number {
   if (competition >= 70) return 1;
   if (competition >= 50) return 4;
   if (competition >= 30) return 7;
   return 10;
 }
 
-// Score average CPC (0-10 points)
-function scoreCpc(avgCpc: number): number {
+function scoreCpcDemand(avgCpc: number): number {
   if (avgCpc >= 7) return 10;
   if (avgCpc >= 3) return 7;
   if (avgCpc >= 1) return 4;
   return 1;
 }
 
-// Score intent type (0-10 points)
-function scoreIntent(intentType: string): number {
+function scoreIntentDemand(intentType: string): number {
   const intent = intentType.toLowerCase();
   if (intent.includes('transactional')) return 10;
   if (intent.includes('commercial')) return 7;
   if (intent.includes('navigational')) return 5;
-  return 3; // Informational
+  return 3;
 }
 
-// Calculate recent momentum modifier (±1 point)
+// INTEREST SCORING FUNCTIONS
+
+function scoreVolumeInterest(avgVolume: number): number {
+  if (avgVolume >= 50000) return 10;
+  if (avgVolume >= 10000) return 8;
+  if (avgVolume >= 1000) return 5;
+  return 2;
+}
+
+function scoreTrendInterest(monthlySearches: number[]): { score: number; slope: number; rSquared: number; monthlyGrowth: number } {
+  if (monthlySearches.length < 3) return { score: 5, slope: 0, rSquared: 0, monthlyGrowth: 0 };
+  
+  const xValues = monthlySearches.map((_, i) => i);
+  const { slope, rSquared } = linearRegression(xValues, monthlySearches);
+  
+  const avgVolume = monthlySearches.reduce((a, b) => a + b, 0) / monthlySearches.length;
+  const monthlyGrowth = avgVolume > 0 ? (slope / avgVolume) * 100 : 0;
+  
+  let score = 5;
+  
+  if (monthlyGrowth >= 7 && rSquared > 0.8) score = 10;
+  else if (monthlyGrowth >= 3 && monthlyGrowth < 7 && rSquared > 0.7) score = 9;
+  else if (monthlyGrowth >= 1 && monthlyGrowth < 3 && rSquared > 0.6) score = 7;
+  else if (monthlyGrowth >= -1 && monthlyGrowth < 1 && rSquared > 0.5) score = 5;
+  else if (monthlyGrowth >= -3 && monthlyGrowth < -1) score = 3;
+  else if (monthlyGrowth < -3) score = 1;
+  
+  return { score, slope, rSquared, monthlyGrowth };
+}
+
+function scoreCompetitionInterest(competition: number): number {
+  if (competition >= 70) return 2;
+  if (competition >= 50) return 5;
+  if (competition >= 30) return 8;
+  return 10;
+}
+
+function scoreCpcInterest(avgCpc: number): number {
+  if (avgCpc < 1) return 8;
+  if (avgCpc >= 1 && avgCpc <= 3) return 10;
+  if (avgCpc > 3 && avgCpc <= 7) return 7;
+  return 4;
+}
+
+function scoreIntentInterest(intentType: string): number {
+  const intent = intentType.toLowerCase();
+  if (intent.includes('informational')) return 10;
+  if (intent.includes('commercial')) return 8;
+  if (intent.includes('transactional')) return 4;
+  return 10;
+}
+
+// Calculate recent momentum modifier
 function calculateMomentum(monthlySearches: number[], overallSlope: number): number {
   if (monthlySearches.length < 6) return 0;
   
-  // Get last 3 months
   const lastThree = monthlySearches.slice(-3);
   const xValues = [0, 1, 2];
   const { slope: recentSlope } = linearRegression(xValues, lastThree);
@@ -123,8 +179,8 @@ function calculateMomentum(monthlySearches: number[], overallSlope: number): num
   
   const percentChange = ((recentSlope - overallSlope) / Math.abs(overallSlope)) * 100;
   
-  if (percentChange >= 25) return 1; // Accelerating
-  if (percentChange <= -25) return -1; // Decelerating
+  if (percentChange >= 25) return 1;
+  if (percentChange <= -25) return -1;
   return 0;
 }
 
@@ -142,48 +198,68 @@ function detectSeasonality(monthlySearches: number[]): boolean {
   return (amplitude / avgVolume) > 0.3;
 }
 
-// Main scoring function
-function calculateDemandScore(data: KeywordData): DemandScoreResult {
-  // 1. Calculate average volume (last 12 months)
+// Main scoring function - calculates both Demand and Interest scores
+function calculateScores(data: KeywordData): ScoreResult {
   const recentMonths = data.monthlySearches.slice(-12);
   const avgVolume = recentMonths.length > 0 
     ? recentMonths.reduce((a, b) => a + b, 0) / recentMonths.length 
     : 0;
   
-  // 2. Score each metric
-  const volumeScore = scoreVolume(avgVolume);
-  const trendResult = scoreTrend(data.monthlySearches);
-  const competitionScore = scoreCompetition(data.competition);
-  const cpcScore = scoreCpc(data.avgCpc);
-  const intentScore = scoreIntent(data.intentType);
-  
-  // 3. Calculate modifiers
-  const recentMomentum = calculateMomentum(data.monthlySearches, trendResult.slope);
+  // DEMAND SCORE
+  const demandVolumeScore = scoreVolumeDemand(avgVolume);
+  const demandTrendResult = scoreTrendDemand(data.monthlySearches);
+  const demandCompetitionScore = scoreCompetitionDemand(data.competition);
+  const demandCpcScore = scoreCpcDemand(data.avgCpc);
+  const demandIntentScore = scoreIntentDemand(data.intentType);
+  const recentMomentum = calculateMomentum(data.monthlySearches, demandTrendResult.slope);
   const seasonalityFlag = detectSeasonality(data.monthlySearches);
   
-  // 4. Total score
-  const baseScore = volumeScore + trendResult.score + competitionScore + cpcScore + intentScore;
-  const demandScore = Math.max(0, Math.min(50, baseScore + recentMomentum));
+  const demandBaseScore = demandVolumeScore + demandTrendResult.score + demandCompetitionScore + demandCpcScore + demandIntentScore;
+  const demandScore = Math.max(0, Math.min(50, demandBaseScore + recentMomentum));
   
-  // 5. Interpretation
-  let interpretation = 'Low Demand - Monitor/Avoid';
-  if (demandScore >= 40) interpretation = 'Very High Demand - Prioritize';
-  else if (demandScore >= 30) interpretation = 'Strong - Good for Growth';
-  else if (demandScore >= 20) interpretation = 'Moderate - Nurture';
+  let demandInterpretation = 'Low Demand - Monitor/Avoid';
+  if (demandScore >= 40) demandInterpretation = 'Very High Demand - Prioritize';
+  else if (demandScore >= 30) demandInterpretation = 'Strong - Good for Growth';
+  else if (demandScore >= 20) demandInterpretation = 'Moderate - Nurture';
+  
+  // INTEREST SCORE
+  const interestVolumeScore = scoreVolumeInterest(avgVolume);
+  const interestTrendResult = scoreTrendInterest(data.monthlySearches);
+  const interestCompetitionScore = scoreCompetitionInterest(data.competition);
+  const interestCpcScore = scoreCpcInterest(data.avgCpc);
+  const interestIntentScore = scoreIntentInterest(data.intentType);
+  
+  const interestScore = Math.max(0, Math.min(50, 
+    interestVolumeScore + interestTrendResult.score + interestCompetitionScore + interestCpcScore + interestIntentScore
+  ));
+  
+  let interestInterpretation = 'Low Interest - Limited Awareness';
+  if (interestScore >= 40) interestInterpretation = 'Very High Interest - Cultural Buzz';
+  else if (interestScore >= 30) interestInterpretation = 'Strong Interest - Build Authority';
+  else if (interestScore >= 20) interestInterpretation = 'Moderate - Emerging Curiosity';
   
   return {
     keyword: data.keyword,
     demandScore: Math.round(demandScore * 100) / 100,
-    breakdown: {
-      volumeScore,
-      trendScore: trendResult.score,
-      competitionScore,
-      cpcScore,
-      intentScore,
+    interestScore: Math.round(interestScore * 100) / 100,
+    demandBreakdown: {
+      volumeScore: demandVolumeScore,
+      trendScore: demandTrendResult.score,
+      competitionScore: demandCompetitionScore,
+      cpcScore: demandCpcScore,
+      intentScore: demandIntentScore,
       recentMomentum,
       seasonalityFlag
     },
-    interpretation
+    interestBreakdown: {
+      volumeScore: interestVolumeScore,
+      trendScore: interestTrendResult.score,
+      competitionScore: interestCompetitionScore,
+      cpcScore: interestCpcScore,
+      intentScore: interestIntentScore
+    },
+    demandInterpretation,
+    interestInterpretation
   };
 }
 
@@ -198,9 +274,8 @@ Deno.serve(async (req: Request) => {
   try {
     const { keyword, keywords } = await req.json();
     
-    // Support both single keyword and batch processing
     if (keyword) {
-      const result = calculateDemandScore(keyword);
+      const result = calculateScores(keyword);
       return new Response(
         JSON.stringify(result),
         {
@@ -211,7 +286,7 @@ Deno.serve(async (req: Request) => {
         }
       );
     } else if (keywords && Array.isArray(keywords)) {
-      const results = keywords.map(kw => calculateDemandScore(kw));
+      const results = keywords.map(kw => calculateScores(kw));
       return new Response(
         JSON.stringify({ results }),
         {

@@ -826,12 +826,13 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
         const scoreResult = scoreMap.get(row.keyword);
         return {
           ...row,
-          intent_type: scoreResult?.breakdown ? intentMap.get(row.keyword) : 'Informational',
+          intent_type: scoreResult?.demandBreakdown ? intentMap.get(row.keyword) : 'Informational',
           demand_score: scoreResult?.demandScore || null,
+          interest_score: scoreResult?.interestScore || null,
         };
       });
 
-      console.log('Demand score calculation complete');
+      console.log('Demand & Interest score calculation complete');
       return scoredData;
     } catch (error) {
       console.error('Error calculating demand scores:', error);
