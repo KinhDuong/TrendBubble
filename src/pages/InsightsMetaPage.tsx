@@ -48,10 +48,13 @@ export default function InsightsMetaPage() {
     setLoading(true);
     try {
       if (!user?.id) {
+        console.log('InsightsMetaPage: No user ID found');
         setBrandMetadata([]);
         setLoading(false);
         return;
       }
+
+      console.log('InsightsMetaPage: Loading data for user:', user.id);
 
       const { data: userProfile, error: profileError } = await supabase
         .from('user_profiles')
@@ -62,6 +65,7 @@ export default function InsightsMetaPage() {
       if (profileError) throw profileError;
 
       const username = userProfile?.username || null;
+      console.log('InsightsMetaPage: Username:', username);
 
       const { data: monthlyData, error: monthlyError } = await supabase
         .from('brand_keyword_monthly_data')
@@ -69,6 +73,7 @@ export default function InsightsMetaPage() {
         .eq('user_id', user.id);
 
       if (monthlyError) throw monthlyError;
+      console.log('InsightsMetaPage: Monthly data loaded, brands:', monthlyData?.length || 0);
 
       const { data: keywordCounts, error: keywordError } = await supabase
         .rpc('get_keyword_counts_by_brand', { p_user_id: user.id });
@@ -141,6 +146,7 @@ export default function InsightsMetaPage() {
         b.keyword_count - a.keyword_count
       );
 
+      console.log('InsightsMetaPage: Final brand list:', result.map(b => b.brand));
       setBrandMetadata(result);
     } catch (error) {
       console.error('Error loading brand metadata:', error);
