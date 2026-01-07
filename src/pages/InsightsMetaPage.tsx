@@ -73,7 +73,11 @@ export default function InsightsMetaPage() {
         .eq('user_id', user.id);
 
       if (monthlyError) throw monthlyError;
-      console.log('InsightsMetaPage: Monthly data loaded, brands:', monthlyData?.length || 0);
+      console.log('InsightsMetaPage: Monthly data loaded, rows:', monthlyData?.length || 0);
+
+      const uniqueBrands = new Set(monthlyData?.map(d => d.brand) || []);
+      console.log('InsightsMetaPage: Unique brands in monthly data:', Array.from(uniqueBrands));
+      console.log('InsightsMetaPage: Gong Cha in monthly data?', uniqueBrands.has('Gong Cha'));
 
       const { data: keywordCounts, error: keywordError } = await supabase
         .rpc('get_keyword_counts_by_brand', { p_user_id: user.id });
@@ -106,6 +110,9 @@ export default function InsightsMetaPage() {
             is_public: false,
             page_id: undefined
           });
+          if (row.brand === 'Gong Cha') {
+            console.log('InsightsMetaPage: Added Gong Cha to brandMap with key:', key);
+          }
         }
 
         const metadata = brandMap.get(key)!;
@@ -141,6 +148,15 @@ export default function InsightsMetaPage() {
         metadata.has_yoy_data = metadata.available_months >= 24;
         metadata.total_volume = Math.round(metadata.total_volume / metadata.available_months);
       });
+
+      console.log('InsightsMetaPage: BrandMap size before converting to array:', brandMap.size);
+      console.log('InsightsMetaPage: BrandMap keys:', Array.from(brandMap.keys()));
+      const gongChaKey = `${user.id}:Gong Cha`;
+      console.log('InsightsMetaPage: Looking for key:', gongChaKey);
+      console.log('InsightsMetaPage: Gong Cha in brandMap?', brandMap.has(gongChaKey));
+      if (brandMap.has(gongChaKey)) {
+        console.log('InsightsMetaPage: Gong Cha data:', brandMap.get(gongChaKey));
+      }
 
       const result = Array.from(brandMap.values()).sort((a, b) =>
         b.keyword_count - a.keyword_count
