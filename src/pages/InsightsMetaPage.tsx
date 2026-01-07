@@ -68,9 +68,15 @@ export default function InsightsMetaPage() {
         .select('id, brand, user_id, is_public, page_id')
         .eq('user_id', user.id);
 
-      if (pagesError) throw pagesError;
+      if (pagesError) {
+        console.error('Error loading brand pages:', pagesError);
+        throw pagesError;
+      }
+
+      console.log('Brand pages loaded:', brandPages?.length || 0, brandPages);
 
       if (!brandPages || brandPages.length === 0) {
+        console.log('No brand pages found for user');
         setBrandMetadata([]);
         setLoading(false);
         return;
@@ -79,7 +85,12 @@ export default function InsightsMetaPage() {
       const { data: aggregatedData, error: aggregateError } = await supabase
         .rpc('get_brand_metadata_by_user', { p_user_id: user.id });
 
-      if (aggregateError) throw aggregateError;
+      if (aggregateError) {
+        console.error('Error loading aggregated data:', aggregateError);
+        throw aggregateError;
+      }
+
+      console.log('Aggregated data loaded:', aggregatedData?.length || 0, aggregatedData);
 
       const statsMap = new Map(
         aggregatedData?.map((row: any) => [row.brand, row]) || []
@@ -104,6 +115,7 @@ export default function InsightsMetaPage() {
         };
       }).sort((a, b) => b.keyword_count - a.keyword_count);
 
+      console.log('Final result:', result);
       setBrandMetadata(result);
     } catch (error) {
       console.error('Error loading brand metadata:', error);
