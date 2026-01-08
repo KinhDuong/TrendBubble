@@ -51,8 +51,8 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
   };
 
   const getInterestLevel = (score: number) => {
-    if (score >= 40) return 'Very High Interest';
-    if (score >= 30) return 'Strong Interest';
+    if (score >= 40) return 'Very High';
+    if (score >= 30) return 'Strong';
     if (score >= 20) return 'Moderate';
     return 'Low';
   };
