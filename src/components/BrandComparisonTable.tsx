@@ -282,7 +282,6 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
     { label: 'Customer Interest', icon: Sparkles, key: 'avgInterestScore', format: (v: number) => v > 0 ? `${v.toFixed(1)}/50` : 'N/A', colorize: 'interest' },
     { label: '3-Month Change', icon: TrendingUp, key: 'threeMonthChange', format: (v: number) => formatPercentage(v), colorize: true },
     { label: 'YoY Change', icon: TrendingUp, key: 'yoyChange', format: (v: number) => formatPercentage(v), colorize: true },
-    { label: 'Historical Growth', icon: TrendingUp, key: 'avgSlope', format: (v: number) => formatMonthlyGrowth(v), colorize: true },
     { label: 'Sentiment', icon: ThumbsUp, key: 'avgSentiment', format: (v: number) => formatSentiment(v), colorize: 'sentiment' },
     { label: 'Top Performers', icon: Trophy, key: 'topPerformers', format: (v: number) => formatCompactNumber(v) },
     { label: 'Rising Stars', icon: Zap, key: 'risingStars', format: (v: number) => formatCompactNumber(v) },
@@ -540,11 +539,6 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
                           {(metric.key === 'topPerformers' || metric.key === 'risingStars' || metric.key === 'risingStarsHistorical' || metric.key === 'declining' || metric.key === 'stable' || metric.key === 'highIntent') && (
                             <div className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'} mt-1`}>
                               keywords
-                            </div>
-                          )}
-                          {metric.key === 'avgSlope' && (
-                            <div className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'} mt-1`}>
-                              per month
                             </div>
                           )}
                         </div>
