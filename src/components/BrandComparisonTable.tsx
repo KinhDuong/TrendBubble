@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { TrendingUp, TrendingDown, Search, Target, Minus, Trophy, Zap, ThumbsUp, Sparkles } from 'lucide-react';
+import { TrendingUp, TrendingDown, Search, Target, Minus, Trophy, Zap, ThumbsUp, Sparkles, ArrowUp, ArrowUpRight, ArrowRight, ArrowDownRight, ArrowDown, Rocket } from 'lucide-react';
 import { formatCompactNumber } from '../utils/formatNumber';
 import { getBrandColor } from './BrandSelector';
 
@@ -62,46 +62,46 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
     }
   };
 
-  const calculateTrending = (stats: BrandStats): { arrow: string; label: string; level: number; color: string; explanation: string } => {
+  const calculateTrending = (stats: BrandStats): { ArrowIcon: any; label: string; level: number; color: string; explanation: string } => {
     const yoyChange = stats.yoyChange || 0;
     const threeMonthChange = stats.threeMonthChange || 0;
     const risingStarsHist = stats.risingStarsHistorical || 0;
     const avgSlope = stats.avgSlope || 0;
 
     let level = 0;
-    let arrow = '→';
+    let ArrowIcon = ArrowRight;
     let label = 'Stable';
     let color = theme === 'dark' ? 'text-gray-400' : 'text-gray-500';
 
     // Step 1: Base direction from YoY Change
     if (yoyChange > 0.30) {
       level = 5;
-      arrow = '🚀';
+      ArrowIcon = Rocket;
       label = 'Explosive Up';
       color = 'text-emerald-500';
     } else if (yoyChange >= 0.15) {
       level = 4;
-      arrow = '↑';
+      ArrowIcon = ArrowUp;
       label = 'Strong Up';
       color = 'text-green-500';
     } else if (yoyChange >= 0.05) {
       level = 3;
-      arrow = '↗';
+      ArrowIcon = ArrowUpRight;
       label = 'Moderate Up';
       color = 'text-blue-500';
     } else if (yoyChange >= -0.05) {
       level = 2;
-      arrow = '→';
+      ArrowIcon = ArrowRight;
       label = 'Stable';
       color = theme === 'dark' ? 'text-gray-400' : 'text-gray-500';
     } else if (yoyChange >= -0.15) {
       level = 1;
-      arrow = '↘';
+      ArrowIcon = ArrowDownRight;
       label = 'Slight Down';
       color = 'text-orange-500';
     } else {
       level = 0;
-      arrow = '↓';
+      ArrowIcon = ArrowDown;
       label = 'Sharp Down';
       color = 'text-red-500';
     }
@@ -123,29 +123,29 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
       label = 'Explosive Up';
     }
 
-    // Map final level to arrow and label
+    // Map final level to icon and label
     if (level === 5) {
-      arrow = '🚀';
+      ArrowIcon = Rocket;
       label = 'Explosive Up';
       color = 'text-emerald-500';
     } else if (level === 4) {
-      arrow = '↑';
+      ArrowIcon = ArrowUp;
       label = 'Strong Up';
       color = 'text-green-500';
     } else if (level === 3) {
-      arrow = '↗';
+      ArrowIcon = ArrowUpRight;
       label = 'Moderate Up';
       color = 'text-blue-500';
     } else if (level === 2) {
-      arrow = '→';
+      ArrowIcon = ArrowRight;
       label = 'Stable';
       color = theme === 'dark' ? 'text-gray-400' : 'text-gray-500';
     } else if (level === 1) {
-      arrow = '↘';
+      ArrowIcon = ArrowDownRight;
       label = 'Slight Down';
       color = 'text-orange-500';
     } else {
-      arrow = '↓';
+      ArrowIcon = ArrowDown;
       label = 'Sharp Down';
       color = 'text-red-500';
     }
@@ -153,7 +153,7 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
     // Build explanation
     const explanation = `YoY: ${formatPercentage(yoyChange)} | 3M: ${formatPercentage(threeMonthChange)} | Historical Growth: ${formatMonthlyGrowth(avgSlope)} | Rising Stars: ${risingStarsHist}`;
 
-    return { arrow, label, level, color, explanation };
+    return { ArrowIcon, label, level, color, explanation };
   };
 
   const getIntensityBoost = (stats: BrandStats): { hasBoost: boolean; level: 'high' | 'extreme' | null; reason: string } => {
@@ -416,9 +416,10 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
                           >
                             {(() => {
                               const trending = calculateTrending(stats);
+                              const Icon = trending.ArrowIcon;
                               return (
                                 <div className="flex flex-col items-center gap-1">
-                                  <div className="text-3xl">{trending.arrow}</div>
+                                  <Icon className={`w-8 h-8 ${trending.color}`} strokeWidth={2.5} />
                                   <div className={`text-sm md:text-base font-bold ${trending.color}`}>
                                     {trending.label}
                                   </div>
@@ -434,8 +435,19 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
                                 : 'bg-white border-gray-300'
                             }`}>
                               <div className="p-4 space-y-2">
-                                <div className={`text-center text-lg font-bold ${calculateTrending(stats).color}`}>
-                                  {calculateTrending(stats).arrow} {calculateTrending(stats).label}
+                                <div className={`text-center flex items-center justify-center gap-2`}>
+                                  {(() => {
+                                    const trending = calculateTrending(stats);
+                                    const Icon = trending.ArrowIcon;
+                                    return (
+                                      <>
+                                        <Icon className={`w-5 h-5 ${trending.color}`} strokeWidth={2.5} />
+                                        <span className={`text-lg font-bold ${trending.color}`}>
+                                          {trending.label}
+                                        </span>
+                                      </>
+                                    );
+                                  })()}
                                 </div>
                                 <div className={`text-xs ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'} leading-relaxed`}>
                                   {calculateTrending(stats).explanation}
