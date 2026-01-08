@@ -67,6 +67,7 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
     const threeMonthChange = stats.threeMonthChange || 0;
     const risingStarsHist = stats.risingStarsHistorical || 0;
     const avgSlope = stats.avgSlope || 0;
+    const rSquared = stats.avgRSquared || 0;
 
     let level = 0;
     let ArrowIcon = ArrowRight;
@@ -150,8 +151,9 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
       color = 'text-red-500';
     }
 
-    // Build explanation
-    const explanation = `YoY: ${formatPercentage(yoyChange)} | 3M: ${formatPercentage(threeMonthChange)} | Historical Growth: ${formatMonthlyGrowth(avgSlope)} | Rising Stars: ${risingStarsHist}`;
+    // Build explanation with trend reliability
+    const reliabilityPercent = (rSquared * 100).toFixed(0);
+    const explanation = `YoY: ${formatPercentage(yoyChange)} | 3M: ${formatPercentage(threeMonthChange)} | Historical Growth: ${formatMonthlyGrowth(avgSlope)} | Rising Stars: ${risingStarsHist} | Trend Reliability: ${reliabilityPercent}% confidence`;
 
     return { ArrowIcon, label, level, color, explanation };
   };
@@ -271,11 +273,6 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
     return slope > 0 ? `+${pct}%` : `${pct}%`;
   };
 
-  const formatRSquared = (r2: number): string => {
-    if (r2 === 0) return 'N/A';
-    return `${(r2 * 100).toFixed(0)}%`;
-  };
-
   const metrics = [
     { label: 'Trending', icon: TrendingUp, key: 'trending', format: (v: number) => '', colorize: 'trending' },
     { label: 'Monthly Search', icon: TrendingUp, key: 'brandSearchVolume', format: (v: number) => formatCompactNumber(v) },
@@ -286,7 +283,6 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
     { label: '3-Month Change', icon: TrendingUp, key: 'threeMonthChange', format: (v: number) => formatPercentage(v), colorize: true },
     { label: 'YoY Change', icon: TrendingUp, key: 'yoyChange', format: (v: number) => formatPercentage(v), colorize: true },
     { label: 'Historical Growth', icon: TrendingUp, key: 'avgSlope', format: (v: number) => formatMonthlyGrowth(v), colorize: true },
-    { label: 'Trend Reliability', icon: Target, key: 'avgRSquared', format: (v: number) => formatRSquared(v) },
     { label: 'Sentiment', icon: ThumbsUp, key: 'avgSentiment', format: (v: number) => formatSentiment(v), colorize: 'sentiment' },
     { label: 'Top Performers', icon: Trophy, key: 'topPerformers', format: (v: number) => formatCompactNumber(v) },
     { label: 'Rising Stars', icon: Zap, key: 'risingStars', format: (v: number) => formatCompactNumber(v) },
@@ -549,11 +545,6 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
                           {metric.key === 'avgSlope' && (
                             <div className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'} mt-1`}>
                               per month
-                            </div>
-                          )}
-                          {metric.key === 'avgRSquared' && (
-                            <div className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'} mt-1`}>
-                              confidence
                             </div>
                           )}
                         </div>
