@@ -363,7 +363,7 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
             return (
               <div
                 key={metric.key}
-                className={`grid gap-0 border-b ${theme === 'dark' ? 'border-gray-700/50' : 'border-gray-200'} hover:${theme === 'dark' ? 'bg-gray-700/20' : 'bg-gray-50'} transition-colors`}
+                className={`grid gap-0 border-b ${theme === 'dark' ? 'border-gray-700/50' : 'border-gray-200'} hover:${theme === 'dark' ? 'bg-gray-700/20' : 'bg-gray-50'} transition-colors overflow-visible`}
                 style={{ gridTemplateColumns: `repeat(${brandStats.length + 1}, 1fr)` }}
               >
                 <div className={`p-4 flex items-center gap-3 ${theme === 'dark' ? 'bg-gray-800/30' : 'bg-gray-50/50'}`}>
@@ -424,7 +424,7 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
                           </button>
 
                           {showTooltip && (
-                            <div className={`absolute z-50 bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-80 rounded-lg shadow-2xl border-2 animate-in fade-in slide-in-from-bottom-2 duration-200 ${
+                            <div className={`absolute z-[9999] bottom-full left-1/2 transform -translate-x-1/2 mb-3 w-80 rounded-lg shadow-2xl border-2 animate-in fade-in slide-in-from-bottom-2 duration-200 ${
                               theme === 'dark'
                                 ? 'bg-gray-800 border-gray-600'
                                 : 'bg-white border-gray-300'
@@ -474,7 +474,7 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
                           </button>
 
                           {showTooltip && value > 0 && (
-                            <div className={`absolute z-50 bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 rounded-lg shadow-2xl border-2 animate-in fade-in slide-in-from-bottom-2 duration-200 ${
+                            <div className={`absolute z-[9999] bottom-full left-1/2 transform -translate-x-1/2 mb-3 w-64 rounded-lg shadow-2xl border-2 animate-in fade-in slide-in-from-bottom-2 duration-200 ${
                               theme === 'dark'
                                 ? 'bg-gray-800 border-gray-600'
                                 : 'bg-white border-gray-300'
@@ -510,7 +510,7 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
                           </button>
 
                           {showTooltip && value > 0 && (
-                            <div className={`absolute z-50 bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 rounded-lg shadow-2xl border-2 animate-in fade-in slide-in-from-bottom-2 duration-200 ${
+                            <div className={`absolute z-[9999] bottom-full left-1/2 transform -translate-x-1/2 mb-3 w-64 rounded-lg shadow-2xl border-2 animate-in fade-in slide-in-from-bottom-2 duration-200 ${
                               theme === 'dark'
                                 ? 'bg-gray-800 border-gray-600'
                                 : 'bg-white border-gray-300'
