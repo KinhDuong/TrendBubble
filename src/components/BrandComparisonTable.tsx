@@ -293,10 +293,14 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
 
   return (
     <div className={`mb-6 rounded-xl border overflow-visible ${theme === 'dark' ? 'bg-gradient-to-br from-gray-800/50 to-gray-900/50 border-gray-700' : 'bg-gradient-to-br from-gray-50 to-white border-gray-200'}`}>
-      <div className={`px-6 py-4 border-b ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'} overflow-visible rounded-t-xl`}>
-        <h2 className={`text-xl md:text-2xl font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-          Brand Compare
-        </h2>
+      <div className={`px-6 py-4 border-b ${theme === 'dark' ? 'border-gray-700 bg-gray-800/30' : 'border-gray-200 bg-orange-50'} overflow-visible rounded-t-xl`}>
+        <div className="flex items-center justify-center">
+          <div className={`px-6 py-2 rounded-full ${theme === 'dark' ? 'bg-orange-600' : 'bg-orange-500'} border-4 ${theme === 'dark' ? 'border-gray-700' : 'border-orange-600'}`}>
+            <h2 className="text-xl md:text-2xl font-black text-white tracking-wider">
+              BRAND COMPARE
+            </h2>
+          </div>
+        </div>
       </div>
 
       <div className="overflow-x-auto overflow-y-visible">
