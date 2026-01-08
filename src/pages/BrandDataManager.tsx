@@ -183,6 +183,82 @@ export default function BrandDataManager() {
     }
   };
 
+  const handleDeleteBrand = async () => {
+    if (!brandName || !user?.id) return;
+
+    const decodedBrand = decodeURIComponent(brandName);
+
+    const confirmed = confirm(
+      `Are you sure you want to permanently delete "${decodedBrand}" and all its data?\n\n` +
+      `This will remove:\n` +
+      `• All keyword data\n` +
+      `• Monthly aggregated data\n` +
+      `• AI analysis and insights\n` +
+      `• SEO strategy\n` +
+      `• PPC insights\n` +
+      `• The brand page\n\n` +
+      `This action cannot be undone.`
+    );
+
+    if (!confirmed) return;
+
+    setShowDeleteConfirm(false);
+    setLoading(true);
+
+    try {
+      // Delete from all brand-related tables
+      const deletePromises = [
+        supabase.from('brand_keyword_data').delete().eq('brand', decodedBrand).eq('user_id', user.id),
+        supabase.from('brand_keyword_monthly_data').delete().eq('brand', decodedBrand).eq('user_id', user.id),
+        supabase.from('brand_ai_analysis').delete().eq('brand', decodedBrand).eq('user_id', user.id),
+        supabase.from('brand_seo_strategy').delete().eq('brand_name', decodedBrand).eq('user_id', user.id),
+        supabase.from('brand_positioning').delete().eq('brand', decodedBrand).eq('user_id', user.id),
+      ];
+
+      // Delete PPC insights if brand page exists
+      if (brandPage) {
+        deletePromises.push(
+          supabase.from('brand_ppc_insights').delete().eq('brand_page_id', brandPage.id).eq('user_id', user.id)
+        );
+      }
+
+      // Execute all deletions
+      const results = await Promise.all(deletePromises);
+
+      // Check for errors
+      const errors = results.filter(r => r.error);
+      if (errors.length > 0) {
+        throw new Error('Some data could not be deleted');
+      }
+
+      // Finally delete the brand page itself
+      if (brandPage) {
+        const { error: pageError } = await supabase
+          .from('brand_pages')
+          .delete()
+          .eq('id', brandPage.id)
+          .eq('user_id', user.id);
+
+        if (pageError) throw pageError;
+      }
+
+      // Navigate back to brand list
+      navigate('/admin/brand-data');
+
+      setAiMessage({
+        type: 'success',
+        text: `Successfully deleted "${decodedBrand}" and all associated data`
+      });
+    } catch (error: any) {
+      console.error('Error deleting brand:', error);
+      setAiMessage({
+        type: 'error',
+        text: error.message || 'Failed to delete brand. Please try again.'
+      });
+      setLoading(false);
+    }
+  };
+
   const createBrandPage = async () => {
     if (!brandName) return;
 
@@ -306,28 +382,6 @@ export default function BrandDataManager() {
     await fetchData();
   };
 
-  const handleDeleteBrand = async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
-
-      const { error } = await supabase
-        .from('brand_keyword_data')
-        .delete()
-        .eq('brand', selectedBrand)
-        .eq('user_id', user.id);
-
-      if (error) throw error;
-
-      await fetchData();
-      setSelectedBrand('all');
-      setShowDeleteConfirm(false);
-    } catch (error) {
-      console.error('Error deleting brand:', error);
-      alert('Failed to delete brand data');
-      setShowDeleteConfirm(false);
-    }
-  };
 
   const handleAICategorization = async () => {
     if (selectedBrand === 'all') {
@@ -972,23 +1026,33 @@ export default function BrandDataManager() {
                         </p>
                       </div>
                     </div>
-                    <button
-                      onClick={createBrandPage}
-                      disabled={creatingPage}
-                      className="flex items-center gap-2 px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {creatingPage ? (
-                        <>
-                          <RefreshCw className="w-4 h-4 animate-spin" />
-                          Creating...
-                        </>
-                      ) : (
-                        <>
-                          <Globe className="w-4 h-4" />
-                          Create Page
-                        </>
-                      )}
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={createBrandPage}
+                        disabled={creatingPage}
+                        className="flex items-center gap-2 px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {creatingPage ? (
+                          <>
+                            <RefreshCw className="w-4 h-4 animate-spin" />
+                            Creating...
+                          </>
+                        ) : (
+                          <>
+                            <Globe className="w-4 h-4" />
+                            Create Page
+                          </>
+                        )}
+                      </button>
+                      <button
+                        onClick={handleDeleteBrand}
+                        className="flex items-center gap-2 px-3 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                        title="Delete brand and all associated data"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                        Delete Brand
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}
@@ -1046,6 +1110,14 @@ export default function BrandDataManager() {
                           <Eye className="w-4 h-4" />
                         )}
                         {togglingPublic ? 'Updating...' : brandPage.is_public ? 'Make Private' : 'Make Public'}
+                      </button>
+                      <button
+                        onClick={handleDeleteBrand}
+                        className="flex items-center gap-2 px-3 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                        title="Delete brand and all associated data"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                        Delete Brand
                       </button>
                     </div>
                   </div>
