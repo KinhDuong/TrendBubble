@@ -541,7 +541,13 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
         // Use the exact match value
         avgMonthlySearches = brandMatch['Avg. monthly searches'];
         console.log(`✓ Found exact match for brand "${brandName}": ${avgMonthlySearches?.toLocaleString()} avg monthly searches`);
-        console.log('Brand match data:', brandMatch);
+        console.log('📋 Brand match details:', {
+          keyword: brandMatch.keyword,
+          avgMonthlySearches: avgMonthlySearches,
+          typeof: typeof avgMonthlySearches,
+          isNumber: typeof avgMonthlySearches === 'number',
+          fullRecord: brandMatch
+        });
       } else {
         // No exact match found - show top 20 by volume + first 20 rows for user selection
         console.log(`⚠ No exact match found for brand "${brandName}"`);
@@ -585,6 +591,13 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
 
       if (detectedDuplicates.length > 0) {
         console.log(`⚠ Found ${detectedDuplicates.length} duplicate groups - caching brand value: ${avgMonthlySearches?.toLocaleString()}`);
+        console.log('💾 Caching avgMonthlySearches:', {
+          value: avgMonthlySearches,
+          typeof: typeof avgMonthlySearches,
+          isNumber: typeof avgMonthlySearches === 'number',
+          isUndefined: avgMonthlySearches === undefined,
+          isNull: avgMonthlySearches === null
+        });
         setDuplicateGroups(detectedDuplicates);
         setZeroTrafficKeywords([]); // Zero-traffic keywords are NOT shown in review
         setPendingData(data); // Only valid traffic keywords
@@ -600,6 +613,13 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
 
       if (detectedMerges.length > 0) {
         console.log(`⚠ Found ${detectedMerges.length} merge groups - caching brand value: ${avgMonthlySearches?.toLocaleString()}`);
+        console.log('💾 Caching avgMonthlySearches (merge):', {
+          value: avgMonthlySearches,
+          typeof: typeof avgMonthlySearches,
+          isNumber: typeof avgMonthlySearches === 'number',
+          isUndefined: avgMonthlySearches === undefined,
+          isNull: avgMonthlySearches === null
+        });
         setMergeGroups(detectedMerges);
         setPendingData(data);
         setAvgMonthlySearchesCache(avgMonthlySearches); // Cache BEFORE showing review
@@ -620,6 +640,13 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
 
   const handleMergeApproval = async (approvedMerges: MergeGroup[]) => {
     console.log(`🔄 Merge approval - using cached brand value: ${avgMonthlySearchesCache?.toLocaleString()}`);
+    console.log('📤 Restoring cached value (merge):', {
+      value: avgMonthlySearchesCache,
+      typeof: typeof avgMonthlySearchesCache,
+      isNumber: typeof avgMonthlySearchesCache === 'number',
+      isUndefined: avgMonthlySearchesCache === undefined,
+      isNull: avgMonthlySearchesCache === null
+    });
     setShowMergeReview(false);
     setUploading(true);
 
@@ -646,6 +673,13 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
 
   const handleDuplicateReviewContinue = async (filteredData: Array<Record<string, any>>) => {
     console.log(`🔄 Duplicate review continue - using cached brand value: ${avgMonthlySearchesCache?.toLocaleString()}`);
+    console.log('📤 Restoring cached value:', {
+      value: avgMonthlySearchesCache,
+      typeof: typeof avgMonthlySearchesCache,
+      isNumber: typeof avgMonthlySearchesCache === 'number',
+      isUndefined: avgMonthlySearchesCache === undefined,
+      isNull: avgMonthlySearchesCache === null
+    });
     setShowDuplicateReview(false);
     setUploading(true);
 
