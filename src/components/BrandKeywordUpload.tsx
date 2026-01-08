@@ -55,6 +55,7 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
   const [showBrandSelector, setShowBrandSelector] = useState(false);
   const [brandSelectorKeywords, setBrandSelectorKeywords] = useState<Array<Record<string, any>>>([]);
   const [avgMonthlySearchesCache, setAvgMonthlySearchesCache] = useState<number | undefined>(undefined);
+  const [exactBrandNameCache, setExactBrandNameCache] = useState<string | undefined>(undefined);
 
   const levenshteinDistance = (str1: string, str2: string): number => {
     const len1 = str1.length;
@@ -444,7 +445,7 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
     return results.filter(row => row.keyword);
   };
 
-  const aggregateMonthlyData = (data: Array<Record<string, any>>) => {
+  const aggregateMonthlyData = (data: Array<Record<string, any>>, brandToUse: string) => {
     const monthlyMap = new Map<string, { keywords: Array<{ keyword: string; volume: number }>, totalVolume: number }>();
 
     data.forEach(row => {
@@ -476,7 +477,7 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
         .slice(0, 100);
 
       return {
-        brand: brandName.trim(),
+        brand: brandToUse,
         month: month,
         total_volume: data.totalVolume,
         keyword_count: data.keywords.length,
@@ -537,10 +538,12 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
 
       let avgMonthlySearches: number | undefined;
 
+      let exactBrandName: string | undefined;
+
       if (brandMatch) {
-        // Use the exact match value AND update brandName to match the CSV exactly
+        // Use the exact match value
         avgMonthlySearches = brandMatch['Avg. monthly searches'];
-        const exactBrandName = brandMatch.keyword;
+        exactBrandName = brandMatch.keyword;
 
         console.log(`✓ Found exact match for brand "${brandName}" → Using exact CSV name: "${exactBrandName}"`);
         console.log(`✓ Brand search volume: ${avgMonthlySearches?.toLocaleString()} avg monthly searches`);
@@ -552,9 +555,6 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
           isNumber: typeof avgMonthlySearches === 'number',
           fullRecord: brandMatch
         });
-
-        // Update the brand name to match the CSV exactly
-        setBrandName(exactBrandName);
       } else {
         // No exact match found - show top 20 by volume + first 20 rows for user selection
         console.log(`⚠ No exact match found for brand "${brandName}"`);
@@ -597,7 +597,7 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
       const detectedDuplicates = detectDuplicates(data);
 
       if (detectedDuplicates.length > 0) {
-        console.log(`⚠ Found ${detectedDuplicates.length} duplicate groups - caching brand value: ${avgMonthlySearches?.toLocaleString()}`);
+        console.log(`⚠ Found ${detectedDuplicates.length} duplicate groups - caching brand: "${exactBrandName || brandName.trim()}", value: ${avgMonthlySearches?.toLocaleString()}`);
         console.log('💾 Caching avgMonthlySearches:', {
           value: avgMonthlySearches,
           typeof: typeof avgMonthlySearches,
@@ -609,6 +609,7 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
         setZeroTrafficKeywords([]); // Zero-traffic keywords are NOT shown in review
         setPendingData(data); // Only valid traffic keywords
         setAvgMonthlySearchesCache(avgMonthlySearches); // Cache BEFORE showing review
+        setExactBrandNameCache(exactBrandName); // Cache exact brand name
         setShowDuplicateReview(true);
         setUploading(false);
         event.target.value = '';
@@ -619,7 +620,7 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
       const detectedMerges = detectMergeGroups(data);
 
       if (detectedMerges.length > 0) {
-        console.log(`⚠ Found ${detectedMerges.length} merge groups - caching brand value: ${avgMonthlySearches?.toLocaleString()}`);
+        console.log(`⚠ Found ${detectedMerges.length} merge groups - caching brand: "${exactBrandName || brandName.trim()}", value: ${avgMonthlySearches?.toLocaleString()}`);
         console.log('💾 Caching avgMonthlySearches (merge):', {
           value: avgMonthlySearches,
           typeof: typeof avgMonthlySearches,
@@ -630,11 +631,12 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
         setMergeGroups(detectedMerges);
         setPendingData(data);
         setAvgMonthlySearchesCache(avgMonthlySearches); // Cache BEFORE showing review
+        setExactBrandNameCache(exactBrandName); // Cache exact brand name
         setShowMergeReview(true);
         setUploading(false);
       } else {
-        console.log(`✓ No duplicates or merges - uploading directly with brand value: ${avgMonthlySearches?.toLocaleString()}`);
-        await processUpload(data, avgMonthlySearches);
+        console.log(`✓ No duplicates or merges - uploading directly with brand: "${exactBrandName || brandName.trim()}", value: ${avgMonthlySearches?.toLocaleString()}`);
+        await processUpload(data, avgMonthlySearches, exactBrandName);
       }
 
       event.target.value = '';
@@ -659,7 +661,7 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
 
     try {
       const finalData = applyMerges(pendingData, approvedMerges);
-      await processUpload(finalData, avgMonthlySearchesCache);
+      await processUpload(finalData, avgMonthlySearchesCache, exactBrandNameCache);
     } catch (err) {
       console.error('Merge approval error:', err);
       setError(err instanceof Error ? err.message : 'Failed to process merges');
@@ -699,7 +701,7 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
         setShowMergeReview(true);
         setUploading(false);
       } else {
-        await processUpload(filteredData, avgMonthlySearchesCache);
+        await processUpload(filteredData, avgMonthlySearchesCache, exactBrandNameCache);
       }
     } catch (err) {
       console.error('Duplicate review continue error:', err);
@@ -717,6 +719,7 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
     setZeroTrafficKeywords([]);
     setPendingData([]);
     setAvgMonthlySearchesCache(undefined);
+    setExactBrandNameCache(undefined);
     setUploading(false);
   };
 
@@ -731,11 +734,9 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
       console.log(`✓ User selected brand: "${exactBrandName}"`);
       console.log(`✓ Brand search volume: ${selectedAvgMonthlySearches?.toLocaleString()} avg monthly searches`);
 
-      // Update the brand name to match the selected keyword exactly
-      setBrandName(exactBrandName);
-
-      // Store the selected brand value
+      // Store the exact brand name and value
       setAvgMonthlySearchesCache(selectedAvgMonthlySearches);
+      setExactBrandNameCache(exactBrandName);
 
       // Continue with duplicate detection
       const detectedDuplicates = detectDuplicates(pendingData);
@@ -756,7 +757,7 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
         setShowMergeReview(true);
         setUploading(false);
       } else {
-        await processUpload(pendingData, selectedAvgMonthlySearches);
+        await processUpload(pendingData, selectedAvgMonthlySearches, exactBrandName);
         setPendingData([]);
       }
     } catch (err) {
@@ -773,6 +774,7 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
     setBrandSelectorKeywords([]);
     setPendingData([]);
     setAvgMonthlySearchesCache(undefined);
+    setExactBrandNameCache(undefined);
     setUploading(false);
   };
 
@@ -893,11 +895,15 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
     }
   };
 
-  const processUpload = async (data: Array<Record<string, any>>, manualAvgMonthlySearches?: number) => {
+  const processUpload = async (data: Array<Record<string, any>>, manualAvgMonthlySearches?: number, exactBrandName?: string) => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       throw new Error('You must be logged in to upload data');
     }
+
+    // Use exact brand name from CSV if provided, otherwise use state variable
+    const brandToUse = exactBrandName || brandName.trim();
+    console.log(`📝 Using brand name: "${brandToUse}"${exactBrandName ? ' (from CSV)' : ' (from input)'}`);
 
     // Check tier limits
     if (getKeywordLimit) {
@@ -915,11 +921,11 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
       }
     }
 
-    console.log('Deleting existing data for brand:', brandName.trim());
+    console.log('Deleting existing data for brand:', brandToUse);
     const { error: deleteError } = await supabase
       .from('brand_keyword_data')
       .delete()
-      .eq('brand', brandName.trim())
+      .eq('brand', brandToUse)
       .eq('user_id', user.id);
 
     if (deleteError) {
@@ -962,7 +968,7 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
       throw new Error(`Database error: ${insertError.message || 'Unknown error'}`);
     }
 
-    const aggregatedData = aggregateMonthlyData(data);
+    const aggregatedData = aggregateMonthlyData(data, brandToUse);
 
     console.log('Aggregated data:', aggregatedData);
 
@@ -977,11 +983,11 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
       console.log('Inserting monthly records:', monthlyRecords);
       console.log('First record sample:', JSON.stringify(monthlyRecords[0], null, 2));
 
-      console.log('Deleting existing monthly data for brand:', brandName.trim());
+      console.log('Deleting existing monthly data for brand:', brandToUse);
       const { error: monthlyDeleteError } = await supabase
         .from('brand_keyword_monthly_data')
         .delete()
-        .eq('brand', brandName.trim())
+        .eq('brand', brandToUse)
         .eq('user_id', user.id);
 
       if (monthlyDeleteError) {
@@ -1004,13 +1010,13 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
       console.log('⚠ No monthly breakdown columns found in CSV - skipping monthly data aggregation');
     }
 
-    const baseSlug = generateSlug(brandName.trim());
+    const baseSlug = generateSlug(brandToUse);
 
     const { data: existingPage } = await supabase
       .from('brand_pages')
       .select('page_id')
       .eq('user_id', user.id)
-      .eq('brand', brandName.trim())
+      .eq('brand', brandToUse)
       .maybeSingle();
 
     let pageId = baseSlug;
@@ -1053,11 +1059,11 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
       .from('brand_pages')
       .upsert({
         user_id: user.id,
-        brand: brandName.trim(),
+        brand: brandToUse,
         page_id: pageId,
         avg_monthly_searches: avgMonthlySearches,
-        meta_title: `${brandName.trim()} - Keyword Search Trends & SEO Insights`,
-        meta_description: `Analyze ${brandName.trim()} keyword search volume trends and SEO performance data.`,
+        meta_title: `${brandToUse} - Keyword Search Trends & SEO Insights`,
+        meta_description: `Analyze ${brandToUse} keyword search volume trends and SEO performance data.`,
         updated_at: new Date().toISOString()
       }, {
         onConflict: 'user_id,brand'
@@ -1069,11 +1075,12 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
     }
 
     const successMessage = aggregatedData.length > 0
-      ? `Successfully uploaded data for ${brandName.trim()}: ${data.length} keywords with ${aggregatedData.length} months of trend data`
-      : `Successfully uploaded data for ${brandName.trim()}: ${data.length} keywords`;
+      ? `Successfully uploaded data for ${brandToUse}: ${data.length} keywords with ${aggregatedData.length} months of trend data`
+      : `Successfully uploaded data for ${brandToUse}: ${data.length} keywords`;
 
     setSuccess(successMessage);
     setAvgMonthlySearchesCache(undefined);
+    setExactBrandNameCache(undefined);
 
     setTimeout(() => {
       onUploadComplete();

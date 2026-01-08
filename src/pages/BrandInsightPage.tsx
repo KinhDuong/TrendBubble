@@ -632,11 +632,16 @@ export default function BrandInsightPage() {
 
       if (monthlyError) throw monthlyError;
 
+      // Use case-insensitive deduplication to prevent "bubble tea" and "Bubble Tea" duplicates
       const brandMap = new Map<string, { brand: string; created_at: string }>();
 
       monthlyData?.forEach((item) => {
-        if (!brandMap.has(item.brand) || item.created_at > brandMap.get(item.brand)!.created_at) {
-          brandMap.set(item.brand, item);
+        const lowerBrand = item.brand.toLowerCase();
+        const existing = brandMap.get(lowerBrand);
+
+        // Keep the entry with the most recent created_at, or prefer capitalized names
+        if (!existing || item.created_at > existing.created_at) {
+          brandMap.set(lowerBrand, item);
         }
       });
 
