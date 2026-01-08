@@ -62,6 +62,100 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
     }
   };
 
+  const calculateTrending = (stats: BrandStats): { arrow: string; label: string; level: number; color: string; explanation: string } => {
+    const yoyChange = stats.yoyChange || 0;
+    const threeMonthChange = stats.threeMonthChange || 0;
+    const risingStarsHist = stats.risingStarsHistorical || 0;
+    const avgSlope = stats.avgSlope || 0;
+
+    let level = 0;
+    let arrow = '→';
+    let label = 'Stable';
+    let color = theme === 'dark' ? 'text-gray-400' : 'text-gray-500';
+
+    // Step 1: Base direction from YoY Change
+    if (yoyChange > 0.30) {
+      level = 5;
+      arrow = '🚀';
+      label = 'Explosive Up';
+      color = 'text-emerald-500';
+    } else if (yoyChange >= 0.15) {
+      level = 4;
+      arrow = '↑';
+      label = 'Strong Up';
+      color = 'text-green-500';
+    } else if (yoyChange >= 0.05) {
+      level = 3;
+      arrow = '↗';
+      label = 'Moderate Up';
+      color = 'text-blue-500';
+    } else if (yoyChange >= -0.05) {
+      level = 2;
+      arrow = '→';
+      label = 'Stable';
+      color = theme === 'dark' ? 'text-gray-400' : 'text-gray-500';
+    } else if (yoyChange >= -0.15) {
+      level = 1;
+      arrow = '↘';
+      label = 'Slight Down';
+      color = 'text-orange-500';
+    } else {
+      level = 0;
+      arrow = '↓';
+      label = 'Sharp Down';
+      color = 'text-red-500';
+    }
+
+    // Step 2: Momentum modifier (compare 3-month to YoY)
+    const momentumDiff = threeMonthChange - yoyChange;
+    if (momentumDiff > 0.15 && level < 5) {
+      level += 1;
+    } else if (momentumDiff < -0.15 && level > 0) {
+      level -= 1;
+    }
+
+    // Step 3: Intensity boost
+    if (risingStarsHist > 400 && threeMonthChange > 0.30) {
+      level = 5;
+    }
+
+    if (avgSlope > 0.07 && level === 5) {
+      label = 'Explosive Up';
+    }
+
+    // Map final level to arrow and label
+    if (level === 5) {
+      arrow = '🚀';
+      label = 'Explosive Up';
+      color = 'text-emerald-500';
+    } else if (level === 4) {
+      arrow = '↑';
+      label = 'Strong Up';
+      color = 'text-green-500';
+    } else if (level === 3) {
+      arrow = '↗';
+      label = 'Moderate Up';
+      color = 'text-blue-500';
+    } else if (level === 2) {
+      arrow = '→';
+      label = 'Stable';
+      color = theme === 'dark' ? 'text-gray-400' : 'text-gray-500';
+    } else if (level === 1) {
+      arrow = '↘';
+      label = 'Slight Down';
+      color = 'text-orange-500';
+    } else {
+      arrow = '↓';
+      label = 'Sharp Down';
+      color = 'text-red-500';
+    }
+
+    // Build explanation
+    const explanation = `YoY: ${formatPercentage(yoyChange)} | 3M: ${formatPercentage(threeMonthChange)} | Historical Growth: ${formatMonthlyGrowth(avgSlope)} | Rising Stars: ${risingStarsHist}`;
+
+    return { arrow, label, level, color, explanation };
+  };
+
   const getIntensityBoost = (stats: BrandStats): { hasBoost: boolean; level: 'high' | 'extreme' | null; reason: string } => {
     const slope = stats.avgSlope || 0;
     const rSquared = stats.avgRSquared || 0;
@@ -183,6 +277,7 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
   };
 
   const metrics = [
+    { label: 'Trending', icon: TrendingUp, key: 'trending', format: (v: number) => '', colorize: 'trending' },
     { label: 'Monthly Search', icon: TrendingUp, key: 'brandSearchVolume', format: (v: number) => formatCompactNumber(v) },
     { label: 'Total Keywords', icon: Search, key: 'totalKeywords', format: (v: number) => formatCompactNumber(v) },
     { label: 'Targeted Reach', icon: TrendingUp, key: 'totalVolume', format: (v: number) => formatCompactNumber(v) },
@@ -300,6 +395,7 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
                     textColor = getInterestScoreColor(value);
                   }
 
+                  const isTrending = metric.key === 'trending';
                   const isInterestScore = metric.key === 'avgInterestScore';
                   const isDemandScore = metric.key === 'avgDemandScore';
                   const showTooltip = tooltipBrand === stats.brand && tooltipMetric === metric.key;
@@ -309,7 +405,54 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
                       key={`${stats.brand}-${metric.key}`}
                       className={`p-4 flex items-center justify-center border-l ${theme === 'dark' ? 'border-gray-700/50' : 'border-gray-200'} relative`}
                     >
-                      {isInterestScore ? (
+                      {isTrending ? (
+                        <div
+                          className="relative"
+                          ref={(el) => { tooltipRefs.current[`${stats.brand}-${metric.key}`] = el; }}
+                        >
+                          <button
+                            onClick={() => toggleTooltip(stats.brand, metric.key)}
+                            className={`text-center transition-all hover:scale-105 ${theme === 'dark' ? 'hover:bg-gray-700/30' : 'hover:bg-gray-100/50'} rounded-lg px-3 py-2 cursor-pointer`}
+                          >
+                            {(() => {
+                              const trending = calculateTrending(stats);
+                              return (
+                                <div className="flex flex-col items-center gap-1">
+                                  <div className="text-3xl">{trending.arrow}</div>
+                                  <div className={`text-sm md:text-base font-bold ${trending.color}`}>
+                                    {trending.label}
+                                  </div>
+                                </div>
+                              );
+                            })()}
+                          </button>
+
+                          {showTooltip && (
+                            <div className={`absolute z-50 bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-80 rounded-lg shadow-2xl border-2 animate-in fade-in slide-in-from-bottom-2 duration-200 ${
+                              theme === 'dark'
+                                ? 'bg-gray-800 border-gray-600'
+                                : 'bg-white border-gray-300'
+                            }`}>
+                              <div className="p-4 space-y-2">
+                                <div className={`text-center text-lg font-bold ${calculateTrending(stats).color}`}>
+                                  {calculateTrending(stats).arrow} {calculateTrending(stats).label}
+                                </div>
+                                <div className={`text-xs ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'} leading-relaxed`}>
+                                  {calculateTrending(stats).explanation}
+                                </div>
+                                <div className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} italic mt-2 pt-2 border-t ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
+                                  Based on YoY change, 3-month momentum, historical growth, and rising stars count.
+                                </div>
+                              </div>
+                              <div
+                                className={`absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent ${
+                                  theme === 'dark' ? 'border-t-gray-600' : 'border-t-gray-300'
+                                }`}
+                              />
+                            </div>
+                          )}
+                        </div>
+                      ) : isInterestScore ? (
                         <div
                           className="relative"
                           ref={(el) => { tooltipRefs.current[`${stats.brand}-${metric.key}`] = el; }}
