@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { TrendingUp, TrendingDown, Search, Target, Minus, Trophy, Zap, ThumbsUp, Sparkles } from 'lucide-react';
 import { formatCompactNumber } from '../utils/formatNumber';
 import { getBrandColor } from './BrandSelector';
@@ -26,7 +27,42 @@ interface BrandComparisonTableProps {
 }
 
 export default function BrandComparisonTable({ brandStats, availableBrands, theme }: BrandComparisonTableProps) {
+  const [expandedInterestScores, setExpandedInterestScores] = useState<Set<string>>(new Set());
+
   if (brandStats.length < 2) return null;
+
+  const toggleInterestScore = (brand: string) => {
+    setExpandedInterestScores(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(brand)) {
+        newSet.delete(brand);
+      } else {
+        newSet.add(brand);
+      }
+      return newSet;
+    });
+  };
+
+  const getInterestLevel = (score: number) => {
+    if (score >= 40) return 'Very High Interest';
+    if (score >= 30) return 'Strong Interest';
+    if (score >= 20) return 'Moderate';
+    return 'Low';
+  };
+
+  const getInterestLevelColor = (score: number) => {
+    if (score >= 40) return 'text-emerald-500';
+    if (score >= 30) return 'text-blue-500';
+    if (score >= 20) return 'text-amber-500';
+    return theme === 'dark' ? 'text-gray-400' : 'text-gray-500';
+  };
+
+  const getInterestExplanation = (score: number) => {
+    if (score >= 40) return 'Cultural buzz, trending topic — perfect for content marketing.';
+    if (score >= 30) return 'Build authority here.';
+    if (score >= 20) return 'Emerging curiosity.';
+    return 'Limited awareness.';
+  };
 
   const formatPercentage = (value: number) => {
     if (value === 0) return '0%';
@@ -160,21 +196,48 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
                     textColor = getInterestScoreColor(value);
                   }
 
+                  const isInterestScore = metric.key === 'avgInterestScore';
+                  const isExpanded = expandedInterestScores.has(stats.brand);
+
                   return (
                     <div
                       key={`${stats.brand}-${metric.key}`}
                       className={`p-4 flex items-center justify-center border-l ${theme === 'dark' ? 'border-gray-700/50' : 'border-gray-200'}`}
                     >
-                      <div className="text-center">
-                        <div className={`text-xl md:text-2xl font-bold ${textColor}`}>
-                          {formattedValue}
-                        </div>
-                        {(metric.key === 'topPerformers' || metric.key === 'risingStars' || metric.key === 'declining' || metric.key === 'stable' || metric.key === 'highIntent') && (
-                          <div className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'} mt-1`}>
-                            keywords
+                      {isInterestScore ? (
+                        <button
+                          onClick={() => toggleInterestScore(stats.brand)}
+                          className={`text-center transition-all hover:scale-105 ${theme === 'dark' ? 'hover:bg-gray-700/30' : 'hover:bg-gray-100/50'} rounded-lg px-3 py-2 cursor-pointer`}
+                        >
+                          {isExpanded ? (
+                            <div className="space-y-1">
+                              <div className={`text-lg md:text-xl font-bold ${getInterestLevelColor(value)}`}>
+                                {value > 0 ? `${value.toFixed(1)}/50` : 'N/A'}
+                              </div>
+                              {value > 0 && (
+                                <div className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} max-w-[200px] mx-auto leading-relaxed`}>
+                                  {getInterestExplanation(value)}
+                                </div>
+                              )}
+                            </div>
+                          ) : (
+                            <div className={`text-lg md:text-xl font-bold ${getInterestLevelColor(value)}`}>
+                              {value > 0 ? getInterestLevel(value) : 'N/A'}
+                            </div>
+                          )}
+                        </button>
+                      ) : (
+                        <div className="text-center">
+                          <div className={`text-xl md:text-2xl font-bold ${textColor}`}>
+                            {formattedValue}
                           </div>
-                        )}
-                      </div>
+                          {(metric.key === 'topPerformers' || metric.key === 'risingStars' || metric.key === 'declining' || metric.key === 'stable' || metric.key === 'highIntent') && (
+                            <div className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'} mt-1`}>
+                              keywords
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   );
                 })}
