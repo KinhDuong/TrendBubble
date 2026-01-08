@@ -994,6 +994,13 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
     // This parameter should always be provided at this point
     const avgMonthlySearches = manualAvgMonthlySearches;
     console.log(`✓ Using brand value: ${avgMonthlySearches?.toLocaleString()} avg monthly searches`);
+    console.log('📊 About to insert into brand_pages:', {
+      brand: brandName.trim(),
+      avg_monthly_searches: avgMonthlySearches,
+      typeof_value: typeof avgMonthlySearches,
+      is_undefined: avgMonthlySearches === undefined,
+      is_null: avgMonthlySearches === null
+    });
 
     const { error: brandPageError } = await supabase
       .from('brand_pages')
