@@ -32,16 +32,7 @@ interface BrandComparisonTableProps {
 export default function BrandComparisonTable({ brandStats, availableBrands, theme }: BrandComparisonTableProps) {
   const [tooltipBrand, setTooltipBrand] = useState<string | null>(null);
   const [tooltipMetric, setTooltipMetric] = useState<string | null>(null);
-  const [isAnimating, setIsAnimating] = useState(false);
   const tooltipRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
-
-  useEffect(() => {
-    if (tooltipBrand && tooltipMetric) {
-      setIsAnimating(true);
-      const timer = setTimeout(() => setIsAnimating(false), 400);
-      return () => clearTimeout(timer);
-    }
-  }, [tooltipBrand, tooltipMetric]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -431,21 +422,11 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
                           </button>
 
                           {showTooltip && (
-                            <div
-                              className={`absolute z-[9999] bottom-full left-1/2 transform -translate-x-1/2 mb-3 w-80 rounded-lg shadow-2xl border ${
-                                theme === 'dark'
-                                  ? 'bg-gray-800 border-gray-700'
-                                  : 'bg-white border-gray-200'
-                              }`}
-                              style={{
-                                transition: isAnimating
-                                  ? 'all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease-out'
-                                  : 'all 0.35s cubic-bezier(0.4, 0, 0.2, 1)',
-                                transform: `translate(-50%, 0) scale(${isAnimating ? 0.85 : 1})`,
-                                opacity: isAnimating ? 0 : 1,
-                                transformOrigin: 'center bottom'
-                              }}
-                            >
+                            <div className={`absolute z-[9999] bottom-full left-1/2 transform -translate-x-1/2 mb-3 w-80 rounded-lg shadow-2xl border animate-in fade-in slide-in-from-bottom-2 duration-200 ${
+                              theme === 'dark'
+                                ? 'bg-gray-800 border-gray-700'
+                                : 'bg-white border-gray-200'
+                            }`}>
                               <div className="p-4 space-y-2">
                                 <div className={`text-center flex items-center justify-center gap-2`}>
                                   {(() => {
@@ -491,21 +472,11 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
                           </button>
 
                           {showTooltip && value > 0 && (
-                            <div
-                              className={`absolute z-[9999] bottom-full left-1/2 transform -translate-x-1/2 mb-3 w-64 rounded-lg shadow-2xl border ${
-                                theme === 'dark'
-                                  ? 'bg-gray-800 border-gray-700'
-                                  : 'bg-white border-gray-200'
-                              }`}
-                              style={{
-                                transition: isAnimating
-                                  ? 'all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease-out'
-                                  : 'all 0.35s cubic-bezier(0.4, 0, 0.2, 1)',
-                                transform: `translate(-50%, 0) scale(${isAnimating ? 0.85 : 1})`,
-                                opacity: isAnimating ? 0 : 1,
-                                transformOrigin: 'center bottom'
-                              }}
-                            >
+                            <div className={`absolute z-[9999] bottom-full left-1/2 transform -translate-x-1/2 mb-3 w-64 rounded-lg shadow-2xl border animate-in fade-in slide-in-from-bottom-2 duration-200 ${
+                              theme === 'dark'
+                                ? 'bg-gray-800 border-gray-700'
+                                : 'bg-white border-gray-200'
+                            }`}>
                               <div className="p-4 space-y-2">
                                 <div className={`text-center text-xl font-bold ${getInterestLevelColor(value)}`}>
                                   Score: {value.toFixed(1)}/50
@@ -537,21 +508,11 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
                           </button>
 
                           {showTooltip && value > 0 && (
-                            <div
-                              className={`absolute z-[9999] bottom-full left-1/2 transform -translate-x-1/2 mb-3 w-64 rounded-lg shadow-2xl border ${
-                                theme === 'dark'
-                                  ? 'bg-gray-800 border-gray-700'
-                                  : 'bg-white border-gray-200'
-                              }`}
-                              style={{
-                                transition: isAnimating
-                                  ? 'all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease-out'
-                                  : 'all 0.35s cubic-bezier(0.4, 0, 0.2, 1)',
-                                transform: `translate(-50%, 0) scale(${isAnimating ? 0.85 : 1})`,
-                                opacity: isAnimating ? 0 : 1,
-                                transformOrigin: 'center bottom'
-                              }}
-                            >
+                            <div className={`absolute z-[9999] bottom-full left-1/2 transform -translate-x-1/2 mb-3 w-64 rounded-lg shadow-2xl border animate-in fade-in slide-in-from-bottom-2 duration-200 ${
+                              theme === 'dark'
+                                ? 'bg-gray-800 border-gray-700'
+                                : 'bg-white border-gray-200'
+                            }`}>
                               <div className="p-4 space-y-2">
                                 <div className={`text-center text-xl font-bold ${getDemandLevelColor(value)}`}>
                                   Score: {value.toFixed(1)}/50
