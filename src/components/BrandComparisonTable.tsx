@@ -1,4 +1,4 @@
-import { TrendingUp, TrendingDown, Search, DollarSign, Target, Star, AlertTriangle, Minus, Trophy, Zap, ThumbsUp, Sparkles } from 'lucide-react';
+import { TrendingUp, TrendingDown, Search, Target, Minus, Trophy, Zap, ThumbsUp, Sparkles } from 'lucide-react';
 import { formatCompactNumber } from '../utils/formatNumber';
 import { getBrandColor } from './BrandSelector';
 
@@ -7,9 +7,6 @@ interface BrandStats {
   brandSearchVolume: number;
   totalKeywords: number;
   totalVolume: number;
-  avgCompetition: number;
-  avgCpcLow: number;
-  avgCpcHigh: number;
   threeMonthChange: number;
   yoyChange: number;
   avgSentiment: number;
@@ -19,9 +16,7 @@ interface BrandStats {
   risingStars: number;
   declining: number;
   stable: number;
-  highVolumeLowComp: number;
   highIntent: number;
-  competitive: number;
 }
 
 interface BrandComparisonTableProps {
@@ -32,11 +27,6 @@ interface BrandComparisonTableProps {
 
 export default function BrandComparisonTable({ brandStats, availableBrands, theme }: BrandComparisonTableProps) {
   if (brandStats.length < 2) return null;
-
-  const formatCurrency = (low: number, high: number) => {
-    if (low === 0 && high === 0) return 'N/A';
-    return `$${low.toFixed(2)} - $${high.toFixed(2)}`;
-  };
 
   const formatPercentage = (value: number) => {
     if (value === 0) return '0%';
@@ -86,8 +76,6 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
     { label: 'Keyword Search Volume', icon: TrendingUp, key: 'totalVolume', format: (v: number) => formatCompactNumber(v) },
     { label: 'Avg. Demand Score', icon: Zap, key: 'avgDemandScore', format: (v: number) => v > 0 ? `${v.toFixed(1)}/50` : 'N/A', colorize: 'demand' },
     { label: 'Avg. Interest Score', icon: Sparkles, key: 'avgInterestScore', format: (v: number) => v > 0 ? `${v.toFixed(1)}/50` : 'N/A', colorize: 'interest' },
-    { label: 'Avg. Competition', icon: Target, key: 'avgCompetition', format: (v: number) => v.toFixed(2) },
-    { label: 'Avg. CPC Range', icon: DollarSign, key: 'cpc', format: (_: number, stats: BrandStats) => formatCurrency(stats.avgCpcLow, stats.avgCpcHigh) },
     { label: '3-Month Change', icon: TrendingUp, key: 'threeMonthChange', format: (v: number) => formatPercentage(v), colorize: true },
     { label: 'YoY Change', icon: TrendingUp, key: 'yoyChange', format: (v: number) => formatPercentage(v), colorize: true },
     { label: 'Sentiment', icon: ThumbsUp, key: 'avgSentiment', format: (v: number) => formatSentiment(v), colorize: 'sentiment' },
@@ -95,9 +83,7 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
     { label: 'Rising Stars', icon: Zap, key: 'risingStars', format: (v: number) => formatCompactNumber(v) },
     { label: 'Declining', icon: TrendingDown, key: 'declining', format: (v: number) => formatCompactNumber(v) },
     { label: 'Stable', icon: Minus, key: 'stable', format: (v: number) => formatCompactNumber(v) },
-    { label: 'High Vol. Low Comp.', icon: Star, key: 'highVolumeLowComp', format: (v: number) => formatCompactNumber(v) },
     { label: 'High Intent', icon: Target, key: 'highIntent', format: (v: number) => formatCompactNumber(v) },
-    { label: 'Competitive', icon: AlertTriangle, key: 'competitive', format: (v: number) => formatCompactNumber(v) },
   ];
 
   return (
@@ -160,7 +146,7 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
                 </div>
 
                 {brandStats.map((stats) => {
-                  const value = metric.key === 'cpc' ? 0 : (stats as any)[metric.key];
+                  const value = (stats as any)[metric.key];
                   const formattedValue = metric.format(value, stats);
 
                   let textColor = theme === 'dark' ? 'text-white' : 'text-gray-900';
@@ -183,7 +169,7 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
                         <div className={`text-xl md:text-2xl font-bold ${textColor}`}>
                           {formattedValue}
                         </div>
-                        {(metric.key === 'topPerformers' || metric.key === 'risingStars' || metric.key === 'declining' || metric.key === 'stable' || metric.key === 'highVolumeLowComp' || metric.key === 'highIntent' || metric.key === 'competitive') && (
+                        {(metric.key === 'topPerformers' || metric.key === 'risingStars' || metric.key === 'declining' || metric.key === 'stable' || metric.key === 'highIntent') && (
                           <div className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'} mt-1`}>
                             keywords
                           </div>
@@ -221,27 +207,6 @@ export function calculateBrandStats(keywordData: any[], brand: string, brandPage
   const totalKeywords = brandKeywords.length;
   const totalVolume = brandKeywords.reduce((sum, kw) => sum + (kw['Avg. monthly searches'] || 0), 0);
 
-  const competitionValues = brandKeywords
-    .map(kw => parseNumericValue(kw['Competition (indexed value)']))
-    .filter(v => v > 0);
-  const avgCompetition = competitionValues.length > 0
-    ? competitionValues.reduce((sum, v) => sum + v, 0) / competitionValues.length
-    : 0;
-
-  const cpcLowValues = brandKeywords
-    .map(kw => parseNumericValue(kw['Top of page bid (low range)']))
-    .filter(v => v > 0);
-  const avgCpcLow = cpcLowValues.length > 0
-    ? cpcLowValues.reduce((sum, v) => sum + v, 0) / cpcLowValues.length
-    : 0;
-
-  const cpcHighValues = brandKeywords
-    .map(kw => parseNumericValue(kw['Top of page bid (high range)']))
-    .filter(v => v > 0);
-  const avgCpcHigh = cpcHighValues.length > 0
-    ? cpcHighValues.reduce((sum, v) => sum + v, 0) / cpcHighValues.length
-    : 0;
-
   const threeMonthValues = brandKeywords
     .map(kw => parseNumericValue(kw['Three month change']))
     .filter(v => v !== 0);
@@ -261,6 +226,20 @@ export function calculateBrandStats(keywordData: any[], brand: string, brandPage
     .filter(v => v !== 0);
   const avgSentiment = sentimentValues.length > 0
     ? sentimentValues.reduce((sum, v) => sum + v, 0) / sentimentValues.length
+    : 0;
+
+  const demandScoreValues = brandKeywords
+    .map(kw => parseNumericValue(kw.demand_score))
+    .filter(v => v !== 0);
+  const avgDemandScore = demandScoreValues.length > 0
+    ? demandScoreValues.reduce((sum, v) => sum + v, 0) / demandScoreValues.length
+    : 0;
+
+  const interestScoreValues = brandKeywords
+    .map(kw => parseNumericValue(kw.interest_score))
+    .filter(v => v !== 0);
+  const avgInterestScore = interestScoreValues.length > 0
+    ? interestScoreValues.reduce((sum, v) => sum + v, 0) / interestScoreValues.length
     : 0;
 
   const topPerformers = brandKeywords.filter(kw => {
@@ -285,18 +264,7 @@ export function calculateBrandStats(keywordData: any[], brand: string, brandPage
     return threeMonth >= -0.1 && threeMonth <= 0.1;
   }).length;
 
-  const highVolumeLowComp = brandKeywords.filter(kw => {
-    const volume = kw['Avg. monthly searches'] || 0;
-    const comp = parseNumericValue(kw['Competition (indexed value)']);
-    return volume > 5000 && comp < 0.3;
-  }).length;
-
   const highIntent = brandKeywords.filter(kw => {
-    const comp = parseNumericValue(kw['Competition (indexed value)']);
-    return comp > 0.7;
-  }).length;
-
-  const competitive = brandKeywords.filter(kw => {
     const comp = parseNumericValue(kw['Competition (indexed value)']);
     return comp > 0.7;
   }).length;
@@ -306,18 +274,15 @@ export function calculateBrandStats(keywordData: any[], brand: string, brandPage
     brandSearchVolume,
     totalKeywords,
     totalVolume,
-    avgCompetition,
-    avgCpcLow,
-    avgCpcHigh,
     threeMonthChange,
     yoyChange,
     avgSentiment,
+    avgDemandScore,
+    avgInterestScore,
     topPerformers,
     risingStars,
     declining,
     stable,
-    highVolumeLowComp,
-    highIntent,
-    competitive
+    highIntent
   };
 }
