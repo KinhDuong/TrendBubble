@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { TrendingUp, TrendingDown, Search, Target, Minus, Trophy, Zap, ThumbsUp, Sparkles } from 'lucide-react';
 import { formatCompactNumber } from '../utils/formatNumber';
 import { getBrandColor } from './BrandSelector';
@@ -27,20 +27,27 @@ interface BrandComparisonTableProps {
 }
 
 export default function BrandComparisonTable({ brandStats, availableBrands, theme }: BrandComparisonTableProps) {
-  const [expandedInterestScores, setExpandedInterestScores] = useState<Set<string>>(new Set());
+  const [tooltipBrand, setTooltipBrand] = useState<string | null>(null);
+  const tooltipRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (tooltipBrand) {
+        const tooltipElement = tooltipRefs.current[tooltipBrand];
+        if (tooltipElement && !tooltipElement.contains(event.target as Node)) {
+          setTooltipBrand(null);
+        }
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [tooltipBrand]);
 
   if (brandStats.length < 2) return null;
 
   const toggleInterestScore = (brand: string) => {
-    setExpandedInterestScores(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(brand)) {
-        newSet.delete(brand);
-      } else {
-        newSet.add(brand);
-      }
-      return newSet;
-    });
+    setTooltipBrand(prev => prev === brand ? null : brand);
   };
 
   const getInterestLevel = (score: number) => {
@@ -197,35 +204,49 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
                   }
 
                   const isInterestScore = metric.key === 'avgInterestScore';
-                  const isExpanded = expandedInterestScores.has(stats.brand);
+                  const showTooltip = tooltipBrand === stats.brand;
 
                   return (
                     <div
                       key={`${stats.brand}-${metric.key}`}
-                      className={`p-4 flex items-center justify-center border-l ${theme === 'dark' ? 'border-gray-700/50' : 'border-gray-200'}`}
+                      className={`p-4 flex items-center justify-center border-l ${theme === 'dark' ? 'border-gray-700/50' : 'border-gray-200'} relative`}
                     >
                       {isInterestScore ? (
-                        <button
-                          onClick={() => toggleInterestScore(stats.brand)}
-                          className={`text-center transition-all hover:scale-105 ${theme === 'dark' ? 'hover:bg-gray-700/30' : 'hover:bg-gray-100/50'} rounded-lg px-3 py-2 cursor-pointer`}
+                        <div
+                          className="relative"
+                          ref={(el) => { tooltipRefs.current[stats.brand] = el; }}
                         >
-                          {isExpanded ? (
-                            <div className="space-y-1">
-                              <div className={`text-lg md:text-xl font-bold ${getInterestLevelColor(value)}`}>
-                                {value > 0 ? `${value.toFixed(1)}/50` : 'N/A'}
-                              </div>
-                              {value > 0 && (
-                                <div className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} max-w-[200px] mx-auto leading-relaxed`}>
-                                  {getInterestExplanation(value)}
-                                </div>
-                              )}
-                            </div>
-                          ) : (
+                          <button
+                            onClick={() => toggleInterestScore(stats.brand)}
+                            className={`text-center transition-all hover:scale-105 ${theme === 'dark' ? 'hover:bg-gray-700/30' : 'hover:bg-gray-100/50'} rounded-lg px-3 py-2 cursor-pointer`}
+                          >
                             <div className={`text-lg md:text-xl font-bold ${getInterestLevelColor(value)}`}>
                               {value > 0 ? getInterestLevel(value) : 'N/A'}
                             </div>
+                          </button>
+
+                          {showTooltip && value > 0 && (
+                            <div className={`absolute z-50 bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 rounded-lg shadow-2xl border-2 animate-in fade-in slide-in-from-bottom-2 duration-200 ${
+                              theme === 'dark'
+                                ? 'bg-gray-800 border-gray-600'
+                                : 'bg-white border-gray-300'
+                            }`}>
+                              <div className="p-4 space-y-2">
+                                <div className={`text-center text-xl font-bold ${getInterestLevelColor(value)}`}>
+                                  Score: {value.toFixed(1)}/50
+                                </div>
+                                <div className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'} text-center leading-relaxed`}>
+                                  {getInterestExplanation(value)}
+                                </div>
+                              </div>
+                              <div
+                                className={`absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent ${
+                                  theme === 'dark' ? 'border-t-gray-600' : 'border-t-gray-300'
+                                }`}
+                              />
+                            </div>
                           )}
-                        </button>
+                        </div>
                       ) : (
                         <div className="text-center">
                           <div className={`text-xl md:text-2xl font-bold ${textColor}`}>
