@@ -541,6 +541,7 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
         // Use the exact match value
         avgMonthlySearches = brandMatch['Avg. monthly searches'];
         console.log(`✓ Found exact match for brand "${brandName}": ${avgMonthlySearches?.toLocaleString()} avg monthly searches`);
+        console.log('Brand match data:', brandMatch);
       } else {
         // No exact match found - show top 20 by volume + first 20 rows for user selection
         console.log(`⚠ No exact match found for brand "${brandName}"`);
@@ -579,16 +580,15 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
         return; // Stop here, wait for user selection
       }
 
-      // Store the brand value for later use
-      setAvgMonthlySearchesCache(avgMonthlySearches);
-
       // STEP 2: Only run duplicate detection on valid traffic keywords (zero-traffic never included)
       const detectedDuplicates = detectDuplicates(data);
 
       if (detectedDuplicates.length > 0) {
+        console.log(`⚠ Found ${detectedDuplicates.length} duplicate groups - caching brand value: ${avgMonthlySearches?.toLocaleString()}`);
         setDuplicateGroups(detectedDuplicates);
         setZeroTrafficKeywords([]); // Zero-traffic keywords are NOT shown in review
         setPendingData(data); // Only valid traffic keywords
+        setAvgMonthlySearchesCache(avgMonthlySearches); // Cache BEFORE showing review
         setShowDuplicateReview(true);
         setUploading(false);
         event.target.value = '';
@@ -599,11 +599,14 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
       const detectedMerges = detectMergeGroups(data);
 
       if (detectedMerges.length > 0) {
+        console.log(`⚠ Found ${detectedMerges.length} merge groups - caching brand value: ${avgMonthlySearches?.toLocaleString()}`);
         setMergeGroups(detectedMerges);
         setPendingData(data);
+        setAvgMonthlySearchesCache(avgMonthlySearches); // Cache BEFORE showing review
         setShowMergeReview(true);
         setUploading(false);
       } else {
+        console.log(`✓ No duplicates or merges - uploading directly with brand value: ${avgMonthlySearches?.toLocaleString()}`);
         await processUpload(data, avgMonthlySearches);
       }
 
@@ -616,6 +619,7 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
   };
 
   const handleMergeApproval = async (approvedMerges: MergeGroup[]) => {
+    console.log(`🔄 Merge approval - using cached brand value: ${avgMonthlySearchesCache?.toLocaleString()}`);
     setShowMergeReview(false);
     setUploading(true);
 
@@ -641,6 +645,7 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
   };
 
   const handleDuplicateReviewContinue = async (filteredData: Array<Record<string, any>>) => {
+    console.log(`🔄 Duplicate review continue - using cached brand value: ${avgMonthlySearchesCache?.toLocaleString()}`);
     setShowDuplicateReview(false);
     setUploading(true);
 
