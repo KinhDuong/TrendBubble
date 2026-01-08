@@ -13,6 +13,9 @@ interface BrandStats {
   avgSentiment: number;
   avgDemandScore: number;
   avgInterestScore: number;
+  avgSlope: number;
+  avgRSquared: number;
+  risingStarsHistorical: number;
   topPerformers: number;
   risingStars: number;
   declining: number;
@@ -57,6 +60,31 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
       setTooltipBrand(brand);
       setTooltipMetric(metric);
     }
+  };
+
+  const getIntensityBoost = (stats: BrandStats): { hasBoost: boolean; level: 'high' | 'extreme' | null; reason: string } => {
+    const slope = stats.avgSlope || 0;
+    const rSquared = stats.avgRSquared || 0;
+    const risingStarsHist = stats.risingStarsHistorical || 0;
+    const threeMonthChange = stats.threeMonthChange || 0;
+
+    if (risingStarsHist > 400 && threeMonthChange > 0.30) {
+      return {
+        hasBoost: true,
+        level: 'extreme',
+        reason: `${risingStarsHist} keywords with strong historical growth + ${(threeMonthChange * 100).toFixed(1)}% recent surge`
+      };
+    }
+
+    if (slope > 0.07 && rSquared > 0.7) {
+      return {
+        hasBoost: true,
+        level: 'high',
+        reason: `${(slope * 100).toFixed(1)}% monthly growth with ${(rSquared * 100).toFixed(0)}% trend reliability`
+      };
+    }
+
+    return { hasBoost: false, level: null, reason: '' };
   };
 
   const getInterestLevel = (score: number) => {
@@ -143,6 +171,17 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
     return theme === 'dark' ? 'text-gray-400' : 'text-gray-500';
   };
 
+  const formatMonthlyGrowth = (slope: number): string => {
+    if (slope === 0) return 'Flat';
+    const pct = (slope * 100).toFixed(2);
+    return slope > 0 ? `+${pct}%` : `${pct}%`;
+  };
+
+  const formatRSquared = (r2: number): string => {
+    if (r2 === 0) return 'N/A';
+    return `${(r2 * 100).toFixed(0)}%`;
+  };
+
   const metrics = [
     { label: 'Monthly Search', icon: TrendingUp, key: 'brandSearchVolume', format: (v: number) => formatCompactNumber(v) },
     { label: 'Total Keywords', icon: Search, key: 'totalKeywords', format: (v: number) => formatCompactNumber(v) },
@@ -151,9 +190,12 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
     { label: 'Customer Interest', icon: Sparkles, key: 'avgInterestScore', format: (v: number) => v > 0 ? `${v.toFixed(1)}/50` : 'N/A', colorize: 'interest' },
     { label: '3-Month Change', icon: TrendingUp, key: 'threeMonthChange', format: (v: number) => formatPercentage(v), colorize: true },
     { label: 'YoY Change', icon: TrendingUp, key: 'yoyChange', format: (v: number) => formatPercentage(v), colorize: true },
+    { label: 'Historical Growth', icon: TrendingUp, key: 'avgSlope', format: (v: number) => formatMonthlyGrowth(v), colorize: true },
+    { label: 'Trend Reliability', icon: Target, key: 'avgRSquared', format: (v: number) => formatRSquared(v) },
     { label: 'Sentiment', icon: ThumbsUp, key: 'avgSentiment', format: (v: number) => formatSentiment(v), colorize: 'sentiment' },
     { label: 'Top Performers', icon: Trophy, key: 'topPerformers', format: (v: number) => formatCompactNumber(v) },
     { label: 'Rising Stars', icon: Zap, key: 'risingStars', format: (v: number) => formatCompactNumber(v) },
+    { label: 'Historical Stars', icon: Zap, key: 'risingStarsHistorical', format: (v: number) => formatCompactNumber(v) },
     { label: 'Declining', icon: TrendingDown, key: 'declining', format: (v: number) => formatCompactNumber(v) },
     { label: 'Stable', icon: Minus, key: 'stable', format: (v: number) => formatCompactNumber(v) },
     { label: 'High Intent', icon: Target, key: 'highIntent', format: (v: number) => formatCompactNumber(v) },
@@ -177,25 +219,50 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
             <div className={`p-4 ${theme === 'dark' ? 'bg-gray-800/50' : 'bg-gray-100'}`}></div>
             {brandStats.map((stats, index) => {
               const brandColor = getBrandColor(stats.brand, availableBrands);
+              const intensityBoost = getIntensityBoost(stats);
+
               return (
                 <div
                   key={stats.brand}
-                  className={`p-4 text-center border-l ${theme === 'dark' ? 'border-gray-700' : 'border-gray-300'}`}
+                  className={`p-4 text-center border-l ${theme === 'dark' ? 'border-gray-700' : 'border-gray-300'} relative`}
                   style={{
                     background: theme === 'dark'
                       ? `linear-gradient(135deg, ${brandColor}20, ${brandColor}10)`
                       : `linear-gradient(135deg, ${brandColor}15, ${brandColor}05)`
                   }}
                 >
-                  <div
-                    className="text-lg md:text-xl font-black uppercase tracking-wide px-4 py-2 rounded-full inline-block"
-                    style={{
-                      background: brandColor,
-                      color: 'white'
-                    }}
-                  >
-                    {stats.brand}
+                  <div className="relative inline-block">
+                    <div
+                      className="text-lg md:text-xl font-black uppercase tracking-wide px-4 py-2 rounded-full inline-block"
+                      style={{
+                        background: brandColor,
+                        color: 'white'
+                      }}
+                    >
+                      {stats.brand}
+                    </div>
+
+                    {intensityBoost.hasBoost && (
+                      <div className="absolute -top-2 -right-2 animate-pulse">
+                        <div
+                          className={`text-2xl ${intensityBoost.level === 'extreme' ? 'animate-bounce' : ''}`}
+                          title={intensityBoost.reason}
+                        >
+                          {intensityBoost.level === 'extreme' ? '🚀' : '🔥'}
+                        </div>
+                      </div>
+                    )}
                   </div>
+
+                  {intensityBoost.hasBoost && (
+                    <div className={`text-xs mt-2 px-2 py-1 rounded ${
+                      intensityBoost.level === 'extreme'
+                        ? theme === 'dark' ? 'bg-emerald-900/40 text-emerald-300' : 'bg-emerald-100 text-emerald-700'
+                        : theme === 'dark' ? 'bg-orange-900/40 text-orange-300' : 'bg-orange-100 text-orange-700'
+                    }`}>
+                      {intensityBoost.level === 'extreme' ? 'Explosive Growth' : 'Strong Momentum'}
+                    </div>
+                  )}
                 </div>
               );
             })}
@@ -319,9 +386,19 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
                           <div className={`text-xl md:text-2xl font-bold ${textColor}`}>
                             {formattedValue}
                           </div>
-                          {(metric.key === 'topPerformers' || metric.key === 'risingStars' || metric.key === 'declining' || metric.key === 'stable' || metric.key === 'highIntent') && (
+                          {(metric.key === 'topPerformers' || metric.key === 'risingStars' || metric.key === 'risingStarsHistorical' || metric.key === 'declining' || metric.key === 'stable' || metric.key === 'highIntent') && (
                             <div className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'} mt-1`}>
                               keywords
+                            </div>
+                          )}
+                          {metric.key === 'avgSlope' && (
+                            <div className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'} mt-1`}>
+                              per month
+                            </div>
+                          )}
+                          {metric.key === 'avgRSquared' && (
+                            <div className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'} mt-1`}>
+                              confidence
                             </div>
                           )}
                         </div>
