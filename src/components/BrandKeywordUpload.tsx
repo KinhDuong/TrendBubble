@@ -538,16 +538,23 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
       let avgMonthlySearches: number | undefined;
 
       if (brandMatch) {
-        // Use the exact match value
+        // Use the exact match value AND update brandName to match the CSV exactly
         avgMonthlySearches = brandMatch['Avg. monthly searches'];
-        console.log(`✓ Found exact match for brand "${brandName}": ${avgMonthlySearches?.toLocaleString()} avg monthly searches`);
+        const exactBrandName = brandMatch.keyword;
+
+        console.log(`✓ Found exact match for brand "${brandName}" → Using exact CSV name: "${exactBrandName}"`);
+        console.log(`✓ Brand search volume: ${avgMonthlySearches?.toLocaleString()} avg monthly searches`);
         console.log('📋 Brand match details:', {
-          keyword: brandMatch.keyword,
+          inputBrandName: brandName,
+          csvBrandName: exactBrandName,
           avgMonthlySearches: avgMonthlySearches,
           typeof: typeof avgMonthlySearches,
           isNumber: typeof avgMonthlySearches === 'number',
           fullRecord: brandMatch
         });
+
+        // Update the brand name to match the CSV exactly
+        setBrandName(exactBrandName);
       } else {
         // No exact match found - show top 20 by volume + first 20 rows for user selection
         console.log(`⚠ No exact match found for brand "${brandName}"`);
@@ -719,7 +726,13 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
 
     try {
       const selectedAvgMonthlySearches = selectedKeyword['Avg. monthly searches'];
-      console.log(`✓ User selected brand value: ${selectedAvgMonthlySearches?.toLocaleString()} avg monthly searches`);
+      const exactBrandName = selectedKeyword.keyword;
+
+      console.log(`✓ User selected brand: "${exactBrandName}"`);
+      console.log(`✓ Brand search volume: ${selectedAvgMonthlySearches?.toLocaleString()} avg monthly searches`);
+
+      // Update the brand name to match the selected keyword exactly
+      setBrandName(exactBrandName);
 
       // Store the selected brand value
       setAvgMonthlySearchesCache(selectedAvgMonthlySearches);
