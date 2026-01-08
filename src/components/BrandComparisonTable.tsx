@@ -28,26 +28,35 @@ interface BrandComparisonTableProps {
 
 export default function BrandComparisonTable({ brandStats, availableBrands, theme }: BrandComparisonTableProps) {
   const [tooltipBrand, setTooltipBrand] = useState<string | null>(null);
+  const [tooltipMetric, setTooltipMetric] = useState<string | null>(null);
   const tooltipRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (tooltipBrand) {
-        const tooltipElement = tooltipRefs.current[tooltipBrand];
+        const tooltipKey = `${tooltipBrand}-${tooltipMetric}`;
+        const tooltipElement = tooltipRefs.current[tooltipKey];
         if (tooltipElement && !tooltipElement.contains(event.target as Node)) {
           setTooltipBrand(null);
+          setTooltipMetric(null);
         }
       }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [tooltipBrand]);
+  }, [tooltipBrand, tooltipMetric]);
 
   if (brandStats.length < 2) return null;
 
-  const toggleInterestScore = (brand: string) => {
-    setTooltipBrand(prev => prev === brand ? null : brand);
+  const toggleTooltip = (brand: string, metric: string) => {
+    if (tooltipBrand === brand && tooltipMetric === metric) {
+      setTooltipBrand(null);
+      setTooltipMetric(null);
+    } else {
+      setTooltipBrand(brand);
+      setTooltipMetric(metric);
+    }
   };
 
   const getInterestLevel = (score: number) => {
@@ -69,6 +78,27 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
     if (score >= 30) return 'Build authority here.';
     if (score >= 20) return 'Emerging curiosity.';
     return 'Limited awareness.';
+  };
+
+  const getDemandLevel = (score: number) => {
+    if (score >= 40) return 'Very High';
+    if (score >= 30) return 'Strong';
+    if (score >= 20) return 'Moderate';
+    return 'Low';
+  };
+
+  const getDemandLevelColor = (score: number) => {
+    if (score >= 40) return 'text-green-500';
+    if (score >= 30) return 'text-blue-500';
+    if (score >= 20) return 'text-yellow-500';
+    return theme === 'dark' ? 'text-gray-400' : 'text-gray-500';
+  };
+
+  const getDemandExplanation = (score: number) => {
+    if (score >= 40) return 'Prioritize for ads/content.';
+    if (score >= 30) return 'Good targeting opportunity.';
+    if (score >= 20) return 'Nurture with content.';
+    return 'Monitor or deprioritize.';
   };
 
   const formatPercentage = (value: number) => {
@@ -204,7 +234,8 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
                   }
 
                   const isInterestScore = metric.key === 'avgInterestScore';
-                  const showTooltip = tooltipBrand === stats.brand;
+                  const isDemandScore = metric.key === 'avgDemandScore';
+                  const showTooltip = tooltipBrand === stats.brand && tooltipMetric === metric.key;
 
                   return (
                     <div
@@ -214,10 +245,10 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
                       {isInterestScore ? (
                         <div
                           className="relative"
-                          ref={(el) => { tooltipRefs.current[stats.brand] = el; }}
+                          ref={(el) => { tooltipRefs.current[`${stats.brand}-${metric.key}`] = el; }}
                         >
                           <button
-                            onClick={() => toggleInterestScore(stats.brand)}
+                            onClick={() => toggleTooltip(stats.brand, metric.key)}
                             className={`text-center transition-all hover:scale-105 ${theme === 'dark' ? 'hover:bg-gray-700/30' : 'hover:bg-gray-100/50'} rounded-lg px-3 py-2 cursor-pointer`}
                           >
                             <div className={`text-lg md:text-xl font-bold ${getInterestLevelColor(value)}`}>
@@ -237,6 +268,42 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
                                 </div>
                                 <div className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'} text-center leading-relaxed`}>
                                   {getInterestExplanation(value)}
+                                </div>
+                              </div>
+                              <div
+                                className={`absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent ${
+                                  theme === 'dark' ? 'border-t-gray-600' : 'border-t-gray-300'
+                                }`}
+                              />
+                            </div>
+                          )}
+                        </div>
+                      ) : isDemandScore ? (
+                        <div
+                          className="relative"
+                          ref={(el) => { tooltipRefs.current[`${stats.brand}-${metric.key}`] = el; }}
+                        >
+                          <button
+                            onClick={() => toggleTooltip(stats.brand, metric.key)}
+                            className={`text-center transition-all hover:scale-105 ${theme === 'dark' ? 'hover:bg-gray-700/30' : 'hover:bg-gray-100/50'} rounded-lg px-3 py-2 cursor-pointer`}
+                          >
+                            <div className={`text-lg md:text-xl font-bold ${getDemandLevelColor(value)}`}>
+                              {value > 0 ? getDemandLevel(value) : 'N/A'}
+                            </div>
+                          </button>
+
+                          {showTooltip && value > 0 && (
+                            <div className={`absolute z-50 bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 rounded-lg shadow-2xl border-2 animate-in fade-in slide-in-from-bottom-2 duration-200 ${
+                              theme === 'dark'
+                                ? 'bg-gray-800 border-gray-600'
+                                : 'bg-white border-gray-300'
+                            }`}>
+                              <div className="p-4 space-y-2">
+                                <div className={`text-center text-xl font-bold ${getDemandLevelColor(value)}`}>
+                                  Score: {value.toFixed(1)}/50
+                                </div>
+                                <div className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'} text-center leading-relaxed`}>
+                                  {getDemandExplanation(value)}
                                 </div>
                               </div>
                               <div
