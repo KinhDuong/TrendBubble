@@ -422,10 +422,10 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
                           </button>
 
                           {showTooltip && (
-                            <div className={`absolute z-[9999] bottom-full left-1/2 transform -translate-x-1/2 mb-3 w-80 rounded-lg shadow-2xl border-2 animate-in fade-in slide-in-from-bottom-2 duration-200 ${
+                            <div className={`absolute z-[9999] bottom-full left-1/2 transform -translate-x-1/2 mb-3 w-80 rounded-lg shadow-2xl border animate-in fade-in slide-in-from-bottom-2 duration-200 ${
                               theme === 'dark'
-                                ? 'bg-gray-800 border-gray-600'
-                                : 'bg-white border-gray-300'
+                                ? 'bg-gray-800 border-gray-700'
+                                : 'bg-white border-gray-200'
                             }`}>
                               <div className="p-4 space-y-2">
                                 <div className={`text-center flex items-center justify-center gap-2`}>
@@ -451,7 +451,7 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
                               </div>
                               <div
                                 className={`absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent ${
-                                  theme === 'dark' ? 'border-t-gray-600' : 'border-t-gray-300'
+                                  theme === 'dark' ? 'border-t-gray-700' : 'border-t-gray-200'
                                 }`}
                               />
                             </div>
@@ -472,10 +472,10 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
                           </button>
 
                           {showTooltip && value > 0 && (
-                            <div className={`absolute z-[9999] bottom-full left-1/2 transform -translate-x-1/2 mb-3 w-64 rounded-lg shadow-2xl border-2 animate-in fade-in slide-in-from-bottom-2 duration-200 ${
+                            <div className={`absolute z-[9999] bottom-full left-1/2 transform -translate-x-1/2 mb-3 w-64 rounded-lg shadow-2xl border animate-in fade-in slide-in-from-bottom-2 duration-200 ${
                               theme === 'dark'
-                                ? 'bg-gray-800 border-gray-600'
-                                : 'bg-white border-gray-300'
+                                ? 'bg-gray-800 border-gray-700'
+                                : 'bg-white border-gray-200'
                             }`}>
                               <div className="p-4 space-y-2">
                                 <div className={`text-center text-xl font-bold ${getInterestLevelColor(value)}`}>
@@ -487,7 +487,7 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
                               </div>
                               <div
                                 className={`absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent ${
-                                  theme === 'dark' ? 'border-t-gray-600' : 'border-t-gray-300'
+                                  theme === 'dark' ? 'border-t-gray-700' : 'border-t-gray-200'
                                 }`}
                               />
                             </div>
@@ -508,10 +508,10 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
                           </button>
 
                           {showTooltip && value > 0 && (
-                            <div className={`absolute z-[9999] bottom-full left-1/2 transform -translate-x-1/2 mb-3 w-64 rounded-lg shadow-2xl border-2 animate-in fade-in slide-in-from-bottom-2 duration-200 ${
+                            <div className={`absolute z-[9999] bottom-full left-1/2 transform -translate-x-1/2 mb-3 w-64 rounded-lg shadow-2xl border animate-in fade-in slide-in-from-bottom-2 duration-200 ${
                               theme === 'dark'
-                                ? 'bg-gray-800 border-gray-600'
-                                : 'bg-white border-gray-300'
+                                ? 'bg-gray-800 border-gray-700'
+                                : 'bg-white border-gray-200'
                             }`}>
                               <div className="p-4 space-y-2">
                                 <div className={`text-center text-xl font-bold ${getDemandLevelColor(value)}`}>
@@ -523,7 +523,7 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
                               </div>
                               <div
                                 className={`absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent ${
-                                  theme === 'dark' ? 'border-t-gray-600' : 'border-t-gray-300'
+                                  theme === 'dark' ? 'border-t-gray-700' : 'border-t-gray-200'
                                 }`}
                               />
                             </div>
