@@ -861,6 +861,9 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
       cpc_high?: number;
       yoy_change?: number;
       three_month_change?: number;
+      demand_score?: number;
+      interest_score?: number;
+      sentiment?: number;
     } = {};
 
     if (representativeKeyword) {
@@ -872,6 +875,9 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
           cpc_high: keywordData['Top of page bid (high range)'] || null,
           yoy_change: keywordData['YoY change'] || null,
           three_month_change: keywordData['Three month change'] || null,
+          demand_score: keywordData['demand_score'] || null,
+          interest_score: keywordData['interest_score'] || null,
+          sentiment: keywordData['sentiment'] || null,
         };
         console.log('✓ Extracted brand metrics:', brandMetrics);
       }
@@ -1063,6 +1069,9 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
         cpc_high: brandMetrics.cpc_high,
         yoy_change: brandMetrics.yoy_change,
         three_month_change: brandMetrics.three_month_change,
+        demand_score: brandMetrics.demand_score,
+        interest_score: brandMetrics.interest_score,
+        sentiment: brandMetrics.sentiment,
         monthly_searches: monthlySearches,
         meta_title: `${brandName.trim()} - Keyword Search Trends & SEO Insights`,
         meta_description: `Analyze ${brandName.trim()} keyword search volume trends and SEO performance data.`,
