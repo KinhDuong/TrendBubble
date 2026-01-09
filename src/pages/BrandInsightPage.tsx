@@ -2298,9 +2298,11 @@ export default function BrandInsightPage() {
                           />
                         )}
 
-                        {exactBrandKeyword && selectedBrands.length === 1 && (
+                        {selectedBrands.length === 1 && keywordData.length > 0 && (
                           <BrandKeywordStats
                             keyword={exactBrandKeyword}
+                            allKeywords={keywordData}
+                            brandName={selectedBrands[0]}
                             monthColumns={monthColumns}
                             theme={theme}
                           />
