@@ -854,35 +854,6 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
       throw new Error('You must be logged in to upload data');
     }
 
-    // Extract metrics from representative keyword if available
-    let brandMetrics: {
-      competition?: number;
-      cpc_low?: number;
-      cpc_high?: number;
-      yoy_change?: number;
-      three_month_change?: number;
-      demand_score?: number;
-      interest_score?: number;
-      sentiment?: number;
-    } = {};
-
-    if (representativeKeyword) {
-      const keywordData = data.find(kw => kw.keyword === representativeKeyword);
-      if (keywordData) {
-        brandMetrics = {
-          competition: keywordData['Competition (indexed value)'] || null,
-          cpc_low: keywordData['Top of page bid (low range)'] || null,
-          cpc_high: keywordData['Top of page bid (high range)'] || null,
-          yoy_change: keywordData['YoY change'] || null,
-          three_month_change: keywordData['Three month change'] || null,
-          demand_score: keywordData['demand_score'] || null,
-          interest_score: keywordData['interest_score'] || null,
-          sentiment: keywordData['sentiment'] || null,
-        };
-        console.log('✓ Extracted brand metrics:', brandMetrics);
-      }
-    }
-
     // Aggregate monthly search volumes across all keywords
     const monthlySearches: Record<string, number> = {};
     const monthColumns = Object.keys(data[0] || {}).filter(col => col.startsWith('Searches: '));
@@ -942,6 +913,35 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
     // Calculate demand scores for all keywords
     console.log('Calculating demand scores...');
     const scoredData = await calculateDemandScores(data);
+
+    // Extract metrics from representative keyword AFTER scores are calculated
+    let brandMetrics: {
+      competition?: number;
+      cpc_low?: number;
+      cpc_high?: number;
+      yoy_change?: number;
+      three_month_change?: number;
+      demand_score?: number;
+      interest_score?: number;
+      sentiment?: number;
+    } = {};
+
+    if (representativeKeyword) {
+      const keywordData = scoredData.find(kw => kw.keyword === representativeKeyword);
+      if (keywordData) {
+        brandMetrics = {
+          competition: keywordData['Competition (indexed value)'] || null,
+          cpc_low: keywordData['Top of page bid (low range)'] || null,
+          cpc_high: keywordData['Top of page bid (high range)'] || null,
+          yoy_change: keywordData['YoY change'] || null,
+          three_month_change: keywordData['Three month change'] || null,
+          demand_score: keywordData['demand_score'] || null,
+          interest_score: keywordData['interest_score'] || null,
+          sentiment: keywordData['sentiment'] || null,
+        };
+        console.log('✓ Extracted brand metrics with scores:', brandMetrics);
+      }
+    }
 
     const recordsToInsert = scoredData.map(row => {
       const mappedRow: Record<string, any> = {};
