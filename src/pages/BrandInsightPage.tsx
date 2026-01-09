@@ -2479,6 +2479,50 @@ export default function BrandInsightPage() {
                                             </div>
                                           )}
                                           <div>
+                                            <span className={`${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>Trending: </span>
+                                            <span className={`font-semibold ${
+                                              (() => {
+                                                const threeMonth = topic.threeMonthRaw;
+                                                const yoy = topic.yoyRaw;
+                                                if (threeMonth === undefined || threeMonth === null) return theme === 'dark' ? 'text-gray-400' : 'text-gray-500';
+                                                const threeMonthPercent = threeMonth * 100;
+                                                const yoyPercent = yoy !== undefined && yoy !== null ? yoy * 100 : null;
+                                                if (yoyPercent !== null) {
+                                                  if (threeMonthPercent > 5 && yoyPercent > 5) return 'text-green-600';
+                                                  if (threeMonthPercent > 0 && yoyPercent > 0) return 'text-green-500';
+                                                  if (threeMonthPercent < -5 && yoyPercent < -5) return 'text-red-600';
+                                                  if (threeMonthPercent < 0 && yoyPercent < 0) return 'text-red-500';
+                                                } else {
+                                                  if (threeMonthPercent > 10) return 'text-green-600';
+                                                  if (threeMonthPercent > 5) return 'text-green-500';
+                                                  if (threeMonthPercent < -10) return 'text-red-600';
+                                                  if (threeMonthPercent < -5) return 'text-red-500';
+                                                }
+                                                return theme === 'dark' ? 'text-gray-400' : 'text-gray-600';
+                                              })()
+                                            }`}>
+                                              {(() => {
+                                                const threeMonth = topic.threeMonthRaw;
+                                                const yoy = topic.yoyRaw;
+                                                if (threeMonth === undefined || threeMonth === null) return 'N/A';
+                                                const threeMonthPercent = threeMonth * 100;
+                                                const yoyPercent = yoy !== undefined && yoy !== null ? yoy * 100 : null;
+                                                if (yoyPercent !== null) {
+                                                  if (threeMonthPercent > 5 && yoyPercent > 5) return '↗↗';
+                                                  if (threeMonthPercent > 0 && yoyPercent > 0) return '↗';
+                                                  if (threeMonthPercent < -5 && yoyPercent < -5) return '↘↘';
+                                                  if (threeMonthPercent < 0 && yoyPercent < 0) return '↘';
+                                                } else {
+                                                  if (threeMonthPercent > 10) return '↗↗';
+                                                  if (threeMonthPercent > 5) return '↗';
+                                                  if (threeMonthPercent < -10) return '↘↘';
+                                                  if (threeMonthPercent < -5) return '↘';
+                                                }
+                                                return '→';
+                                              })()}
+                                            </span>
+                                          </div>
+                                          <div>
                                             <span className={`${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>3-Month: </span>
                                             <span className={`font-semibold ${
                                               topic.threeMonthChange === 'N/A'

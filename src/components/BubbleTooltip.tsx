@@ -16,6 +16,8 @@ interface KeywordPerformanceData {
   ai_insights?: string;
   sentiment?: number;
   search_variants?: string;
+  demand_score?: number;
+  interest_score?: number;
 }
 
 interface BubbleTooltipProps {
@@ -270,6 +272,78 @@ function BubbleTooltip({
     return '😢';
   };
 
+  const formatDemandScore = (score: number | undefined) => {
+    if (score === undefined || score === null) return 'N/A';
+    if (score >= 40) return 'Very High';
+    if (score >= 30) return 'Strong';
+    if (score >= 20) return 'Moderate';
+    return 'Low';
+  };
+
+  const getDemandScoreColor = (score: number | undefined) => {
+    if (score === undefined || score === null) return theme === 'dark' ? 'text-gray-400' : 'text-gray-600';
+    if (score >= 40) return 'text-green-500';
+    if (score >= 30) return 'text-blue-500';
+    if (score >= 20) return 'text-yellow-500';
+    return theme === 'dark' ? 'text-gray-400' : 'text-gray-500';
+  };
+
+  const formatInterestScore = (score: number | undefined) => {
+    if (score === undefined || score === null) return 'N/A';
+    if (score >= 40) return 'Very High';
+    if (score >= 30) return 'Strong';
+    if (score >= 20) return 'Moderate';
+    return 'Low';
+  };
+
+  const getInterestScoreColor = (score: number | undefined) => {
+    if (score === undefined || score === null) return theme === 'dark' ? 'text-gray-400' : 'text-gray-600';
+    if (score >= 40) return 'text-emerald-500';
+    if (score >= 30) return 'text-blue-500';
+    if (score >= 20) return 'text-amber-500';
+    return theme === 'dark' ? 'text-gray-400' : 'text-gray-500';
+  };
+
+  const getTrendingStatus = () => {
+    const threeMonth = keywordData?.three_month_change;
+    const yoy = keywordData?.yoy_change;
+
+    if (threeMonth === undefined || threeMonth === null) return { label: 'N/A', icon: null, color: theme === 'dark' ? 'text-gray-400' : 'text-gray-600' };
+
+    const threeMonthPercent = threeMonth * 100;
+    const yoyPercent = yoy !== undefined && yoy !== null ? yoy * 100 : null;
+
+    if (yoyPercent !== null) {
+      if (threeMonthPercent > 5 && yoyPercent > 5) {
+        return { label: 'Strong Upward', icon: <TrendingUp size={14} />, color: 'text-green-600' };
+      }
+      if (threeMonthPercent > 0 && yoyPercent > 0) {
+        return { label: 'Upward', icon: <TrendingUp size={14} />, color: 'text-green-500' };
+      }
+      if (threeMonthPercent < -5 && yoyPercent < -5) {
+        return { label: 'Strong Downward', icon: <TrendingDown size={14} />, color: 'text-red-600' };
+      }
+      if (threeMonthPercent < 0 && yoyPercent < 0) {
+        return { label: 'Downward', icon: <TrendingDown size={14} />, color: 'text-red-500' };
+      }
+    } else {
+      if (threeMonthPercent > 10) {
+        return { label: 'Strong Upward', icon: <TrendingUp size={14} />, color: 'text-green-600' };
+      }
+      if (threeMonthPercent > 5) {
+        return { label: 'Upward', icon: <TrendingUp size={14} />, color: 'text-green-500' };
+      }
+      if (threeMonthPercent < -10) {
+        return { label: 'Strong Downward', icon: <TrendingDown size={14} />, color: 'text-red-600' };
+      }
+      if (threeMonthPercent < -5) {
+        return { label: 'Downward', icon: <TrendingDown size={14} />, color: 'text-red-500' };
+      }
+    }
+
+    return { label: 'Stable', icon: <BarChart3 size={14} />, color: theme === 'dark' ? 'text-gray-400' : 'text-gray-600' };
+  };
+
   if (isMobile) {
     return createPortal(
       <>
@@ -434,6 +508,46 @@ function BubbleTooltip({
                     </div>
                     <p className={`text-base font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                       {formatCompetition(keywordData.competition, keywordData.competition_indexed)}
+                    </p>
+                  </div>
+
+                  {keywordData.demand_score !== undefined && keywordData.demand_score !== null && (
+                    <div className={`${theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-50'} rounded-lg p-3`}>
+                      <div className="flex items-center gap-2 mb-1">
+                        <Target size={14} className="text-blue-500" />
+                        <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                          Demand
+                        </span>
+                      </div>
+                      <p className={`text-base font-bold ${getDemandScoreColor(keywordData.demand_score)}`}>
+                        {formatDemandScore(keywordData.demand_score)}
+                      </p>
+                    </div>
+                  )}
+
+                  {keywordData.interest_score !== undefined && keywordData.interest_score !== null && (
+                    <div className={`${theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-50'} rounded-lg p-3`}>
+                      <div className="flex items-center gap-2 mb-1">
+                        <BarChart3 size={14} className="text-emerald-500" />
+                        <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                          Interest
+                        </span>
+                      </div>
+                      <p className={`text-base font-bold ${getInterestScoreColor(keywordData.interest_score)}`}>
+                        {formatInterestScore(keywordData.interest_score)}
+                      </p>
+                    </div>
+                  )}
+
+                  <div className={`${theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-50'} rounded-lg p-3`}>
+                    <div className="flex items-center gap-2 mb-1">
+                      {getTrendingStatus().icon || <BarChart3 size={14} className="text-gray-500" />}
+                      <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                        Trending
+                      </span>
+                    </div>
+                    <p className={`text-base font-bold ${getTrendingStatus().color}`}>
+                      {getTrendingStatus().label}
                     </p>
                   </div>
 
@@ -722,6 +836,46 @@ function BubbleTooltip({
                 </div>
                 <p className={`text-lg font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                   {formatCompetition(keywordData.competition, keywordData.competition_indexed)}
+                </p>
+              </div>
+
+              {keywordData.demand_score !== undefined && keywordData.demand_score !== null && (
+                <div className={`${theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-50'} rounded-lg p-3`}>
+                  <div className="flex items-center gap-2 mb-1">
+                    <Target size={14} className="text-blue-500" />
+                    <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                      Demand
+                    </span>
+                  </div>
+                  <p className={`text-lg font-bold ${getDemandScoreColor(keywordData.demand_score)}`}>
+                    {formatDemandScore(keywordData.demand_score)}
+                  </p>
+                </div>
+              )}
+
+              {keywordData.interest_score !== undefined && keywordData.interest_score !== null && (
+                <div className={`${theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-50'} rounded-lg p-3`}>
+                  <div className="flex items-center gap-2 mb-1">
+                    <BarChart3 size={14} className="text-emerald-500" />
+                    <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                      Interest
+                    </span>
+                  </div>
+                  <p className={`text-lg font-bold ${getInterestScoreColor(keywordData.interest_score)}`}>
+                    {formatInterestScore(keywordData.interest_score)}
+                  </p>
+                </div>
+              )}
+
+              <div className={`${theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-50'} rounded-lg p-3`}>
+                <div className="flex items-center gap-2 mb-1">
+                  {getTrendingStatus().icon || <BarChart3 size={14} className="text-gray-500" />}
+                  <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                    Trending
+                  </span>
+                </div>
+                <p className={`text-lg font-bold ${getTrendingStatus().color}`}>
+                  {getTrendingStatus().label}
                 </p>
               </div>
 
