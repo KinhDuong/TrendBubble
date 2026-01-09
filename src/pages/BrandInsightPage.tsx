@@ -2453,9 +2453,12 @@ export default function BrandInsightPage() {
                                                 topic.demandScore >= 40 ? 'text-green-500' :
                                                 topic.demandScore >= 30 ? 'text-blue-500' :
                                                 topic.demandScore >= 20 ? 'text-yellow-500' :
-                                                'text-gray-500'
+                                                theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
                                               }`}>
-                                                {topic.demandScore.toFixed(1)}/50
+                                                {topic.demandScore >= 40 ? 'Very High' :
+                                                 topic.demandScore >= 30 ? 'Strong' :
+                                                 topic.demandScore >= 20 ? 'Moderate' :
+                                                 'Low'}
                                               </span>
                                             </div>
                                           )}
@@ -2463,12 +2466,15 @@ export default function BrandInsightPage() {
                                             <div>
                                               <span className={`${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>Interest: </span>
                                               <span className={`font-semibold ${
-                                                topic.interestScore >= 40 ? 'text-purple-500' :
-                                                topic.interestScore >= 30 ? 'text-indigo-500' :
-                                                topic.interestScore >= 20 ? 'text-pink-500' :
-                                                'text-gray-500'
+                                                topic.interestScore >= 40 ? 'text-emerald-500' :
+                                                topic.interestScore >= 30 ? 'text-blue-500' :
+                                                topic.interestScore >= 20 ? 'text-amber-500' :
+                                                theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
                                               }`}>
-                                                {topic.interestScore.toFixed(1)}/50
+                                                {topic.interestScore >= 40 ? 'Very High' :
+                                                 topic.interestScore >= 30 ? 'Strong' :
+                                                 topic.interestScore >= 20 ? 'Moderate' :
+                                                 'Low'}
                                               </span>
                                             </div>
                                           )}
