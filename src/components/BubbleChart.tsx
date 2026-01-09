@@ -163,170 +163,28 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
 
   const getKeywordColorAndRing = (topicName: string): { color: string; ringColor?: string; ringIntensity?: number } => {
     if (!keywordPerformanceData.length) {
-      return { color: '#3B82F6' };
+      return { color: '#6B7280' }; // Gray-500
     }
 
     const perfData = keywordPerformanceData.find(k => k.keyword === topicName);
     if (!perfData) {
-      return { color: '#3B82F6' };
+      return { color: '#6B7280' }; // Gray-500
     }
 
-    const parsePercentage = (value: any): number => {
-      if (typeof value === 'number') return value;
-      if (typeof value === 'string') {
-        const cleaned = value.replace('%', '').replace(',', '').trim();
-        const parsed = parseFloat(cleaned);
-        return isNaN(parsed) ? 0 : parsed;
-      }
-      return 0;
-    };
-
-    const threeMonthChange = parsePercentage(perfData.three_month_change);
-    const yoyChange = parsePercentage(perfData.yoy_change);
-    const bidHigh = perfData.bid_high || 0;
     const searchVolume = perfData.searchVolume || 0;
 
-    const monthlySearches = perfData.monthly_searches || [];
-    const hasData = monthlySearches.length > 0;
-    const mean = hasData ? monthlySearches.reduce((a, b) => a + b, 0) / monthlySearches.length : 0;
-    const variance = hasData ? monthlySearches.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / monthlySearches.length : 0;
-    const stdDev = Math.sqrt(variance);
-    const coefficientOfVariation = mean > 0 ? (stdDev / mean) * 100 : 0;
+    // Use neutral gray shades based on volume
+    // Higher volume = darker gray
+    const volumes = keywordPerformanceData.map(k => k.searchVolume || 0).sort((a, b) => b - a);
+    const maxVolume = volumes[0] || 1;
+    const volumeRatio = searchVolume / maxVolume;
 
-    const hasYoYData = monthlySearches.length >= 24;
-
-    // Priority 1: Check for Declining trends first (no rings for these)
-    if (hasYoYData) {
-      if (yoyChange < 0 && threeMonthChange < 0) {
-        return {
-          color: '#E74C3C',
-          ringColor: '#C0392B',
-          ringIntensity: 0
-        };
-      }
-    } else {
-      if (threeMonthChange < -10) {
-        return {
-          color: '#E74C3C',
-          ringColor: '#C0392B',
-          ringIntensity: 0
-        };
-      }
-    }
-
-    // Priority 2: Check for Start Declining
-    if (hasYoYData) {
-      if (yoyChange >= 0 && threeMonthChange < -5) {
-        return {
-          color: '#E67E22',
-          ringColor: '#CA6F1E',
-          ringIntensity: 0
-        };
-      }
-    } else {
-      if (threeMonthChange < -10) {
-        return {
-          color: '#E67E22',
-          ringColor: '#CA6F1E',
-          ringIntensity: 0
-        };
-      }
-    }
-
-    // Priority 3: Check for High Growth (strongest growth signal)
-    if (hasYoYData) {
-      if (yoyChange > 75) {
-        return {
-          color: '#1E8449',
-          ringColor: '#145A32',
-          ringIntensity: 0.9
-        };
-      }
-    } else {
-      if (threeMonthChange > 60) {
-        return {
-          color: '#1E8449',
-          ringColor: '#145A32',
-          ringIntensity: 0.9
-        };
-      }
-    }
-
-    // Priority 4: Check for Great Potential
-    if (hasYoYData) {
-      if (yoyChange > 30 && threeMonthChange > 20) {
-        return {
-          color: '#27AE60',
-          ringColor: '#1E8449',
-          ringIntensity: 0.85
-        };
-      }
-    } else {
-      if (threeMonthChange > 40) {
-        return {
-          color: '#27AE60',
-          ringColor: '#1E8449',
-          ringIntensity: 0.85
-        };
-      }
-    }
-
-    // Priority 5: Check for Hidden Gem (growth + low volume)
-    if (hasYoYData) {
-      if ((yoyChange > 30 || threeMonthChange > 30) && searchVolume < 15000) {
-        return {
-          color: '#F39C12',
-          ringColor: '#D68910',
-          ringIntensity: 0.75
-        };
-      }
-    } else {
-      if (threeMonthChange > 30 && searchVolume < 15000) {
-        return {
-          color: '#F39C12',
-          ringColor: '#D68910',
-          ringIntensity: 0.75
-        };
-      }
-    }
-
-    // Priority 6: Check for Has Potential (moderate growth)
-    if (threeMonthChange > 30) {
-      return {
-        color: '#16A085',
-        ringColor: '#138D75',
-        ringIntensity: 0.7
-      };
-    }
-
-    // Priority 7: Check for Seasonal Spike (only if not growing/declining) - NO RINGS
-    if (monthlySearches.length > 0) {
-      const positiveSearches = monthlySearches.filter(v => v > 0);
-      if (positiveSearches.length > 0) {
-        const maxSearch = Math.max(...positiveSearches);
-        const minSearch = Math.min(...positiveSearches);
-        const peakVariance = minSearch > 0 ? ((maxSearch - minSearch) / minSearch) * 100 : 0;
-        if (peakVariance > 500) {
-          return {
-            color: '#9B59B6',
-            ringColor: '#8E44AD',
-            ringIntensity: 0
-          };
-        }
-      }
-    }
-
-    // Priority 8: Check for Solid Performer (stable, consistent) - NO RINGS
-    if (coefficientOfVariation < 40 && searchVolume >= 1000) {
-      return {
-        color: '#3498DB',
-        ringColor: '#2E86C1',
-        ringIntensity: 0
-      };
-    }
-
-    // Default: Blue for neutral/unknown
-    return { color: '#3498DB' };
+    // Define 5 shades of gray from light to dark
+    if (volumeRatio >= 0.8) return { color: '#374151' }; // Gray-700 (darkest)
+    if (volumeRatio >= 0.6) return { color: '#4B5563' }; // Gray-600
+    if (volumeRatio >= 0.4) return { color: '#6B7280' }; // Gray-500
+    if (volumeRatio >= 0.2) return { color: '#9CA3AF' }; // Gray-400
+    return { color: '#D1D5DB' }; // Gray-300 (lightest)
   };
 
   const isYearRoundPerformer = (monthlySearches: number[]): boolean => {
@@ -1558,43 +1416,8 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
           ctx.fill();
         }
 
-        // Skip rings for declining bubbles (red/orange) and stable bubbles (blue/purple)
-        const shouldSkipRing = bubble.color === '#E74C3C' || bubble.color === '#E67E22' || // Red/Orange
-                               bubble.color === '#9B59B6' || bubble.color === '#3498DB' || // Purple/Blue
-                               bubble.ringIntensity === 0;
-
-        if (bubble.ringColor && bubble.ringIntensity && !shouldSkipRing) {
-          const ringOpacity = Math.min(bubble.ringIntensity, 1);
-          const baseRingLineWidth = 1;
-          const ringRgb = bubble.ringColor.match(/\w\w/g)?.map(x => parseInt(x, 16)) || [59, 130, 246];
-
-          // Ripple effect - multiple expanding rings
-          const rippleSpeed = 0.0003; // Speed of ripple animation
-          const currentTime = Date.now() * rippleSpeed;
-          const numRipples = 3; // Number of concurrent ripples
-          const maxExpansion = 20; // Max distance rings expand outward
-
-          for (let i = 0; i < numRipples; i++) {
-            // Offset each ripple in time so they spawn sequentially
-            const ripplePhase = (currentTime + (i / numRipples)) % 1;
-
-            // Ring expands from 0 to maxExpansion
-            const rippleOffset = ripplePhase * maxExpansion;
-            const rippleRadius = displayRadius + 3 + rippleOffset;
-
-            // Fade out as the ring expands
-            const fadeOut = 1 - ripplePhase;
-            const rippleOpacity = ringOpacity * fadeOut * opacity;
-
-            // Only draw if visible
-            if (rippleOpacity > 0.01) {
-              drawShape(ctx, bubble.x, bubble.y, rippleRadius, shape);
-              ctx.strokeStyle = `rgba(${ringRgb[0]}, ${ringRgb[1]}, ${ringRgb[2]}, ${rippleOpacity})`;
-              ctx.lineWidth = baseRingLineWidth;
-              ctx.stroke();
-            }
-          }
-        }
+        // Skip rings for neutral gray bubbles (no performance-based coloring)
+        // Rings are disabled when using neutral color scheme
 
         if (bubble.isPinned) {
           drawShape(ctx, bubble.x, bubble.y, displayRadius + 4, shape);
@@ -1654,19 +1477,34 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
             displayLines[maxLines - 1] = lastLine.length > 10 ? lastLine.slice(0, 10) + '...' : lastLine + '...';
           }
 
+          const brandFontSize = Math.max(isMobile ? 7 : 8, displayRadius / (isMobile ? 4.5 : 5));
           const lineHeight = fontSize * 1.2;
-          const totalTextHeight = displayLines.length * lineHeight;
+          const brandLineHeight = brandFontSize * 1.2;
+
+          // Calculate total height including brand name
+          const hasBrand = bubble.topic.brand && bubble.topic.brand.trim().length > 0;
+          const totalTextHeight = displayLines.length * lineHeight + (hasBrand ? brandLineHeight : 0);
           const startY = bubble.y - totalTextHeight / 2 + fontSize / 2;
 
+          // Draw keyword lines
           displayLines.forEach((line, i) => {
             ctx.fillText(line, bubble.x, startY + i * lineHeight);
           });
+
+          // Draw brand name underneath in smaller, muted text
+          if (hasBrand) {
+            ctx.font = `${brandFontSize}px sans-serif`;
+            const brandAlpha = theme === 'dark' ? 0.6 * textBrightness : 0.7;
+            ctx.fillStyle = theme === 'dark' ? `rgba(200, 200, 200, ${brandAlpha * opacity})` : `rgba(220, 220, 220, ${0.8 * opacity})`;
+            const brandY = startY + displayLines.length * lineHeight;
+            ctx.fillText(bubble.topic.brand, bubble.x, brandY);
+          }
 
           if (useCryptoColors) {
             ctx.font = `${Math.max(8, displayRadius / 5)}px sans-serif`;
             const volumeAlpha = theme === 'dark' ? 0.9 * textBrightness : 0.9;
             ctx.fillStyle = theme === 'dark' ? `rgba(200, 200, 200, ${volumeAlpha * opacity})` : `rgba(255, 255, 255, ${0.85 * opacity})`;
-            const volumeY = startY + displayLines.length * lineHeight + Math.max(4, displayRadius / 10);
+            const volumeY = startY + displayLines.length * lineHeight + (hasBrand ? brandLineHeight : 0) + Math.max(4, displayRadius / 10);
             const displayText = getCryptoDisplayText(bubble.topic);
             const cleanVolume = displayText.replace(/"/g, '');
             const gainPercentage = cleanVolume.split('•')[0].trim();
@@ -1675,7 +1513,7 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
             ctx.font = `${Math.max(8, displayRadius / 5)}px sans-serif`;
             const volumeAlpha = theme === 'dark' ? 0.9 * textBrightness : 0.9;
             ctx.fillStyle = theme === 'dark' ? `rgba(200, 200, 200, ${volumeAlpha * opacity})` : `rgba(255, 255, 255, ${0.85 * opacity})`;
-            const volumeY = startY + displayLines.length * lineHeight + Math.max(4, displayRadius / 10);
+            const volumeY = startY + displayLines.length * lineHeight + (hasBrand ? brandLineHeight : 0) + Math.max(4, displayRadius / 10);
             const cleanVolume = bubble.topic.searchVolumeRaw.replace(/"/g, '');
             ctx.fillText(cleanVolume, bubble.x, volumeY);
           }

@@ -2432,8 +2432,15 @@ export default function BrandInsightPage() {
                                         </div>
                                       </div>
                                       <div className="flex-1 min-w-0">
-                                        <div className="flex items-center gap-2 flex-wrap mb-1.5">
-                                          <h3 className={`font-bold text-sm ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`} itemProp="name">{topic.name}</h3>
+                                        <div className="flex items-center gap-2 flex-wrap mb-0.5">
+                                          <div className="flex flex-col">
+                                            <h3 className={`font-bold text-sm ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`} itemProp="name">{topic.name}</h3>
+                                            {topic.brand && (
+                                              <span className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-600'}`}>
+                                                {topic.brand}
+                                              </span>
+                                            )}
+                                          </div>
                                           <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium ${topic.category.color}`}>
                                             <span>{topic.category.emoji}</span>
                                             <span>{topic.category.label}</span>
