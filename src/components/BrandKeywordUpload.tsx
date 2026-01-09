@@ -854,6 +854,29 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
       throw new Error('You must be logged in to upload data');
     }
 
+    // Extract metrics from representative keyword if available
+    let brandMetrics: {
+      competition?: number;
+      cpc_low?: number;
+      cpc_high?: number;
+      yoy_change?: number;
+      three_month_change?: number;
+    } = {};
+
+    if (representativeKeyword) {
+      const keywordData = data.find(kw => kw.keyword === representativeKeyword);
+      if (keywordData) {
+        brandMetrics = {
+          competition: keywordData['Competition (indexed value)'] || null,
+          cpc_low: keywordData['Top of page bid (low range)'] || null,
+          cpc_high: keywordData['Top of page bid (high range)'] || null,
+          yoy_change: keywordData['YoY change'] || null,
+          three_month_change: keywordData['Three month change'] || null,
+        };
+        console.log('✓ Extracted brand metrics:', brandMetrics);
+      }
+    }
+
     // Check tier limits
     if (getKeywordLimit) {
       const keywordLimit = getKeywordLimit(membershipTier);
@@ -1006,6 +1029,11 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
         page_id: pageId,
         avg_monthly_searches: avgMonthlySearches,
         representative_keyword: representativeKeyword,
+        competition: brandMetrics.competition,
+        cpc_low: brandMetrics.cpc_low,
+        cpc_high: brandMetrics.cpc_high,
+        yoy_change: brandMetrics.yoy_change,
+        three_month_change: brandMetrics.three_month_change,
         meta_title: `${brandName.trim()} - Keyword Search Trends & SEO Insights`,
         meta_description: `Analyze ${brandName.trim()} keyword search volume trends and SEO performance data.`,
         updated_at: new Date().toISOString()

@@ -86,6 +86,11 @@ interface BrandPageData {
   cover_image?: string;
   avg_monthly_searches?: number;
   representative_keyword?: string;
+  competition?: number;
+  cpc_low?: number;
+  cpc_high?: number;
+  yoy_change?: number;
+  three_month_change?: number;
   created_at: string;
   updated_at: string;
 }
@@ -109,7 +114,6 @@ export default function BrandInsightPage() {
 
   const [monthlyData, setMonthlyData] = useState<MonthlyData[]>([]);
   const [keywordData, setKeywordData] = useState<any[]>([]);
-  const [representativeKeywordData, setRepresentativeKeywordData] = useState<any | null>(null);
   const [totalKeywordCount, setTotalKeywordCount] = useState<number>(0);
   const [monthColumns, setMonthColumns] = useState<string[]>([]);
   const [brandPageData, setBrandPageData] = useState<BrandPageData | null>(null);
@@ -255,8 +259,7 @@ export default function BrandInsightPage() {
 
     await Promise.all([
       loadMonthColumns(),
-      loadAIAnalysis(brandPageData.user_id, brandPageData.brand),
-      loadRepresentativeKeyword(brandPageData.user_id, brandPageData.brand, brandPageData.representative_keyword)
+      loadAIAnalysis(brandPageData.user_id, brandPageData.brand)
     ]);
     setLoading(false);
   };
@@ -495,37 +498,6 @@ export default function BrandInsightPage() {
     }
   };
 
-  const loadRepresentativeKeyword = async (ownerUserId: string, brandToQuery: string, representativeKeywordName?: string) => {
-    if (!representativeKeywordName) {
-      console.log('No representative keyword set');
-      setRepresentativeKeywordData(null);
-      return;
-    }
-
-    try {
-      const { data, error } = await supabase
-        .from('brand_keyword_data')
-        .select('*')
-        .eq('brand', brandToQuery)
-        .eq('user_id', ownerUserId)
-        .eq('keyword', representativeKeywordName)
-        .maybeSingle();
-
-      if (error) throw error;
-
-      if (data) {
-        console.log(`Loaded representative keyword data for: "${representativeKeywordName}"`);
-        setRepresentativeKeywordData(data);
-      } else {
-        console.warn(`Representative keyword "${representativeKeywordName}" not found in brand_keyword_data`);
-        setRepresentativeKeywordData(null);
-      }
-    } catch (error) {
-      console.error('Error loading representative keyword data:', error);
-      setRepresentativeKeywordData(null);
-    }
-  };
-
   const loadBrandPageData = async (): Promise<BrandPageData & { user_id: string } | null> => {
     if (!brandName || !pageIdOrUserId) return null;
 
@@ -541,7 +513,7 @@ export default function BrandInsightPage() {
       if (isUUID) {
         const brandPageResult = await supabase
           .from('brand_pages')
-          .select('*, user_id, avg_monthly_searches, representative_keyword')
+          .select('*, user_id, avg_monthly_searches, representative_keyword, competition, cpc_low, cpc_high, yoy_change, three_month_change')
           .eq('id', decodedPageIdOrUserId)
           .maybeSingle();
 
@@ -551,7 +523,7 @@ export default function BrandInsightPage() {
         } else {
           const result = await supabase
             .from('brand_pages')
-            .select('*, user_id, avg_monthly_searches, representative_keyword')
+            .select('*, user_id, avg_monthly_searches, representative_keyword, competition, cpc_low, cpc_high, yoy_change, three_month_change')
             .eq('user_id', decodedPageIdOrUserId)
             .eq('page_id', decodedBrand)
             .maybeSingle();
@@ -571,7 +543,7 @@ export default function BrandInsightPage() {
           // If no user profile found, try to find a public brand page with matching page_id
           const publicPageResult = await supabase
             .from('brand_pages')
-            .select('*, user_id, avg_monthly_searches, representative_keyword')
+            .select('*, user_id, avg_monthly_searches, representative_keyword, competition, cpc_low, cpc_high, yoy_change, three_month_change')
             .eq('page_id', decodedBrand)
             .eq('is_public', true)
             .order('created_at', { ascending: false })
@@ -600,7 +572,7 @@ export default function BrandInsightPage() {
 
           const result = await supabase
             .from('brand_pages')
-            .select('*, user_id, avg_monthly_searches, representative_keyword')
+            .select('*, user_id, avg_monthly_searches, representative_keyword, competition, cpc_low, cpc_high, yoy_change, three_month_change')
             .eq('user_id', profileData.id)
             .eq('page_id', decodedBrand)
             .maybeSingle();
@@ -2334,11 +2306,19 @@ export default function BrandInsightPage() {
 
                         {selectedBrands.length === 1 && keywordData.length > 0 && (
                           <BrandKeywordStats
-                            keyword={representativeKeywordData || exactBrandKeyword}
+                            keyword={exactBrandKeyword}
                             allKeywords={keywordData}
                             brandName={selectedBrands[0]}
                             monthColumns={monthColumns}
                             theme={theme}
+                            brandMetrics={brandPageData ? {
+                              searchVolume: brandPageData.avg_monthly_searches,
+                              competition: brandPageData.competition,
+                              cpc_low: brandPageData.cpc_low,
+                              cpc_high: brandPageData.cpc_high,
+                              yoy_change: brandPageData.yoy_change,
+                              three_month_change: brandPageData.three_month_change,
+                            } : undefined}
                           />
                         )}
 

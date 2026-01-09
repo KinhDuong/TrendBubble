@@ -7,9 +7,17 @@ interface BrandKeywordStatsProps {
   brandName?: string;
   monthColumns: string[];
   theme: 'light' | 'dark';
+  brandMetrics?: {
+    searchVolume?: number;
+    competition?: number;
+    cpc_low?: number;
+    cpc_high?: number;
+    yoy_change?: number;
+    three_month_change?: number;
+  };
 }
 
-export default function BrandKeywordStats({ keyword, allKeywords, brandName, monthColumns, theme }: BrandKeywordStatsProps) {
+export default function BrandKeywordStats({ keyword, allKeywords, brandName, monthColumns, theme, brandMetrics }: BrandKeywordStatsProps) {
   const parseNumericValue = (value: any): number => {
     if (value === null || value === undefined) return 0;
     if (typeof value === 'number') return value;
@@ -34,25 +42,37 @@ export default function BrandKeywordStats({ keyword, allKeywords, brandName, mon
     monthlyData: Array<{ month: string; volume: number }>;
   };
 
-  if (keyword) {
-    // Single keyword stats
-    const searchVolume = keyword['Avg. monthly searches'] || 0;
-    const competition = parseNumericValue(keyword['Competition (indexed value)']);
-    const lowTopBid = parseNumericValue(keyword['Top of page bid (low range)']);
-    const highTopBid = parseNumericValue(keyword['Top of page bid (high range)']);
-    const yoyChange = parseNumericValue(keyword['YoY change']);
-    const threeMonthChange = parseNumericValue(keyword['Three month change']);
-    const monthlyData = monthColumns
-      .map(col => ({
-        month: col,
-        volume: keyword[col]
-      }))
-      .filter(item => item.volume !== null && item.volume !== undefined)
-      .slice(-12);
+  if (keyword || brandMetrics) {
+    // Single keyword stats - use brandMetrics if provided, otherwise extract from keyword
+    const searchVolume = brandMetrics?.searchVolume || keyword?.['Avg. monthly searches'] || 0;
+    const competition = brandMetrics?.competition !== undefined
+      ? parseNumericValue(brandMetrics.competition)
+      : parseNumericValue(keyword?.['Competition (indexed value)']);
+    const lowTopBid = brandMetrics?.cpc_low !== undefined
+      ? parseNumericValue(brandMetrics.cpc_low)
+      : parseNumericValue(keyword?.['Top of page bid (low range)']);
+    const highTopBid = brandMetrics?.cpc_high !== undefined
+      ? parseNumericValue(brandMetrics.cpc_high)
+      : parseNumericValue(keyword?.['Top of page bid (high range)']);
+    const yoyChange = brandMetrics?.yoy_change !== undefined
+      ? parseNumericValue(brandMetrics.yoy_change)
+      : parseNumericValue(keyword?.['YoY change']);
+    const threeMonthChange = brandMetrics?.three_month_change !== undefined
+      ? parseNumericValue(brandMetrics.three_month_change)
+      : parseNumericValue(keyword?.['Three month change']);
+    const monthlyData = keyword
+      ? monthColumns
+          .map(col => ({
+            month: col,
+            volume: keyword[col]
+          }))
+          .filter(item => item.volume !== null && item.volume !== undefined)
+          .slice(-12)
+      : [];
 
     displayData = {
-      title: keyword.keyword,
-      subtitle: keyword.brand,
+      title: keyword?.keyword || brandName || 'Brand',
+      subtitle: keyword?.brand || (brandMetrics ? `${allKeywords?.length || 0} keywords` : undefined),
       searchVolume,
       competition,
       lowTopBid,
