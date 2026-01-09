@@ -55,6 +55,7 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
   const [showBrandSelector, setShowBrandSelector] = useState(false);
   const [brandSelectorKeywords, setBrandSelectorKeywords] = useState<Array<Record<string, any>>>([]);
   const [avgMonthlySearchesCache, setAvgMonthlySearchesCache] = useState<number | undefined>(undefined);
+  const [representativeKeywordCache, setRepresentativeKeywordCache] = useState<string | undefined>(undefined);
 
   const levenshteinDistance = (str1: string, str2: string): number => {
     const len1 = str1.length;
@@ -579,8 +580,9 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
         return; // Stop here, wait for user selection
       }
 
-      // Store the brand value for later use
+      // Store the brand value and keyword for later use
       setAvgMonthlySearchesCache(avgMonthlySearches);
+      setRepresentativeKeywordCache(brandName.trim());
 
       // STEP 2: Only run duplicate detection on valid traffic keywords (zero-traffic never included)
       const detectedDuplicates = detectDuplicates(data);
@@ -604,7 +606,7 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
         setShowMergeReview(true);
         setUploading(false);
       } else {
-        await processUpload(data, avgMonthlySearches);
+        await processUpload(data, avgMonthlySearches, brandName.trim());
       }
 
       event.target.value = '';
@@ -621,7 +623,7 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
 
     try {
       const finalData = applyMerges(pendingData, approvedMerges);
-      await processUpload(finalData, avgMonthlySearchesCache);
+      await processUpload(finalData, avgMonthlySearchesCache, representativeKeywordCache);
     } catch (err) {
       console.error('Merge approval error:', err);
       setError(err instanceof Error ? err.message : 'Failed to process merges');
@@ -637,6 +639,7 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
     setPendingData([]);
     setMergeGroups([]);
     setAvgMonthlySearchesCache(undefined);
+    setRepresentativeKeywordCache(undefined);
     setUploading(false);
   };
 
@@ -653,7 +656,7 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
         setShowMergeReview(true);
         setUploading(false);
       } else {
-        await processUpload(filteredData, avgMonthlySearchesCache);
+        await processUpload(filteredData, avgMonthlySearchesCache, representativeKeywordCache);
       }
     } catch (err) {
       console.error('Duplicate review continue error:', err);
@@ -671,6 +674,7 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
     setZeroTrafficKeywords([]);
     setPendingData([]);
     setAvgMonthlySearchesCache(undefined);
+    setRepresentativeKeywordCache(undefined);
     setUploading(false);
   };
 
@@ -680,10 +684,12 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
 
     try {
       const selectedAvgMonthlySearches = selectedKeyword['Avg. monthly searches'];
-      console.log(`✓ User selected brand value: ${selectedAvgMonthlySearches?.toLocaleString()} avg monthly searches`);
+      const selectedKeywordName = selectedKeyword.keyword;
+      console.log(`✓ User selected keyword: "${selectedKeywordName}" with ${selectedAvgMonthlySearches?.toLocaleString()} avg monthly searches`);
 
-      // Store the selected brand value
+      // Store the selected brand value and keyword name
       setAvgMonthlySearchesCache(selectedAvgMonthlySearches);
+      setRepresentativeKeywordCache(selectedKeywordName);
 
       // Continue with duplicate detection
       const detectedDuplicates = detectDuplicates(pendingData);
@@ -704,7 +710,7 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
         setShowMergeReview(true);
         setUploading(false);
       } else {
-        await processUpload(pendingData, selectedAvgMonthlySearches);
+        await processUpload(pendingData, selectedAvgMonthlySearches, selectedKeywordName);
         setPendingData([]);
       }
     } catch (err) {
@@ -721,6 +727,7 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
     setBrandSelectorKeywords([]);
     setPendingData([]);
     setAvgMonthlySearchesCache(undefined);
+    setRepresentativeKeywordCache(undefined);
     setUploading(false);
   };
 
@@ -841,7 +848,7 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
     }
   };
 
-  const processUpload = async (data: Array<Record<string, any>>, manualAvgMonthlySearches?: number) => {
+  const processUpload = async (data: Array<Record<string, any>>, manualAvgMonthlySearches?: number, representativeKeyword?: string) => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       throw new Error('You must be logged in to upload data');
@@ -989,6 +996,7 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
     // This parameter should always be provided at this point
     const avgMonthlySearches = manualAvgMonthlySearches;
     console.log(`✓ Using brand value: ${avgMonthlySearches?.toLocaleString()} avg monthly searches`);
+    console.log(`✓ Representative keyword: "${representativeKeyword}"`);
 
     const { error: brandPageError } = await supabase
       .from('brand_pages')
@@ -997,6 +1005,7 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
         brand: brandName.trim(),
         page_id: pageId,
         avg_monthly_searches: avgMonthlySearches,
+        representative_keyword: representativeKeyword,
         meta_title: `${brandName.trim()} - Keyword Search Trends & SEO Insights`,
         meta_description: `Analyze ${brandName.trim()} keyword search volume trends and SEO performance data.`,
         updated_at: new Date().toISOString()
@@ -1015,6 +1024,7 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
 
     setSuccess(successMessage);
     setAvgMonthlySearchesCache(undefined);
+    setRepresentativeKeywordCache(undefined);
 
     setTimeout(() => {
       onUploadComplete();
