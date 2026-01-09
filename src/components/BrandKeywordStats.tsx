@@ -14,6 +14,7 @@ interface BrandKeywordStatsProps {
     cpc_high?: number;
     yoy_change?: number;
     three_month_change?: number;
+    monthly_searches?: Record<string, number>;
   };
 }
 
@@ -60,15 +61,28 @@ export default function BrandKeywordStats({ keyword, allKeywords, brandName, mon
     const threeMonthChange = brandMetrics?.three_month_change !== undefined
       ? parseNumericValue(brandMetrics.three_month_change)
       : parseNumericValue(keyword?.['Three month change']);
-    const monthlyData = keyword
-      ? monthColumns
-          .map(col => ({
-            month: col,
-            volume: keyword[col]
-          }))
-          .filter(item => item.volume !== null && item.volume !== undefined)
-          .slice(-12)
-      : [];
+
+    let monthlyData: Array<{ month: string; volume: number }> = [];
+
+    if (brandMetrics?.monthly_searches) {
+      // Use stored monthly searches from brand_pages
+      monthlyData = Object.entries(brandMetrics.monthly_searches)
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([isoMonth, volume]) => ({
+          month: isoMonth,
+          volume
+        }))
+        .slice(-12);
+    } else if (keyword) {
+      // Fall back to keyword data
+      monthlyData = monthColumns
+        .map(col => ({
+          month: col,
+          volume: keyword[col]
+        }))
+        .filter(item => item.volume !== null && item.volume !== undefined)
+        .slice(-12);
+    }
 
     displayData = {
       title: keyword?.keyword || brandName || 'Brand',

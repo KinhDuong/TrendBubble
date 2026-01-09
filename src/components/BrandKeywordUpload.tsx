@@ -877,6 +877,35 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
       }
     }
 
+    // Aggregate monthly search volumes across all keywords
+    const monthlySearches: Record<string, number> = {};
+    const monthColumns = Object.keys(data[0] || {}).filter(col => col.startsWith('Searches: '));
+
+    monthColumns.forEach(col => {
+      const totalVolume = data.reduce((sum, row) => {
+        const volume = row[col];
+        return sum + (typeof volume === 'number' ? volume : 0);
+      }, 0);
+
+      // Convert "Searches: Dec 2021" to "2021-12"
+      const monthMatch = col.match(/Searches: (\w+) (\d{4})/);
+      if (monthMatch) {
+        const [, monthName, year] = monthMatch;
+        const monthMap: Record<string, string> = {
+          'Jan': '01', 'Feb': '02', 'Mar': '03', 'Apr': '04',
+          'May': '05', 'Jun': '06', 'Jul': '07', 'Aug': '08',
+          'Sep': '09', 'Oct': '10', 'Nov': '11', 'Dec': '12'
+        };
+        const monthNum = monthMap[monthName];
+        if (monthNum) {
+          const isoMonth = `${year}-${monthNum}`;
+          monthlySearches[isoMonth] = totalVolume;
+        }
+      }
+    });
+
+    console.log(`✓ Aggregated ${Object.keys(monthlySearches).length} months of search data`);
+
     // Check tier limits
     if (getKeywordLimit) {
       const keywordLimit = getKeywordLimit(membershipTier);
@@ -1034,6 +1063,7 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
         cpc_high: brandMetrics.cpc_high,
         yoy_change: brandMetrics.yoy_change,
         three_month_change: brandMetrics.three_month_change,
+        monthly_searches: monthlySearches,
         meta_title: `${brandName.trim()} - Keyword Search Trends & SEO Insights`,
         meta_description: `Analyze ${brandName.trim()} keyword search volume trends and SEO performance data.`,
         updated_at: new Date().toISOString()
