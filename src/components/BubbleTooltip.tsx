@@ -400,12 +400,8 @@ function BubbleTooltip({
                         {keywordData.search_variants}
                       </p>
                     )}
-                    {topic.brand && (
-                      <div className="flex items-center gap-2">
-                        <div
-                          className="w-3 h-3 rounded-full flex-shrink-0"
-                          style={{ backgroundColor: topic.brandColor || '#3B82F6' }}
-                        />
+                    {topic.isDuplicate && topic.brand && (
+                      <div className="flex items-center gap-2 mt-1">
                         <span className={`text-sm font-medium ${
                           theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
                         }`}>
@@ -741,9 +737,9 @@ function BubbleTooltip({
                   </p>
                 )}
               </div>
-              {topic.category && (
-                <span className={`text-lg ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                  {topic.category}
+              {topic.isDuplicate && topic.brand && (
+                <span className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                  {topic.brand}
                 </span>
               )}
             </div>

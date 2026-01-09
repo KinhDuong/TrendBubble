@@ -794,49 +794,80 @@ export default function BrandInsightPage() {
 
       const now = new Date().toISOString();
 
-      const result = keywordData.map(kw => {
-        const monthlyVolumes: number[] = [];
+      // Group keywords by name (case-insensitive)
+      const keywordGroups = new Map<string, any[]>();
+      keywordData.forEach(kw => {
+        const normalizedName = (kw.keyword || '').toLowerCase().trim();
+        if (!keywordGroups.has(normalizedName)) {
+          keywordGroups.set(normalizedName, []);
+        }
+        keywordGroups.get(normalizedName)!.push(kw);
+      });
 
+      const result: TrendingTopic[] = [];
+
+      keywordGroups.forEach((keywords, normalizedName) => {
+        // Get the original keyword name (preserve case from first occurrence)
+        const originalName = keywords[0].keyword;
+
+        // Get all unique brands for this keyword
+        const brands = [...new Set(keywords.map(kw => kw.brand || ''))].filter(Boolean);
+        const isDuplicate = brands.length > 1;
+
+        // Use the first keyword's data (they're all identical for search volume)
+        const firstKeyword = keywords[0];
+
+        const monthlyVolumes: number[] = [];
         monthColumns.forEach(col => {
-          if (kw[col] !== null && kw[col] !== undefined) {
-            monthlyVolumes.push(Number(kw[col]));
+          if (firstKeyword[col] !== null && firstKeyword[col] !== undefined) {
+            monthlyVolumes.push(Number(firstKeyword[col]));
           }
         });
 
-        const avgVolume = kw['Avg. monthly searches'] || 0;
-        const brandName = kw.brand || '';
-        const brandColor = getBrandColor(brandName, availableBrands);
+        const avgVolume = firstKeyword['Avg. monthly searches'] || 0;
 
-        return {
-          name: kw.keyword,
+        // For duplicates: gray color + show brand list
+        // For single brand: use brand color + no brand label
+        const brandColor = isDuplicate
+          ? (theme === 'dark' ? '#9CA3AF' : '#6B7280')  // Gray color
+          : getBrandColor(brands[0], availableBrands);
+
+        result.push({
+          name: originalName,
           searchVolume: avgVolume,
           searchVolumeRaw: formatCompactNumber(avgVolume),
           url: '',
           createdAt: now,
           pubDate: now,
-          category: brandName,
+          category: isDuplicate ? brands.join(' | ') : brands[0],  // Brand list for duplicates
           source: 'brand_keywords',
-          brand: brandName,
+          brand: isDuplicate ? brands.join(' | ') : brands[0],
           brandColor: brandColor,
+          isDuplicate: isDuplicate,  // Flag to identify duplicates
           monthlySearches: monthlyVolumes.map((vol, idx) => ({
             month: monthColumns[idx],
             volume: vol
           }))
-        };
-      }).sort((a, b) => b.searchVolume - a.searchVolume);
+        });
+      });
+
+      // Sort by search volume
+      const sorted = result.sort((a, b) => b.searchVolume - a.searchVolume);
 
       console.log('BrandInsightPage - transformToTopics:', {
         keywordDataCount: keywordData.length,
-        resultCount: result.length,
+        uniqueKeywordsCount: keywordGroups.size,
+        resultCount: sorted.length,
         selectedBrands: selectedBrands,
-        sampleData: result.slice(0, 3)
+        duplicatesCount: sorted.filter(t => t.isDuplicate).length,
+        sampleData: sorted.slice(0, 3)
       });
-      return result;
+      return sorted;
     } catch (error) {
       console.error('Error transforming topics:', error);
       return [];
     }
-  }, [keywordData, monthColumns, availableBrands, selectedBrands]);
+  }, [keywordData, monthColumns, availableBrands, selectedBrands, theme]);
 
   useEffect(() => {
     async function fetchBrandComparisonStats() {
