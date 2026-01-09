@@ -425,6 +425,25 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
 
   const bubbleLifetimes = [40000, 60000, 80000, 100000, 120000];
 
+  // Track duplicate keywords (keywords that appear in multiple brands)
+  const duplicateKeywords = new Set<string>();
+  const keywordBrandMap = new Map<string, Set<string>>();
+
+  topics.forEach(topic => {
+    if (!keywordBrandMap.has(topic.name)) {
+      keywordBrandMap.set(topic.name, new Set());
+    }
+    if (topic.brand) {
+      keywordBrandMap.get(topic.name)!.add(topic.brand);
+    }
+  });
+
+  keywordBrandMap.forEach((brands, keyword) => {
+    if (brands.size > 1) {
+      duplicateKeywords.add(keyword);
+    }
+  });
+
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
@@ -1059,13 +1078,17 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
       // The shrink factor will be applied during animation
       const initialRadius = isStaticLayout ? radius : 0;
 
+      // Use gray color for duplicate keywords across multiple brands
+      const isDuplicate = duplicateKeywords.has(topic.name);
       const colorData = useCryptoColors
         ? { color: getCryptoColorByGain(cryptoValue, getCryptoDisplayText(topic)) }
-        : (selectedBrandsCount > 1 && topic.brandColor)
-            ? { color: topic.brandColor }
-            : (keywordPerformanceData.length > 0
-                ? getKeywordColorAndRing(topic.name)
-                : { color: getRandomColor(topicIndex) });
+        : isDuplicate
+            ? { color: '#808080' }
+            : (selectedBrandsCount > 1 && topic.brandColor)
+                ? { color: topic.brandColor }
+                : (keywordPerformanceData.length > 0
+                    ? getKeywordColorAndRing(topic.name)
+                    : { color: getRandomColor(topicIndex) });
 
       const badges = keywordPerformanceData.length > 0 ? getKeywordBadges(topic.name) : undefined;
 
@@ -1658,8 +1681,9 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
           const lineHeight = fontSize * 1.2;
           const brandLineHeight = brandFontSize * 1.2;
 
-          // Calculate total height including brand name
-          const hasBrand = bubble.topic.brand && bubble.topic.brand.trim().length > 0;
+          // Only show brand name if this keyword appears in multiple brands (is a duplicate)
+          const isDuplicate = duplicateKeywords.has(bubble.topic.name);
+          const hasBrand = isDuplicate && bubble.topic.brand && bubble.topic.brand.trim().length > 0;
           const totalTextHeight = displayLines.length * lineHeight + (hasBrand ? brandLineHeight : 0);
           const startY = bubble.y - totalTextHeight / 2 + fontSize / 2;
 
@@ -1668,7 +1692,7 @@ export default function BubbleChart({ topics, maxDisplay, theme, layout = 'force
             ctx.fillText(line, bubble.x, startY + i * lineHeight);
           });
 
-          // Draw brand name underneath in smaller, muted text
+          // Draw brand name underneath only for duplicate keywords
           if (hasBrand) {
             ctx.font = `${brandFontSize}px sans-serif`;
             const brandAlpha = theme === 'dark' ? 0.6 * textBrightness : 0.7;

@@ -1502,6 +1502,29 @@ export default function BrandInsightPage() {
   const endIndex = startIndex + itemsPerPage;
   const displayTopics = sortedTopicsWithRanks.slice(startIndex, endIndex);
 
+  // Calculate duplicate keywords (keywords that appear in multiple brands)
+  const duplicateKeywords = useMemo(() => {
+    const keywordBrandMap = new Map<string, Set<string>>();
+    const duplicates = new Set<string>();
+
+    transformToTopics.forEach(topic => {
+      if (!keywordBrandMap.has(topic.name)) {
+        keywordBrandMap.set(topic.name, new Set());
+      }
+      if (topic.brand) {
+        keywordBrandMap.get(topic.name)!.add(topic.brand);
+      }
+    });
+
+    keywordBrandMap.forEach((brands, keyword) => {
+      if (brands.size > 1) {
+        duplicates.add(keyword);
+      }
+    });
+
+    return duplicates;
+  }, [transformToTopics]);
+
   const handleRankingSort = (field: SortField) => {
     if (rankingSortField === field) {
       setRankingSortDirection(rankingSortDirection === 'asc' ? 'desc' : 'asc');
@@ -2434,8 +2457,8 @@ export default function BrandInsightPage() {
                                       <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-2 flex-wrap mb-0.5">
                                           <div className="flex flex-col">
-                                            <h3 className={`font-bold text-sm ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`} itemProp="name">{topic.name}</h3>
-                                            {topic.brand && (
+                                            <h3 className={`font-bold text-sm ${duplicateKeywords.has(topic.name) ? 'text-gray-500' : theme === 'dark' ? 'text-white' : 'text-gray-900'}`} itemProp="name">{topic.name}</h3>
+                                            {duplicateKeywords.has(topic.name) && topic.brand && (
                                               <span className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-600'}`}>
                                                 {topic.brand}
                                               </span>
