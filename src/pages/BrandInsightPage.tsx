@@ -1545,7 +1545,7 @@ export default function BrandInsightPage() {
       }
 
       const csv = [
-        ['Brand', 'Keyword', 'Avg. Monthly Searches', 'Demand Score', 'Interest Score', 'Intent Type', 'Three Month Change', 'YoY Change', 'Competition', 'Top of Page Bid (High)'].join(','),
+        ['Brand', 'Keyword', 'Avg. Monthly Searches', 'Demand Score', 'Interest Score', 'Three Month Change', 'YoY Change', 'Competition', 'Top of Page Bid (High)'].join(','),
         ...allData.map(row =>
           [
             row.brand,
@@ -1553,7 +1553,6 @@ export default function BrandInsightPage() {
             row['Avg. monthly searches'] || 0,
             row.demand_score || '',
             row.interest_score || '',
-            row.intent_type || '',
             row['Three month change'] || '',
             row['YoY change'] || '',
             row.competition || '',
@@ -2496,18 +2495,6 @@ export default function BrandInsightPage() {
                                                     : 'text-green-500'
                                               }`}>
                                                 {topic.yoyChange}
-                                              </span>
-                                            </div>
-                                          )}
-                                          {topic.intentType && (
-                                            <div>
-                                              <span className={`${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>Intent: </span>
-                                              <span className={`font-semibold ${
-                                                topic.intentType === 'Transactional' ? 'text-purple-500' :
-                                                topic.intentType === 'Commercial' ? 'text-blue-500' :
-                                                theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-                                              }`}>
-                                                {topic.intentType}
                                               </span>
                                             </div>
                                           )}
