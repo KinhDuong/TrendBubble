@@ -802,6 +802,15 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
         };
       });
 
+      console.log('✓ Scoring data sample:', keywordsForScoring.slice(0, 2).map(k => ({
+        keyword: k.keyword,
+        monthlySearches: k.monthlySearches.length > 0 ? `${k.monthlySearches.length} months` : 'none',
+        avgVolume: k.monthlySearches.length > 0 ? k.monthlySearches.reduce((a, b) => a + b, 0) / k.monthlySearches.length : 0,
+        competition: k.competition,
+        avgCpc: k.avgCpc,
+        intentType: k.intentType
+      })));
+
       // Step 3: Calculate demand scores
       const scoreResponse = await fetch(`${supabaseUrl}/functions/v1/calculate-demand-score`, {
         method: 'POST',
@@ -822,6 +831,8 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
 
       const { results: scoreResults } = await scoreResponse.json();
 
+      console.log('✓ Score results sample:', scoreResults.slice(0, 3));
+
       // Create score map for quick lookup
       const scoreMap = new Map<string, any>();
       scoreResults.forEach((result: any) => {
@@ -838,6 +849,13 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
           interest_score: scoreResult?.interestScore || null,
         };
       });
+
+      console.log('✓ Scored data sample:', scoredData.slice(0, 3).map(d => ({
+        keyword: d.keyword,
+        demand_score: d.demand_score,
+        interest_score: d.interest_score,
+        intent_type: d.intent_type
+      })));
 
       console.log('Demand & Interest score calculation complete');
       return scoredData;
