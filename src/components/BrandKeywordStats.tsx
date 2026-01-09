@@ -299,7 +299,10 @@ export default function BrandKeywordStats({ keyword, allKeywords, brandName, mon
                     {formatCompactNumber(item.volume)}
                   </div>
                   <div className={`text-xs mt-1 ${theme === 'dark' ? 'text-gray-500' : 'text-gray-600'}`}>
-                    {item.month.split(' ')[0]}
+                    {item.month.includes('-')
+                      ? new Date(item.month + '-01').toLocaleDateString('en-US', { month: 'short' })
+                      : item.month.split(' ')[0]
+                    }
                   </div>
                 </div>
               );
