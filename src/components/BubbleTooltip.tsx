@@ -451,6 +451,7 @@ function BubbleTooltip({
                   Performance Metrics
                 </h4>
                 <div className="grid grid-cols-2 gap-3">
+                  {/* Row 1: Search, Demand, Interest, Trending */}
                   <div className={`${theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-50'} rounded-lg p-3`}>
                     <div className="flex items-center gap-2 mb-1">
                       <TrendingUp size={14} className="text-blue-500" />
@@ -463,6 +464,43 @@ function BubbleTooltip({
                     </p>
                   </div>
 
+                  <div className={`${theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-50'} rounded-lg p-3`}>
+                    <div className="flex items-center gap-2 mb-1">
+                      <Target size={14} className="text-blue-500" />
+                      <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                        Demand
+                      </span>
+                    </div>
+                    <p className={`text-base font-bold ${getDemandScoreColor(keywordData.demand_score)}`}>
+                      {formatDemandScore(keywordData.demand_score)}
+                    </p>
+                  </div>
+
+                  <div className={`${theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-50'} rounded-lg p-3`}>
+                    <div className="flex items-center gap-2 mb-1">
+                      <BarChart3 size={14} className="text-emerald-500" />
+                      <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                        Interest
+                      </span>
+                    </div>
+                    <p className={`text-base font-bold ${getInterestScoreColor(keywordData.interest_score)}`}>
+                      {formatInterestScore(keywordData.interest_score)}
+                    </p>
+                  </div>
+
+                  <div className={`${theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-50'} rounded-lg p-3`}>
+                    <div className="flex items-center gap-2 mb-1">
+                      {getTrendingStatus().icon || <BarChart3 size={14} className="text-gray-500" />}
+                      <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                        Trending
+                      </span>
+                    </div>
+                    <p className={`text-base font-bold ${getTrendingStatus().color}`}>
+                      {getTrendingStatus().label}
+                    </p>
+                  </div>
+
+                  {/* Row 2: 3-M Change, YoY Change, Top Bid, Keyword Comp. */}
                   <div className={`${theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-50'} rounded-lg p-3`}>
                     <div className="flex items-center gap-2 mb-1">
                       <TrendingUp size={14} className="text-blue-500" />
@@ -508,46 +546,6 @@ function BubbleTooltip({
                     </div>
                     <p className={`text-base font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                       {formatCompetition(keywordData.competition, keywordData.competition_indexed)}
-                    </p>
-                  </div>
-
-                  {keywordData.demand_score !== undefined && keywordData.demand_score !== null && (
-                    <div className={`${theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-50'} rounded-lg p-3`}>
-                      <div className="flex items-center gap-2 mb-1">
-                        <Target size={14} className="text-blue-500" />
-                        <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                          Demand
-                        </span>
-                      </div>
-                      <p className={`text-base font-bold ${getDemandScoreColor(keywordData.demand_score)}`}>
-                        {formatDemandScore(keywordData.demand_score)}
-                      </p>
-                    </div>
-                  )}
-
-                  {keywordData.interest_score !== undefined && keywordData.interest_score !== null && (
-                    <div className={`${theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-50'} rounded-lg p-3`}>
-                      <div className="flex items-center gap-2 mb-1">
-                        <BarChart3 size={14} className="text-emerald-500" />
-                        <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                          Interest
-                        </span>
-                      </div>
-                      <p className={`text-base font-bold ${getInterestScoreColor(keywordData.interest_score)}`}>
-                        {formatInterestScore(keywordData.interest_score)}
-                      </p>
-                    </div>
-                  )}
-
-                  <div className={`${theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-50'} rounded-lg p-3`}>
-                    <div className="flex items-center gap-2 mb-1">
-                      {getTrendingStatus().icon || <BarChart3 size={14} className="text-gray-500" />}
-                      <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                        Trending
-                      </span>
-                    </div>
-                    <p className={`text-base font-bold ${getTrendingStatus().color}`}>
-                      {getTrendingStatus().label}
                     </p>
                   </div>
 
@@ -778,7 +776,8 @@ function BubbleTooltip({
             <h4 className={`text-sm font-semibold mb-3 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
               Performance Metrics
             </h4>
-            <div className="grid grid-cols-5 gap-3">
+            <div className="grid grid-cols-4 gap-3">
+              {/* Row 1: Search, Demand, Interest, Trending */}
               <div className={`${theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-50'} rounded-lg p-3`}>
                 <div className="flex items-center gap-2 mb-1">
                   <TrendingUp size={14} className="text-blue-500" />
@@ -791,6 +790,43 @@ function BubbleTooltip({
                 </p>
               </div>
 
+              <div className={`${theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-50'} rounded-lg p-3`}>
+                <div className="flex items-center gap-2 mb-1">
+                  <Target size={14} className="text-blue-500" />
+                  <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                    Demand
+                  </span>
+                </div>
+                <p className={`text-lg font-bold ${getDemandScoreColor(keywordData.demand_score)}`}>
+                  {formatDemandScore(keywordData.demand_score)}
+                </p>
+              </div>
+
+              <div className={`${theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-50'} rounded-lg p-3`}>
+                <div className="flex items-center gap-2 mb-1">
+                  <BarChart3 size={14} className="text-emerald-500" />
+                  <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                    Interest
+                  </span>
+                </div>
+                <p className={`text-lg font-bold ${getInterestScoreColor(keywordData.interest_score)}`}>
+                  {formatInterestScore(keywordData.interest_score)}
+                </p>
+              </div>
+
+              <div className={`${theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-50'} rounded-lg p-3`}>
+                <div className="flex items-center gap-2 mb-1">
+                  {getTrendingStatus().icon || <BarChart3 size={14} className="text-gray-500" />}
+                  <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                    Trending
+                  </span>
+                </div>
+                <p className={`text-lg font-bold ${getTrendingStatus().color}`}>
+                  {getTrendingStatus().label}
+                </p>
+              </div>
+
+              {/* Row 2: 3-M Change, YoY Change, Top Bid, Keyword Comp. */}
               <div className={`${theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-50'} rounded-lg p-3`}>
                 <div className="flex items-center gap-2 mb-1">
                   <TrendingUp size={14} className="text-blue-500" />
@@ -839,48 +875,8 @@ function BubbleTooltip({
                 </p>
               </div>
 
-              {keywordData.demand_score !== undefined && keywordData.demand_score !== null && (
-                <div className={`${theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-50'} rounded-lg p-3`}>
-                  <div className="flex items-center gap-2 mb-1">
-                    <Target size={14} className="text-blue-500" />
-                    <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                      Demand
-                    </span>
-                  </div>
-                  <p className={`text-lg font-bold ${getDemandScoreColor(keywordData.demand_score)}`}>
-                    {formatDemandScore(keywordData.demand_score)}
-                  </p>
-                </div>
-              )}
-
-              {keywordData.interest_score !== undefined && keywordData.interest_score !== null && (
-                <div className={`${theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-50'} rounded-lg p-3`}>
-                  <div className="flex items-center gap-2 mb-1">
-                    <BarChart3 size={14} className="text-emerald-500" />
-                    <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                      Interest
-                    </span>
-                  </div>
-                  <p className={`text-lg font-bold ${getInterestScoreColor(keywordData.interest_score)}`}>
-                    {formatInterestScore(keywordData.interest_score)}
-                  </p>
-                </div>
-              )}
-
-              <div className={`${theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-50'} rounded-lg p-3`}>
-                <div className="flex items-center gap-2 mb-1">
-                  {getTrendingStatus().icon || <BarChart3 size={14} className="text-gray-500" />}
-                  <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                    Trending
-                  </span>
-                </div>
-                <p className={`text-lg font-bold ${getTrendingStatus().color}`}>
-                  {getTrendingStatus().label}
-                </p>
-              </div>
-
               {keywordData.sentiment !== undefined && keywordData.sentiment !== null && (
-                <div className={`${theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-50'} rounded-lg p-3 col-span-5`}>
+                <div className={`${theme === 'dark' ? 'bg-gray-700/50' : 'bg-gray-50'} rounded-lg p-3 col-span-4`}>
                   <div className="flex items-center gap-2 mb-2">
                     <span className="text-sm">{getSentimentEmoji(keywordData.sentiment)}</span>
                     <span className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
