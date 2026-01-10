@@ -94,8 +94,8 @@ function scoreTrendDemand(monthlySearches: number[]): { score: number; slope: nu
 }
 
 function scoreCompetitionDemand(competition: number): number {
-  if (competition >= 70) return 1;
-  if (competition >= 50) return 4;
+  if (competition > 70) return 2;
+  if (competition >= 50) return 5;
   if (competition >= 30) return 7;
   return 10;
 }
@@ -111,7 +111,7 @@ function scoreIntentDemand(intentType: string): number {
   const intent = intentType.toLowerCase();
   if (intent.includes('transactional')) return 10;
   if (intent.includes('commercial')) return 7;
-  if (intent.includes('navigational')) return 5;
+  if (intent.includes('navigational')) return 2;
   return 3;
 }
 
