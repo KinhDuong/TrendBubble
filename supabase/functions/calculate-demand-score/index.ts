@@ -146,25 +146,28 @@ function scoreTrendInterest(monthlySearches: number[]): { score: number; slope: 
 }
 
 function scoreCompetitionInterest(competition: number): number {
-  if (competition >= 70) return 2;
-  if (competition >= 50) return 5;
-  if (competition >= 30) return 8;
-  return 10;
+  if (competition > 70) return 10; // Lots of people talking
+  if (competition >= 40) return 7;
+  if (competition >= 20) return 4;
+  return 2; // Niche
 }
 
 function scoreCpcInterest(avgCpc: number): number {
-  if (avgCpc < 1) return 8;
-  if (avgCpc >= 1 && avgCpc <= 3) return 10;
+  if (avgCpc < 1) return 6;
+  if (avgCpc >= 1 && avgCpc <= 3) return 10; // Optimal curiosity zone
   if (avgCpc > 3 && avgCpc <= 7) return 7;
   return 4;
 }
 
 function scoreIntentInterest(intentType: string): number {
   const intent = intentType.toLowerCase();
+  // >60% informational = pure learning/research interest
   if (intent.includes('informational')) return 10;
-  if (intent.includes('commercial')) return 8;
-  if (intent.includes('transactional')) return 4;
-  return 10;
+  // 40-60% = mixed intent (commercial/navigational)
+  if (intent.includes('commercial') || intent.includes('navigational')) return 8;
+  // <40% informational = transactional (ready to buy, less interest)
+  if (intent.includes('transactional')) return 5;
+  return 10; // Default to informational
 }
 
 // Calculate recent momentum modifier
