@@ -945,7 +945,9 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
     } = {};
 
     if (representativeKeyword) {
-      const keywordData = scoredData.find(kw => kw.keyword === representativeKeyword);
+      const keywordData = scoredData.find(kw =>
+        kw.keyword.toLowerCase() === representativeKeyword.toLowerCase()
+      );
       if (keywordData) {
         brandMetrics = {
           competition: keywordData['Competition (indexed value)'] || null,
@@ -958,6 +960,8 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
           sentiment: keywordData['sentiment'] || null,
         };
         console.log('✓ Extracted brand metrics with scores:', brandMetrics);
+      } else {
+        console.warn(`⚠ Representative keyword "${representativeKeyword}" not found in scored data`);
       }
     }
 
