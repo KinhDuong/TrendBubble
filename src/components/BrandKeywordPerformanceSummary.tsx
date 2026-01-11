@@ -289,9 +289,9 @@ export default function BrandKeywordPerformanceSummary({ brandStats, brandColor,
   ];
 
   return (
-    <div className={`mb-6 rounded-xl border overflow-visible ${theme === 'dark' ? 'bg-gradient-to-br from-gray-800/50 to-gray-900/50 border-gray-700' : 'bg-gradient-to-br from-gray-50 to-white border-gray-200'}`}>
+    <div className="mb-6 overflow-visible">
       <div
-        className={`px-6 py-4 border-b ${theme === 'dark' ? 'border-gray-700' : 'border-gray-300'} overflow-visible relative`}
+        className="px-6 py-4 overflow-visible relative"
         style={{
           background: theme === 'dark'
             ? `linear-gradient(135deg, ${brandColor}20, ${brandColor}10)`
@@ -336,7 +336,7 @@ export default function BrandKeywordPerformanceSummary({ brandStats, brandColor,
         )}
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-8 gap-3 p-4 overflow-visible">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-8 gap-3 overflow-visible">
         {metrics.map((metric, metricIndex) => {
           const Icon = metric.icon;
           const value = (normalizedStats as any)[metric.key];
