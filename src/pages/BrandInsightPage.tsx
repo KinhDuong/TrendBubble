@@ -2140,7 +2140,7 @@ export default function BrandInsightPage() {
                     </div>
                   </div>
 
-                  <div className="max-w-7xl mx-auto mb-6">
+                  <div className="mb-6">
                     <FilterMenu
                       theme={theme}
                       loading={loading}
