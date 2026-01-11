@@ -6,7 +6,7 @@ import { useAuth } from '../hooks/useAuth';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import BrandKeywordUpload from '../components/BrandKeywordUpload';
-import { TrendingUp, Calendar, Database, BarChart3, AlertCircle, CheckCircle, ArrowRight, Table, Lock, Unlock, Loader2, Upload, X } from 'lucide-react';
+import { TrendingUp, Calendar, Database, BarChart3, AlertCircle, CheckCircle, ArrowRight, Lock, Unlock, Loader2, Upload, X } from 'lucide-react';
 
 interface BrandMetadata {
   brand: string;
@@ -344,15 +344,23 @@ export default function InsightsMetaPage() {
                       <td className="py-3 px-4 text-center">
                         <div className="flex items-center justify-center gap-2">
                           {brand.has_yoy_data ? (
-                            <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium ${theme === 'dark' ? 'bg-green-900/30 text-green-400' : 'bg-green-100 text-green-700'}`}>
+                            <button
+                              onClick={() => navigate(`/admin/brand-data/${encodeURIComponent(brand.brand)}`)}
+                              className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-colors ${theme === 'dark' ? 'bg-green-900/30 text-green-400 hover:bg-green-900/50' : 'bg-green-100 text-green-700 hover:bg-green-200'}`}
+                              title="View full brand data"
+                            >
                               <CheckCircle className="w-3 h-3" />
                               Full Data
-                            </span>
+                            </button>
                           ) : (
-                            <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium ${theme === 'dark' ? 'bg-amber-900/30 text-amber-400' : 'bg-amber-100 text-amber-700'}`}>
+                            <button
+                              onClick={() => navigate(`/admin/brand-data/${encodeURIComponent(brand.brand)}`)}
+                              className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-colors ${theme === 'dark' ? 'bg-amber-900/30 text-amber-400 hover:bg-amber-900/50' : 'bg-amber-100 text-amber-700 hover:bg-amber-200'}`}
+                              title="View brand data"
+                            >
                               <AlertCircle className="w-3 h-3" />
                               Limited
-                            </span>
+                            </button>
                           )}
                           {brand.has_page && (
                             <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium ${theme === 'dark' ? 'bg-blue-900/30 text-blue-400' : 'bg-blue-100 text-blue-700'}`}>
@@ -400,38 +408,28 @@ export default function InsightsMetaPage() {
                         )}
                       </td>
                       <td className="py-3 px-4 text-center">
-                        <div className="flex items-center justify-end gap-2">
-                          <button
-                            onClick={() => {
-                              const identifier = brand.username || brand.user_id;
-                              if (identifier && brand.has_page && brand.page_id) {
-                                navigate(`/insights/${encodeURIComponent(identifier)}/${brand.page_id}/`);
-                              }
-                            }}
-                            disabled={!brand.has_page}
-                            className={`inline-flex items-center gap-1 px-3 py-1.5 rounded text-sm font-medium transition-colors ${
-                              !brand.has_page
-                                ? theme === 'dark'
-                                  ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
-                                  : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                                : theme === 'dark'
-                                ? 'bg-blue-600 hover:bg-blue-700 text-white'
-                                : 'bg-blue-600 hover:bg-blue-700 text-white'
-                            }`}
-                            title={brand.has_page ? 'View brand insight page' : 'No page created yet'}
-                          >
-                            View Page
-                            <ArrowRight className="w-3 h-3" />
-                          </button>
-                          <button
-                            onClick={() => navigate(`/admin/brand-data/${encodeURIComponent(brand.brand)}`)}
-                            className={`inline-flex items-center gap-1 px-3 py-1.5 rounded text-sm font-medium transition-colors ${theme === 'dark' ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-green-600 hover:bg-green-700 text-white'}`}
-                            title="View brand data"
-                          >
-                            <Table className="w-3 h-3" />
-                            Data
-                          </button>
-                        </div>
+                        <button
+                          onClick={() => {
+                            const identifier = brand.username || brand.user_id;
+                            if (identifier && brand.has_page && brand.page_id) {
+                              navigate(`/insights/${encodeURIComponent(identifier)}/${brand.page_id}/`);
+                            }
+                          }}
+                          disabled={!brand.has_page}
+                          className={`inline-flex items-center gap-1 px-3 py-1.5 rounded text-sm font-medium transition-colors ${
+                            !brand.has_page
+                              ? theme === 'dark'
+                                ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
+                                : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                              : theme === 'dark'
+                              ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                              : 'bg-blue-600 hover:bg-blue-700 text-white'
+                          }`}
+                          title={brand.has_page ? 'View brand insight page' : 'No page created yet'}
+                        >
+                          View Page
+                          <ArrowRight className="w-3 h-3" />
+                        </button>
                       </td>
                     </tr>
                   ))}
