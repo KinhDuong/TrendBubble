@@ -25,7 +25,7 @@ interface BrandMetadata {
 
 export default function InsightsMetaPage() {
   const navigate = useNavigate();
-  const { isAdmin, user, logout, membershipTier } = useAuth();
+  const { isAdmin, user, logout } = useAuth();
   const [brandMetadata, setBrandMetadata] = useState<BrandMetadata[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -40,12 +40,6 @@ export default function InsightsMetaPage() {
   useEffect(() => {
     document.documentElement.style.backgroundColor = theme === 'dark' ? '#111827' : '#f1f3f4';
   }, [theme]);
-
-  useEffect(() => {
-    if (membershipTier !== null && membershipTier !== 5) {
-      navigate('/');
-    }
-  }, [membershipTier, navigate]);
 
   useEffect(() => {
     loadBrandMetadata();
@@ -164,7 +158,7 @@ export default function InsightsMetaPage() {
   const baseUrl = import.meta.env.VITE_BASE_URL || 'https://topbestcharts.com';
   const pageUrl = `${baseUrl}/insights-meta/`;
 
-  if (loading || (membershipTier !== null && membershipTier !== 5)) {
+  if (loading) {
     return (
       <div className={`min-h-screen flex items-center justify-center ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'}`}>
         <div className="text-xl">Loading...</div>
@@ -302,11 +296,9 @@ export default function InsightsMetaPage() {
                     <th className={`text-center py-3 px-4 font-semibold ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
                       Avg. Volume
                     </th>
-                    {membershipTier === 5 && (
-                      <th className={`text-center py-3 px-4 font-semibold ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                        Status
-                      </th>
-                    )}
+                    <th className={`text-center py-3 px-4 font-semibold ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                      Status
+                    </th>
                     <th className={`text-center py-3 px-4 font-semibold ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
                       Visibility
                     </th>
@@ -348,36 +340,34 @@ export default function InsightsMetaPage() {
                       <td className={`py-3 px-4 text-center ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
                         {brand.total_volume.toLocaleString()}
                       </td>
-                      {membershipTier === 5 && (
-                        <td className="py-3 px-4 text-center">
-                          <div className="flex items-center justify-center gap-2">
-                            {brand.has_yoy_data ? (
-                              <button
-                                onClick={() => navigate(`/admin/brand-data/${encodeURIComponent(brand.brand)}`)}
-                                className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-colors ${theme === 'dark' ? 'bg-green-900/30 text-green-400 hover:bg-green-900/50' : 'bg-green-100 text-green-700 hover:bg-green-200'}`}
-                                title="View full brand data"
-                              >
-                                <CheckCircle className="w-3 h-3" />
-                                Full Data
-                              </button>
-                            ) : (
-                              <button
-                                onClick={() => navigate(`/admin/brand-data/${encodeURIComponent(brand.brand)}`)}
-                                className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-colors ${theme === 'dark' ? 'bg-amber-900/30 text-amber-400 hover:bg-amber-900/50' : 'bg-amber-100 text-amber-700 hover:bg-amber-200'}`}
-                                title="View brand data"
-                              >
-                                <AlertCircle className="w-3 h-3" />
-                                Limited
-                              </button>
-                            )}
-                            {brand.has_page && (
-                              <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium ${theme === 'dark' ? 'bg-blue-900/30 text-blue-400' : 'bg-blue-100 text-blue-700'}`}>
-                                Page
-                              </span>
-                            )}
-                          </div>
-                        </td>
-                      )}
+                      <td className="py-3 px-4 text-center">
+                        <div className="flex items-center justify-center gap-2">
+                          {brand.has_yoy_data ? (
+                            <button
+                              onClick={() => navigate(`/admin/brand-data/${encodeURIComponent(brand.brand)}`)}
+                              className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-colors ${theme === 'dark' ? 'bg-green-900/30 text-green-400 hover:bg-green-900/50' : 'bg-green-100 text-green-700 hover:bg-green-200'}`}
+                              title="View full brand data"
+                            >
+                              <CheckCircle className="w-3 h-3" />
+                              Full Data
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => navigate(`/admin/brand-data/${encodeURIComponent(brand.brand)}`)}
+                              className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-colors ${theme === 'dark' ? 'bg-amber-900/30 text-amber-400 hover:bg-amber-900/50' : 'bg-amber-100 text-amber-700 hover:bg-amber-200'}`}
+                              title="View brand data"
+                            >
+                              <AlertCircle className="w-3 h-3" />
+                              Limited
+                            </button>
+                          )}
+                          {brand.has_page && (
+                            <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium ${theme === 'dark' ? 'bg-blue-900/30 text-blue-400' : 'bg-blue-100 text-blue-700'}`}>
+                              Page
+                            </span>
+                          )}
+                        </div>
+                      </td>
                       <td className="py-3 px-4 text-center">
                         {brand.has_page ? (
                           <button
