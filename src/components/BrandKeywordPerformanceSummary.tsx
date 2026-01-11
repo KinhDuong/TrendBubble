@@ -63,7 +63,6 @@ export default function BrandKeywordPerformanceSummary({ brandStats, brandColor,
   const normalizedStats = {
     brand: brandStats.brand,
     brandSearchVolume: brandStats.brandSearchVolume ?? brandStats.brand_search_volume ?? 0,
-    totalKeywords: brandStats.totalKeywords ?? brandStats.total_keywords ?? 0,
     totalVolume: brandStats.totalVolume ?? brandStats.total_volume ?? 0,
     threeMonthChange: brandStats.threeMonthChange ?? brandStats.three_month_change ?? 0,
     yoyChange: brandStats.yoyChange ?? brandStats.yoy_change ?? 0,
@@ -73,11 +72,6 @@ export default function BrandKeywordPerformanceSummary({ brandStats, brandColor,
     avgSlope: brandStats.avgSlope ?? brandStats.avg_slope ?? 0,
     avgRSquared: brandStats.avgRSquared ?? brandStats.avg_r_squared ?? 0,
     risingStarsHistorical: brandStats.risingStarsHistorical ?? brandStats.rising_stars_historical ?? 0,
-    topPerformers: brandStats.topPerformers ?? brandStats.top_performers ?? 0,
-    risingStars: brandStats.risingStars ?? brandStats.rising_stars ?? 0,
-    declining: brandStats.declining ?? 0,
-    stable: brandStats.stable ?? 0,
-    highIntent: brandStats.highIntent ?? brandStats.high_intent ?? 0,
   };
 
   const toggleTooltip = (metric: string) => {
