@@ -336,7 +336,7 @@ export default function BrandKeywordPerformanceSummary({ brandStats, brandColor,
         )}
       </div>
 
-      <div className="overflow-visible">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-8 gap-3 p-4 overflow-visible">
         {metrics.map((metric, metricIndex) => {
           const Icon = metric.icon;
           const value = (normalizedStats as any)[metric.key];
@@ -361,18 +361,9 @@ export default function BrandKeywordPerformanceSummary({ brandStats, brandColor,
           return (
             <div
               key={metric.key}
-              className={`grid grid-cols-2 gap-4 border-b ${theme === 'dark' ? 'border-gray-700/50' : 'border-gray-200'} hover:${theme === 'dark' ? 'bg-gray-700/20' : 'bg-gray-50'} transition-colors overflow-visible`}
+              className={`relative flex flex-col rounded-lg border ${theme === 'dark' ? 'bg-gray-800/50 border-gray-700' : 'bg-white border-gray-200'} overflow-visible transition-all hover:shadow-lg`}
             >
-              <div className={`p-4 flex items-center gap-3 ${theme === 'dark' ? 'bg-gray-800/30' : 'bg-gray-50/50'}`}>
-                <div className={`p-2 rounded-lg ${theme === 'dark' ? 'bg-gray-700' : 'bg-white border border-gray-200'}`}>
-                  <Icon className={`w-5 h-5 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`} />
-                </div>
-                <span className={`text-sm font-semibold ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                  {metric.label}
-                </span>
-              </div>
-
-              <div className={`p-4 flex items-center justify-center relative`}>
+              <div className={`flex-1 flex items-center justify-center px-4 py-6 ${theme === 'dark' ? 'hover:bg-gray-700/30' : 'hover:bg-gray-50'} rounded-t-lg transition-colors`}>
                 {isTrending ? (
                   <div
                     className="relative"
@@ -380,14 +371,14 @@ export default function BrandKeywordPerformanceSummary({ brandStats, brandColor,
                   >
                     <button
                       onClick={() => toggleTooltip(metric.key)}
-                      className={`text-center transition-all hover:scale-105 ${theme === 'dark' ? 'hover:bg-gray-700/30' : 'hover:bg-gray-100/50'} rounded-lg px-3 py-2 cursor-pointer`}
+                      className="text-center transition-all hover:scale-105 cursor-pointer"
                     >
                       {(() => {
                         const TrendIcon = trending.ArrowIcon;
                         return (
                           <div className="flex flex-col items-center gap-1">
                             <TrendIcon className={`w-8 h-8 ${trending.color}`} strokeWidth={2.5} />
-                            <div className={`text-sm md:text-base font-bold ${trending.color}`}>
+                            <div className={`text-base md:text-lg font-bold ${trending.color}`}>
                               {trending.label}
                             </div>
                           </div>
@@ -437,9 +428,9 @@ export default function BrandKeywordPerformanceSummary({ brandStats, brandColor,
                   >
                     <button
                       onClick={() => toggleTooltip(metric.key)}
-                      className={`text-center transition-all hover:scale-105 ${theme === 'dark' ? 'hover:bg-gray-700/30' : 'hover:bg-gray-100/50'} rounded-lg px-3 py-2 cursor-pointer`}
+                      className="text-center transition-all hover:scale-105 cursor-pointer"
                     >
-                      <div className={`text-lg md:text-xl font-bold ${getInterestLevelColor(value)}`}>
+                      <div className={`text-xl md:text-2xl font-bold ${getInterestLevelColor(value)}`}>
                         {value > 0 ? getInterestLevel(value) : 'N/A'}
                       </div>
                     </button>
@@ -473,9 +464,9 @@ export default function BrandKeywordPerformanceSummary({ brandStats, brandColor,
                   >
                     <button
                       onClick={() => toggleTooltip(metric.key)}
-                      className={`text-center transition-all hover:scale-105 ${theme === 'dark' ? 'hover:bg-gray-700/30' : 'hover:bg-gray-100/50'} rounded-lg px-3 py-2 cursor-pointer`}
+                      className="text-center transition-all hover:scale-105 cursor-pointer"
                     >
-                      <div className={`text-lg md:text-xl font-bold ${getDemandLevelColor(value)}`}>
+                      <div className={`text-xl md:text-2xl font-bold ${getDemandLevelColor(value)}`}>
                         {value > 0 ? getDemandLevel(value) : 'N/A'}
                       </div>
                     </button>
@@ -509,6 +500,15 @@ export default function BrandKeywordPerformanceSummary({ brandStats, brandColor,
                     </div>
                   </div>
                 )}
+              </div>
+
+              <div className={`px-4 py-3 border-t text-center ${theme === 'dark' ? 'border-gray-700 bg-gray-800/70' : 'border-gray-200 bg-gray-50'}`}>
+                <div className="flex items-center justify-center gap-2">
+                  <Icon className={`w-4 h-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`} />
+                  <span className={`text-xs font-semibold ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                    {metric.label}
+                  </span>
+                </div>
               </div>
             </div>
           );
