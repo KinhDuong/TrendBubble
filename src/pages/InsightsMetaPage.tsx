@@ -316,7 +316,7 @@ export default function InsightsMetaPage() {
                       key={brand.brand}
                       className={`border-b ${theme === 'dark' ? 'border-gray-700 hover:bg-gray-700/50' : 'border-gray-100 hover:bg-gray-50'} transition-colors`}
                     >
-                      <td className={`py-3 px-4 font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                      <td className="py-3 px-4">
                         {brand.has_page ? (
                           <button
                             onClick={() => {
@@ -325,14 +325,16 @@ export default function InsightsMetaPage() {
                                 navigate(`/insights/${encodeURIComponent(identifier)}/${brand.page_id}/`);
                               }
                             }}
-                            className={`text-left hover:underline ${
-                              theme === 'dark' ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'
+                            className={`text-left font-medium transition-colors ${
+                              theme === 'dark'
+                                ? 'text-gray-300 hover:text-blue-400 hover:underline'
+                                : 'text-gray-700 hover:text-blue-600 hover:underline'
                             }`}
                           >
                             {brand.brand}
                           </button>
                         ) : (
-                          <span>{brand.brand}</span>
+                          <span className={`font-medium ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>{brand.brand}</span>
                         )}
                       </td>
                       <td className={`py-3 px-4 text-center ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
