@@ -1929,6 +1929,24 @@ export default function BrandInsightPage() {
         title="Top Best Charts"
       />
 
+      {!loading && selectedBrands.length === 1 && keywordData.length > 0 && (
+        <div className={`${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'} pb-4`}>
+          <BrandKeywordPerformanceSummary
+            brandStats={calculateBrandStats(keywordData, selectedBrands[0], brandPageData ? [brandPageData] : undefined)}
+            brandColor={getBrandColor(selectedBrands[0], availableBrands)}
+            theme={theme}
+          />
+        </div>
+      )}
+
+      {!loading && selectedBrands.length === 1 && keywordData.length > 0 && (
+        <BrandInsightTabs
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          theme={theme}
+        />
+      )}
+
       <FilterMenu
         theme={theme}
         loading={loading}
@@ -2062,24 +2080,6 @@ export default function BrandInsightPage() {
                     return null;
                   })()}
                 </header>
-
-                {!loading && selectedBrands.length === 1 && keywordData.length > 0 && (
-                  <BrandInsightTabs
-                    activeTab={activeTab}
-                    onTabChange={setActiveTab}
-                    theme={theme}
-                  />
-                )}
-
-                {!loading && selectedBrands.length === 1 && keywordData.length > 0 && (
-                  <div className={`${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'} pb-4`}>
-                    <BrandKeywordPerformanceSummary
-                      brandStats={calculateBrandStats(keywordData, selectedBrands[0], brandPageData ? [brandPageData] : undefined)}
-                      brandColor={getBrandColor(selectedBrands[0], availableBrands)}
-                      theme={theme}
-                    />
-                  </div>
-                )}
               </article>
 
               {activeTab === 'charts' && viewMode === 'keyword' && (
