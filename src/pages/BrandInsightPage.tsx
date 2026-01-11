@@ -23,7 +23,8 @@ import SEOStrategyInsights from '../components/SEOStrategyInsights';
 import PPCCampaignInsights from '../components/PPCCampaignInsights';
 import BrandSelector, { getBrandColor } from '../components/BrandSelector';
 import BrandKeywordStats from '../components/BrandKeywordStats';
-import BrandComparisonTable from '../components/BrandComparisonTable';
+import BrandKeywordPerformanceSummary from '../components/BrandKeywordPerformanceSummary';
+import BrandComparisonTable, { calculateBrandStats } from '../components/BrandComparisonTable';
 import { TrendingTopic, FAQ } from '../types';
 import { TrendingUp, Download, ArrowLeft, Search, X, ChevronsLeft, ChevronsRight, ArrowUpDown, ArrowUp, ArrowDown, Sparkles, AlertCircle } from 'lucide-react';
 import { formatCompactNumber } from '../utils/formatNumber';
@@ -2306,21 +2307,10 @@ export default function BrandInsightPage() {
                         )}
 
                         {selectedBrands.length === 1 && keywordData.length > 0 && (
-                          <BrandKeywordStats
-                            keyword={exactBrandKeyword}
-                            allKeywords={keywordData}
-                            brandName={selectedBrands[0]}
-                            monthColumns={monthColumns}
+                          <BrandKeywordPerformanceSummary
+                            brandStats={calculateBrandStats(keywordData, selectedBrands[0], brandPageData ? [brandPageData] : undefined)}
+                            brandColor={getBrandColor(selectedBrands[0], availableBrands)}
                             theme={theme}
-                            brandMetrics={brandPageData ? {
-                              searchVolume: brandPageData.avg_monthly_searches,
-                              competition: brandPageData.competition,
-                              cpc_low: brandPageData.cpc_low,
-                              cpc_high: brandPageData.cpc_high,
-                              yoy_change: brandPageData.yoy_change,
-                              three_month_change: brandPageData.three_month_change,
-                              monthly_searches: brandPageData.monthly_searches,
-                            } : undefined}
                           />
                         )}
 
