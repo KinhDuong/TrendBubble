@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { TrendingUp, TrendingDown, Search, Target, Minus, Trophy, Zap, ThumbsUp, Sparkles, ArrowUp, ArrowUpRight, ArrowRight, ArrowDownRight, ArrowDown, Rocket } from 'lucide-react';
+import { TrendingUp, Zap, ThumbsUp, Sparkles, ArrowUp, ArrowUpRight, ArrowRight, ArrowDownRight, ArrowDown, Rocket } from 'lucide-react';
 import { formatCompactNumber } from '../utils/formatNumber';
 
 interface BrandStats {
@@ -286,19 +286,12 @@ export default function BrandKeywordPerformanceSummary({ brandStats, brandColor,
   const metrics = [
     { label: 'Trending', icon: TrendingUp, key: 'trending', format: () => '', colorize: 'trending' },
     { label: 'Monthly Search', icon: TrendingUp, key: 'brandSearchVolume', format: (v: number) => formatCompactNumber(v) },
-    { label: 'Total Keywords', icon: Search, key: 'totalKeywords', format: (v: number) => formatCompactNumber(v) },
     { label: 'Targeted Reach', icon: TrendingUp, key: 'totalVolume', format: (v: number) => formatCompactNumber(v) },
     { label: 'Customer Demand', icon: Zap, key: 'avgDemandScore', format: (v: number) => v > 0 ? `${v.toFixed(1)}/50` : 'N/A', colorize: 'demand' },
     { label: 'Customer Interest', icon: Sparkles, key: 'avgInterestScore', format: (v: number) => v > 0 ? `${v.toFixed(1)}/50` : 'N/A', colorize: 'interest' },
     { label: '3-Month Change', icon: TrendingUp, key: 'threeMonthChange', format: (v: number) => formatPercentage(v), colorize: true },
     { label: 'YoY Change', icon: TrendingUp, key: 'yoyChange', format: (v: number) => formatPercentage(v), colorize: true },
     { label: 'Sentiment', icon: ThumbsUp, key: 'avgSentiment', format: (v: number) => formatSentiment(v), colorize: 'sentiment' },
-    { label: 'Top Performers', icon: Trophy, key: 'topPerformers', format: (v: number) => formatCompactNumber(v) },
-    { label: 'Rising Stars', icon: Zap, key: 'risingStars', format: (v: number) => formatCompactNumber(v) },
-    { label: 'Historical Stars', icon: Zap, key: 'risingStarsHistorical', format: (v: number) => formatCompactNumber(v) },
-    { label: 'Declining', icon: TrendingDown, key: 'declining', format: (v: number) => formatCompactNumber(v) },
-    { label: 'Stable', icon: Minus, key: 'stable', format: (v: number) => formatCompactNumber(v) },
-    { label: 'High Intent', icon: Target, key: 'highIntent', format: (v: number) => formatCompactNumber(v) },
   ];
 
   return (
@@ -520,11 +513,6 @@ export default function BrandKeywordPerformanceSummary({ brandStats, brandColor,
                     <div className={`text-xl md:text-2xl font-bold ${textColor}`}>
                       {formattedValue}
                     </div>
-                    {(metric.key === 'topPerformers' || metric.key === 'risingStars' || metric.key === 'risingStarsHistorical' || metric.key === 'declining' || metric.key === 'stable' || metric.key === 'highIntent') && (
-                      <div className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'} mt-1`}>
-                        keywords
-                      </div>
-                    )}
                   </div>
                 )}
               </div>
