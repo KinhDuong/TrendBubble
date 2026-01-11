@@ -25,6 +25,7 @@ import BrandSelector, { getBrandColor } from '../components/BrandSelector';
 import BrandKeywordStats from '../components/BrandKeywordStats';
 import BrandKeywordPerformanceSummary from '../components/BrandKeywordPerformanceSummary';
 import BrandComparisonTable, { calculateBrandStats } from '../components/BrandComparisonTable';
+import BrandInsightTabs from '../components/BrandInsightTabs';
 import { TrendingTopic, FAQ } from '../types';
 import { TrendingUp, Download, ArrowLeft, Search, X, ChevronsLeft, ChevronsRight, ArrowUpDown, ArrowUp, ArrowDown, Sparkles, AlertCircle } from 'lucide-react';
 import { formatCompactNumber } from '../utils/formatNumber';
@@ -163,6 +164,7 @@ export default function BrandInsightPage() {
   const [animationStyle, setAnimationStyle] = useState<AnimationStyle>('default');
   const [performanceFilter, setPerformanceFilter] = useState<string>('all');
   const [rankingListFilter, setRankingListFilter] = useState<string>('all');
+  const [activeTab, setActiveTab] = useState<string>('charts');
 
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     const savedTheme = localStorage.getItem('theme');
@@ -1937,6 +1939,14 @@ export default function BrandInsightPage() {
         </div>
       )}
 
+      {!loading && selectedBrands.length === 1 && keywordData.length > 0 && (
+        <BrandInsightTabs
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          theme={theme}
+        />
+      )}
+
       <FilterMenu
         theme={theme}
         loading={loading}
@@ -2072,7 +2082,7 @@ export default function BrandInsightPage() {
                 </header>
               </article>
 
-              {viewMode === 'keyword' && (
+              {activeTab === 'charts' && viewMode === 'keyword' && (
                 <div className="max-w-7xl mx-auto mb-8">
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
                     <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-sm p-6`}>
@@ -2105,7 +2115,7 @@ export default function BrandInsightPage() {
                 </div>
               )}
 
-              {transformToTopics.length > 0 && (viewMode === 'bubble' || viewMode === 'bar' || viewMode === 'treemap' || viewMode === 'donut' || viewMode === 'wordcloud') && (
+              {activeTab === 'charts' && transformToTopics.length > 0 && (viewMode === 'bubble' || viewMode === 'bar' || viewMode === 'treemap' || viewMode === 'donut' || viewMode === 'wordcloud') && (
                 <>
                   <div className="max-w-7xl mx-auto mb-6">
                     <div>
@@ -2282,7 +2292,7 @@ export default function BrandInsightPage() {
                 </>
               )}
 
-              {transformToTopics.length > 0 && (viewMode === 'bubble' || viewMode === 'bar' || viewMode === 'treemap' || viewMode === 'donut' || viewMode === 'wordcloud') && (
+              {activeTab === 'charts' && transformToTopics.length > 0 && (viewMode === 'bubble' || viewMode === 'bar' || viewMode === 'treemap' || viewMode === 'donut' || viewMode === 'wordcloud') && (
                 <div className="max-w-7xl mx-auto mt-8 mb-0 md:mb-8">
                   <section className="w-full" aria-labelledby="top-keywords-heading">
                       <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-lg border p-6 shadow-md`}>
@@ -3097,7 +3107,7 @@ export default function BrandInsightPage() {
                 </div>
               )}
 
-              {keywordData.length > 0 && pageOwnerId && (
+              {activeTab === 'seo' && keywordData.length > 0 && pageOwnerId && (
                 <SEOStrategyInsights
                   brandName={brandPageData?.brand || decodedBrand}
                   theme={theme}
@@ -3106,7 +3116,7 @@ export default function BrandInsightPage() {
                 />
               )}
 
-              {keywordData.length > 0 && pageOwnerId && brandName && (
+              {activeTab === 'ppc' && keywordData.length > 0 && pageOwnerId && brandName && (
                 <PPCCampaignInsights
                   brandPageSlug={brandName}
                   brandName={brandPageData?.brand || decodedBrand}
@@ -3116,7 +3126,54 @@ export default function BrandInsightPage() {
                 />
               )}
 
-              {keywordData.length > 0 && (
+              {activeTab === 'compare' && (
+                <div className="max-w-7xl mx-auto mt-8 px-2 md:px-0">
+                  <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-lg border p-6 shadow-md`}>
+                    <h2 className={`text-xl md:text-2xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                      Compare Brands
+                    </h2>
+                    {selectedBrands.length >= 2 && brandComparisonStats.length >= 2 ? (
+                      <BrandComparisonTable
+                        brandStats={brandComparisonStats}
+                        availableBrands={availableBrands}
+                        theme={theme}
+                      />
+                    ) : (
+                      <p className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                        Select 2 or more brands to compare their performance metrics.
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'list' && (
+                <div className="max-w-7xl mx-auto mt-8 px-2 md:px-0">
+                  <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-lg border p-6 shadow-md`}>
+                    <h2 className={`text-xl md:text-2xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                      List View
+                    </h2>
+                    <p className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                      Detailed list view of all keywords coming soon.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'tracked' && (
+                <div className="max-w-7xl mx-auto mt-8 px-2 md:px-0">
+                  <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-lg border p-6 shadow-md`}>
+                    <h2 className={`text-xl md:text-2xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                      Tracked Items
+                    </h2>
+                    <p className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                      Save and track your favorite keywords and brands.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'charts' && keywordData.length > 0 && (
                 <div className="max-w-7xl mx-auto mt-8 px-2 md:px-0">
                   <AdvertisingRecommendations
                     keywordData={keywordData}
