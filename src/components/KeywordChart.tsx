@@ -16,6 +16,10 @@ interface KeywordChartProps {
   availableBrands: string[];
 }
 
+const sanitizeCssClass = (str: string): string => {
+  return str.replace(/[^a-zA-Z0-9-_]/g, '-').replace(/--+/g, '-');
+};
+
 export default function KeywordChart({ data, selectedBrands, availableBrands }: KeywordChartProps) {
   const trendRef = useRef<SVGSVGElement>(null);
 
@@ -92,11 +96,13 @@ export default function KeywordChart({ data, selectedBrands, availableBrands }: 
         .attr('stroke-width', 2.5)
         .attr('d', line);
 
-      g.selectAll(`.dot-${brand.replace(/\s/g, '-')}`)
+      const sanitizedBrand = sanitizeCssClass(brand);
+
+      g.selectAll(`.dot-${sanitizedBrand}`)
         .data(sortedData)
         .enter()
         .append('circle')
-        .attr('class', `dot-${brand.replace(/\s/g, '-')}`)
+        .attr('class', `dot-${sanitizedBrand}`)
         .attr('cx', d => x(parseDate(d.month)))
         .attr('cy', d => y(d.total_volume))
         .attr('r', 4)
