@@ -107,7 +107,7 @@ export function useAuth() {
       case 1: return 200;
       case 2: return 500;
       case 3: return 1000;
-      case 4: return 10000;
+      case 4: return -1;
       case 5: return -1;
       default: return 200;
     }

@@ -797,6 +797,39 @@ export default function BrandDataManager() {
     return null;
   }
 
+  if (membershipTier !== 5) {
+    return (
+      <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'}`}>
+        <Header
+          theme={theme}
+          isAdmin={isAdmin}
+          isLoggedIn={!!user}
+          onLoginClick={() => setShowLogin(true)}
+          onLogout={logout}
+          title="Brand Keyword Data Manager"
+        />
+        <div className="min-h-screen flex items-center justify-center px-4">
+          <div className={`max-w-md w-full ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-md p-8 text-center`}>
+            <Lock className={`w-16 h-16 mx-auto mb-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-400'}`} />
+            <h2 className={`text-2xl font-bold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+              Access Restricted
+            </h2>
+            <p className={`text-sm mb-6 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+              This page is only accessible to Tier 5 (Enterprise/Admin) members.
+            </p>
+            <button
+              onClick={() => navigate('/insights-meta')}
+              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+            >
+              Go to Insights
+            </button>
+          </div>
+        </div>
+        <Footer theme={theme} />
+      </div>
+    );
+  }
+
   if (loading) {
     return (
       <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'}`}>
