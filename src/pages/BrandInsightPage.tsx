@@ -1928,14 +1928,12 @@ export default function BrandInsightPage() {
       />
 
       {!loading && selectedBrands.length === 1 && keywordData.length > 0 && (
-        <div className={`${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'} px-2 md:px-6 py-4`}>
-          <div className="max-w-7xl mx-auto">
-            <BrandKeywordPerformanceSummary
-              brandStats={calculateBrandStats(keywordData, selectedBrands[0], brandPageData ? [brandPageData] : undefined)}
-              brandColor={getBrandColor(selectedBrands[0], availableBrands)}
-              theme={theme}
-            />
-          </div>
+        <div className={`${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'} pb-4`}>
+          <BrandKeywordPerformanceSummary
+            brandStats={calculateBrandStats(keywordData, selectedBrands[0], brandPageData ? [brandPageData] : undefined)}
+            brandColor={getBrandColor(selectedBrands[0], availableBrands)}
+            theme={theme}
+          />
         </div>
       )}
 
