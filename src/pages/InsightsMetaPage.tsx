@@ -214,9 +214,6 @@ export default function InsightsMetaPage() {
                 Upload Data
               </button>
             </div>
-            <p className={`text-lg mb-6 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-              Browse data quality indicators and statistics for all tracked brands
-            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
