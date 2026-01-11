@@ -42,6 +42,12 @@ export default function InsightsMetaPage() {
   }, [theme]);
 
   useEffect(() => {
+    if (membershipTier !== null && membershipTier !== 5) {
+      navigate('/');
+    }
+  }, [membershipTier, navigate]);
+
+  useEffect(() => {
     loadBrandMetadata();
   }, [user?.id]);
 
@@ -158,7 +164,7 @@ export default function InsightsMetaPage() {
   const baseUrl = import.meta.env.VITE_BASE_URL || 'https://topbestcharts.com';
   const pageUrl = `${baseUrl}/insights-meta/`;
 
-  if (loading) {
+  if (loading || (membershipTier !== null && membershipTier !== 5)) {
     return (
       <div className={`min-h-screen flex items-center justify-center ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'}`}>
         <div className="text-xl">Loading...</div>
