@@ -6,7 +6,7 @@ import { useAuth } from '../hooks/useAuth';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import BrandKeywordUpload from '../components/BrandKeywordUpload';
-import { TrendingUp, Calendar, Database, BarChart3, AlertCircle, CheckCircle, ArrowRight, Table, Lock, Unlock, Loader2 } from 'lucide-react';
+import { TrendingUp, Calendar, Database, BarChart3, AlertCircle, CheckCircle, ArrowRight, Table, Lock, Unlock, Loader2, Upload, X } from 'lucide-react';
 
 interface BrandMetadata {
   brand: string;
@@ -30,6 +30,7 @@ export default function InsightsMetaPage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [togglingBrand, setTogglingBrand] = useState<string | null>(null);
+  const [showUploadModal, setShowUploadModal] = useState(false);
 
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     const savedTheme = localStorage.getItem('theme');
@@ -46,6 +47,7 @@ export default function InsightsMetaPage() {
 
   const loadBrandMetadata = async () => {
     setLoading(true);
+    setShowUploadModal(false);
     try {
       if (!user?.id) {
         setBrandMetadata([]);
@@ -196,14 +198,25 @@ export default function InsightsMetaPage() {
       <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'} px-4 py-8`}>
         <div className="max-w-7xl mx-auto">
           <div className="mb-8">
-            <h1 className={`text-3xl md:text-4xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-              Brand Insights Metadata
-            </h1>
+            <div className="flex items-center justify-between mb-4">
+              <h1 className={`text-3xl md:text-4xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                Brand Insights Metadata
+              </h1>
+              <button
+                onClick={() => setShowUploadModal(true)}
+                className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
+                  theme === 'dark'
+                    ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                    : 'bg-blue-600 hover:bg-blue-700 text-white'
+                }`}
+              >
+                <Upload className="w-4 h-4" />
+                Upload Data
+              </button>
+            </div>
             <p className={`text-lg mb-6 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
               Browse data quality indicators and statistics for all tracked brands
             </p>
-
-            <BrandKeywordUpload onUploadComplete={loadBrandMetadata} theme={theme} />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
@@ -457,6 +470,35 @@ export default function InsightsMetaPage() {
           </div>
         </div>
       </div>
+
+      {showUploadModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className={`max-w-3xl w-full max-h-[90vh] overflow-y-auto rounded-lg shadow-xl ${
+            theme === 'dark' ? 'bg-gray-900' : 'bg-white'
+          }`}>
+            <div className={`sticky top-0 flex items-center justify-between p-6 border-b ${
+              theme === 'dark' ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-200'
+            }`}>
+              <h2 className={`text-xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                Upload Brand Keyword Data
+              </h2>
+              <button
+                onClick={() => setShowUploadModal(false)}
+                className={`p-2 rounded-lg transition-colors ${
+                  theme === 'dark'
+                    ? 'hover:bg-gray-800 text-gray-400 hover:text-white'
+                    : 'hover:bg-gray-100 text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-6">
+              <BrandKeywordUpload onUploadComplete={loadBrandMetadata} theme={theme} />
+            </div>
+          </div>
+        </div>
+      )}
 
       <Footer theme={theme} />
     </>
