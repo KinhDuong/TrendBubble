@@ -1940,42 +1940,6 @@ export default function BrandInsightPage() {
         </div>
       )}
 
-      <FilterMenu
-        theme={theme}
-        loading={loading}
-        viewMode={viewMode}
-        dateFilter="all"
-        categoryFilter="all"
-        categories={[]}
-        sourceFilter="all"
-        sources={[]}
-        maxBubbles={maxBubbles}
-        searchQuery={searchQuery}
-        bubbleLayout={bubbleLayout}
-        shape={shape}
-        cryptoTimeframe="24h"
-        showCryptoTimeframe={false}
-        showDateFilter={false}
-        showCategoryFilter={false}
-        showShapeSelector={false}
-        showSearchBubbles={false}
-        onViewModeChange={handleViewModeChange}
-        onDateFilterChange={() => {}}
-        onCategoryFilterChange={() => {}}
-        onSourceFilterChange={() => {}}
-        onMaxBubblesChange={handleMaxBubblesChange}
-        onThemeChange={handleThemeChange}
-        onSearchQueryChange={setSearchQuery}
-        onSearchClear={() => {
-          setSearchQuery('');
-          handleViewModeChange('bubble');
-        }}
-        onBubbleLayoutChange={setBubbleLayout}
-        onShapeChange={setShape}
-        onCryptoTimeframeChange={() => {}}
-        variant="homepage"
-      />
-
       <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'} px-2 md:px-6 py-2 md:py-6 pb-0`}>
         <main role="main" aria-label="Brand keyword analysis" style={{ minHeight: '80vh' }}>
           {!loading && (
@@ -2174,6 +2138,44 @@ export default function BrandInsightPage() {
                         ))}
                       </div>
                     </div>
+                  </div>
+
+                  <div className="max-w-7xl mx-auto mb-6">
+                    <FilterMenu
+                      theme={theme}
+                      loading={loading}
+                      viewMode={viewMode}
+                      dateFilter="all"
+                      categoryFilter="all"
+                      categories={[]}
+                      sourceFilter="all"
+                      sources={[]}
+                      maxBubbles={maxBubbles}
+                      searchQuery={searchQuery}
+                      bubbleLayout={bubbleLayout}
+                      shape={shape}
+                      cryptoTimeframe="24h"
+                      showCryptoTimeframe={false}
+                      showDateFilter={false}
+                      showCategoryFilter={false}
+                      showShapeSelector={false}
+                      showSearchBubbles={false}
+                      onViewModeChange={handleViewModeChange}
+                      onDateFilterChange={() => {}}
+                      onCategoryFilterChange={() => {}}
+                      onSourceFilterChange={() => {}}
+                      onMaxBubblesChange={handleMaxBubblesChange}
+                      onThemeChange={handleThemeChange}
+                      onSearchQueryChange={setSearchQuery}
+                      onSearchClear={() => {
+                        setSearchQuery('');
+                        handleViewModeChange('bubble');
+                      }}
+                      onBubbleLayoutChange={setBubbleLayout}
+                      onShapeChange={setShape}
+                      onCryptoTimeframeChange={() => {}}
+                      variant="homepage"
+                    />
                   </div>
 
                   {filteredTopics.length === 0 ? (
