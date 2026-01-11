@@ -56,6 +56,8 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
   const [brandSelectorKeywords, setBrandSelectorKeywords] = useState<Array<Record<string, any>>>([]);
   const [avgMonthlySearchesCache, setAvgMonthlySearchesCache] = useState<number | undefined>(undefined);
   const [representativeKeywordCache, setRepresentativeKeywordCache] = useState<string | undefined>(undefined);
+  const [showUpdateConfirmation, setShowUpdateConfirmation] = useState(false);
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
 
   const levenshteinDistance = (str1: string, str2: string): number => {
     const len1 = str1.length;
@@ -498,6 +500,30 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
       return;
     }
 
+    // Check if brand already exists
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      setError('You must be logged in to upload data');
+      event.target.value = '';
+      return;
+    }
+
+    const { data: existingBrand } = await supabase
+      .from('brand_pages')
+      .select('brand, page_id')
+      .eq('user_id', user.id)
+      .eq('brand', brandName.trim())
+      .maybeSingle();
+
+    if (existingBrand) {
+      // Brand exists - show confirmation dialog
+      setPendingFile(file);
+      setShowUpdateConfirmation(true);
+      event.target.value = '';
+      return;
+    }
+
+    // Brand doesn't exist - proceed with upload
     setUploading(true);
     setError(null);
     setSuccess(null);
@@ -615,6 +641,133 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
       setError(err instanceof Error ? err.message : 'Failed to upload file');
       setUploading(false);
     }
+  };
+
+  const handleUpdateConfirm = async () => {
+    if (!pendingFile) return;
+
+    setShowUpdateConfirmation(false);
+    setUploading(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      // Use FileReader for better cross-browser encoding support
+      const text = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve(e.target?.result as string);
+        reader.onerror = () => reject(new Error('Failed to read file'));
+        reader.readAsText(pendingFile, 'UTF-8');
+      });
+      const rawData = parseCSV(text);
+
+      if (rawData.length === 0) {
+        throw new Error('No valid data found in CSV');
+      }
+
+      // IMMEDIATELY filter out zero-traffic keywords (trash data) - they are excluded from ALL processing
+      const data = rawData.filter(record => {
+        const avgSearches = record['Avg. monthly searches'];
+        return avgSearches !== undefined && avgSearches !== null && avgSearches !== 0 && avgSearches !== '';
+      });
+
+      const excludedCount = rawData.length - data.length;
+      console.log(`✓ Filtered out ${excludedCount} zero-traffic keywords (trash)`);
+      console.log(`✓ Processing ${data.length} keywords with valid traffic`);
+
+      if (data.length === 0) {
+        throw new Error('All keywords have zero traffic. Please upload a file with valid search volume data.');
+      }
+
+      // STEP 1: Brand matching - find exact match for brand name (case-insensitive)
+      const brandLower = brandName.trim().toLowerCase();
+      const brandMatch = data.find(record =>
+        record.keyword.toLowerCase() === brandLower
+      );
+
+      let avgMonthlySearches: number | undefined;
+
+      if (brandMatch) {
+        // Use the exact match value
+        avgMonthlySearches = brandMatch['Avg. monthly searches'];
+        console.log(`✓ Found exact match for brand "${brandName}": ${avgMonthlySearches?.toLocaleString()} avg monthly searches`);
+      } else {
+        // No exact match found - show top 20 by volume + first 20 rows for user selection
+        console.log(`⚠ No exact match found for brand "${brandName}"`);
+
+        // Group 1: Top 20 by search volume
+        const top20ByVolume = [...data]
+          .sort((a, b) => (b['Avg. monthly searches'] || 0) - (a['Avg. monthly searches'] || 0))
+          .slice(0, 20);
+
+        // Group 2: First 20 from CSV
+        const first20 = data.slice(0, 20);
+
+        // Combine and remove duplicates (keeping top volume version)
+        const keywordMap = new Map<string, Record<string, any>>();
+
+        // Add top volume first (they take precedence)
+        top20ByVolume.forEach(kw => {
+          keywordMap.set(kw.keyword, { ...kw, group: 'top' });
+        });
+
+        // Add first 20, only if not already in map
+        first20.forEach(kw => {
+          if (!keywordMap.has(kw.keyword)) {
+            keywordMap.set(kw.keyword, { ...kw, group: 'first' });
+          }
+        });
+
+        const combinedKeywords = Array.from(keywordMap.values());
+
+        setBrandSelectorKeywords(combinedKeywords);
+        setPendingData(data); // Store data for later processing
+        setAvgMonthlySearchesCache(undefined); // Clear cache
+        setShowBrandSelector(true);
+        setUploading(false);
+        return; // Stop here, wait for user selection
+      }
+
+      // Store the brand value and keyword for later use
+      setAvgMonthlySearchesCache(avgMonthlySearches);
+      setRepresentativeKeywordCache(brandName.trim());
+
+      // STEP 2: Only run duplicate detection on valid traffic keywords (zero-traffic never included)
+      const detectedDuplicates = detectDuplicates(data);
+
+      if (detectedDuplicates.length > 0) {
+        setDuplicateGroups(detectedDuplicates);
+        setZeroTrafficKeywords([]); // Zero-traffic keywords are NOT shown in review
+        setPendingData(data); // Only valid traffic keywords
+        setShowDuplicateReview(true);
+        setUploading(false);
+        return;
+      }
+
+      // STEP 3: Detect merge groups
+      const detectedMerges = detectMergeGroups(data);
+
+      if (detectedMerges.length > 0) {
+        setMergeGroups(detectedMerges);
+        setPendingData(data);
+        setShowMergeReview(true);
+        setUploading(false);
+      } else {
+        await processUpload(data, avgMonthlySearches, brandName.trim());
+      }
+    } catch (err) {
+      console.error('Upload error details:', err);
+      setError(err instanceof Error ? err.message : 'Failed to upload file');
+      setUploading(false);
+    } finally {
+      setPendingFile(null);
+    }
+  };
+
+  const handleUpdateCancel = () => {
+    setShowUpdateConfirmation(false);
+    setPendingFile(null);
+    setError(null);
   };
 
   const handleMergeApproval = async (approvedMerges: MergeGroup[]) => {
@@ -1128,6 +1281,49 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
 
   return (
     <>
+      {showUpdateConfirmation && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className={`max-w-md w-full rounded-lg shadow-xl ${
+            theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'
+          }`}>
+            <div className={`p-6 border-b ${
+              theme === 'dark' ? 'border-gray-700' : 'border-gray-200'
+            }`}>
+              <h3 className="text-lg font-semibold mb-2">Brand Already Exists</h3>
+              <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                Data already exists for "<span className="font-semibold">{brandName}</span>".
+                Updating will replace all existing keyword data for this brand.
+              </p>
+            </div>
+
+            <div className={`p-6 flex gap-3 ${
+              theme === 'dark' ? 'bg-gray-750' : 'bg-gray-50'
+            }`}>
+              <button
+                onClick={handleUpdateCancel}
+                className={`flex-1 px-4 py-2 rounded-lg font-medium transition-colors ${
+                  theme === 'dark'
+                    ? 'bg-gray-700 hover:bg-gray-600 text-white'
+                    : 'bg-white hover:bg-gray-100 text-gray-700 border border-gray-300'
+                }`}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleUpdateConfirm}
+                className={`flex-1 px-4 py-2 rounded-lg font-medium transition-colors ${
+                  theme === 'dark'
+                    ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                    : 'bg-blue-600 hover:bg-blue-700 text-white'
+                }`}
+              >
+                Update
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {showBrandSelector && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className={`max-w-3xl w-full max-h-[80vh] overflow-auto rounded-lg shadow-xl ${
