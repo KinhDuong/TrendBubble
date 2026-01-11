@@ -361,9 +361,9 @@ export default function BrandKeywordPerformanceSummary({ brandStats, brandColor,
           return (
             <div
               key={metric.key}
-              className="relative flex flex-col overflow-visible"
+              className={`relative flex flex-col rounded-lg border ${theme === 'dark' ? 'bg-gray-800/50 border-gray-700' : 'bg-white border-gray-200'} overflow-visible transition-all hover:shadow-lg`}
             >
-              <div className="flex-1 flex items-center justify-center px-4 py-6">
+              <div className={`flex-1 flex items-center justify-center px-4 py-6 ${theme === 'dark' ? 'hover:bg-gray-700/30' : 'hover:bg-gray-50'} rounded-t-lg transition-colors`}>
                 {isTrending ? (
                   <div
                     className="relative"
@@ -502,7 +502,7 @@ export default function BrandKeywordPerformanceSummary({ brandStats, brandColor,
                 )}
               </div>
 
-              <div className="px-4 py-2 text-center">
+              <div className={`px-4 py-3 border-t text-center ${theme === 'dark' ? 'border-gray-700 bg-gray-800/70' : 'border-gray-200 bg-gray-50'}`}>
                 <div className="flex items-center justify-center gap-2">
                   <Icon className={`w-4 h-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`} />
                   <span className={`text-xs font-semibold ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
