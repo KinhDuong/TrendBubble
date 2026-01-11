@@ -1097,10 +1097,41 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
       sentiment?: number;
     } = {};
 
+    let actualRepresentativeKeyword = representativeKeyword;
+
     if (representativeKeyword) {
-      const keywordData = scoredData.find(kw =>
+      // Try exact match first
+      let keywordData = scoredData.find(kw =>
         kw.keyword.toLowerCase() === representativeKeyword.toLowerCase()
       );
+
+      // If not found, try to find similar keywords
+      if (!keywordData) {
+        const brandLower = representativeKeyword.toLowerCase();
+        const normalized = brandLower.replace(/[^\w\s]/g, '').replace(/\s+/g, ' ').trim();
+
+        // Try to find keyword that matches when normalized (removes apostrophes, extra spaces, etc.)
+        keywordData = scoredData.find(kw => {
+          const kwNormalized = kw.keyword.toLowerCase().replace(/[^\w\s]/g, '').replace(/\s+/g, ' ').trim();
+          return kwNormalized === normalized;
+        });
+
+        // If still not found, find keyword that contains the brand name
+        if (!keywordData) {
+          keywordData = scoredData
+            .filter(kw => {
+              const kwLower = kw.keyword.toLowerCase();
+              return kwLower.includes(brandLower) || brandLower.includes(kwLower);
+            })
+            .sort((a, b) => (b['Avg. monthly searches'] || 0) - (a['Avg. monthly searches'] || 0))[0];
+        }
+
+        if (keywordData) {
+          actualRepresentativeKeyword = keywordData.keyword;
+          console.log(`✓ Found alternative representative keyword: "${keywordData.keyword}" (searched for "${representativeKeyword}")`);
+        }
+      }
+
       if (keywordData) {
         brandMetrics = {
           competition: keywordData['Competition (indexed value)'] || null,
@@ -1229,7 +1260,7 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
     // This parameter should always be provided at this point
     const avgMonthlySearches = manualAvgMonthlySearches;
     console.log(`✓ Using brand value: ${avgMonthlySearches?.toLocaleString()} avg monthly searches`);
-    console.log(`✓ Representative keyword: "${representativeKeyword}"`);
+    console.log(`✓ Representative keyword: "${actualRepresentativeKeyword}"`);
 
     const { error: brandPageError } = await supabase
       .from('brand_pages')
@@ -1238,7 +1269,7 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
         brand: brandName.trim(),
         page_id: pageId,
         avg_monthly_searches: avgMonthlySearches,
-        representative_keyword: representativeKeyword,
+        representative_keyword: actualRepresentativeKeyword,
         competition: brandMetrics.competition,
         cpc_low: brandMetrics.cpc_low,
         cpc_high: brandMetrics.cpc_high,
