@@ -281,8 +281,8 @@ export default function BrandKeywordPerformanceSummary({ brandStats, brandColor,
     { label: 'Trending', icon: TrendingUp, key: 'trending', format: () => '', colorize: 'trending' },
     { label: 'Monthly Search', icon: TrendingUp, key: 'brandSearchVolume', format: (v: number) => formatCompactNumber(v) },
     { label: 'Targeted Reach', icon: TrendingUp, key: 'totalVolume', format: (v: number) => formatCompactNumber(v) },
-    { label: 'Customer Demand', icon: Zap, key: 'avgDemandScore', format: (v: number) => v > 0 ? `${v.toFixed(1)}/50` : 'N/A', colorize: 'demand' },
-    { label: 'Customer Interest', icon: Sparkles, key: 'avgInterestScore', format: (v: number) => v > 0 ? `${v.toFixed(1)}/50` : 'N/A', colorize: 'interest' },
+    { label: 'Demand', icon: Zap, key: 'avgDemandScore', format: (v: number) => v > 0 ? `${v.toFixed(1)}/50` : 'N/A', colorize: 'demand' },
+    { label: 'Interest', icon: Sparkles, key: 'avgInterestScore', format: (v: number) => v > 0 ? `${v.toFixed(1)}/50` : 'N/A', colorize: 'interest' },
     { label: '3-Month Change', icon: TrendingUp, key: 'threeMonthChange', format: (v: number) => formatPercentage(v), colorize: true },
     { label: 'YoY Change', icon: TrendingUp, key: 'yoyChange', format: (v: number) => formatPercentage(v), colorize: true },
     { label: 'Sentiment', icon: ThumbsUp, key: 'avgSentiment', format: (v: number) => formatSentiment(v), colorize: 'sentiment' },
@@ -336,7 +336,7 @@ export default function BrandKeywordPerformanceSummary({ brandStats, brandColor,
         )}
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-8 gap-3 overflow-visible">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-8 gap-3 overflow-visible" style={{ paddingTop: '10px' }}>
         {metrics.map((metric, metricIndex) => {
           const Icon = metric.icon;
           const value = (normalizedStats as any)[metric.key];
