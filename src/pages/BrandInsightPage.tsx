@@ -25,7 +25,6 @@ import BrandSelector, { getBrandColor } from '../components/BrandSelector';
 import BrandKeywordStats from '../components/BrandKeywordStats';
 import BrandKeywordPerformanceSummary from '../components/BrandKeywordPerformanceSummary';
 import BrandComparisonTable, { calculateBrandStats } from '../components/BrandComparisonTable';
-import BrandInsightTabs from '../components/BrandInsightTabs';
 import { TrendingTopic, FAQ } from '../types';
 import { TrendingUp, Download, ArrowLeft, Search, X, ChevronsLeft, ChevronsRight, ArrowUpDown, ArrowUp, ArrowDown, Sparkles, AlertCircle } from 'lucide-react';
 import { formatCompactNumber } from '../utils/formatNumber';
@@ -1935,16 +1934,10 @@ export default function BrandInsightPage() {
             brandStats={calculateBrandStats(keywordData, selectedBrands[0], brandPageData ? [brandPageData] : undefined)}
             brandColor={getBrandColor(selectedBrands[0], availableBrands)}
             theme={theme}
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
           />
         </div>
-      )}
-
-      {!loading && selectedBrands.length === 1 && keywordData.length > 0 && (
-        <BrandInsightTabs
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-          theme={theme}
-        />
       )}
 
       <FilterMenu

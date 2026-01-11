@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { TrendingUp, Zap, ThumbsUp, Sparkles, ArrowUp, ArrowUpRight, ArrowRight, ArrowDownRight, ArrowDown, Rocket } from 'lucide-react';
 import { formatCompactNumber } from '../utils/formatNumber';
+import BrandInsightTabs from './BrandInsightTabs';
 
 interface BrandStats {
   brand: string;
@@ -40,9 +41,11 @@ interface BrandKeywordPerformanceSummaryProps {
   brandStats: BrandStats;
   brandColor: string;
   theme: 'light' | 'dark';
+  activeTab: string;
+  onTabChange: (tab: string) => void;
 }
 
-export default function BrandKeywordPerformanceSummary({ brandStats, brandColor, theme }: BrandKeywordPerformanceSummaryProps) {
+export default function BrandKeywordPerformanceSummary({ brandStats, brandColor, theme, activeTab, onTabChange }: BrandKeywordPerformanceSummaryProps) {
   const [tooltipMetric, setTooltipMetric] = useState<string | null>(null);
   const tooltipRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
@@ -335,6 +338,12 @@ export default function BrandKeywordPerformanceSummary({ brandStats, brandColor,
           </div>
         )}
       </div>
+
+      <BrandInsightTabs
+        activeTab={activeTab}
+        onTabChange={onTabChange}
+        theme={theme}
+      />
 
       <div className="max-w-7xl mx-auto px-2 md:px-6">
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-8 gap-3 overflow-visible" style={{ paddingTop: '10px' }}>
