@@ -400,7 +400,7 @@ export default function InsightsMetaPage() {
                         )}
                       </td>
                       <td className="py-3 px-4 text-center">
-                        <div className="flex items-center justify-center gap-2">
+                        <div className="flex items-center justify-end gap-2">
                           <button
                             onClick={() => {
                               const identifier = brand.username || brand.user_id;
@@ -420,7 +420,7 @@ export default function InsightsMetaPage() {
                             }`}
                             title={brand.has_page ? 'View brand insight page' : 'No page created yet'}
                           >
-                            View
+                            View Page
                             <ArrowRight className="w-3 h-3" />
                           </button>
                           <button
