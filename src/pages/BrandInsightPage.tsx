@@ -1930,6 +1930,14 @@ export default function BrandInsightPage() {
       />
 
       {!loading && selectedBrands.length === 1 && keywordData.length > 0 && (
+        <BrandInsightTabs
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          theme={theme}
+        />
+      )}
+
+      {!loading && selectedBrands.length === 1 && keywordData.length > 0 && (
         <div className={`${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'} pb-4`}>
           <BrandKeywordPerformanceSummary
             brandStats={calculateBrandStats(keywordData, selectedBrands[0], brandPageData ? [brandPageData] : undefined)}
@@ -1937,14 +1945,6 @@ export default function BrandInsightPage() {
             theme={theme}
           />
         </div>
-      )}
-
-      {!loading && selectedBrands.length === 1 && keywordData.length > 0 && (
-        <BrandInsightTabs
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-          theme={theme}
-        />
       )}
 
       <FilterMenu
