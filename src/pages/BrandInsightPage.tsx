@@ -25,7 +25,7 @@ import BrandSelector, { getBrandColor } from '../components/BrandSelector';
 import BrandKeywordStats from '../components/BrandKeywordStats';
 import BrandComparisonTable from '../components/BrandComparisonTable';
 import { TrendingTopic, FAQ } from '../types';
-import { TrendingUp, Download, ArrowLeft, Search, X, ChevronsLeft, ChevronsRight, ArrowUpDown, ArrowUp, ArrowDown, Sparkles, AlertCircle, Upload } from 'lucide-react';
+import { TrendingUp, Download, ArrowLeft, Search, X, ChevronsLeft, ChevronsRight, ArrowUpDown, ArrowUp, ArrowDown, Sparkles, AlertCircle } from 'lucide-react';
 import { formatCompactNumber } from '../utils/formatNumber';
 
 type SortField = 'name' | 'searchVolume' | 'rank' | 'month' | 'threeMonth' | 'yoy';
@@ -133,7 +133,6 @@ export default function BrandInsightPage() {
   const [aiErrorCode, setAiErrorCode] = useState<string | null>(null);
   const [aiAnalysisDate, setAiAnalysisDate] = useState<string | null>(null);
   const [aiSaveStatus, setAiSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
-  const [showUploadModal, setShowUploadModal] = useState(false);
 
   const getInitialMaxBubbles = () => {
     const topParam = searchParams.get('Top');
@@ -1963,44 +1962,6 @@ export default function BrandInsightPage() {
         variant="homepage"
       />
 
-      {showUploadModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className={`max-w-2xl w-full max-h-[90vh] overflow-auto rounded-xl shadow-2xl ${
-            theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'
-          }`}>
-            <div className={`sticky top-0 flex items-center justify-between p-6 border-b ${
-              theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-            }`}>
-              <h2 className={`text-xl font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                Upload Keyword Data
-              </h2>
-              <button
-                onClick={() => setShowUploadModal(false)}
-                className={`p-2 rounded-lg transition-colors ${
-                  theme === 'dark'
-                    ? 'hover:bg-gray-700 text-gray-400 hover:text-white'
-                    : 'hover:bg-gray-100 text-gray-500 hover:text-gray-700'
-                }`}
-                aria-label="Close modal"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <div className="p-6">
-              <BrandKeywordUpload
-                onUploadComplete={() => {
-                  loadAllData();
-                  setShowUploadModal(false);
-                }}
-                theme={theme}
-                membershipTier={membershipTier}
-                getKeywordLimit={getKeywordLimit}
-              />
-            </div>
-          </div>
-        </div>
-      )}
-
       <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-50 text-gray-900'} px-2 md:px-6 py-2 md:py-6 pb-0`}>
         <main role="main" aria-label="Brand keyword analysis" style={{ minHeight: '80vh' }}>
           {!loading && (
@@ -2020,19 +1981,6 @@ export default function BrandInsightPage() {
                         {selectedBrands.length === 1 ? brandPageData.meta_title : 'Multi-Brand Keyword Insights'}
                       </h1>
                       <div className="flex items-center gap-4">
-                        {pageOwnerId === user?.id && (
-                          <button
-                            onClick={() => setShowUploadModal(true)}
-                            className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${
-                              theme === 'dark'
-                                ? 'bg-blue-600 hover:bg-blue-700 text-white'
-                                : 'bg-blue-600 hover:bg-blue-700 text-white'
-                            }`}
-                          >
-                            <Upload className="w-4 h-4" />
-                            Upload Data
-                          </button>
-                        )}
                         {availableBrands.length > 1 && (
                           <div className="flex items-center gap-2">
                             <span className={`text-sm font-medium whitespace-nowrap ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
