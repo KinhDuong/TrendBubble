@@ -300,12 +300,6 @@ export default function InsightsMetaPage() {
                       Avg. Volume
                     </th>
                     <th className={`text-center py-3 px-4 font-semibold ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                      Months
-                    </th>
-                    <th className={`text-center py-3 px-4 font-semibold ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                      Date Range
-                    </th>
-                    <th className={`text-center py-3 px-4 font-semibold ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
                       Status
                     </th>
                     <th className={`text-center py-3 px-4 font-semibold ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
@@ -323,26 +317,29 @@ export default function InsightsMetaPage() {
                       className={`border-b ${theme === 'dark' ? 'border-gray-700 hover:bg-gray-700/50' : 'border-gray-100 hover:bg-gray-50'} transition-colors`}
                     >
                       <td className={`py-3 px-4 font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                        {brand.brand}
+                        {brand.has_page ? (
+                          <button
+                            onClick={() => {
+                              const identifier = brand.username || brand.user_id;
+                              if (identifier && brand.page_id) {
+                                navigate(`/insights/${encodeURIComponent(identifier)}/${brand.page_id}/`);
+                              }
+                            }}
+                            className={`text-left hover:underline ${
+                              theme === 'dark' ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'
+                            }`}
+                          >
+                            {brand.brand}
+                          </button>
+                        ) : (
+                          <span>{brand.brand}</span>
+                        )}
                       </td>
                       <td className={`py-3 px-4 text-center ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
                         {brand.keyword_count.toLocaleString()}
                       </td>
                       <td className={`py-3 px-4 text-center ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
                         {brand.total_volume.toLocaleString()}
-                      </td>
-                      <td className={`py-3 px-4 text-center ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                        <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium ${
-                          brand.has_yoy_data
-                            ? theme === 'dark' ? 'bg-green-900/30 text-green-400' : 'bg-green-100 text-green-700'
-                            : theme === 'dark' ? 'bg-amber-900/30 text-amber-400' : 'bg-amber-100 text-amber-700'
-                        }`}>
-                          <Calendar className="w-3 h-3" />
-                          {brand.available_months}
-                        </span>
-                      </td>
-                      <td className={`py-3 px-4 text-center text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                        {new Date(brand.oldest_month).toLocaleDateString('en-US', { month: 'short', year: '2-digit' })} - {new Date(brand.latest_month).toLocaleDateString('en-US', { month: 'short', year: '2-digit' })}
                       </td>
                       <td className="py-3 px-4 text-center">
                         <div className="flex items-center justify-center gap-2">
@@ -465,6 +462,9 @@ export default function InsightsMetaPage() {
               </p>
               <p>
                 <strong>Keywords:</strong> Total unique keywords tracked for each brand.
+              </p>
+              <p>
+                <strong>Tip:</strong> Click on any brand name to view its detailed insight page.
               </p>
             </div>
           </div>
