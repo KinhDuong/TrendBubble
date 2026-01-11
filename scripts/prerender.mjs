@@ -1473,17 +1473,6 @@ async function prerenderInsightsMetaPage(baseHTML, distPath) {
       <main style="max-width: 80rem; margin: 2rem auto; padding: 0 1rem;">
         <article style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 0.5rem; padding: 2rem;">
           <h1 style="font-size: 2.5rem; font-weight: 700; color: #111827; margin-bottom: 1rem;">Brand Insights Metadata</h1>
-
-          <div style="background-color: #e5e7eb; border-radius: 0.5rem; padding: 2rem; margin: 2rem 0;">
-            <h2 style="font-size: 1.5rem; font-weight: 700; color: #111827; margin-bottom: 1rem;">About This Data</h2>
-            <ul style="color: #4b5563; font-size: 1rem; line-height: 1.75; list-style: disc; margin-left: 1.5rem;">
-              <li>View all brands with tracked keyword data</li>
-              <li>Data quality indicators (Full Data vs Limited)</li>
-              <li>Date ranges and available months</li>
-              <li>Total keywords and average search volume</li>
-              <li>Direct links to brand insight pages</li>
-            </ul>
-          </div>
         </article>
       </main>
 

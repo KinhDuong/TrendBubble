@@ -442,29 +442,6 @@ export default function InsightsMetaPage() {
               </div>
             )}
           </div>
-
-          <div className={`${theme === 'dark' ? 'bg-gray-800/50 border-gray-700' : 'bg-blue-50 border-blue-200'} border rounded-lg p-6`}>
-            <h2 className={`text-lg font-bold mb-3 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-              About This Data
-            </h2>
-            <div className={`space-y-2 text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-              <p>
-                <strong>Full Data:</strong> Brands with 24+ months of data support year-over-year comparisons and all performance filters.
-              </p>
-              <p>
-                <strong>Limited Data:</strong> Brands with less than 24 months use 3-month trend analysis for performance filters.
-              </p>
-              <p>
-                <strong>Average Volume:</strong> Mean monthly search volume across all available months.
-              </p>
-              <p>
-                <strong>Keywords:</strong> Total unique keywords tracked for each brand.
-              </p>
-              <p>
-                <strong>Tip:</strong> Click on any brand name to view its detailed insight page.
-              </p>
-            </div>
-          </div>
         </div>
       </div>
 
