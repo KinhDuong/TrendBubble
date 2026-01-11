@@ -797,6 +797,52 @@ export default function BrandDataManager() {
     return null;
   }
 
+  // Restrict access to Tier 5 users only
+  if (membershipTier !== 5) {
+    return (
+      <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'}`}>
+        <Header
+          theme={theme}
+          isAdmin={isAdmin}
+          isLoggedIn={!!user}
+          onLoginClick={() => setShowLogin(true)}
+          onLogout={logout}
+          onThemeChange={(newTheme) => {
+            setTheme(newTheme);
+            localStorage.setItem('theme', newTheme);
+          }}
+        />
+        <div className="max-w-4xl mx-auto py-16 px-4">
+          <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-lg border shadow-lg p-8 text-center`}>
+            <div className="mb-6">
+              <Lock className={`w-16 h-16 mx-auto ${theme === 'dark' ? 'text-amber-400' : 'text-amber-600'}`} />
+            </div>
+            <h1 className={`text-2xl font-bold mb-4 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+              Tier 5 Access Required
+            </h1>
+            <p className={`text-lg mb-6 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+              This page is only available to Tier 5 (Unlimited) members.
+            </p>
+            <p className={`text-sm mb-8 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+              Current tier: <span className="font-semibold">Tier {membershipTier}</span>
+            </p>
+            <button
+              onClick={() => navigate('/insights-meta')}
+              className={`px-6 py-3 rounded-lg font-medium transition-colors ${
+                theme === 'dark'
+                  ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                  : 'bg-blue-600 hover:bg-blue-700 text-white'
+              }`}
+            >
+              Return to Brand Insights
+            </button>
+          </div>
+        </div>
+        <Footer theme={theme} />
+      </div>
+    );
+  }
+
   if (loading) {
     return (
       <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'}`}>
