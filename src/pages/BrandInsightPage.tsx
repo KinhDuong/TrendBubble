@@ -24,7 +24,7 @@ import PPCCampaignInsights from '../components/PPCCampaignInsights';
 import BrandSelector, { getBrandColor } from '../components/BrandSelector';
 import BrandKeywordStats from '../components/BrandKeywordStats';
 import BrandKeywordPerformanceSummary from '../components/BrandKeywordPerformanceSummary';
-import BrandComparisonTable, { calculateBrandStats } from '../components/BrandComparisonTable';
+import BrandComparisonTable from '../components/BrandComparisonTable';
 import { TrendingTopic, FAQ } from '../types';
 import { TrendingUp, Download, ArrowLeft, Search, X, ChevronsLeft, ChevronsRight, ArrowUpDown, ArrowUp, ArrowDown, Sparkles, AlertCircle } from 'lucide-react';
 import { formatCompactNumber } from '../utils/formatNumber';
@@ -883,7 +883,7 @@ export default function BrandInsightPage() {
 
   useEffect(() => {
     async function fetchBrandComparisonStats() {
-      if (selectedBrands.length < 2 || !pageOwnerId) {
+      if (selectedBrands.length === 0 || !pageOwnerId) {
         setBrandComparisonStats([]);
         return;
       }
@@ -1931,10 +1931,10 @@ export default function BrandInsightPage() {
         title="Top Best Charts"
       />
 
-      {!loading && selectedBrands.length === 1 && keywordData.length > 0 && (
+      {!loading && selectedBrands.length === 1 && keywordData.length > 0 && brandComparisonStats.length > 0 && (
         <div className={`${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'} pb-4`}>
           <BrandKeywordPerformanceSummary
-            brandStats={calculateBrandStats(keywordData, selectedBrands[0], brandPageData ? [brandPageData] : undefined)}
+            brandStats={brandComparisonStats[0]}
             brandColor={getBrandColor(selectedBrands[0], availableBrands)}
             theme={theme}
             activeTab={activeTab}
