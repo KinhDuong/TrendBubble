@@ -553,12 +553,23 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
   );
 }
 
-export function calculateBrandStats(keywordData: any[], brand: string, brandPageData?: { brand: string; avg_monthly_searches?: number }[]): BrandStats {
+export function calculateBrandStats(
+  keywordData: any[],
+  brand: string,
+  brandPageData?: {
+    brand: string;
+    avg_monthly_searches?: number;
+    yoy_change?: number;
+    three_month_change?: number;
+    demand_score?: number;
+    interest_score?: number;
+    sentiment?: number;
+  }[]
+): BrandStats {
   const brandKeywords = keywordData.filter(kw => kw.brand === brand);
 
-  // Get brand search volume from brand pages
+  // Get data from brand pages (pre-calculated values)
   const brandPage = brandPageData?.find(page => page.brand === brand);
-  const brandSearchVolume = brandPage?.avg_monthly_searches || 0;
 
   const parseNumericValue = (value: any): number => {
     if (value === null || value === undefined) return 0;
@@ -570,43 +581,17 @@ export function calculateBrandStats(keywordData: any[], brand: string, brandPage
     return 0;
   };
 
+  // Use brand_pages data if available, otherwise calculate from keywords
+  const brandSearchVolume = brandPage?.avg_monthly_searches || 0;
+  const threeMonthChange = brandPage?.three_month_change ?? 0;
+  const yoyChange = brandPage?.yoy_change ?? 0;
+  const avgSentiment = brandPage?.sentiment ?? 0;
+  const avgDemandScore = brandPage?.demand_score ?? 0;
+  const avgInterestScore = brandPage?.interest_score ?? 0;
+
+  // Calculate these from keywords as they're not stored in brand_pages
   const totalKeywords = brandKeywords.length;
   const totalVolume = brandKeywords.reduce((sum, kw) => sum + (kw['Avg. monthly searches'] || 0), 0);
-
-  const threeMonthValues = brandKeywords
-    .map(kw => parseNumericValue(kw['Three month change']))
-    .filter(v => v !== 0);
-  const threeMonthChange = threeMonthValues.length > 0
-    ? threeMonthValues.reduce((sum, v) => sum + v, 0) / threeMonthValues.length
-    : 0;
-
-  const yoyValues = brandKeywords
-    .map(kw => parseNumericValue(kw['YoY change']))
-    .filter(v => v !== 0);
-  const yoyChange = yoyValues.length > 0
-    ? yoyValues.reduce((sum, v) => sum + v, 0) / yoyValues.length
-    : 0;
-
-  const sentimentValues = brandKeywords
-    .map(kw => parseNumericValue(kw.sentiment))
-    .filter(v => v !== 0);
-  const avgSentiment = sentimentValues.length > 0
-    ? sentimentValues.reduce((sum, v) => sum + v, 0) / sentimentValues.length
-    : 0;
-
-  const demandScoreValues = brandKeywords
-    .map(kw => parseNumericValue(kw.demand_score))
-    .filter(v => v !== 0);
-  const avgDemandScore = demandScoreValues.length > 0
-    ? demandScoreValues.reduce((sum, v) => sum + v, 0) / demandScoreValues.length
-    : 0;
-
-  const interestScoreValues = brandKeywords
-    .map(kw => parseNumericValue(kw.interest_score))
-    .filter(v => v !== 0);
-  const avgInterestScore = interestScoreValues.length > 0
-    ? interestScoreValues.reduce((sum, v) => sum + v, 0) / interestScoreValues.length
-    : 0;
 
   const topPerformers = brandKeywords.filter(kw => {
     const volume = kw['Avg. monthly searches'] || 0;

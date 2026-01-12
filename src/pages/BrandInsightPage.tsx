@@ -92,6 +92,9 @@ interface BrandPageData {
   cpc_high?: number;
   yoy_change?: number;
   three_month_change?: number;
+  demand_score?: number;
+  interest_score?: number;
+  sentiment?: number;
   monthly_searches?: Record<string, number>;
   created_at: string;
   updated_at: string;
@@ -516,7 +519,7 @@ export default function BrandInsightPage() {
       if (isUUID) {
         const brandPageResult = await supabase
           .from('brand_pages')
-          .select('*, user_id, avg_monthly_searches, representative_keyword, competition, cpc_low, cpc_high, yoy_change, three_month_change, monthly_searches')
+          .select('*, user_id, avg_monthly_searches, representative_keyword, competition, cpc_low, cpc_high, yoy_change, three_month_change, monthly_searches, demand_score, interest_score, sentiment')
           .eq('id', decodedPageIdOrUserId)
           .maybeSingle();
 
@@ -526,7 +529,7 @@ export default function BrandInsightPage() {
         } else {
           const result = await supabase
             .from('brand_pages')
-            .select('*, user_id, avg_monthly_searches, representative_keyword, competition, cpc_low, cpc_high, yoy_change, three_month_change, monthly_searches')
+            .select('*, user_id, avg_monthly_searches, representative_keyword, competition, cpc_low, cpc_high, yoy_change, three_month_change, monthly_searches, demand_score, interest_score, sentiment')
             .eq('user_id', decodedPageIdOrUserId)
             .eq('page_id', decodedBrand)
             .maybeSingle();
@@ -546,7 +549,7 @@ export default function BrandInsightPage() {
           // If no user profile found, try to find a public brand page with matching page_id
           const publicPageResult = await supabase
             .from('brand_pages')
-            .select('*, user_id, avg_monthly_searches, representative_keyword, competition, cpc_low, cpc_high, yoy_change, three_month_change, monthly_searches')
+            .select('*, user_id, avg_monthly_searches, representative_keyword, competition, cpc_low, cpc_high, yoy_change, three_month_change, monthly_searches, demand_score, interest_score, sentiment')
             .eq('page_id', decodedBrand)
             .eq('is_public', true)
             .order('created_at', { ascending: false })
@@ -575,7 +578,7 @@ export default function BrandInsightPage() {
 
           const result = await supabase
             .from('brand_pages')
-            .select('*, user_id, avg_monthly_searches, representative_keyword, competition, cpc_low, cpc_high, yoy_change, three_month_change, monthly_searches')
+            .select('*, user_id, avg_monthly_searches, representative_keyword, competition, cpc_low, cpc_high, yoy_change, three_month_change, monthly_searches, demand_score, interest_score, sentiment')
             .eq('user_id', profileData.id)
             .eq('page_id', decodedBrand)
             .maybeSingle();
