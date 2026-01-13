@@ -92,57 +92,67 @@ export default function BrandKeywordPerformanceSummary({ brandStats, brandColor,
     const avgSlope = normalizedStats.avgSlope || 0;
     const rSquared = normalizedStats.avgRSquared || 0;
 
-    let level = 0;
+    // Industry Standard: 70/30 Exponential Weighted Moving Average
+    // 70% weight on recent momentum (3-6 months), 30% on historical trend (12-24+ months)
+
+    // Step 1: Calculate short-term momentum level (0-5 scale)
+    let shortTermLevel = 2; // default: stable
+
+    // Use average of YoY and 3-month for short-term assessment
+    const shortTermMomentum = (yoyChange * 0.6) + (threeMonthChange * 0.4);
+
+    if (shortTermMomentum > 0.30) {
+      shortTermLevel = 5;
+    } else if (shortTermMomentum >= 0.15) {
+      shortTermLevel = 4;
+    } else if (shortTermMomentum >= 0.05) {
+      shortTermLevel = 3;
+    } else if (shortTermMomentum >= -0.05) {
+      shortTermLevel = 2;
+    } else if (shortTermMomentum >= -0.15) {
+      shortTermLevel = 1;
+    } else {
+      shortTermLevel = 0;
+    }
+
+    // Step 2: Calculate long-term historical trend level (0-5 scale)
+    let longTermLevel = 2; // default: stable
+
+    // avgSlope is monthly growth rate (e.g., 0.05 = 5% per month)
+    // Annualized: multiply by 12 for yearly equivalent
+    const annualizedSlope = avgSlope * 12;
+
+    if (annualizedSlope > 0.30) {
+      longTermLevel = 5;
+    } else if (annualizedSlope >= 0.15) {
+      longTermLevel = 4;
+    } else if (annualizedSlope >= 0.05) {
+      longTermLevel = 3;
+    } else if (annualizedSlope >= -0.05) {
+      longTermLevel = 2;
+    } else if (annualizedSlope >= -0.15) {
+      longTermLevel = 1;
+    } else {
+      longTermLevel = 0;
+    }
+
+    // Step 3: Apply 70/30 weighting (EWMA industry standard)
+    const weightedLevel = (shortTermLevel * 0.7) + (longTermLevel * 0.3);
+    let level = Math.round(weightedLevel);
+
+    // Step 4: Intensity boost for truly explosive cases
+    // Only boost if BOTH short-term AND long-term agree on strong growth
+    if (risingStarsHist > 400 && shortTermMomentum > 0.30 && annualizedSlope > 0.15) {
+      level = 5;
+    }
+
+    // Ensure level stays in bounds
+    level = Math.max(0, Math.min(5, level));
+
+    // Map final level to icon, label, and color
     let ArrowIcon = ArrowRight;
     let label = 'Stable';
     let color = theme === 'dark' ? 'text-gray-400' : 'text-gray-500';
-
-    if (yoyChange > 0.30) {
-      level = 5;
-      ArrowIcon = Rocket;
-      label = 'Explosive Up';
-      color = 'text-emerald-500';
-    } else if (yoyChange >= 0.15) {
-      level = 4;
-      ArrowIcon = ArrowUp;
-      label = 'Strong Up';
-      color = 'text-green-500';
-    } else if (yoyChange >= 0.05) {
-      level = 3;
-      ArrowIcon = ArrowUpRight;
-      label = 'Moderate Up';
-      color = 'text-blue-500';
-    } else if (yoyChange >= -0.05) {
-      level = 2;
-      ArrowIcon = ArrowRight;
-      label = 'Stable';
-      color = theme === 'dark' ? 'text-gray-400' : 'text-gray-500';
-    } else if (yoyChange >= -0.15) {
-      level = 1;
-      ArrowIcon = ArrowDownRight;
-      label = 'Slight Down';
-      color = 'text-orange-500';
-    } else {
-      level = 0;
-      ArrowIcon = ArrowDown;
-      label = 'Sharp Down';
-      color = 'text-red-500';
-    }
-
-    const momentumDiff = threeMonthChange - yoyChange;
-    if (momentumDiff > 0.15 && level < 5) {
-      level += 1;
-    } else if (momentumDiff < -0.15 && level > 0) {
-      level -= 1;
-    }
-
-    if (risingStarsHist > 400 && threeMonthChange > 0.30) {
-      level = 5;
-    }
-
-    if (avgSlope > 0.07 && level === 5) {
-      label = 'Explosive Up';
-    }
 
     if (level === 5) {
       ArrowIcon = Rocket;
@@ -170,8 +180,9 @@ export default function BrandKeywordPerformanceSummary({ brandStats, brandColor,
       color = 'text-red-500';
     }
 
+    // Build explanation with weighted calculation details
     const reliabilityPercent = (rSquared * 100).toFixed(0);
-    const explanation = `YoY: ${formatPercentage(yoyChange)} | 3M: ${formatPercentage(threeMonthChange)} | Historical Growth: ${formatMonthlyGrowth(avgSlope)} | Rising Stars: ${risingStarsHist} | Trend Reliability: ${reliabilityPercent}% confidence`;
+    const explanation = `Short-term (70%): YoY ${formatPercentage(yoyChange)}, 3M ${formatPercentage(threeMonthChange)} → Level ${shortTermLevel} | Long-term (30%): ${formatMonthlyGrowth(avgSlope)}/mo (${formatPercentage(annualizedSlope)}/yr) → Level ${longTermLevel} | Weighted: ${weightedLevel.toFixed(1)} → ${label} | Confidence: ${reliabilityPercent}%`;
 
     return { ArrowIcon, label, color, explanation };
   };
@@ -181,20 +192,24 @@ export default function BrandKeywordPerformanceSummary({ brandStats, brandColor,
     const rSquared = normalizedStats.avgRSquared || 0;
     const risingStarsHist = normalizedStats.risingStarsHistorical || 0;
     const threeMonthChange = normalizedStats.threeMonthChange || 0;
+    const yoyChange = normalizedStats.yoyChange || 0;
+    const annualizedSlope = slope * 12;
 
-    if (risingStarsHist > 400 && threeMonthChange > 0.30) {
+    // Extreme: Both short-term AND long-term show explosive growth
+    if (risingStarsHist > 400 && threeMonthChange > 0.30 && annualizedSlope > 0.15) {
       return {
         hasBoost: true,
         level: 'extreme',
-        reason: `${risingStarsHist} keywords with strong historical growth + ${(threeMonthChange * 100).toFixed(1)}% recent surge`
+        reason: `${risingStarsHist} rising keywords + ${(threeMonthChange * 100).toFixed(1)}% recent momentum + ${(annualizedSlope * 100).toFixed(1)}% annual growth trend`
       };
     }
 
-    if (slope > 0.07 && rSquared > 0.7) {
+    // High: Strong historical growth with high confidence
+    if (slope > 0.07 && rSquared > 0.7 && yoyChange > 0.10) {
       return {
         hasBoost: true,
         level: 'high',
-        reason: `${(slope * 100).toFixed(1)}% monthly growth with ${(rSquared * 100).toFixed(0)}% trend reliability`
+        reason: `${(slope * 100).toFixed(1)}% monthly growth with ${(rSquared * 100).toFixed(0)}% confidence + positive momentum`
       };
     }
 
