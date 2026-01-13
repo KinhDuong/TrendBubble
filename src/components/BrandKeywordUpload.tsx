@@ -1054,6 +1054,43 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
 
     console.log(`✓ Aggregated ${Object.keys(monthlySearches).length} months of search data`);
 
+    // Calculate YoY and 3-month change from aggregated monthly data
+    const calculateTrendMetrics = (monthlyData: Record<string, number>) => {
+      const sortedMonths = Object.keys(monthlyData).sort();
+
+      if (sortedMonths.length === 0) {
+        return { yoy_change: null, three_month_change: null };
+      }
+
+      const latestMonth = sortedMonths[sortedMonths.length - 1];
+      const latestValue = monthlyData[latestMonth];
+
+      // Calculate 3-month change
+      let threeMonthChange = null;
+      if (sortedMonths.length >= 4) {
+        const threeMonthsAgo = sortedMonths[sortedMonths.length - 4];
+        const threeMonthsAgoValue = monthlyData[threeMonthsAgo];
+        if (threeMonthsAgoValue > 0) {
+          threeMonthChange = (latestValue - threeMonthsAgoValue) / threeMonthsAgoValue;
+        }
+      }
+
+      // Calculate YoY change (12 months ago)
+      let yoyChange = null;
+      if (sortedMonths.length >= 13) {
+        const twelveMonthsAgo = sortedMonths[sortedMonths.length - 13];
+        const twelveMonthsAgoValue = monthlyData[twelveMonthsAgo];
+        if (twelveMonthsAgoValue > 0) {
+          yoyChange = (latestValue - twelveMonthsAgoValue) / twelveMonthsAgoValue;
+        }
+      }
+
+      return { yoy_change: yoyChange, three_month_change: threeMonthChange };
+    };
+
+    const aggregatedTrendMetrics = calculateTrendMetrics(monthlySearches);
+    console.log('✓ Calculated trend metrics from aggregated data:', aggregatedTrendMetrics);
+
     // Check tier limits
     if (getKeywordLimit) {
       const keywordLimit = getKeywordLimit(membershipTier);
@@ -1137,8 +1174,6 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
           competition: keywordData['Competition (indexed value)'] || null,
           cpc_low: keywordData['Top of page bid (low range)'] || null,
           cpc_high: keywordData['Top of page bid (high range)'] || null,
-          yoy_change: keywordData['YoY change'] || null,
-          three_month_change: keywordData['Three month change'] || null,
           demand_score: keywordData['demand_score'] || null,
           interest_score: keywordData['interest_score'] || null,
           sentiment: keywordData['sentiment'] || null,
@@ -1273,8 +1308,8 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
         competition: brandMetrics.competition,
         cpc_low: brandMetrics.cpc_low,
         cpc_high: brandMetrics.cpc_high,
-        yoy_change: brandMetrics.yoy_change,
-        three_month_change: brandMetrics.three_month_change,
+        yoy_change: aggregatedTrendMetrics.yoy_change,
+        three_month_change: aggregatedTrendMetrics.three_month_change,
         demand_score: brandMetrics.demand_score,
         interest_score: brandMetrics.interest_score,
         sentiment: brandMetrics.sentiment,
