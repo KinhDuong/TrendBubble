@@ -307,41 +307,80 @@ function BubbleTooltip({
   const getTrendingStatus = () => {
     const threeMonth = keywordData?.three_month_change;
     const yoy = keywordData?.yoy_change;
+    const monthlySearches = keywordData?.monthly_searches;
 
     if (threeMonth === undefined || threeMonth === null) return { label: 'N/A', icon: null, color: theme === 'dark' ? 'text-gray-400' : 'text-gray-600' };
 
     const threeMonthPercent = threeMonth * 100;
     const yoyPercent = yoy !== undefined && yoy !== null ? yoy * 100 : null;
 
-    if (yoyPercent !== null) {
-      if (threeMonthPercent > 5 && yoyPercent > 5) {
-        return { label: 'Strong Upward', icon: <TrendingUp size={14} />, color: 'text-green-600' };
-      }
-      if (threeMonthPercent > 0 && yoyPercent > 0) {
-        return { label: 'Upward', icon: <TrendingUp size={14} />, color: 'text-green-500' };
-      }
-      if (threeMonthPercent < -5 && yoyPercent < -5) {
-        return { label: 'Strong Downward', icon: <TrendingDown size={14} />, color: 'text-red-600' };
-      }
-      if (threeMonthPercent < 0 && yoyPercent < 0) {
-        return { label: 'Downward', icon: <TrendingDown size={14} />, color: 'text-red-500' };
-      }
-    } else {
-      if (threeMonthPercent > 10) {
-        return { label: 'Strong Upward', icon: <TrendingUp size={14} />, color: 'text-green-600' };
-      }
-      if (threeMonthPercent > 5) {
-        return { label: 'Upward', icon: <TrendingUp size={14} />, color: 'text-green-500' };
-      }
-      if (threeMonthPercent < -10) {
-        return { label: 'Strong Downward', icon: <TrendingDown size={14} />, color: 'text-red-600' };
-      }
-      if (threeMonthPercent < -5) {
-        return { label: 'Downward', icon: <TrendingDown size={14} />, color: 'text-red-500' };
+    // Calculate historical slope from monthly_searches (last 48 months)
+    let historicalSlope = 0;
+    if (monthlySearches && monthlySearches.length >= 24) {
+      const validData = monthlySearches
+        .map((vol, index) => ({ x: index, y: vol }))
+        .filter(d => d.y > 0);
+
+      if (validData.length >= 24) {
+        const n = validData.length;
+        const sumX = validData.reduce((sum, d) => sum + d.x, 0);
+        const sumY = validData.reduce((sum, d) => sum + d.y, 0);
+        const sumXY = validData.reduce((sum, d) => sum + d.x * d.y, 0);
+        const sumX2 = validData.reduce((sum, d) => sum + d.x * d.x, 0);
+
+        const avgY = sumY / n;
+        const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+        historicalSlope = avgY > 0 ? (slope / avgY) * 100 : 0;
       }
     }
 
-    return { label: 'Stable', icon: <BarChart3 size={14} />, color: theme === 'dark' ? 'text-gray-400' : 'text-gray-600' };
+    // Calculate short-term score (70% weight)
+    let shortTermMomentum = 0;
+    if (yoyPercent !== null) {
+      shortTermMomentum = (yoyPercent * 0.6) + (threeMonthPercent * 0.4);
+    } else {
+      shortTermMomentum = threeMonthPercent;
+    }
+
+    // Convert short-term momentum to 0-5 scale
+    let shortTermLevel = 2; // Default: Stable
+    if (shortTermMomentum >= 50) shortTermLevel = 5;
+    else if (shortTermMomentum >= 25) shortTermLevel = 4;
+    else if (shortTermMomentum >= 10) shortTermLevel = 3;
+    else if (shortTermMomentum >= -10) shortTermLevel = 2;
+    else if (shortTermMomentum >= -25) shortTermLevel = 1;
+    else shortTermLevel = 0;
+
+    // Calculate long-term score (30% weight)
+    const annualizedSlope = historicalSlope * 12;
+    let longTermLevel = 2; // Default: Stable
+    if (annualizedSlope >= 50) longTermLevel = 5;
+    else if (annualizedSlope >= 25) longTermLevel = 4;
+    else if (annualizedSlope >= 10) longTermLevel = 3;
+    else if (annualizedSlope >= -10) longTermLevel = 2;
+    else if (annualizedSlope >= -25) longTermLevel = 1;
+    else longTermLevel = 0;
+
+    // Weighted average: 70% short-term, 30% long-term
+    const weightedLevel = Math.round((shortTermLevel * 0.7) + (longTermLevel * 0.3));
+
+    // Map to trend labels
+    switch (weightedLevel) {
+      case 5:
+        return { label: 'Explosive Growth', icon: <TrendingUp size={14} />, color: 'text-emerald-600' };
+      case 4:
+        return { label: 'Strong Up', icon: <TrendingUp size={14} />, color: 'text-green-600' };
+      case 3:
+        return { label: 'Moderate Up', icon: <TrendingUp size={14} />, color: 'text-blue-500' };
+      case 2:
+        return { label: 'Stable', icon: <BarChart3 size={14} />, color: theme === 'dark' ? 'text-gray-400' : 'text-gray-600' };
+      case 1:
+        return { label: 'Moderate Down', icon: <TrendingDown size={14} />, color: 'text-orange-500' };
+      case 0:
+        return { label: 'Strong Down', icon: <TrendingDown size={14} />, color: 'text-red-600' };
+      default:
+        return { label: 'Stable', icon: <BarChart3 size={14} />, color: theme === 'dark' ? 'text-gray-400' : 'text-gray-600' };
+    }
   };
 
   if (isMobile) {
