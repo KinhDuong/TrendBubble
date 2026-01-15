@@ -91,6 +91,7 @@ export default function KeywordComparisonPage() {
       const { data: keywordData, error: keywordError } = await supabase
         .from('brand_keyword_data')
         .select('keyword, brand, "Avg. monthly searches"')
+        .not('"Avg. monthly searches"', 'is', null)
         .order('"Avg. monthly searches"', { ascending: false });
 
       if (keywordError) throw keywordError;
