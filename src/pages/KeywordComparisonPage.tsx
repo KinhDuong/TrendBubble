@@ -169,7 +169,7 @@ export default function KeywordComparisonPage() {
 
         const { data, error } = await supabase
           .from('brand_keyword_data')
-          .select('keyword, brand, "Avg. monthly searches", "Three month change", "YoY change", Competition, "Competition (indexed value)", "Top of page bid (low range)", "Top of page bid (high range)", sentiment, demand_score, interest_score, intent, ai_category')
+          .select('keyword, brand, "Avg. monthly searches", "Three month change", "YoY change", competition, "Competition (indexed value)", "Top of page bid (low range)", "Top of page bid (high range)", sentiment, demand_score, interest_score, intent_type, ai_category')
           .eq('keyword', kw.keyword)
           .eq('brand', kw.brand)
           .not('"Avg. monthly searches"', 'is', null)
@@ -190,14 +190,14 @@ export default function KeywordComparisonPage() {
             avgMonthlySearches: row['Avg. monthly searches'] || 0,
             threeMonthChange: parsePercentage(row['Three month change']),
             yoyChange: parsePercentage(row['YoY change']),
-            competition: row.Competition || '',
+            competition: row.competition || '',
             competitionIndexed: row['Competition (indexed value)'] || 0,
             topBidLow: row['Top of page bid (low range)'] || 0,
             topBidHigh: row['Top of page bid (high range)'] || 0,
             sentiment: row.sentiment || 0,
             demandScore: row.demand_score || 0,
             interestScore: row.interest_score || 0,
-            intent: row.intent || '',
+            intent: row.intent_type || '',
             aiCategory: row.ai_category || ''
           });
         } else {
