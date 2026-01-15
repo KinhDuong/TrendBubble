@@ -159,6 +159,7 @@ export default function KeywordComparisonPage() {
           .select('keyword, brand, "Avg. monthly searches", "Three month change", "YoY change", Competition, "Competition (indexed value)", "Top of page bid (low range)", "Top of page bid (high range)", sentiment, demand_score, interest_score, intent, ai_category')
           .eq('keyword', kw.keyword)
           .eq('brand', kw.brand)
+          .limit(1)
           .maybeSingle();
 
         if (error) {
