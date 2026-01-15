@@ -41,6 +41,8 @@ export default function KeywordComparisonPage() {
   const [availableKeywords, setAvailableKeywords] = useState<KeywordOption[]>([]);
   const [selectedKeywords, setSelectedKeywords] = useState<KeywordOption[]>([]);
   const [keywordComparisonStats, setKeywordComparisonStats] = useState<KeywordStats[]>([]);
+  const [fetchingComparison, setFetchingComparison] = useState(false);
+  const [comparisonError, setComparisonError] = useState<string | null>(null);
 
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     const savedTheme = localStorage.getItem('theme');
@@ -137,56 +139,60 @@ export default function KeywordComparisonPage() {
   const fetchKeywordComparisonStats = async () => {
     if (selectedKeywords.length < 2) {
       setKeywordComparisonStats([]);
+      setComparisonError(null);
       return;
     }
 
+    setFetchingComparison(true);
+    setComparisonError(null);
+
     try {
-      const keywordBrandPairs = selectedKeywords.map((kw) => ({
-        keyword: kw.keyword,
-        brand: kw.brand
-      }));
+      const allStats: KeywordStats[] = [];
 
-      const { data, error } = await supabase
-        .from('brand_keyword_data')
-        .select('keyword, brand, "Avg. monthly searches", "Three month change", "YoY change", Competition, "Competition (indexed value)", "Top of page bid (low range)", "Top of page bid (high range)", sentiment, demand_score, interest_score, intent, ai_category')
-        .in(
-          'keyword',
-          keywordBrandPairs.map((p) => p.keyword)
-        );
+      for (const kw of selectedKeywords) {
+        const { data, error } = await supabase
+          .from('brand_keyword_data')
+          .select('keyword, brand, "Avg. monthly searches", "Three month change", "YoY change", Competition, "Competition (indexed value)", "Top of page bid (low range)", "Top of page bid (high range)", sentiment, demand_score, interest_score, intent, ai_category')
+          .eq('keyword', kw.keyword)
+          .eq('brand', kw.brand)
+          .maybeSingle();
 
-      if (error) {
-        console.error('Error fetching keyword comparison stats:', error);
-        setKeywordComparisonStats([]);
-        return;
+        if (error) {
+          console.error(`Error fetching data for ${kw.keyword} (${kw.brand}):`, error);
+          continue;
+        }
+
+        if (data) {
+          allStats.push({
+            keyword: data.keyword,
+            brand: data.brand,
+            avgMonthlySearches: data['Avg. monthly searches'] || 0,
+            threeMonthChange: parsePercentage(data['Three month change']),
+            yoyChange: parsePercentage(data['YoY change']),
+            competition: data.Competition || '',
+            competitionIndexed: data['Competition (indexed value)'] || 0,
+            topBidLow: data['Top of page bid (low range)'] || 0,
+            topBidHigh: data['Top of page bid (high range)'] || 0,
+            sentiment: data.sentiment || 0,
+            demandScore: data.demand_score || 0,
+            interestScore: data.interest_score || 0,
+            intent: data.intent || '',
+            aiCategory: data.ai_category || ''
+          });
+        }
       }
 
-      const filteredData = (data || []).filter((item) =>
-        keywordBrandPairs.some(
-          (pair) => pair.keyword === item.keyword && pair.brand === item.brand
-        )
-      );
+      if (allStats.length < 2) {
+        setComparisonError('Could not find complete data for the selected keywords');
+      }
 
-      const stats: KeywordStats[] = filteredData.map((item) => ({
-        keyword: item.keyword,
-        brand: item.brand,
-        avgMonthlySearches: item['Avg. monthly searches'] || 0,
-        threeMonthChange: parsePercentage(item['Three month change']),
-        yoyChange: parsePercentage(item['YoY change']),
-        competition: item.Competition || '',
-        competitionIndexed: item['Competition (indexed value)'] || 0,
-        topBidLow: item['Top of page bid (low range)'] || 0,
-        topBidHigh: item['Top of page bid (high range)'] || 0,
-        sentiment: item.sentiment || 0,
-        demandScore: item.demand_score || 0,
-        interestScore: item.interest_score || 0,
-        intent: item.intent || '',
-        aiCategory: item.ai_category || ''
-      }));
-
-      setKeywordComparisonStats(stats);
+      setKeywordComparisonStats(allStats);
     } catch (error) {
       console.error('Error in fetchKeywordComparisonStats:', error);
+      setComparisonError('Failed to load comparison data');
       setKeywordComparisonStats([]);
+    } finally {
+      setFetchingComparison(false);
     }
   };
 
@@ -274,16 +280,28 @@ export default function KeywordComparisonPage() {
                   )}
                 </div>
 
-                {selectedKeywords.length >= 2 && keywordComparisonStats.length >= 2 ? (
+                {comparisonError ? (
+                  <div className={`${theme === 'dark' ? 'bg-red-900/20 border-red-800' : 'bg-red-50 border-red-200'} rounded-lg border p-8 text-center`}>
+                    <p className={`text-lg font-semibold ${theme === 'dark' ? 'text-red-400' : 'text-red-600'}`}>
+                      {comparisonError}
+                    </p>
+                  </div>
+                ) : selectedKeywords.length >= 2 && keywordComparisonStats.length >= 2 ? (
                   <KeywordComparisonTable
                     keywordStats={keywordComparisonStats}
                     theme={theme}
                   />
-                ) : selectedKeywords.length >= 2 ? (
+                ) : fetchingComparison ? (
                   <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-lg border p-12 text-center`}>
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
                     <p className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}>
                       Loading comparison data...
+                    </p>
+                  </div>
+                ) : selectedKeywords.length >= 2 ? (
+                  <div className={`${theme === 'dark' ? 'bg-amber-900/20 border-amber-800' : 'bg-amber-50 border-amber-200'} rounded-lg border p-8 text-center`}>
+                    <p className={`${theme === 'dark' ? 'text-amber-400' : 'text-amber-600'}`}>
+                      No data available for the selected keywords
                     </p>
                   </div>
                 ) : (
