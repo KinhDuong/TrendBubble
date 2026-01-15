@@ -74,27 +74,22 @@ export default function KeywordComparisonPage() {
 
   useEffect(() => {
     loadUserData();
-  }, [user]);
+  }, []);
 
   useEffect(() => {
-    if (selectedKeywords.length >= 2 && user?.id) {
+    if (selectedKeywords.length >= 2) {
       fetchKeywordComparisonStats();
     } else {
       setKeywordComparisonStats([]);
     }
-  }, [selectedKeywords, user?.id]);
+  }, [selectedKeywords]);
 
   const loadUserData = async () => {
-    if (!user?.id) {
-      setLoading(false);
-      return;
-    }
-
     try {
       const { data: keywordData, error: keywordError } = await supabase
         .from('brand_keyword_data')
         .select('keyword, brand, "Avg. monthly searches"')
-        .order('Avg. monthly searches', { ascending: false });
+        .order('"Avg. monthly searches"', { ascending: false });
 
       if (keywordError) throw keywordError;
 
@@ -140,7 +135,7 @@ export default function KeywordComparisonPage() {
   };
 
   const fetchKeywordComparisonStats = async () => {
-    if (!user?.id || selectedKeywords.length < 2) {
+    if (selectedKeywords.length < 2) {
       setKeywordComparisonStats([]);
       return;
     }
@@ -241,23 +236,7 @@ export default function KeywordComparisonPage() {
               </p>
             </div>
 
-            {!user ? (
-              <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-lg border p-8 text-center`}>
-                <GitCompare className={`w-16 h-16 mx-auto mb-4 ${theme === 'dark' ? 'text-gray-600' : 'text-gray-300'}`} />
-                <h2 className={`text-xl font-bold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                  Sign In Required
-                </h2>
-                <p className={`mb-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                  Please sign in to compare your keyword data
-                </p>
-                <button
-                  onClick={() => navigate('/profile')}
-                  className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
-                >
-                  Sign In
-                </button>
-              </div>
-            ) : loading ? (
+            {loading ? (
               <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-lg border p-12 text-center`}>
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
                 <p className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}>
@@ -268,17 +247,11 @@ export default function KeywordComparisonPage() {
               <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-lg border p-8 text-center`}>
                 <GitCompare className={`w-16 h-16 mx-auto mb-4 ${theme === 'dark' ? 'text-gray-600' : 'text-gray-300'}`} />
                 <h2 className={`text-xl font-bold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                  No Keyword Data Found
+                  No Keywords Available
                 </h2>
-                <p className={`mb-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                  Upload brand keyword data to start comparing keywords
+                <p className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                  No keyword data is currently available in the database
                 </p>
-                <button
-                  onClick={() => navigate('/upload')}
-                  className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
-                >
-                  Upload Data
-                </button>
               </div>
             ) : (
               <>
