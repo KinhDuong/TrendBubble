@@ -1503,6 +1503,77 @@ async function prerenderInsightsMetaPage(baseHTML, distPath) {
   console.log('✓ Generated: /insights-meta/index.html');
 }
 
+async function prerenderCompetitorComparisonPage(baseHTML, distPath) {
+  console.log('Pre-rendering: /insights/competitor-comparison');
+
+  const competitorComparisonMetaTags = `
+    <title>Compare Brands - Competitor Analysis | Top Best Charts</title>
+    <meta name="description" content="Compare multiple brands side-by-side with detailed keyword performance metrics, search trends, and competitive insights." data-prerendered />
+    <meta name="keywords" content="brand comparison, competitor analysis, keyword comparison, SEO comparison, brand metrics" data-prerendered />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="${BASE_URL}/insights/competitor-comparison/" />
+
+    <meta property="og:type" content="website" data-prerendered />
+    <meta property="og:url" content="${BASE_URL}/insights/competitor-comparison/" data-prerendered />
+    <meta property="og:title" content="Compare Brands - Competitor Analysis | Top Best Charts" data-prerendered />
+    <meta property="og:description" content="Compare multiple brands side-by-side with detailed keyword performance metrics and competitive insights" data-prerendered />
+    <meta property="og:site_name" content="Top Best Charts" data-prerendered />
+
+    <meta name="twitter:card" content="summary_large_image" data-prerendered />
+    <meta name="twitter:title" content="Compare Brands - Competitor Analysis | Top Best Charts" data-prerendered />
+    <meta name="twitter:description" content="Compare multiple brands side-by-side with detailed keyword performance metrics" data-prerendered />
+  `;
+
+  const competitorComparisonContentHTML = `
+    <div class="competitor-comparison-page-content">
+      <header style="background-color: #ffffff; border-bottom: 1px solid #e5e7eb; padding: 0.5rem 1rem;">
+        <nav aria-label="Main navigation" style="max-width: 80rem; margin: 0 auto; display: flex; align-items: center; justify-content: space-between;">
+          <a href="${BASE_URL}/" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none;">
+            <div style="background-color: #3b82f6; width: 2rem; height: 2rem; border-radius: 0.5rem; display: flex; align-items: center; justify-content: center;">
+              <span style="color: white; font-size: 1.25rem;">📊</span>
+            </div>
+            <span style="font-size: 1.25rem; font-weight: bold; color: #1f2937;">Top Best Charts</span>
+          </a>
+        </nav>
+      </header>
+      <main style="min-height: 60vh; padding: 2rem 1rem;">
+        <div style="max-width: 80rem; margin: 0 auto;">
+          <div style="margin-bottom: 2rem;">
+            <h1 style="font-size: 2rem; font-weight: bold; color: #1f2937; margin-bottom: 1rem;">Competitor Comparison</h1>
+            <p style="font-size: 1.125rem; color: #6b7280;">Compare multiple brands side-by-side to analyze competitive positioning and keyword performance</p>
+          </div>
+          <div style="background-color: #ffffff; border: 1px solid #e5e7eb; border-radius: 0.5rem; padding: 2rem; text-align: center;">
+            <p style="color: #6b7280; margin-bottom: 1rem;">Sign in to compare your brand data</p>
+            <a href="${BASE_URL}/profile" style="display: inline-block; padding: 0.75rem 1.5rem; background-color: #3b82f6; color: white; border-radius: 0.5rem; text-decoration: none; font-weight: 500;">Sign In</a>
+          </div>
+        </div>
+      </main>
+    </div>
+  `;
+
+  const competitorComparisonStructuredData = `
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "name": "Compare Brands - Competitor Analysis",
+      "description": "Compare multiple brands side-by-side with detailed keyword performance metrics",
+      "url": "${BASE_URL}/insights/competitor-comparison/"
+    }
+    </script>
+  `;
+
+  const html = baseHTML
+    .replace('<!-- PRERENDER_META -->', competitorComparisonMetaTags)
+    .replace('<div id="root"></div>', `<div id="root">${competitorComparisonContentHTML}</div>`)
+    .replace('</head>', `${competitorComparisonStructuredData}</head>`);
+
+  const competitorComparisonDir = path.join(distPath, 'insights', 'competitor-comparison');
+  fs.mkdirSync(competitorComparisonDir, { recursive: true });
+  fs.writeFileSync(path.join(competitorComparisonDir, 'index.html'), html);
+  console.log('✓ Generated: /insights/competitor-comparison/index.html');
+}
+
 async function prerenderBrandInsightPages(baseHTML, distPath) {
   console.log('Pre-rendering: Brand Insight Pages');
 
@@ -1978,7 +2049,7 @@ async function prerenderPages() {
   console.log('Starting pre-rendering process...');
 
   const pages = await fetchPages();
-  console.log(`Found ${pages.length} pages to pre-render`);
+  console.log(`Found ${pages.length + 1} pages to pre-render`);
 
   const distPath = path.join(__dirname, '..', 'dist');
   const indexPath = path.join(distPath, 'index.html');
@@ -2023,6 +2094,7 @@ async function prerenderPages() {
   await prerenderContactPage(baseHTML, distPath);
   await prerenderInsightPage(baseHTML, distPath);
   await prerenderInsightsMetaPage(baseHTML, distPath);
+  await prerenderCompetitorComparisonPage(baseHTML, distPath);
   await prerenderAboutPage(baseHTML, distPath);
   const brandPages = await prerenderBrandInsightPages(baseHTML, distPath);
 
@@ -2138,6 +2210,12 @@ async function generateSitemap(pages, brandPages, distPath) {
     <lastmod>${today}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>${escapeXml(BASE_URL)}/insights/competitor-comparison/</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
   </url>
 `;
 
