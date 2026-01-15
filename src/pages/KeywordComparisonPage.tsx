@@ -96,11 +96,24 @@ export default function KeywordComparisonPage() {
 
       if (keywordError) throw keywordError;
 
-      const keywordOptions: KeywordOption[] = (keywordData || []).map((item) => ({
-        keyword: item.keyword,
-        brand: item.brand,
-        avgMonthlySearches: item['Avg. monthly searches'] || 0
-      }));
+      const keywordMap = new Map<string, KeywordOption>();
+
+      (keywordData || []).forEach((item) => {
+        const key = `${item.keyword}|||${item.brand}`;
+        const currentSearches = item['Avg. monthly searches'] || 0;
+
+        if (!keywordMap.has(key) || (keywordMap.get(key)?.avgMonthlySearches || 0) < currentSearches) {
+          keywordMap.set(key, {
+            keyword: item.keyword,
+            brand: item.brand,
+            avgMonthlySearches: currentSearches
+          });
+        }
+      });
+
+      const keywordOptions = Array.from(keywordMap.values()).sort(
+        (a, b) => b.avgMonthlySearches - a.avgMonthlySearches
+      );
 
       setAvailableKeywords(keywordOptions);
 
@@ -159,31 +172,33 @@ export default function KeywordComparisonPage() {
           .select('keyword, brand, "Avg. monthly searches", "Three month change", "YoY change", Competition, "Competition (indexed value)", "Top of page bid (low range)", "Top of page bid (high range)", sentiment, demand_score, interest_score, intent, ai_category')
           .eq('keyword', kw.keyword)
           .eq('brand', kw.brand)
-          .limit(1)
-          .maybeSingle();
+          .not('"Avg. monthly searches"', 'is', null)
+          .order('"Avg. monthly searches"', { ascending: false })
+          .limit(1);
 
         if (error) {
           console.error(`Error fetching data for ${kw.keyword} (${kw.brand}):`, error);
           continue;
         }
 
-        if (data) {
+        if (data && data.length > 0) {
+          const row = data[0];
           console.log(`Found data for ${kw.keyword} (${kw.brand})`);
           allStats.push({
-            keyword: data.keyword,
-            brand: data.brand,
-            avgMonthlySearches: data['Avg. monthly searches'] || 0,
-            threeMonthChange: parsePercentage(data['Three month change']),
-            yoyChange: parsePercentage(data['YoY change']),
-            competition: data.Competition || '',
-            competitionIndexed: data['Competition (indexed value)'] || 0,
-            topBidLow: data['Top of page bid (low range)'] || 0,
-            topBidHigh: data['Top of page bid (high range)'] || 0,
-            sentiment: data.sentiment || 0,
-            demandScore: data.demand_score || 0,
-            interestScore: data.interest_score || 0,
-            intent: data.intent || '',
-            aiCategory: data.ai_category || ''
+            keyword: row.keyword,
+            brand: row.brand,
+            avgMonthlySearches: row['Avg. monthly searches'] || 0,
+            threeMonthChange: parsePercentage(row['Three month change']),
+            yoyChange: parsePercentage(row['YoY change']),
+            competition: row.Competition || '',
+            competitionIndexed: row['Competition (indexed value)'] || 0,
+            topBidLow: row['Top of page bid (low range)'] || 0,
+            topBidHigh: row['Top of page bid (high range)'] || 0,
+            sentiment: row.sentiment || 0,
+            demandScore: row.demand_score || 0,
+            interestScore: row.interest_score || 0,
+            intent: row.intent || '',
+            aiCategory: row.ai_category || ''
           });
         } else {
           console.warn(`No data found for ${kw.keyword} (${kw.brand})`);
