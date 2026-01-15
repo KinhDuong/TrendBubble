@@ -635,6 +635,8 @@ export default function BrandInsightPage() {
     const userIdToUse = ownerUserId || pageOwnerId;
     if (!userIdToUse) return;
 
+    console.log('[loadLatestBrandPages] Starting with:', { userIdToUse, currentBrand });
+
     try {
       const { data: monthlyData, error: monthlyError } = await supabase
         .from('brand_keyword_monthly_data')
@@ -683,30 +685,38 @@ export default function BrandInsightPage() {
       const brandNames = brandsWithMetadata.map(b => b.brand);
       setAvailableBrands(brandNames);
 
+      console.log('[loadLatestBrandPages] Available brands:', brandNames);
+      console.log('[loadLatestBrandPages] Current brand from page:', currentBrand);
+
       let brandsToSelect: string[] = [];
 
-      if (currentBrand) {
-        const exactMatch = brandNames.find(b => b === currentBrand);
+      if (currentBrand && currentBrand.trim()) {
+        const exactMatch = brandNames.find(b => b.trim() === currentBrand.trim());
         if (exactMatch) {
           brandsToSelect = [exactMatch];
+          console.log('[loadLatestBrandPages] ✓ Selected current brand:', exactMatch);
         } else {
-          console.warn(`Brand "${currentBrand}" not found in available brands:`, brandNames);
+          console.warn('[loadLatestBrandPages] ✗ Brand not found:', currentBrand, 'Available:', brandNames);
         }
       }
 
       if (brandsToSelect.length === 0) {
         const brandsParam = searchParams.get('brands');
         if (brandsParam) {
-          const requestedBrands = brandsParam.split(',').filter(b => brandNames.includes(b));
+          const requestedBrands = brandsParam.split(',').map(b => b.trim()).filter(b => brandNames.includes(b));
           if (requestedBrands.length > 0) {
             brandsToSelect = requestedBrands;
+            console.log('[loadLatestBrandPages] Selected from URL param:', requestedBrands);
           }
         }
       }
 
       if (brandsToSelect.length === 0 && brandNames.length > 0) {
         brandsToSelect = [brandNames[0]];
+        console.log('[loadLatestBrandPages] Defaulting to first brand:', brandNames[0]);
       }
+
+      console.log('[loadLatestBrandPages] Final selection:', brandsToSelect);
 
       if (brandsToSelect.length > 0) {
         setSelectedBrands(brandsToSelect);
