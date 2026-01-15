@@ -110,12 +110,12 @@ export default function KeywordComparisonPage() {
         const requestedKeywords = keywordsParam.split(',').map((k) => k.trim());
         const requestedBrands = brandsParam.split(',').map((b) => b.trim());
 
-        const matchedKeywords = keywordOptions.filter((kw, idx) => {
-          return (
-            requestedKeywords[idx] === kw.keyword &&
-            requestedBrands[idx] === kw.brand
+        const matchedKeywords = requestedKeywords.map((keyword, idx) => {
+          const brand = requestedBrands[idx];
+          return keywordOptions.find(
+            (kw) => kw.keyword === keyword && kw.brand === brand
           );
-        });
+        }).filter((kw): kw is KeywordOption => kw !== undefined);
 
         if (matchedKeywords.length >= 2) {
           setSelectedKeywords(matchedKeywords);
@@ -143,6 +143,7 @@ export default function KeywordComparisonPage() {
       return;
     }
 
+    console.log('Fetching comparison data for:', selectedKeywords);
     setFetchingComparison(true);
     setComparisonError(null);
 
@@ -150,6 +151,8 @@ export default function KeywordComparisonPage() {
       const allStats: KeywordStats[] = [];
 
       for (const kw of selectedKeywords) {
+        console.log(`Querying for keyword: "${kw.keyword}", brand: "${kw.brand}"`);
+
         const { data, error } = await supabase
           .from('brand_keyword_data')
           .select('keyword, brand, "Avg. monthly searches", "Three month change", "YoY change", Competition, "Competition (indexed value)", "Top of page bid (low range)", "Top of page bid (high range)", sentiment, demand_score, interest_score, intent, ai_category')
@@ -163,6 +166,7 @@ export default function KeywordComparisonPage() {
         }
 
         if (data) {
+          console.log(`Found data for ${kw.keyword} (${kw.brand})`);
           allStats.push({
             keyword: data.keyword,
             brand: data.brand,
@@ -179,8 +183,12 @@ export default function KeywordComparisonPage() {
             intent: data.intent || '',
             aiCategory: data.ai_category || ''
           });
+        } else {
+          console.warn(`No data found for ${kw.keyword} (${kw.brand})`);
         }
       }
+
+      console.log(`Comparison complete. Found ${allStats.length} results`);
 
       if (allStats.length < 2) {
         setComparisonError('Could not find complete data for the selected keywords');
