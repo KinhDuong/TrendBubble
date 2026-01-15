@@ -229,6 +229,12 @@ export default function BrandInsightPage() {
   }, [brandName, pageIdOrUserId]);
 
   useEffect(() => {
+    console.log('[useEffect:selectedBrands] Triggered with:', {
+      pageOwnerId,
+      selectedBrands,
+      hasPageOwnerId: !!pageOwnerId,
+      brandsLength: selectedBrands.length
+    });
     if (pageOwnerId && selectedBrands.length > 0) {
       loadMultiBrandData(pageOwnerId, selectedBrands);
     }
@@ -253,11 +259,18 @@ export default function BrandInsightPage() {
       return;
     }
 
+    console.log('[loadAllData] Loading page data for:', pageIdOrUserId);
     const brandPageData = await loadBrandPageData();
     if (!brandPageData) {
       setLoading(false);
       return;
     }
+
+    console.log('[loadAllData] Got brand page data:', {
+      brand: brandPageData.brand,
+      user_id: brandPageData.user_id,
+      page_id: brandPageData.page_id
+    });
 
     setPageOwnerId(brandPageData.user_id);
 
@@ -900,6 +913,11 @@ export default function BrandInsightPage() {
 
   useEffect(() => {
     async function fetchBrandComparisonStats() {
+      console.log('[useEffect:brandComparisonStats] Fetching with:', {
+        selectedBrands,
+        pageOwnerId
+      });
+
       if (selectedBrands.length === 0 || !pageOwnerId) {
         setBrandComparisonStats([]);
         return;
@@ -917,6 +935,7 @@ export default function BrandInsightPage() {
           return;
         }
 
+        console.log('[useEffect:brandComparisonStats] Got stats:', data);
         setBrandComparisonStats(data || []);
       } catch (error) {
         console.error('Error in fetchBrandComparisonStats:', error);
