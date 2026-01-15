@@ -683,22 +683,29 @@ export default function BrandInsightPage() {
       const brandNames = brandsWithMetadata.map(b => b.brand);
       setAvailableBrands(brandNames);
 
-      const brandsParam = searchParams.get('brands');
       let brandsToSelect: string[] = [];
 
-      if (brandsParam) {
-        const requestedBrands = brandsParam.split(',').filter(b => brandNames.includes(b));
-        if (requestedBrands.length > 0) {
-          brandsToSelect = requestedBrands;
+      if (currentBrand) {
+        const exactMatch = brandNames.find(b => b === currentBrand);
+        if (exactMatch) {
+          brandsToSelect = [exactMatch];
+        } else {
+          console.warn(`Brand "${currentBrand}" not found in available brands:`, brandNames);
         }
       }
 
       if (brandsToSelect.length === 0) {
-        if (currentBrand && brandNames.includes(currentBrand)) {
-          brandsToSelect = [currentBrand];
-        } else if (brandNames.length > 0) {
-          brandsToSelect = [brandNames[0]];
+        const brandsParam = searchParams.get('brands');
+        if (brandsParam) {
+          const requestedBrands = brandsParam.split(',').filter(b => brandNames.includes(b));
+          if (requestedBrands.length > 0) {
+            brandsToSelect = requestedBrands;
+          }
         }
+      }
+
+      if (brandsToSelect.length === 0 && brandNames.length > 0) {
+        brandsToSelect = [brandNames[0]];
       }
 
       if (brandsToSelect.length > 0) {
