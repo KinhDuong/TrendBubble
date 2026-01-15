@@ -94,7 +94,6 @@ export default function KeywordComparisonPage() {
       const { data: keywordData, error: keywordError } = await supabase
         .from('brand_keyword_data')
         .select('keyword, brand, "Avg. monthly searches"')
-        .eq('user_id', user.id)
         .order('Avg. monthly searches', { ascending: false });
 
       if (keywordError) throw keywordError;
@@ -155,7 +154,6 @@ export default function KeywordComparisonPage() {
       const { data, error } = await supabase
         .from('brand_keyword_data')
         .select('keyword, brand, "Avg. monthly searches", "Three month change", "YoY change", Competition, "Competition (indexed value)", "Top of page bid (low range)", "Top of page bid (high range)", sentiment, demand_score, interest_score, intent, ai_category')
-        .eq('user_id', user.id)
         .in(
           'keyword',
           keywordBrandPairs.map((p) => p.keyword)
