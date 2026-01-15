@@ -88,17 +88,33 @@ export default function KeywordComparisonPage() {
 
   const loadUserData = async () => {
     try {
-      const { data: keywordData, error: keywordError } = await supabase
-        .from('brand_keyword_data')
-        .select('keyword, brand, "Avg. monthly searches"')
-        .not('"Avg. monthly searches"', 'is', null)
-        .order('"Avg. monthly searches"', { ascending: false });
+      let allKeywordData: any[] = [];
+      let from = 0;
+      const pageSize = 1000;
+      let hasMore = true;
 
-      if (keywordError) throw keywordError;
+      while (hasMore) {
+        const { data: keywordData, error: keywordError } = await supabase
+          .from('brand_keyword_data')
+          .select('keyword, brand, "Avg. monthly searches"')
+          .not('"Avg. monthly searches"', 'is', null)
+          .order('"Avg. monthly searches"', { ascending: false })
+          .range(from, from + pageSize - 1);
+
+        if (keywordError) throw keywordError;
+
+        if (keywordData && keywordData.length > 0) {
+          allKeywordData = [...allKeywordData, ...keywordData];
+          from += pageSize;
+          hasMore = keywordData.length === pageSize;
+        } else {
+          hasMore = false;
+        }
+      }
 
       const keywordMap = new Map<string, KeywordOption>();
 
-      (keywordData || []).forEach((item) => {
+      allKeywordData.forEach((item) => {
         const key = `${item.keyword}|||${item.brand}`;
         const currentSearches = item['Avg. monthly searches'] || 0;
 
