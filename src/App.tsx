@@ -23,6 +23,7 @@ import ContactPage from './pages/ContactPage';
 import InsightPage from './pages/InsightPage';
 import BrandInsightPage from './pages/BrandInsightPage';
 import CompetitorComparisonPage from './pages/CompetitorComparisonPage';
+import KeywordComparisonPage from './pages/KeywordComparisonPage';
 import BrandDataManager from './pages/BrandDataManager';
 import InsightsMetaPage from './pages/InsightsMetaPage';
 import UploadPage from './pages/UploadPage';
@@ -2243,6 +2244,8 @@ function App() {
         <Route path="/insights-meta/" element={<InsightsMetaPage />} />
         <Route path="/insights/competitor-comparison" element={<CompetitorComparisonPage />} />
         <Route path="/insights/competitor-comparison/" element={<CompetitorComparisonPage />} />
+        <Route path="/insights/keyword-comparison" element={<KeywordComparisonPage />} />
+        <Route path="/insights/keyword-comparison/" element={<KeywordComparisonPage />} />
         <Route path="/insights/:userId/:brandName" element={<BrandInsightPage />} />
         <Route path="/insights/:userId/:brandName/" element={<BrandInsightPage />} />
         <Route path="/insights/:userId/:brandName/:chartType" element={<BrandInsightPage />} />

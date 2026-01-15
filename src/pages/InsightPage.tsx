@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { TrendingUp, Download, Trash2, ExternalLink, Database } from 'lucide-react';
+import { TrendingUp, Download, Trash2, ExternalLink, Database, GitCompare } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import BrandKeywordUpload from '../components/BrandKeywordUpload';
@@ -232,13 +232,29 @@ export default function InsightPage() {
                 <h1 className="text-3xl font-bold text-gray-900 mb-2">Brand Keyword Insights</h1>
                 <p className="text-gray-600">Upload and analyze keyword search volume data for your brands</p>
               </div>
-              <button
-                onClick={() => navigate('/insights-meta')}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
-              >
-                <Database className="w-4 h-4" />
-                View All Brands
-              </button>
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  onClick={() => navigate('/insights/competitor-comparison')}
+                  className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors shadow-sm"
+                >
+                  <GitCompare className="w-4 h-4" />
+                  Compare Brands
+                </button>
+                <button
+                  onClick={() => navigate('/insights/keyword-comparison')}
+                  className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors shadow-sm"
+                >
+                  <GitCompare className="w-4 h-4" />
+                  Compare Keywords
+                </button>
+                <button
+                  onClick={() => navigate('/insights-meta')}
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
+                >
+                  <Database className="w-4 h-4" />
+                  View All Brands
+                </button>
+              </div>
             </div>
           </div>
 
