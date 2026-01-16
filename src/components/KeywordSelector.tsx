@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
-import { X, Check } from 'lucide-react';
+import { X, Check, Search as SearchIcon } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 
 interface KeywordOption {
   keyword: string;
@@ -8,25 +9,28 @@ interface KeywordOption {
 }
 
 interface KeywordSelectorProps {
-  availableKeywords: KeywordOption[];
   selectedKeywords: KeywordOption[];
   onSelectionChange: (keywords: KeywordOption[]) => void;
   theme: 'light' | 'dark';
   disabled?: boolean;
   maxSelection?: number;
+  userId?: string;
 }
 
 export default function KeywordSelector({
-  availableKeywords,
   selectedKeywords,
   onSelectionChange,
   theme,
   disabled = false,
-  maxSelection = 6
+  maxSelection = 6,
+  userId
 }: KeywordSelectorProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [isOpen, setIsOpen] = useState(false);
+  const [searchResults, setSearchResults] = useState<KeywordOption[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -39,13 +43,79 @@ export default function KeywordSelector({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const filteredKeywords = availableKeywords.filter((kw) => {
-    const searchLower = searchQuery.toLowerCase();
-    return (
-      kw.keyword.toLowerCase().includes(searchLower) ||
-      kw.brand.toLowerCase().includes(searchLower)
-    );
-  });
+  useEffect(() => {
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+
+    if (searchQuery.length < 2) {
+      setSearchResults([]);
+      setIsSearching(false);
+      return;
+    }
+
+    setIsSearching(true);
+
+    searchTimeoutRef.current = setTimeout(async () => {
+      await performSearch(searchQuery);
+    }, 300);
+
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, [searchQuery, userId]);
+
+  const performSearch = async (query: string) => {
+    try {
+      const searchPattern = `%${query}%`;
+
+      let dbQuery = supabase
+        .from('brand_keyword_data')
+        .select('keyword, brand, "Avg. monthly searches"')
+        .not('"Avg. monthly searches"', 'is', null)
+        .or(`keyword.ilike.${searchPattern},brand.ilike.${searchPattern}`)
+        .order('"Avg. monthly searches"', { ascending: false })
+        .limit(50);
+
+      if (userId) {
+        dbQuery = dbQuery.eq('user_id', userId);
+      }
+
+      const { data, error } = await dbQuery;
+
+      if (error) throw error;
+
+      const keywordMap = new Map<string, KeywordOption>();
+
+      data?.forEach((item) => {
+        const key = `${item.keyword}|||${item.brand}`;
+        const currentSearches = item['Avg. monthly searches'] || 0;
+
+        if (!keywordMap.has(key) || (keywordMap.get(key)?.avgMonthlySearches || 0) < currentSearches) {
+          keywordMap.set(key, {
+            keyword: item.keyword,
+            brand: item.brand,
+            avgMonthlySearches: currentSearches
+          });
+        }
+      });
+
+      const results = Array.from(keywordMap.values()).sort(
+        (a, b) => b.avgMonthlySearches - a.avgMonthlySearches
+      );
+
+      setSearchResults(results);
+    } catch (error) {
+      console.error('Error searching keywords:', error);
+      setSearchResults([]);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const filteredKeywords = searchResults;
 
   const isSelected = (keyword: KeywordOption) => {
     return selectedKeywords.some(
@@ -142,25 +212,46 @@ export default function KeywordSelector({
               : 'bg-white border-gray-200'
           }`}
         >
-          <div className="p-3 border-b border-gray-700">
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search keywords or brands..."
-              className={`w-full px-3 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                theme === 'dark'
-                  ? 'bg-gray-900 border-gray-600 text-white placeholder-gray-500'
-                  : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400'
-              }`}
-              onClick={(e) => e.stopPropagation()}
-            />
+          <div className={`p-3 border-b ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
+            <div className="relative">
+              <SearchIcon className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 ${
+                theme === 'dark' ? 'text-gray-500' : 'text-gray-400'
+              }`} />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Type to search keywords or brands..."
+                className={`w-full pl-10 pr-3 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  theme === 'dark'
+                    ? 'bg-gray-900 border-gray-600 text-white placeholder-gray-500'
+                    : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400'
+                }`}
+                onClick={(e) => e.stopPropagation()}
+                autoFocus
+              />
+            </div>
+            {searchQuery.length > 0 && searchQuery.length < 2 && (
+              <p className={`mt-2 text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
+                Type at least 2 characters to search
+              </p>
+            )}
           </div>
 
           <div className="overflow-y-auto max-h-80">
-            {filteredKeywords.length === 0 ? (
-              <div className={`p-4 text-center ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
-                No keywords found
+            {isSearching ? (
+              <div className={`p-8 text-center ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+                <p className="text-sm">Searching...</p>
+              </div>
+            ) : searchQuery.length < 2 ? (
+              <div className={`p-8 text-center ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
+                <SearchIcon className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                <p className="text-sm">Start typing to search keywords</p>
+              </div>
+            ) : filteredKeywords.length === 0 ? (
+              <div className={`p-8 text-center ${theme === 'dark' ? 'text-gray-500' : 'text-gray-400'}`}>
+                <p className="text-sm">No keywords found matching "{searchQuery}"</p>
               </div>
             ) : (
               filteredKeywords.map((keyword) => {

@@ -37,8 +37,7 @@ export default function KeywordComparisonPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { user } = useAuth();
 
-  const [loading, setLoading] = useState(true);
-  const [availableKeywords, setAvailableKeywords] = useState<KeywordOption[]>([]);
+  const [loading, setLoading] = useState(false);
   const [selectedKeywords, setSelectedKeywords] = useState<KeywordOption[]>([]);
   const [keywordComparisonStats, setKeywordComparisonStats] = useState<KeywordStats[]>([]);
   const [fetchingComparison, setFetchingComparison] = useState(false);
@@ -75,7 +74,7 @@ export default function KeywordComparisonPage() {
   }, [theme]);
 
   useEffect(() => {
-    loadUserData();
+    loadInitialKeywords();
   }, []);
 
   useEffect(() => {
@@ -86,75 +85,51 @@ export default function KeywordComparisonPage() {
     }
   }, [selectedKeywords]);
 
-  const loadUserData = async () => {
-    try {
-      let allKeywordData: any[] = [];
-      let from = 0;
-      const pageSize = 1000;
-      let hasMore = true;
+  const loadInitialKeywords = async () => {
+    const keywordsParam = searchParams.get('keywords');
+    const brandsParam = searchParams.get('brands');
 
-      while (hasMore) {
-        const { data: keywordData, error: keywordError } = await supabase
+    if (!keywordsParam || !brandsParam) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const requestedKeywords = keywordsParam.split(',').map((k) => k.trim());
+      const requestedBrands = brandsParam.split(',').map((b) => b.trim());
+
+      const matchedKeywords: KeywordOption[] = [];
+
+      for (let i = 0; i < requestedKeywords.length; i++) {
+        const keyword = requestedKeywords[i];
+        const brand = requestedBrands[i];
+
+        const { data, error } = await supabase
           .from('brand_keyword_data')
           .select('keyword, brand, "Avg. monthly searches"')
+          .eq('keyword', keyword)
+          .eq('brand', brand)
           .not('"Avg. monthly searches"', 'is', null)
           .order('"Avg. monthly searches"', { ascending: false })
-          .range(from, from + pageSize - 1);
+          .limit(1)
+          .maybeSingle();
 
-        if (keywordError) throw keywordError;
-
-        if (keywordData && keywordData.length > 0) {
-          allKeywordData = [...allKeywordData, ...keywordData];
-          from += pageSize;
-          hasMore = keywordData.length === pageSize;
-        } else {
-          hasMore = false;
-        }
-      }
-
-      const keywordMap = new Map<string, KeywordOption>();
-
-      allKeywordData.forEach((item) => {
-        const key = `${item.keyword}|||${item.brand}`;
-        const currentSearches = item['Avg. monthly searches'] || 0;
-
-        if (!keywordMap.has(key) || (keywordMap.get(key)?.avgMonthlySearches || 0) < currentSearches) {
-          keywordMap.set(key, {
-            keyword: item.keyword,
-            brand: item.brand,
-            avgMonthlySearches: currentSearches
+        if (!error && data) {
+          matchedKeywords.push({
+            keyword: data.keyword,
+            brand: data.brand,
+            avgMonthlySearches: data['Avg. monthly searches'] || 0
           });
         }
-      });
-
-      const keywordOptions = Array.from(keywordMap.values()).sort(
-        (a, b) => b.avgMonthlySearches - a.avgMonthlySearches
-      );
-
-      setAvailableKeywords(keywordOptions);
-
-      const keywordsParam = searchParams.get('keywords');
-      const brandsParam = searchParams.get('brands');
-
-      if (keywordsParam && brandsParam) {
-        const requestedKeywords = keywordsParam.split(',').map((k) => k.trim());
-        const requestedBrands = brandsParam.split(',').map((b) => b.trim());
-
-        const matchedKeywords = requestedKeywords.map((keyword, idx) => {
-          const brand = requestedBrands[idx];
-          return keywordOptions.find(
-            (kw) => kw.keyword === keyword && kw.brand === brand
-          );
-        }).filter((kw): kw is KeywordOption => kw !== undefined);
-
-        if (matchedKeywords.length >= 2) {
-          setSelectedKeywords(matchedKeywords);
-        }
       }
 
-      setLoading(false);
+      if (matchedKeywords.length >= 2) {
+        setSelectedKeywords(matchedKeywords);
+      }
     } catch (error) {
-      console.error('Error loading user data:', error);
+      console.error('Error loading initial keywords:', error);
+    } finally {
       setLoading(false);
     }
   };
@@ -283,78 +258,59 @@ export default function KeywordComparisonPage() {
               </p>
             </div>
 
-            {loading ? (
-              <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-lg border p-12 text-center`}>
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                <p className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}>
-                  Loading your keywords...
-                </p>
-              </div>
-            ) : availableKeywords.length === 0 ? (
-              <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-lg border p-8 text-center`}>
-                <GitCompare className={`w-16 h-16 mx-auto mb-4 ${theme === 'dark' ? 'text-gray-600' : 'text-gray-300'}`} />
-                <h2 className={`text-xl font-bold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                  No Keywords Available
-                </h2>
-                <p className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                  No keyword data is currently available in the database
-                </p>
-              </div>
-            ) : (
-              <>
-                <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-lg border p-6 mb-6`}>
-                  <label className={`block text-sm font-semibold mb-3 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                    Select Keywords to Compare (minimum 2)
-                  </label>
-                  <KeywordSelector
-                    availableKeywords={availableKeywords}
-                    selectedKeywords={selectedKeywords}
-                    onSelectionChange={handleKeywordSelectionChange}
-                    theme={theme}
-                    disabled={false}
-                    maxSelection={6}
-                  />
-                  {selectedKeywords.length === 1 && (
-                    <p className={`mt-3 text-sm ${theme === 'dark' ? 'text-amber-400' : 'text-amber-600'}`}>
-                      Please select at least one more keyword to compare
-                    </p>
-                  )}
-                </div>
-
-                {comparisonError ? (
-                  <div className={`${theme === 'dark' ? 'bg-red-900/20 border-red-800' : 'bg-red-50 border-red-200'} rounded-lg border p-8 text-center`}>
-                    <p className={`text-lg font-semibold ${theme === 'dark' ? 'text-red-400' : 'text-red-600'}`}>
-                      {comparisonError}
-                    </p>
-                  </div>
-                ) : selectedKeywords.length >= 2 && keywordComparisonStats.length >= 2 ? (
-                  <KeywordComparisonTable
-                    keywordStats={keywordComparisonStats}
-                    theme={theme}
-                  />
-                ) : fetchingComparison ? (
-                  <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-lg border p-12 text-center`}>
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                    <p className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}>
-                      Loading comparison data...
-                    </p>
-                  </div>
-                ) : selectedKeywords.length >= 2 ? (
-                  <div className={`${theme === 'dark' ? 'bg-amber-900/20 border-amber-800' : 'bg-amber-50 border-amber-200'} rounded-lg border p-8 text-center`}>
-                    <p className={`${theme === 'dark' ? 'text-amber-400' : 'text-amber-600'}`}>
-                      No data available for the selected keywords
-                    </p>
-                  </div>
-                ) : (
-                  <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-lg border p-12 text-center`}>
-                    <GitCompare className={`w-20 h-20 mx-auto mb-4 ${theme === 'dark' ? 'text-gray-600' : 'text-gray-300'}`} />
-                    <p className={`text-lg ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                      Select at least 2 keywords above to see the comparison
-                    </p>
-                  </div>
+            <>
+              <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-lg border p-6 mb-6`}>
+                <label className={`block text-sm font-semibold mb-3 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                  Search and Select Keywords to Compare (minimum 2)
+                </label>
+                <KeywordSelector
+                  selectedKeywords={selectedKeywords}
+                  onSelectionChange={handleKeywordSelectionChange}
+                  theme={theme}
+                  disabled={false}
+                  maxSelection={6}
+                  userId={user?.id}
+                />
+                {selectedKeywords.length === 1 && (
+                  <p className={`mt-3 text-sm ${theme === 'dark' ? 'text-amber-400' : 'text-amber-600'}`}>
+                    Please select at least one more keyword to compare
+                  </p>
                 )}
-              </>
-            )}
+              </div>
+
+              {comparisonError ? (
+                <div className={`${theme === 'dark' ? 'bg-red-900/20 border-red-800' : 'bg-red-50 border-red-200'} rounded-lg border p-8 text-center`}>
+                  <p className={`text-lg font-semibold ${theme === 'dark' ? 'text-red-400' : 'text-red-600'}`}>
+                    {comparisonError}
+                  </p>
+                </div>
+              ) : selectedKeywords.length >= 2 && keywordComparisonStats.length >= 2 ? (
+                <KeywordComparisonTable
+                  keywordStats={keywordComparisonStats}
+                  theme={theme}
+                />
+              ) : fetchingComparison ? (
+                <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-lg border p-12 text-center`}>
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                  <p className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}>
+                    Loading comparison data...
+                  </p>
+                </div>
+              ) : selectedKeywords.length >= 2 ? (
+                <div className={`${theme === 'dark' ? 'bg-amber-900/20 border-amber-800' : 'bg-amber-50 border-amber-200'} rounded-lg border p-8 text-center`}>
+                  <p className={`${theme === 'dark' ? 'text-amber-400' : 'text-amber-600'}`}>
+                    No data available for the selected keywords
+                  </p>
+                </div>
+              ) : (
+                <div className={`${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} rounded-lg border p-12 text-center`}>
+                  <GitCompare className={`w-20 h-20 mx-auto mb-4 ${theme === 'dark' ? 'text-gray-600' : 'text-gray-300'}`} />
+                  <p className={`text-lg ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                    Select at least 2 keywords above to see the comparison
+                  </p>
+                </div>
+              )}
+            </>
           </div>
         </main>
 
