@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { TrendingUp, TrendingDown, Search, Target, DollarSign, Trophy, Zap, ThumbsUp, Sparkles, ArrowUp, ArrowUpRight, ArrowRight, ArrowDownRight, ArrowDown } from 'lucide-react';
+import { TrendingUp, TrendingDown, Search, Target, DollarSign, Trophy, Zap, ThumbsUp, Sparkles, ArrowUp, ArrowUpRight, ArrowRight, ArrowDownRight, ArrowDown, Rocket } from 'lucide-react';
 import { formatCompactNumber } from '../utils/formatNumber';
 
 interface KeywordStats {
@@ -160,7 +160,57 @@ export default function KeywordComparisonTable({ keywordStats, theme }: KeywordC
     return colors[index % colors.length];
   };
 
+  const calculateTrending = (stats: KeywordStats): { ArrowIcon: any; label: string; level: number; color: string; explanation: string } => {
+    const yoyChange = stats.yoyChange || 0;
+    const threeMonthChange = stats.threeMonthChange || 0;
+
+    // 70/30 Weighted: 70% recent momentum (3-month), 30% longer term (YoY)
+    const weightedMomentum = (threeMonthChange * 0.7) + (yoyChange * 0.3);
+
+    let level = 2; // default: stable
+    let ArrowIcon = ArrowRight;
+    let label = 'Stable';
+    let color = theme === 'dark' ? 'text-gray-400' : 'text-gray-500';
+
+    if (weightedMomentum > 0.30) {
+      level = 5;
+      ArrowIcon = Rocket;
+      label = 'Explosive Up';
+      color = 'text-emerald-500';
+    } else if (weightedMomentum >= 0.15) {
+      level = 4;
+      ArrowIcon = ArrowUp;
+      label = 'Strong Up';
+      color = 'text-green-500';
+    } else if (weightedMomentum >= 0.05) {
+      level = 3;
+      ArrowIcon = ArrowUpRight;
+      label = 'Moderate Up';
+      color = 'text-blue-500';
+    } else if (weightedMomentum >= -0.05) {
+      level = 2;
+      ArrowIcon = ArrowRight;
+      label = 'Stable';
+      color = theme === 'dark' ? 'text-gray-400' : 'text-gray-500';
+    } else if (weightedMomentum >= -0.15) {
+      level = 1;
+      ArrowIcon = ArrowDownRight;
+      label = 'Slight Down';
+      color = 'text-orange-500';
+    } else {
+      level = 0;
+      ArrowIcon = ArrowDown;
+      label = 'Sharp Down';
+      color = 'text-red-500';
+    }
+
+    const explanation = `3-Month (70%): ${formatPercentage(threeMonthChange)} | YoY (30%): ${formatPercentage(yoyChange)} | Weighted: ${(weightedMomentum * 100).toFixed(1)}% → ${label}`;
+
+    return { ArrowIcon, label, level, color, explanation };
+  };
+
   const metrics = [
+    { label: 'Trending', icon: TrendingUp, key: 'trending', format: (v: number) => '', colorize: 'trending' },
     { label: 'Brand', icon: Target, key: 'brand', format: (v: string) => v },
     { label: 'Monthly Searches', icon: Search, key: 'avgMonthlySearches', format: (v: number) => formatCompactNumber(v) },
     { label: 'Demand', icon: Zap, key: 'demandScore', format: (v: number) => v > 0 ? `${v.toFixed(1)}/50` : 'N/A', colorize: 'demand' },
@@ -255,6 +305,7 @@ export default function KeywordComparisonTable({ keywordStats, theme }: KeywordC
                     textColor = getIntentColor(value);
                   }
 
+                  const isTrending = metric.key === 'trending';
                   const isInterestScore = metric.key === 'interestScore';
                   const isDemandScore = metric.key === 'demandScore';
                   const showTooltip = tooltipKeyword === `${stats.keyword}-${stats.brand}` && tooltipMetric === metric.key;
@@ -264,7 +315,66 @@ export default function KeywordComparisonTable({ keywordStats, theme }: KeywordC
                       key={`${stats.keyword}-${stats.brand}-${metric.key}`}
                       className={`p-4 flex items-center justify-center border-l ${theme === 'dark' ? 'border-gray-700/50' : 'border-gray-200'} relative`}
                     >
-                      {isInterestScore ? (
+                      {isTrending ? (
+                        <div
+                          className="relative"
+                          ref={(el) => { tooltipRefs.current[`${stats.keyword}-${stats.brand}-${metric.key}`] = el; }}
+                        >
+                          <button
+                            onClick={() => toggleTooltip(`${stats.keyword}-${stats.brand}`, metric.key)}
+                            className={`text-center transition-all hover:scale-105 ${theme === 'dark' ? 'hover:bg-gray-700/30' : 'hover:bg-gray-100/50'} rounded-lg px-3 py-2 cursor-pointer`}
+                          >
+                            {(() => {
+                              const trending = calculateTrending(stats);
+                              const Icon = trending.ArrowIcon;
+                              return (
+                                <div className="flex flex-col items-center gap-1">
+                                  <Icon className={`w-8 h-8 ${trending.color}`} strokeWidth={2.5} />
+                                  <div className={`text-sm md:text-base font-bold ${trending.color}`}>
+                                    {trending.label}
+                                  </div>
+                                </div>
+                              );
+                            })()}
+                          </button>
+
+                          {showTooltip && (
+                            <div className={`absolute z-[9999] bottom-full left-1/2 transform -translate-x-1/2 mb-3 w-80 rounded-lg shadow-2xl border animate-in fade-in slide-in-from-bottom-2 duration-200 ${
+                              theme === 'dark'
+                                ? 'bg-gray-800 border-gray-700'
+                                : 'bg-white border-gray-200'
+                            }`}>
+                              <div className="p-4 space-y-2">
+                                <div className={`text-center flex items-center justify-center gap-2`}>
+                                  {(() => {
+                                    const trending = calculateTrending(stats);
+                                    const Icon = trending.ArrowIcon;
+                                    return (
+                                      <>
+                                        <Icon className={`w-5 h-5 ${trending.color}`} strokeWidth={2.5} />
+                                        <span className={`text-lg font-bold ${trending.color}`}>
+                                          {trending.label}
+                                        </span>
+                                      </>
+                                    );
+                                  })()}
+                                </div>
+                                <div className={`text-xs ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'} leading-relaxed`}>
+                                  {calculateTrending(stats).explanation}
+                                </div>
+                                <div className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} italic mt-2 pt-2 border-t ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
+                                  Based on 3-month and year-over-year momentum trends.
+                                </div>
+                              </div>
+                              <div
+                                className={`absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent ${
+                                  theme === 'dark' ? 'border-t-gray-700' : 'border-t-gray-200'
+                                }`}
+                              />
+                            </div>
+                          )}
+                        </div>
+                      ) : isInterestScore ? (
                         <div
                           className="relative"
                           ref={(el) => { tooltipRefs.current[`${stats.keyword}-${stats.brand}-${metric.key}`] = el; }}
