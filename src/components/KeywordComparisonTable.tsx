@@ -217,13 +217,7 @@ export default function KeywordComparisonTable({ keywordStats, theme }: KeywordC
     { label: 'Interest', icon: Sparkles, key: 'interestScore', format: (v: number) => v > 0 ? `${v.toFixed(1)}/50` : 'N/A', colorize: 'interest' },
     { label: '3-Month Change', icon: TrendingUp, key: 'threeMonthChange', format: (v: number) => formatPercentage(v), colorize: true },
     { label: 'YoY Change', icon: TrendingUp, key: 'yoyChange', format: (v: number) => formatPercentage(v), colorize: true },
-    { label: 'Competition', icon: Trophy, key: 'competition', format: (v: string) => v || 'N/A', colorize: 'competition' },
-    { label: 'Competition Index', icon: Trophy, key: 'competitionIndexed', format: (v: number) => v > 0 ? v.toFixed(2) : 'N/A' },
-    { label: 'CPC Low', icon: DollarSign, key: 'topBidLow', format: (v: number) => formatCurrency(v) },
-    { label: 'CPC High', icon: DollarSign, key: 'topBidHigh', format: (v: number) => formatCurrency(v) },
-    { label: 'Intent', icon: Target, key: 'intent', format: (v: string) => v || 'Unknown', colorize: 'intent' },
     { label: 'Sentiment', icon: ThumbsUp, key: 'sentiment', format: (v: number) => formatSentiment(v), colorize: 'sentiment' },
-    { label: 'Category', icon: Search, key: 'aiCategory', format: (v: string) => v || 'Uncategorized' },
   ];
 
   return (
