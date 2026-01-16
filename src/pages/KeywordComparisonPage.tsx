@@ -158,41 +158,75 @@ export default function KeywordComparisonPage() {
       for (const kw of selectedKeywords) {
         console.log(`Querying for keyword: "${kw.keyword}", brand: "${kw.brand}"`);
 
-        const { data, error } = await supabase
-          .from('brand_keyword_data')
-          .select('keyword, brand, "Avg. monthly searches", "Three month change", "YoY change", competition, "Competition (indexed value)", "Top of page bid (low range)", "Top of page bid (high range)", sentiment, demand_score, interest_score, intent_type, ai_category')
-          .eq('keyword', kw.keyword)
+        // First try to get aggregate data from brand_pages table
+        const { data: pageData, error: pageError } = await supabase
+          .from('brand_pages')
+          .select('brand, avg_monthly_searches, representative_keyword, competition, cpc_low, cpc_high, yoy_change, three_month_change, demand_score, interest_score, sentiment')
           .eq('brand', kw.brand)
-          .not('"Avg. monthly searches"', 'is', null)
-          .order('"Avg. monthly searches"', { ascending: false })
-          .limit(1);
+          .maybeSingle();
 
-        if (error) {
-          console.error(`Error fetching data for ${kw.keyword} (${kw.brand}):`, error);
+        if (pageError) {
+          console.error(`Error fetching page data for ${kw.brand}:`, pageError);
           continue;
         }
 
-        if (data && data.length > 0) {
-          const row = data[0];
-          console.log(`Found data for ${kw.keyword} (${kw.brand})`);
+        if (pageData) {
+          console.log(`Found brand page data for ${kw.brand}`);
           allStats.push({
-            keyword: row.keyword,
-            brand: row.brand,
-            avgMonthlySearches: row['Avg. monthly searches'] || 0,
-            threeMonthChange: parsePercentage(row['Three month change']),
-            yoyChange: parsePercentage(row['YoY change']),
-            competition: row.competition || '',
-            competitionIndexed: row['Competition (indexed value)'] || 0,
-            topBidLow: row['Top of page bid (low range)'] || 0,
-            topBidHigh: row['Top of page bid (high range)'] || 0,
-            sentiment: row.sentiment || 0,
-            demandScore: row.demand_score || 0,
-            interestScore: row.interest_score || 0,
-            intent: row.intent_type || '',
-            aiCategory: row.ai_category || ''
+            keyword: pageData.representative_keyword || kw.keyword,
+            brand: pageData.brand,
+            avgMonthlySearches: pageData.avg_monthly_searches || 0,
+            threeMonthChange: pageData.three_month_change || 0,
+            yoyChange: pageData.yoy_change || 0,
+            competition: pageData.competition || '',
+            competitionIndexed: 0,
+            topBidLow: pageData.cpc_low || 0,
+            topBidHigh: pageData.cpc_high || 0,
+            sentiment: pageData.sentiment || 0,
+            demandScore: pageData.demand_score || 0,
+            interestScore: pageData.interest_score || 0,
+            intent: '',
+            aiCategory: ''
           });
         } else {
-          console.warn(`No data found for ${kw.keyword} (${kw.brand})`);
+          // Fallback to fetching from brand_keyword_data
+          console.warn(`No brand page found for ${kw.brand}, falling back to keyword data`);
+          const { data, error } = await supabase
+            .from('brand_keyword_data')
+            .select('keyword, brand, "Avg. monthly searches", "Three month change", "YoY change", competition, "Competition (indexed value)", "Top of page bid (low range)", "Top of page bid (high range)", sentiment, demand_score, interest_score, intent_type, ai_category')
+            .eq('keyword', kw.keyword)
+            .eq('brand', kw.brand)
+            .not('"Avg. monthly searches"', 'is', null)
+            .order('"Avg. monthly searches"', { ascending: false })
+            .limit(1);
+
+          if (error) {
+            console.error(`Error fetching data for ${kw.keyword} (${kw.brand}):`, error);
+            continue;
+          }
+
+          if (data && data.length > 0) {
+            const row = data[0];
+            console.log(`Found keyword data for ${kw.keyword} (${kw.brand})`);
+            allStats.push({
+              keyword: row.keyword,
+              brand: row.brand,
+              avgMonthlySearches: row['Avg. monthly searches'] || 0,
+              threeMonthChange: parsePercentage(row['Three month change']),
+              yoyChange: parsePercentage(row['YoY change']),
+              competition: row.competition || '',
+              competitionIndexed: row['Competition (indexed value)'] || 0,
+              topBidLow: row['Top of page bid (low range)'] || 0,
+              topBidHigh: row['Top of page bid (high range)'] || 0,
+              sentiment: row.sentiment || 0,
+              demandScore: row.demand_score || 0,
+              interestScore: row.interest_score || 0,
+              intent: row.intent_type || '',
+              aiCategory: row.ai_category || ''
+            });
+          } else {
+            console.warn(`No data found for ${kw.keyword} (${kw.brand})`);
+          }
         }
       }
 
