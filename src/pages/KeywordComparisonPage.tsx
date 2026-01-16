@@ -134,11 +134,24 @@ export default function KeywordComparisonPage() {
     }
   };
 
-  const parsePercentage = (value: string | null): number => {
+  const parsePercentage = (value: string | number | null): number => {
     if (!value) return 0;
+
+    // If it's already a number, return as-is (already in decimal form)
+    if (typeof value === 'number') return value;
+
+    // If it's a string, parse it
     const cleaned = value.replace('%', '').replace(/[<>]/g, '').trim();
     const parsed = parseFloat(cleaned);
-    return isNaN(parsed) ? 0 : parsed / 100;
+    if (isNaN(parsed)) return 0;
+
+    // If the original string had a '%' sign, divide by 100
+    // Otherwise, assume it's already in decimal form
+    if (value.includes('%')) {
+      return parsed / 100;
+    }
+
+    return parsed;
   };
 
   const fetchKeywordComparisonStats = async () => {
