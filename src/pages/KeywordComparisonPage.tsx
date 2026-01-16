@@ -173,7 +173,7 @@ export default function KeywordComparisonPage() {
         if (pageData) {
           console.log(`Found brand page data for ${kw.brand}`);
           allStats.push({
-            keyword: pageData.representative_keyword || kw.keyword,
+            keyword: kw.keyword, // Keep the original selected keyword
             brand: pageData.brand,
             avgMonthlySearches: pageData.avg_monthly_searches || 0,
             threeMonthChange: pageData.three_month_change || 0,
