@@ -43,6 +43,10 @@ interface BrandStats {
   yearlyAvg2024?: number;
   yearlyAvg2025?: number;
   yearlyAvg2026?: number;
+  yearlyAvg2027?: number;
+  yearlyAvg2028?: number;
+  yearlyAvg2029?: number;
+  yearlyAvg2030?: number;
 }
 
 export default function CompetitorComparisonPage() {

@@ -29,6 +29,10 @@ interface BrandStats {
   yearlyAvg2024?: number;
   yearlyAvg2025?: number;
   yearlyAvg2026?: number;
+  yearlyAvg2027?: number;
+  yearlyAvg2028?: number;
+  yearlyAvg2029?: number;
+  yearlyAvg2030?: number;
 }
 
 interface BrandComparisonTableProps {
@@ -306,6 +310,10 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
       { year: 2024, value: stats.yearlyAvg2024 || 0 },
       { year: 2025, value: stats.yearlyAvg2025 || 0 },
       { year: 2026, value: stats.yearlyAvg2026 || 0 },
+      { year: 2027, value: stats.yearlyAvg2027 || 0 },
+      { year: 2028, value: stats.yearlyAvg2028 || 0 },
+      { year: 2029, value: stats.yearlyAvg2029 || 0 },
+      { year: 2030, value: stats.yearlyAvg2030 || 0 },
     ].filter(y => y.value > 0);
 
     if (years.length < 2) {
