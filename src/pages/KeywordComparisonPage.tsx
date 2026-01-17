@@ -30,6 +30,18 @@ interface KeywordStats {
   interestScore: number;
   intent: string;
   aiCategory: string;
+  cagr3Year: number;
+  yearlyAvg2020?: number;
+  yearlyAvg2021?: number;
+  yearlyAvg2022?: number;
+  yearlyAvg2023?: number;
+  yearlyAvg2024?: number;
+  yearlyAvg2025?: number;
+  yearlyAvg2026?: number;
+  yearlyAvg2027?: number;
+  yearlyAvg2028?: number;
+  yearlyAvg2029?: number;
+  yearlyAvg2030?: number;
 }
 
 export default function KeywordComparisonPage() {
@@ -173,7 +185,7 @@ export default function KeywordComparisonPage() {
 
         const { data, error } = await supabase
           .from('brand_keyword_data')
-          .select('keyword, brand, "Avg. monthly searches", "Three month change", "YoY change", competition, "Competition (indexed value)", "Top of page bid (low range)", "Top of page bid (high range)", sentiment, demand_score, interest_score, intent_type, ai_category')
+          .select('keyword, brand, "Avg. monthly searches", "Three month change", "YoY change", competition, "Competition (indexed value)", "Top of page bid (low range)", "Top of page bid (high range)", sentiment, demand_score, interest_score, intent_type, ai_category, "2020 Avg", "2021 Avg", "2022 Avg", "2023 Avg", "2024 Avg", "2025 Avg", "2026 Avg", "2027 Avg", "2028 Avg", "2029 Avg", "2030 Avg"')
           .eq('keyword', kw.keyword)
           .eq('brand', kw.brand)
           .not('"Avg. monthly searches"', 'is', null)
@@ -188,6 +200,37 @@ export default function KeywordComparisonPage() {
         if (data && data.length > 0) {
           const row = data[0];
           console.log(`Found data for ${kw.keyword} (${kw.brand})`);
+
+          // Calculate CAGR dynamically from yearly averages
+          const calculateCAGR = (): number => {
+            const yearlyData = [
+              { year: 2030, value: row['2030 Avg'] },
+              { year: 2029, value: row['2029 Avg'] },
+              { year: 2028, value: row['2028 Avg'] },
+              { year: 2027, value: row['2027 Avg'] },
+              { year: 2026, value: row['2026 Avg'] },
+              { year: 2025, value: row['2025 Avg'] },
+              { year: 2024, value: row['2024 Avg'] },
+              { year: 2023, value: row['2023 Avg'] },
+              { year: 2022, value: row['2022 Avg'] },
+              { year: 2021, value: row['2021 Avg'] },
+              { year: 2020, value: row['2020 Avg'] },
+            ];
+
+            // Find the most recent 3-year period with valid data
+            for (let i = 0; i < yearlyData.length - 2; i++) {
+              const endYear = yearlyData[i];
+              const startYear = yearlyData[i + 2];
+
+              if (endYear.value && startYear.value && endYear.value > 0 && startYear.value > 0) {
+                // Calculate 3-year CAGR: ((ending/beginning)^(1/2)) - 1
+                return Math.pow(endYear.value / startYear.value, 1.0 / 2.0) - 1;
+              }
+            }
+
+            return 0;
+          };
+
           allStats.push({
             keyword: row.keyword,
             brand: row.brand,
@@ -202,7 +245,19 @@ export default function KeywordComparisonPage() {
             demandScore: row.demand_score || 0,
             interestScore: row.interest_score || 0,
             intent: row.intent_type || '',
-            aiCategory: row.ai_category || ''
+            aiCategory: row.ai_category || '',
+            cagr3Year: calculateCAGR(),
+            yearlyAvg2020: row['2020 Avg'] || undefined,
+            yearlyAvg2021: row['2021 Avg'] || undefined,
+            yearlyAvg2022: row['2022 Avg'] || undefined,
+            yearlyAvg2023: row['2023 Avg'] || undefined,
+            yearlyAvg2024: row['2024 Avg'] || undefined,
+            yearlyAvg2025: row['2025 Avg'] || undefined,
+            yearlyAvg2026: row['2026 Avg'] || undefined,
+            yearlyAvg2027: row['2027 Avg'] || undefined,
+            yearlyAvg2028: row['2028 Avg'] || undefined,
+            yearlyAvg2029: row['2029 Avg'] || undefined,
+            yearlyAvg2030: row['2030 Avg'] || undefined
           });
         } else {
           console.warn(`No data found for ${kw.keyword} (${kw.brand})`);

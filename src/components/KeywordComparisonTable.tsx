@@ -17,6 +17,18 @@ interface KeywordStats {
   interestScore: number;
   intent: string;
   aiCategory: string;
+  cagr3Year: number;
+  yearlyAvg2020?: number;
+  yearlyAvg2021?: number;
+  yearlyAvg2022?: number;
+  yearlyAvg2023?: number;
+  yearlyAvg2024?: number;
+  yearlyAvg2025?: number;
+  yearlyAvg2026?: number;
+  yearlyAvg2027?: number;
+  yearlyAvg2028?: number;
+  yearlyAvg2029?: number;
+  yearlyAvg2030?: number;
 }
 
 interface KeywordComparisonTableProps {
@@ -146,6 +158,72 @@ export default function KeywordComparisonTable({ keywordStats, theme }: KeywordC
     return `$${value.toFixed(2)}`;
   };
 
+  const formatCAGR = (cagr: number): string => {
+    if (cagr === 0) return '0%';
+    const pct = (cagr * 100).toFixed(1);
+    return cagr > 0 ? `+${pct}%` : `${pct}%`;
+  };
+
+  const calculateLongTermTrend = (stats: KeywordStats): { trend: string; color: string; explanation: string } => {
+    const years = [
+      { year: 2020, value: stats.yearlyAvg2020 || 0 },
+      { year: 2021, value: stats.yearlyAvg2021 || 0 },
+      { year: 2022, value: stats.yearlyAvg2022 || 0 },
+      { year: 2023, value: stats.yearlyAvg2023 || 0 },
+      { year: 2024, value: stats.yearlyAvg2024 || 0 },
+      { year: 2025, value: stats.yearlyAvg2025 || 0 },
+      { year: 2026, value: stats.yearlyAvg2026 || 0 },
+      { year: 2027, value: stats.yearlyAvg2027 || 0 },
+      { year: 2028, value: stats.yearlyAvg2028 || 0 },
+      { year: 2029, value: stats.yearlyAvg2029 || 0 },
+      { year: 2030, value: stats.yearlyAvg2030 || 0 },
+    ].filter(y => y.value > 0);
+
+    if (years.length < 2) {
+      return {
+        trend: 'Insufficient Data',
+        color: theme === 'dark' ? 'text-gray-400' : 'text-gray-500',
+        explanation: 'Not enough yearly data available for trend analysis'
+      };
+    }
+
+    const changes: number[] = [];
+    for (let i = 1; i < years.length; i++) {
+      const change = (years[i].value - years[i-1].value) / years[i-1].value;
+      changes.push(change);
+    }
+
+    const avgChange = changes.reduce((sum, c) => sum + c, 0) / changes.length;
+    const yearRange = `${years[0].year}→${years[years.length - 1].year}`;
+
+    let trend = '';
+    let color = theme === 'dark' ? 'text-gray-400' : 'text-gray-500';
+
+    if (avgChange > 0.30) {
+      trend = `🚀 Strong Growth`;
+      color = 'text-emerald-500';
+    } else if (avgChange >= 0.15) {
+      trend = `📈 Growing`;
+      color = 'text-green-500';
+    } else if (avgChange >= 0.05) {
+      trend = `↗️ Moderate Growth`;
+      color = 'text-blue-500';
+    } else if (avgChange >= -0.05) {
+      trend = `→ Stable`;
+      color = theme === 'dark' ? 'text-gray-400' : 'text-gray-500';
+    } else if (avgChange >= -0.15) {
+      trend = `↘️ Declining`;
+      color = 'text-orange-500';
+    } else {
+      trend = `📉 Sharp Decline`;
+      color = 'text-red-500';
+    }
+
+    const explanation = `Period: ${yearRange} | Years analyzed: ${years.length} | Avg YoY change: ${formatPercentage(avgChange)} | Based on yearly search volume averages`;
+
+    return { trend, color, explanation };
+  };
+
   const getKeywordColor = (index: number): string => {
     const colors = [
       '#3B82F6',
@@ -217,6 +295,8 @@ export default function KeywordComparisonTable({ keywordStats, theme }: KeywordC
     { label: 'Interest', icon: Sparkles, key: 'interestScore', format: (v: number) => v > 0 ? `${v.toFixed(1)}/50` : 'N/A', colorize: 'interest' },
     { label: '3-Month Change', icon: TrendingUp, key: 'threeMonthChange', format: (v: number) => formatPercentage(v), colorize: true },
     { label: 'YoY Change', icon: TrendingUp, key: 'yoyChange', format: (v: number) => formatPercentage(v), colorize: true },
+    { label: '3-Year CAGR', icon: TrendingUp, key: 'cagr3Year', format: (v: number) => formatCAGR(v), colorize: true },
+    { label: 'Long-Term Trend', icon: TrendingUp, key: 'longTermTrend', format: (v: number) => '', colorize: 'longTermTrend' },
     { label: 'Sentiment', icon: ThumbsUp, key: 'sentiment', format: (v: number) => formatSentiment(v), colorize: 'sentiment' },
   ];
 
@@ -302,6 +382,7 @@ export default function KeywordComparisonTable({ keywordStats, theme }: KeywordC
                   const isTrending = metric.key === 'trending';
                   const isInterestScore = metric.key === 'interestScore';
                   const isDemandScore = metric.key === 'demandScore';
+                  const isLongTermTrend = metric.key === 'longTermTrend';
                   const showTooltip = tooltipKeyword === `${stats.keyword}-${stats.brand}` && tooltipMetric === metric.key;
 
                   return (
@@ -430,6 +511,50 @@ export default function KeywordComparisonTable({ keywordStats, theme }: KeywordC
                                 </div>
                                 <div className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'} text-center leading-relaxed`}>
                                   {getDemandExplanation(value)}
+                                </div>
+                              </div>
+                              <div
+                                className={`absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent ${
+                                  theme === 'dark' ? 'border-t-gray-700' : 'border-t-gray-200'
+                                }`}
+                              />
+                            </div>
+                          )}
+                        </div>
+                      ) : isLongTermTrend ? (
+                        <div
+                          className="relative"
+                          ref={(el) => { tooltipRefs.current[`${stats.keyword}-${stats.brand}-${metric.key}`] = el; }}
+                        >
+                          <button
+                            onClick={() => toggleTooltip(`${stats.keyword}-${stats.brand}`, metric.key)}
+                            className={`text-center transition-all hover:scale-105 ${theme === 'dark' ? 'hover:bg-gray-700/30' : 'hover:bg-gray-100/50'} rounded-lg px-3 py-2 cursor-pointer`}
+                          >
+                            {(() => {
+                              const trendData = calculateLongTermTrend(stats);
+                              return (
+                                <div className={`text-base md:text-lg font-bold ${trendData.color}`}>
+                                  {trendData.trend}
+                                </div>
+                              );
+                            })()}
+                          </button>
+
+                          {showTooltip && (
+                            <div className={`absolute z-[9999] bottom-full left-1/2 transform -translate-x-1/2 mb-3 w-80 rounded-lg shadow-2xl border animate-in fade-in slide-in-from-bottom-2 duration-200 ${
+                              theme === 'dark'
+                                ? 'bg-gray-800 border-gray-700'
+                                : 'bg-white border-gray-200'
+                            }`}>
+                              <div className="p-4 space-y-2">
+                                <div className={`text-center text-lg font-bold ${calculateLongTermTrend(stats).color}`}>
+                                  {calculateLongTermTrend(stats).trend}
+                                </div>
+                                <div className={`text-xs ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'} leading-relaxed`}>
+                                  {calculateLongTermTrend(stats).explanation}
+                                </div>
+                                <div className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} italic mt-2 pt-2 border-t ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
+                                  Multi-year trend analysis based on yearly average search volumes.
                                 </div>
                               </div>
                               <div
