@@ -22,6 +22,13 @@ interface BrandStats {
   stable: number;
   highIntent: number;
   cagr3Year: number;
+  yearlyAvg2020: number;
+  yearlyAvg2021: number;
+  yearlyAvg2022: number;
+  yearlyAvg2023: number;
+  yearlyAvg2024: number;
+  yearlyAvg2025: number;
+  yearlyAvg2026: number;
 }
 
 interface BrandComparisonTableProps {
@@ -72,7 +79,7 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
     const cagr3Year = stats.cagr3Year || 0;
 
     // Industry Standard: 70/30 Exponential Weighted Moving Average
-    // 70% weight on recent momentum (3-6 months), 30% on historical trend (12-24+ months)
+    // 70% weight on recent momentum (3-6 months), 30% on historical trend (yearly averages)
 
     // Step 1: Calculate short-term momentum level (0-5 scale)
     let shortTermLevel = 2; // default: stable
@@ -94,22 +101,49 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
       shortTermLevel = 0;
     }
 
-    // Step 2: Calculate long-term historical trend level (0-5 scale)
+    // Step 2: Calculate long-term historical trend level (0-5 scale) using yearly averages
     let longTermLevel = 2; // default: stable
+    let yearlyGrowthRate = 0;
 
-    // avgSlope is monthly growth rate (e.g., 0.05 = 5% per month)
-    // Annualized: multiply by 12 for yearly equivalent
-    const annualizedSlope = avgSlope * 12;
+    // Find available consecutive years and calculate average annual growth
+    const years = [
+      { year: 2024, value: stats.yearlyAvg2024 },
+      { year: 2023, value: stats.yearlyAvg2023 },
+      { year: 2022, value: stats.yearlyAvg2022 },
+      { year: 2021, value: stats.yearlyAvg2021 },
+      { year: 2020, value: stats.yearlyAvg2020 },
+    ].filter(y => y.value > 0);
 
-    if (annualizedSlope > 0.30) {
+    // Calculate average year-over-year growth from available years
+    if (years.length >= 2) {
+      let totalGrowth = 0;
+      let growthCount = 0;
+
+      for (let i = 0; i < years.length - 1; i++) {
+        const currentYear = years[i];
+        const previousYear = years[i + 1];
+
+        if (previousYear.value > 0) {
+          const growth = (currentYear.value - previousYear.value) / previousYear.value;
+          totalGrowth += growth;
+          growthCount++;
+        }
+      }
+
+      if (growthCount > 0) {
+        yearlyGrowthRate = totalGrowth / growthCount;
+      }
+    }
+
+    if (yearlyGrowthRate > 0.30) {
       longTermLevel = 5;
-    } else if (annualizedSlope >= 0.15) {
+    } else if (yearlyGrowthRate >= 0.15) {
       longTermLevel = 4;
-    } else if (annualizedSlope >= 0.05) {
+    } else if (yearlyGrowthRate >= 0.05) {
       longTermLevel = 3;
-    } else if (annualizedSlope >= -0.05) {
+    } else if (yearlyGrowthRate >= -0.05) {
       longTermLevel = 2;
-    } else if (annualizedSlope >= -0.15) {
+    } else if (yearlyGrowthRate >= -0.15) {
       longTermLevel = 1;
     } else {
       longTermLevel = 0;
@@ -121,7 +155,7 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
 
     // Step 4: Intensity boost for truly explosive cases
     // Only boost if BOTH short-term AND long-term agree on strong growth
-    if (risingStarsHist > 400 && shortTermMomentum > 0.30 && annualizedSlope > 0.15) {
+    if (risingStarsHist > 400 && shortTermMomentum > 0.30 && yearlyGrowthRate > 0.15) {
       level = 5;
     }
 
@@ -159,10 +193,10 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
       color = 'text-red-500';
     }
 
-    // Build explanation with weighted calculation details including CAGR
+    // Build explanation with weighted calculation details
     const reliabilityPercent = (rSquared * 100).toFixed(0);
-    const cagrText = cagr3Year !== 0 ? ` | 3-Year CAGR: ${formatPercentage(cagr3Year)}` : '';
-    const explanation = `Short-term (70%): YoY ${formatPercentage(yoyChange)}, 3M ${formatPercentage(threeMonthChange)} → Level ${shortTermLevel} | Long-term (30%): ${formatMonthlyGrowth(avgSlope)}/mo (${formatPercentage(annualizedSlope)}/yr) → Level ${longTermLevel}${cagrText} | Weighted: ${weightedLevel.toFixed(1)} → ${label} | Trend Confidence: ${reliabilityPercent}%`;
+    const yearsUsed = years.length > 0 ? `${years[0].year}-${years[years.length - 1].year}` : 'N/A';
+    const explanation = `Short-term (70%): YoY ${formatPercentage(yoyChange)}, 3M ${formatPercentage(threeMonthChange)} → Level ${shortTermLevel} | Long-term (30%): Yearly Avg Growth ${formatPercentage(yearlyGrowthRate)}/yr (${yearsUsed}) → Level ${longTermLevel} | Weighted: ${weightedLevel.toFixed(1)} → ${label} | Trend Confidence: ${reliabilityPercent}%`;
 
     return { ArrowIcon, label, level, color, explanation };
   };
@@ -460,7 +494,7 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
                                   {calculateTrending(stats).explanation}
                                 </div>
                                 <div className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} italic mt-2 pt-2 border-t ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
-                                  Based on YoY change, 3-month momentum, historical growth, and rising stars count.
+                                  Based on YoY change, 3-month momentum, yearly average growth trends, and rising stars count.
                                 </div>
                               </div>
                               <div
