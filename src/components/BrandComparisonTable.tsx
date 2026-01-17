@@ -70,38 +70,8 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
     }
   };
 
-  const calculateTrending = (stats: BrandStats): { ArrowIcon: any; label: string; level: number; color: string; explanation: string } => {
-    const yoyChange = stats.yoyChange || 0;
-    const threeMonthChange = stats.threeMonthChange || 0;
-    const risingStarsHist = stats.risingStarsHistorical || 0;
-    const avgSlope = stats.avgSlope || 0;
-    const rSquared = stats.avgRSquared || 0;
-    const cagr3Year = stats.cagr3Year || 0;
-
-    // Industry Standard: 70/30 Exponential Weighted Moving Average
-    // 70% weight on recent momentum (3-6 months), 30% on historical trend (yearly averages)
-
-    // Step 1: Calculate short-term momentum level (0-5 scale)
-    let shortTermLevel = 2; // default: stable
-
-    // Use average of YoY and 3-month for short-term assessment
-    const shortTermMomentum = (yoyChange * 0.6) + (threeMonthChange * 0.4);
-
-    if (shortTermMomentum > 0.30) {
-      shortTermLevel = 5;
-    } else if (shortTermMomentum >= 0.15) {
-      shortTermLevel = 4;
-    } else if (shortTermMomentum >= 0.05) {
-      shortTermLevel = 3;
-    } else if (shortTermMomentum >= -0.05) {
-      shortTermLevel = 2;
-    } else if (shortTermMomentum >= -0.15) {
-      shortTermLevel = 1;
-    } else {
-      shortTermLevel = 0;
-    }
-
-    // Step 2: Calculate long-term historical trend level (0-5 scale) using yearly averages
+  const calculateLongTermTrend = (stats: BrandStats): { ArrowIcon: any; label: string; level: number; color: string; explanation: string; yearlyGrowthRate: number; years: { year: number; value: number }[] } => {
+    // Calculate long-term historical trend level (0-5 scale) using yearly averages
     let longTermLevel = 2; // default: stable
     let yearlyGrowthRate = 0;
 
@@ -148,6 +118,79 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
     } else {
       longTermLevel = 0;
     }
+
+    // Map level to icon, label, and color
+    let ArrowIcon = ArrowRight;
+    let label = 'Stable';
+    let color = theme === 'dark' ? 'text-gray-400' : 'text-gray-500';
+
+    if (longTermLevel === 5) {
+      ArrowIcon = Rocket;
+      label = 'Explosive Growth';
+      color = 'text-emerald-500';
+    } else if (longTermLevel === 4) {
+      ArrowIcon = ArrowUp;
+      label = 'Strong Growth';
+      color = 'text-green-500';
+    } else if (longTermLevel === 3) {
+      ArrowIcon = ArrowUpRight;
+      label = 'Moderate Growth';
+      color = 'text-blue-500';
+    } else if (longTermLevel === 2) {
+      ArrowIcon = ArrowRight;
+      label = 'Stable';
+      color = theme === 'dark' ? 'text-gray-400' : 'text-gray-500';
+    } else if (longTermLevel === 1) {
+      ArrowIcon = ArrowDownRight;
+      label = 'Slight Decline';
+      color = 'text-orange-500';
+    } else {
+      ArrowIcon = ArrowDown;
+      label = 'Sharp Decline';
+      color = 'text-red-500';
+    }
+
+    const yearsUsed = years.length > 0 ? `${years[years.length - 1].year}-${years[0].year}` : 'N/A';
+    const explanation = `Yearly Avg Growth: ${formatPercentage(yearlyGrowthRate)}/yr (${yearsUsed}) | Years Analyzed: ${years.length} | Level ${longTermLevel}: ${label}`;
+
+    return { ArrowIcon, label, level: longTermLevel, color, explanation, yearlyGrowthRate, years };
+  };
+
+  const calculateTrending = (stats: BrandStats): { ArrowIcon: any; label: string; level: number; color: string; explanation: string } => {
+    const yoyChange = stats.yoyChange || 0;
+    const threeMonthChange = stats.threeMonthChange || 0;
+    const risingStarsHist = stats.risingStarsHistorical || 0;
+    const avgSlope = stats.avgSlope || 0;
+    const rSquared = stats.avgRSquared || 0;
+
+    // Industry Standard: 70/30 Exponential Weighted Moving Average
+    // 70% weight on recent momentum (3-6 months), 30% on historical trend (yearly averages)
+
+    // Step 1: Calculate short-term momentum level (0-5 scale)
+    let shortTermLevel = 2; // default: stable
+
+    // Use average of YoY and 3-month for short-term assessment
+    const shortTermMomentum = (yoyChange * 0.6) + (threeMonthChange * 0.4);
+
+    if (shortTermMomentum > 0.30) {
+      shortTermLevel = 5;
+    } else if (shortTermMomentum >= 0.15) {
+      shortTermLevel = 4;
+    } else if (shortTermMomentum >= 0.05) {
+      shortTermLevel = 3;
+    } else if (shortTermMomentum >= -0.05) {
+      shortTermLevel = 2;
+    } else if (shortTermMomentum >= -0.15) {
+      shortTermLevel = 1;
+    } else {
+      shortTermLevel = 0;
+    }
+
+    // Step 2: Get long-term trend from separate function
+    const longTermTrend = calculateLongTermTrend(stats);
+    const longTermLevel = longTermTrend.level;
+    const yearlyGrowthRate = longTermTrend.yearlyGrowthRate;
+    const years = longTermTrend.years;
 
     // Step 3: Apply 70/30 weighting (EWMA industry standard)
     const weightedLevel = (shortTermLevel * 0.7) + (longTermLevel * 0.3);
@@ -322,6 +365,7 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
 
   const metrics = [
     { label: 'Trending', icon: TrendingUp, key: 'trending', format: (v: number) => '', colorize: 'trending' },
+    { label: 'Long Term Trend', icon: TrendingUp, key: 'longTermTrend', format: (v: number) => '', colorize: 'longTermTrend' },
     { label: 'Monthly Search', icon: TrendingUp, key: 'brandSearchVolume', format: (v: number) => formatCompactNumber(v) },
     { label: 'Total Keywords', icon: Search, key: 'totalKeywords', format: (v: number) => formatCompactNumber(v) },
     { label: 'Targeted Reach', icon: TrendingUp, key: 'totalVolume', format: (v: number) => formatCompactNumber(v) },
@@ -437,6 +481,7 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
                   }
 
                   const isTrending = metric.key === 'trending';
+                  const isLongTermTrend = metric.key === 'longTermTrend';
                   const isInterestScore = metric.key === 'avgInterestScore';
                   const isDemandScore = metric.key === 'avgDemandScore';
                   const showTooltip = tooltipBrand === stats.brand && tooltipMetric === metric.key;
@@ -495,6 +540,65 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
                                 </div>
                                 <div className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} italic mt-2 pt-2 border-t ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
                                   Based on YoY change, 3-month momentum, yearly average growth trends, and rising stars count.
+                                </div>
+                              </div>
+                              <div
+                                className={`absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent ${
+                                  theme === 'dark' ? 'border-t-gray-700' : 'border-t-gray-200'
+                                }`}
+                              />
+                            </div>
+                          )}
+                        </div>
+                      ) : isLongTermTrend ? (
+                        <div
+                          className="relative"
+                          ref={(el) => { tooltipRefs.current[`${stats.brand}-${metric.key}`] = el; }}
+                        >
+                          <button
+                            onClick={() => toggleTooltip(stats.brand, metric.key)}
+                            className={`text-center transition-all hover:scale-105 ${theme === 'dark' ? 'hover:bg-gray-700/30' : 'hover:bg-gray-100/50'} rounded-lg px-3 py-2 cursor-pointer`}
+                          >
+                            {(() => {
+                              const longTerm = calculateLongTermTrend(stats);
+                              const Icon = longTerm.ArrowIcon;
+                              return (
+                                <div className="flex flex-col items-center gap-1">
+                                  <Icon className={`w-8 h-8 ${longTerm.color}`} strokeWidth={2.5} />
+                                  <div className={`text-sm md:text-base font-bold ${longTerm.color}`}>
+                                    {longTerm.label}
+                                  </div>
+                                </div>
+                              );
+                            })()}
+                          </button>
+
+                          {showTooltip && (
+                            <div className={`absolute z-[9999] bottom-full left-1/2 transform -translate-x-1/2 mb-3 w-80 rounded-lg shadow-2xl border animate-in fade-in slide-in-from-bottom-2 duration-200 ${
+                              theme === 'dark'
+                                ? 'bg-gray-800 border-gray-700'
+                                : 'bg-white border-gray-200'
+                            }`}>
+                              <div className="p-4 space-y-2">
+                                <div className={`text-center flex items-center justify-center gap-2`}>
+                                  {(() => {
+                                    const longTerm = calculateLongTermTrend(stats);
+                                    const Icon = longTerm.ArrowIcon;
+                                    return (
+                                      <>
+                                        <Icon className={`w-5 h-5 ${longTerm.color}`} strokeWidth={2.5} />
+                                        <span className={`text-lg font-bold ${longTerm.color}`}>
+                                          {longTerm.label}
+                                        </span>
+                                      </>
+                                    );
+                                  })()}
+                                </div>
+                                <div className={`text-xs ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'} leading-relaxed`}>
+                                  {calculateLongTermTrend(stats).explanation}
+                                </div>
+                                <div className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} italic mt-2 pt-2 border-t ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
+                                  Based on average year-over-year growth calculated from yearly average search volumes (2020-2024).
                                 </div>
                               </div>
                               <div
