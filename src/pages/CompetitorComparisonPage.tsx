@@ -35,6 +35,7 @@ interface BrandStats {
   declining: number;
   stable: number;
   highIntent: number;
+  cagr3Year: number;
 }
 
 export default function CompetitorComparisonPage() {

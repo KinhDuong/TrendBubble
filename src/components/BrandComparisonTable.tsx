@@ -21,6 +21,7 @@ interface BrandStats {
   declining: number;
   stable: number;
   highIntent: number;
+  cagr3Year: number;
 }
 
 interface BrandComparisonTableProps {
@@ -68,6 +69,7 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
     const risingStarsHist = stats.risingStarsHistorical || 0;
     const avgSlope = stats.avgSlope || 0;
     const rSquared = stats.avgRSquared || 0;
+    const cagr3Year = stats.cagr3Year || 0;
 
     // Industry Standard: 70/30 Exponential Weighted Moving Average
     // 70% weight on recent momentum (3-6 months), 30% on historical trend (12-24+ months)
@@ -157,9 +159,10 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
       color = 'text-red-500';
     }
 
-    // Build explanation with weighted calculation details
+    // Build explanation with weighted calculation details including CAGR
     const reliabilityPercent = (rSquared * 100).toFixed(0);
-    const explanation = `Short-term (70%): YoY ${formatPercentage(yoyChange)}, 3M ${formatPercentage(threeMonthChange)} → Level ${shortTermLevel} | Long-term (30%): ${formatMonthlyGrowth(avgSlope)}/mo (${formatPercentage(annualizedSlope)}/yr) → Level ${longTermLevel} | Weighted: ${weightedLevel.toFixed(1)} → ${label} | Trend Confidence: ${reliabilityPercent}%`;
+    const cagrText = cagr3Year !== 0 ? ` | 3-Year CAGR: ${formatPercentage(cagr3Year)}` : '';
+    const explanation = `Short-term (70%): YoY ${formatPercentage(yoyChange)}, 3M ${formatPercentage(threeMonthChange)} → Level ${shortTermLevel} | Long-term (30%): ${formatMonthlyGrowth(avgSlope)}/mo (${formatPercentage(annualizedSlope)}/yr) → Level ${longTermLevel}${cagrText} | Weighted: ${weightedLevel.toFixed(1)} → ${label} | Trend Confidence: ${reliabilityPercent}%`;
 
     return { ArrowIcon, label, level, color, explanation };
   };
@@ -292,6 +295,7 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
     { label: 'Interest', icon: Sparkles, key: 'avgInterestScore', format: (v: number) => v > 0 ? `${v.toFixed(1)}/50` : 'N/A', colorize: 'interest' },
     { label: '3-Month Change', icon: TrendingUp, key: 'threeMonthChange', format: (v: number) => formatPercentage(v), colorize: true },
     { label: 'YoY Change', icon: TrendingUp, key: 'yoyChange', format: (v: number) => formatPercentage(v), colorize: true },
+    { label: '3-Year CAGR', icon: TrendingUp, key: 'cagr3Year', format: (v: number) => v !== 0 ? formatPercentage(v) : 'N/A', colorize: true },
     { label: 'Sentiment', icon: ThumbsUp, key: 'avgSentiment', format: (v: number) => formatSentiment(v), colorize: 'sentiment' },
     { label: 'Top Performers', icon: Trophy, key: 'topPerformers', format: (v: number) => formatCompactNumber(v) },
     { label: 'Rising Stars', icon: Zap, key: 'risingStars', format: (v: number) => formatCompactNumber(v) },
