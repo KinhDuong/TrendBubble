@@ -35,6 +35,14 @@ interface BrandStats {
   declining: number;
   stable: number;
   highIntent: number;
+  cagr3Year: number;
+  yearlyAvg2020?: number;
+  yearlyAvg2021?: number;
+  yearlyAvg2022?: number;
+  yearlyAvg2023?: number;
+  yearlyAvg2024?: number;
+  yearlyAvg2025?: number;
+  yearlyAvg2026?: number;
 }
 
 export default function CompetitorComparisonPage() {
