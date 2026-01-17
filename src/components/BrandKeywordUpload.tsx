@@ -331,6 +331,50 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
     return null;
   };
 
+  const calculateYearlyAverages = (data: Array<Record<string, any>>): Array<Record<string, any>> => {
+    // Find all unique years from monthly columns
+    const yearsSet = new Set<string>();
+
+    if (data.length === 0) return data;
+
+    Object.keys(data[0]).forEach(key => {
+      if (key.toLowerCase().startsWith('searches:')) {
+        const match = key.match(/(\d{4})/);
+        if (match) {
+          yearsSet.add(match[1]);
+        }
+      }
+    });
+
+    const years = Array.from(yearsSet).sort();
+    console.log(`Found ${years.length} unique years:`, years);
+
+    // Calculate yearly averages for each row
+    return data.map(row => {
+      const enrichedRow = { ...row };
+
+      years.forEach(year => {
+        const monthlyValues: number[] = [];
+
+        Object.keys(row).forEach(key => {
+          if (key.toLowerCase().startsWith('searches:') && key.includes(year)) {
+            const value = row[key];
+            if (typeof value === 'number' && !isNaN(value)) {
+              monthlyValues.push(value);
+            }
+          }
+        });
+
+        if (monthlyValues.length > 0) {
+          const average = monthlyValues.reduce((sum, val) => sum + val, 0) / monthlyValues.length;
+          enrichedRow[`${year} Avg`] = Math.round(average);
+        }
+      });
+
+      return enrichedRow;
+    });
+  };
+
   const parseCSV = (text: string): Array<Record<string, any>> => {
     // Strip UTF-8 BOM if present
     const cleanText = text.replace(/^\uFEFF/, '');
@@ -444,7 +488,13 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
 
     console.log(`Parsed ${results.length} records from CSV`);
 
-    return results.filter(row => row.keyword);
+    const filteredResults = results.filter(row => row.keyword);
+
+    // Calculate yearly averages
+    const enrichedResults = calculateYearlyAverages(filteredResults);
+    console.log(`Added yearly average columns for each record`);
+
+    return enrichedResults;
   };
 
   const aggregateMonthlyData = (data: Array<Record<string, any>>) => {
