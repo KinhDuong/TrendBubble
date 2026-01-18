@@ -1227,18 +1227,12 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
           return kwNormalized === normalized;
         });
 
-        // If still not found, find keyword that contains the brand name (normalize spaces for comparison)
+        // If still not found, find keyword that contains the brand name
         if (!keywordData) {
-          const brandNormalized = brandLower.replace(/\s+/g, '');
           keywordData = scoredData
             .filter(kw => {
               const kwLower = kw.keyword.toLowerCase();
-              const kwNormalized = kwLower.replace(/\s+/g, '');
-              // Check both with and without spaces
-              return kwLower.includes(brandLower) ||
-                     brandLower.includes(kwLower) ||
-                     kwNormalized.includes(brandNormalized) ||
-                     brandNormalized.includes(kwNormalized);
+              return kwLower.includes(brandLower) || brandLower.includes(kwLower);
             })
             .sort((a, b) => (b['Avg. monthly searches'] || 0) - (a['Avg. monthly searches'] || 0))[0];
         }
