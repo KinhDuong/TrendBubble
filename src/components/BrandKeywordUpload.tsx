@@ -217,6 +217,13 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
       if (similar.length > 1) {
         // First priority: keyword that exactly matches brand name (case-insensitive)
         const brandLower = brandName.trim().toLowerCase();
+
+        console.log(`🔍 Merge group candidates:`, similar.map(s => ({
+          keyword: s.keyword,
+          volume: s['Avg. monthly searches'],
+          matchesBrand: s.keyword.toLowerCase() === brandLower
+        })));
+
         const exactBrandMatch = similar.find(s => s.keyword.toLowerCase() === brandLower);
 
         // Second priority: highest search volume
@@ -230,12 +237,16 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
 
         if (exactBrandMatch) {
           console.log(`✓ Preserving brand name "${primaryKeyword}" as primary keyword in merge (volume: ${exactBrandMatch['Avg. monthly searches']?.toLocaleString()})`);
+        } else {
+          console.log(`⚠ No exact brand match found in group. Using highest volume: "${primaryKeyword}"`);
         }
 
         const mergedData: any = {
           keyword: primaryKeyword,
           brand: record.brand
         };
+
+        console.log(`📦 Created mergedData with keyword: "${mergedData.keyword}"`);
 
         const numericFields = new Set<string>();
         similar.forEach(item => {
@@ -1552,6 +1563,7 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
           onApprove={handleMergeApproval}
           onCancel={handleMergeCancel}
           theme={theme}
+          brandName={brandName}
         />
       )}
 

@@ -14,6 +14,7 @@ interface KeywordMergeReviewProps {
   onApprove: (approvedMerges: MergeGroup[]) => void;
   onCancel: () => void;
   theme: 'dark' | 'light';
+  brandName: string;
 }
 
 export default function KeywordMergeReview({
@@ -21,6 +22,7 @@ export default function KeywordMergeReview({
   onApprove,
   onCancel,
   theme,
+  brandName,
 }: KeywordMergeReviewProps) {
   const [selectedMerges, setSelectedMerges] = useState<Set<string>>(
     new Set(mergeGroups.map(g => g.id))
@@ -75,9 +77,35 @@ export default function KeywordMergeReview({
           return null;
         }
 
-        const primaryKeyword = filteredOriginalData.reduce((longest, current) =>
-          current.keyword.length > longest.keyword.length ? current : longest
-        ).keyword;
+        // Preserve the original primaryKeyword logic from detection:
+        // 1. If a keyword matches brand name (case-insensitive), use that
+        // 2. Otherwise, use highest search volume
+        // 3. Only recalculate if variants were modified
+        const brandLower = brandName.trim().toLowerCase();
+        const exactBrandMatch = filteredOriginalData.find(s =>
+          s.keyword.toLowerCase() === brandLower
+        );
+
+        const highestVolumeKeyword = filteredOriginalData.reduce((highest, current) => {
+          const currentVolume = current['Avg. monthly searches'] || 0;
+          const highestVolume = highest['Avg. monthly searches'] || 0;
+          return currentVolume > highestVolume ? current : highest;
+        });
+
+        // If user unchecked the original primary keyword, we need to pick a new one
+        const originalPrimaryStillSelected = Array.from(selectedVars).includes(group.primaryKeyword);
+
+        let primaryKeyword: string;
+        if (!originalPrimaryStillSelected) {
+          // User removed the original primary, pick new one with same logic
+          primaryKeyword = (exactBrandMatch ? exactBrandMatch : highestVolumeKeyword).keyword;
+        } else if (exactBrandMatch) {
+          // Brand match exists and is selected - always use it
+          primaryKeyword = exactBrandMatch.keyword;
+        } else {
+          // No brand match, use highest volume
+          primaryKeyword = highestVolumeKeyword.keyword;
+        }
 
         const mergedData: any = {
           keyword: primaryKeyword,
