@@ -54,8 +54,6 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
   const [currentKeywordCount, setCurrentKeywordCount] = useState<number>(0);
   const [showBrandSelector, setShowBrandSelector] = useState(false);
   const [brandSelectorKeywords, setBrandSelectorKeywords] = useState<Array<Record<string, any>>>([]);
-  const [avgMonthlySearchesCache, setAvgMonthlySearchesCache] = useState<number | undefined>(undefined);
-  const [representativeKeywordCache, setRepresentativeKeywordCache] = useState<string | undefined>(undefined);
   const [showUpdateConfirmation, setShowUpdateConfirmation] = useState(false);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
 
@@ -601,6 +599,66 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
     return aggregated;
   };
 
+  const performBrandMatchingAndUpload = async (data: Array<Record<string, any>>) => {
+    try {
+      // Brand matching - find exact match for brand name (case-insensitive)
+      const brandLower = brandName.trim().toLowerCase();
+      const brandMatch = data.find(record =>
+        record.keyword.toLowerCase() === brandLower
+      );
+
+      let avgMonthlySearches: number | undefined;
+      let representativeKeyword: string | undefined;
+
+      if (brandMatch) {
+        // Use the exact match value
+        avgMonthlySearches = brandMatch['Avg. monthly searches'];
+        representativeKeyword = brandName.trim();
+        console.log(`✓ Found exact match for brand "${brandName}": ${avgMonthlySearches?.toLocaleString()} avg monthly searches (after merges)`);
+
+        // Proceed directly to upload
+        await processUpload(data, avgMonthlySearches, representativeKeyword);
+      } else {
+        // No exact match found - show top 20 by volume + first 20 rows for user selection
+        console.log(`⚠ No exact match found for brand "${brandName}" (after merges)`);
+
+        // Group 1: Top 20 by search volume
+        const top20ByVolume = [...data]
+          .sort((a, b) => (b['Avg. monthly searches'] || 0) - (a['Avg. monthly searches'] || 0))
+          .slice(0, 20);
+
+        // Group 2: First 20 from CSV
+        const first20 = data.slice(0, 20);
+
+        // Combine and remove duplicates (keeping top volume version)
+        const keywordMap = new Map<string, Record<string, any>>();
+
+        // Add top volume first (they take precedence)
+        top20ByVolume.forEach(kw => {
+          keywordMap.set(kw.keyword, { ...kw, group: 'top' });
+        });
+
+        // Add first 20, only if not already in map
+        first20.forEach(kw => {
+          if (!keywordMap.has(kw.keyword)) {
+            keywordMap.set(kw.keyword, { ...kw, group: 'first' });
+          }
+        });
+
+        const combinedKeywords = Array.from(keywordMap.values());
+
+        setBrandSelectorKeywords(combinedKeywords);
+        setPendingData(data); // Store data for final upload
+        setShowBrandSelector(true);
+        setUploading(false);
+      }
+    } catch (err) {
+      console.error('Brand matching error:', err);
+      setError(err instanceof Error ? err.message : 'Failed to process brand matching');
+      setUploading(false);
+    }
+  };
+
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -653,7 +711,7 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
         throw new Error('No valid data found in CSV');
       }
 
-      // IMMEDIATELY filter out zero-traffic keywords (trash data) - they are excluded from ALL processing
+      // STEP 1: Filter out zero-traffic keywords (trash data) - excluded from ALL processing
       const data = rawData.filter(record => {
         const avgSearches = record['Avg. monthly searches'];
         return avgSearches !== undefined && avgSearches !== null && avgSearches !== 0 && avgSearches !== '';
@@ -667,67 +725,13 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
         throw new Error('All keywords have zero traffic. Please upload a file with valid search volume data.');
       }
 
-      // STEP 1: Brand matching - find exact match for brand name (case-insensitive)
-      const brandLower = brandName.trim().toLowerCase();
-      const brandMatch = data.find(record =>
-        record.keyword.toLowerCase() === brandLower
-      );
-
-      let avgMonthlySearches: number | undefined;
-
-      if (brandMatch) {
-        // Use the exact match value
-        avgMonthlySearches = brandMatch['Avg. monthly searches'];
-        console.log(`✓ Found exact match for brand "${brandName}": ${avgMonthlySearches?.toLocaleString()} avg monthly searches`);
-      } else {
-        // No exact match found - show top 20 by volume + first 20 rows for user selection
-        console.log(`⚠ No exact match found for brand "${brandName}"`);
-
-        // Group 1: Top 20 by search volume
-        const top20ByVolume = [...data]
-          .sort((a, b) => (b['Avg. monthly searches'] || 0) - (a['Avg. monthly searches'] || 0))
-          .slice(0, 20);
-
-        // Group 2: First 20 from CSV
-        const first20 = data.slice(0, 20);
-
-        // Combine and remove duplicates (keeping top volume version)
-        const keywordMap = new Map<string, Record<string, any>>();
-
-        // Add top volume first (they take precedence)
-        top20ByVolume.forEach(kw => {
-          keywordMap.set(kw.keyword, { ...kw, group: 'top' });
-        });
-
-        // Add first 20, only if not already in map
-        first20.forEach(kw => {
-          if (!keywordMap.has(kw.keyword)) {
-            keywordMap.set(kw.keyword, { ...kw, group: 'first' });
-          }
-        });
-
-        const combinedKeywords = Array.from(keywordMap.values());
-
-        setBrandSelectorKeywords(combinedKeywords);
-        setPendingData(data); // Store data for later processing
-        setAvgMonthlySearchesCache(undefined); // Clear cache
-        setShowBrandSelector(true);
-        setUploading(false);
-        event.target.value = '';
-        return; // Stop here, wait for user selection
-      }
-
-      // Store the brand value and keyword for later use
-      setAvgMonthlySearchesCache(avgMonthlySearches);
-      setRepresentativeKeywordCache(brandName.trim());
-
-      // STEP 2: Only run duplicate detection on valid traffic keywords (zero-traffic never included)
+      // STEP 2: Run duplicate detection on valid traffic keywords
       const detectedDuplicates = detectDuplicates(data);
 
       if (detectedDuplicates.length > 0) {
         setDuplicateGroups(detectedDuplicates);
-        setZeroTrafficKeywords([]); // Zero-traffic keywords are NOT shown in review
-        setPendingData(data); // Only valid traffic keywords
+        setZeroTrafficKeywords([]);
+        setPendingData(data);
         setShowDuplicateReview(true);
         setUploading(false);
         event.target.value = '';
@@ -743,7 +747,8 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
         setShowMergeReview(true);
         setUploading(false);
       } else {
-        await processUpload(data, avgMonthlySearches, brandName.trim());
+        // STEP 4: Brand matching happens AFTER merges (data is now cleaned)
+        await performBrandMatchingAndUpload(data);
       }
 
       event.target.value = '';
@@ -776,7 +781,7 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
         throw new Error('No valid data found in CSV');
       }
 
-      // IMMEDIATELY filter out zero-traffic keywords (trash data) - they are excluded from ALL processing
+      // STEP 1: Filter out zero-traffic keywords (trash data) - excluded from ALL processing
       const data = rawData.filter(record => {
         const avgSearches = record['Avg. monthly searches'];
         return avgSearches !== undefined && avgSearches !== null && avgSearches !== 0 && avgSearches !== '';
@@ -790,66 +795,13 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
         throw new Error('All keywords have zero traffic. Please upload a file with valid search volume data.');
       }
 
-      // STEP 1: Brand matching - find exact match for brand name (case-insensitive)
-      const brandLower = brandName.trim().toLowerCase();
-      const brandMatch = data.find(record =>
-        record.keyword.toLowerCase() === brandLower
-      );
-
-      let avgMonthlySearches: number | undefined;
-
-      if (brandMatch) {
-        // Use the exact match value
-        avgMonthlySearches = brandMatch['Avg. monthly searches'];
-        console.log(`✓ Found exact match for brand "${brandName}": ${avgMonthlySearches?.toLocaleString()} avg monthly searches`);
-      } else {
-        // No exact match found - show top 20 by volume + first 20 rows for user selection
-        console.log(`⚠ No exact match found for brand "${brandName}"`);
-
-        // Group 1: Top 20 by search volume
-        const top20ByVolume = [...data]
-          .sort((a, b) => (b['Avg. monthly searches'] || 0) - (a['Avg. monthly searches'] || 0))
-          .slice(0, 20);
-
-        // Group 2: First 20 from CSV
-        const first20 = data.slice(0, 20);
-
-        // Combine and remove duplicates (keeping top volume version)
-        const keywordMap = new Map<string, Record<string, any>>();
-
-        // Add top volume first (they take precedence)
-        top20ByVolume.forEach(kw => {
-          keywordMap.set(kw.keyword, { ...kw, group: 'top' });
-        });
-
-        // Add first 20, only if not already in map
-        first20.forEach(kw => {
-          if (!keywordMap.has(kw.keyword)) {
-            keywordMap.set(kw.keyword, { ...kw, group: 'first' });
-          }
-        });
-
-        const combinedKeywords = Array.from(keywordMap.values());
-
-        setBrandSelectorKeywords(combinedKeywords);
-        setPendingData(data); // Store data for later processing
-        setAvgMonthlySearchesCache(undefined); // Clear cache
-        setShowBrandSelector(true);
-        setUploading(false);
-        return; // Stop here, wait for user selection
-      }
-
-      // Store the brand value and keyword for later use
-      setAvgMonthlySearchesCache(avgMonthlySearches);
-      setRepresentativeKeywordCache(brandName.trim());
-
-      // STEP 2: Only run duplicate detection on valid traffic keywords (zero-traffic never included)
+      // STEP 2: Run duplicate detection on valid traffic keywords
       const detectedDuplicates = detectDuplicates(data);
 
       if (detectedDuplicates.length > 0) {
         setDuplicateGroups(detectedDuplicates);
-        setZeroTrafficKeywords([]); // Zero-traffic keywords are NOT shown in review
-        setPendingData(data); // Only valid traffic keywords
+        setZeroTrafficKeywords([]);
+        setPendingData(data);
         setShowDuplicateReview(true);
         setUploading(false);
         return;
@@ -864,7 +816,8 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
         setShowMergeReview(true);
         setUploading(false);
       } else {
-        await processUpload(data, avgMonthlySearches, brandName.trim());
+        // STEP 4: Brand matching happens AFTER merges (data is now cleaned)
+        await performBrandMatchingAndUpload(data);
       }
     } catch (err) {
       console.error('Upload error details:', err);
@@ -887,12 +840,13 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
 
     try {
       const finalData = applyMerges(pendingData, approvedMerges);
-      await processUpload(finalData, avgMonthlySearchesCache, representativeKeywordCache);
+      // Brand matching happens AFTER merges are applied
+      await performBrandMatchingAndUpload(finalData);
     } catch (err) {
       console.error('Merge approval error:', err);
       setError(err instanceof Error ? err.message : 'Failed to process merges');
-    } finally {
       setUploading(false);
+    } finally {
       setPendingData([]);
       setMergeGroups([]);
     }
@@ -902,8 +856,6 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
     setShowMergeReview(false);
     setPendingData([]);
     setMergeGroups([]);
-    setAvgMonthlySearchesCache(undefined);
-    setRepresentativeKeywordCache(undefined);
     setUploading(false);
   };
 
@@ -920,13 +872,14 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
         setShowMergeReview(true);
         setUploading(false);
       } else {
-        await processUpload(filteredData, avgMonthlySearchesCache, representativeKeywordCache);
+        // Brand matching happens AFTER duplicates removed and no merges needed
+        await performBrandMatchingAndUpload(filteredData);
       }
     } catch (err) {
       console.error('Duplicate review continue error:', err);
       setError(err instanceof Error ? err.message : 'Failed to process data');
-    } finally {
       setUploading(false);
+    } finally {
       setDuplicateGroups([]);
       setZeroTrafficKeywords([]);
     }
@@ -937,8 +890,6 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
     setDuplicateGroups([]);
     setZeroTrafficKeywords([]);
     setPendingData([]);
-    setAvgMonthlySearchesCache(undefined);
-    setRepresentativeKeywordCache(undefined);
     setUploading(false);
   };
 
@@ -949,34 +900,12 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
     try {
       const selectedAvgMonthlySearches = selectedKeyword['Avg. monthly searches'];
       const selectedKeywordName = selectedKeyword.keyword;
-      console.log(`✓ User selected keyword: "${selectedKeywordName}" with ${selectedAvgMonthlySearches?.toLocaleString()} avg monthly searches`);
+      console.log(`✓ User selected keyword: "${selectedKeywordName}" with ${selectedAvgMonthlySearches?.toLocaleString()} avg monthly searches (post-merge data)`);
 
-      // Store the selected brand value and keyword name
-      setAvgMonthlySearchesCache(selectedAvgMonthlySearches);
-      setRepresentativeKeywordCache(selectedKeywordName);
-
-      // Continue with duplicate detection
-      const detectedDuplicates = detectDuplicates(pendingData);
-
-      if (detectedDuplicates.length > 0) {
-        setDuplicateGroups(detectedDuplicates);
-        setZeroTrafficKeywords([]);
-        setShowDuplicateReview(true);
-        setUploading(false);
-        return;
-      }
-
-      // Continue with merge detection
-      const detectedMerges = detectMergeGroups(pendingData);
-
-      if (detectedMerges.length > 0) {
-        setMergeGroups(detectedMerges);
-        setShowMergeReview(true);
-        setUploading(false);
-      } else {
-        await processUpload(pendingData, selectedAvgMonthlySearches, selectedKeywordName);
-        setPendingData([]);
-      }
+      // At this point, pendingData has already been through duplicate removal and merge detection
+      // So we can proceed directly to upload
+      await processUpload(pendingData, selectedAvgMonthlySearches, selectedKeywordName);
+      setPendingData([]);
     } catch (err) {
       console.error('Brand selection error:', err);
       setError(err instanceof Error ? err.message : 'Failed to process upload');
@@ -990,8 +919,6 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
     setShowBrandSelector(false);
     setBrandSelectorKeywords([]);
     setPendingData([]);
-    setAvgMonthlySearchesCache(undefined);
-    setRepresentativeKeywordCache(undefined);
     setUploading(false);
   };
 
@@ -1407,8 +1334,6 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
       : `Successfully uploaded data for ${brandName.trim()}: ${data.length} keywords`;
 
     setSuccess(successMessage);
-    setAvgMonthlySearchesCache(undefined);
-    setRepresentativeKeywordCache(undefined);
 
     setTimeout(() => {
       onUploadComplete();
