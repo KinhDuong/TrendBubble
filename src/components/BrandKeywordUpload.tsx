@@ -674,11 +674,13 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
       );
 
       let avgMonthlySearches: number | undefined;
+      let representativeKeywordName: string | undefined;
 
       if (brandMatch) {
-        // Use the exact match value
+        // Use the exact match value and keyword
         avgMonthlySearches = brandMatch['Avg. monthly searches'];
-        console.log(`✓ Found exact match for brand "${brandName}": ${avgMonthlySearches?.toLocaleString()} avg monthly searches`);
+        representativeKeywordName = brandMatch.keyword; // Use the actual keyword from the data
+        console.log(`✓ Found exact match for brand "${brandName}": keyword "${representativeKeywordName}" with ${avgMonthlySearches?.toLocaleString()} avg monthly searches`);
       } else {
         // No exact match found - show top 20 by volume + first 20 rows for user selection
         console.log(`⚠ No exact match found for brand "${brandName}"`);
@@ -719,7 +721,7 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
 
       // Store the brand value and keyword for later use
       setAvgMonthlySearchesCache(avgMonthlySearches);
-      setRepresentativeKeywordCache(brandName.trim());
+      setRepresentativeKeywordCache(representativeKeywordName);
 
       // STEP 2: Only run duplicate detection on valid traffic keywords (zero-traffic never included)
       const detectedDuplicates = detectDuplicates(data);
@@ -743,7 +745,7 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
         setShowMergeReview(true);
         setUploading(false);
       } else {
-        await processUpload(data, avgMonthlySearches, brandName.trim());
+        await processUpload(data, avgMonthlySearches, representativeKeywordName);
       }
 
       event.target.value = '';
@@ -797,11 +799,13 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
       );
 
       let avgMonthlySearches: number | undefined;
+      let representativeKeywordName: string | undefined;
 
       if (brandMatch) {
-        // Use the exact match value
+        // Use the exact match value and keyword
         avgMonthlySearches = brandMatch['Avg. monthly searches'];
-        console.log(`✓ Found exact match for brand "${brandName}": ${avgMonthlySearches?.toLocaleString()} avg monthly searches`);
+        representativeKeywordName = brandMatch.keyword; // Use the actual keyword from the data
+        console.log(`✓ Found exact match for brand "${brandName}": keyword "${representativeKeywordName}" with ${avgMonthlySearches?.toLocaleString()} avg monthly searches`);
       } else {
         // No exact match found - show top 20 by volume + first 20 rows for user selection
         console.log(`⚠ No exact match found for brand "${brandName}"`);
@@ -841,7 +845,7 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
 
       // Store the brand value and keyword for later use
       setAvgMonthlySearchesCache(avgMonthlySearches);
-      setRepresentativeKeywordCache(brandName.trim());
+      setRepresentativeKeywordCache(representativeKeywordName);
 
       // STEP 2: Only run duplicate detection on valid traffic keywords (zero-traffic never included)
       const detectedDuplicates = detectDuplicates(data);
@@ -864,7 +868,7 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
         setShowMergeReview(true);
         setUploading(false);
       } else {
-        await processUpload(data, avgMonthlySearches, brandName.trim());
+        await processUpload(data, avgMonthlySearches, representativeKeywordName);
       }
     } catch (err) {
       console.error('Upload error details:', err);
