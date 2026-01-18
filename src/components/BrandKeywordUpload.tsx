@@ -331,6 +331,59 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
     return null;
   };
 
+  const calculateAvgMonthlySearches = (row: Record<string, any>): number | null => {
+    // Extract all monthly search columns with their dates
+    const monthlyData: Array<{ date: Date; value: number }> = [];
+
+    Object.keys(row).forEach(key => {
+      if (key.toLowerCase().startsWith('searches:')) {
+        const value = row[key];
+        if (typeof value === 'number' && !isNaN(value)) {
+          // Parse the month from the column header (e.g., "Searches: Dec 2021")
+          const match = key.match(/searches?:\s*(\w+)\s+(\d{4})/i);
+          if (match) {
+            const [, monthName, year] = match;
+            const monthMap: { [key: string]: number } = {
+              jan: 0, january: 0,
+              feb: 1, february: 1,
+              mar: 2, march: 2,
+              apr: 3, april: 3,
+              may: 4,
+              jun: 5, june: 5,
+              jul: 6, july: 6,
+              aug: 7, august: 7,
+              sep: 8, september: 8,
+              oct: 9, october: 9,
+              nov: 10, november: 10,
+              dec: 11, december: 11
+            };
+            const monthNum = monthMap[monthName.toLowerCase()];
+            if (monthNum !== undefined) {
+              const date = new Date(parseInt(year), monthNum, 1);
+              monthlyData.push({ date, value });
+            }
+          }
+        }
+      }
+    });
+
+    if (monthlyData.length === 0) {
+      return null;
+    }
+
+    // Sort by date descending (most recent first)
+    monthlyData.sort((a, b) => b.date.getTime() - a.date.getTime());
+
+    // Take the last 12 months (or all available if fewer than 12)
+    const recentMonths = monthlyData.slice(0, Math.min(12, monthlyData.length));
+
+    // Calculate average
+    const sum = recentMonths.reduce((acc, item) => acc + item.value, 0);
+    const average = Math.round(sum / recentMonths.length);
+
+    return average;
+  };
+
   const calculateYearlyAverages = (data: Array<Record<string, any>>): Array<Record<string, any>> => {
     // Find all unique years from monthly columns
     const yearsSet = new Set<string>();
@@ -350,7 +403,8 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
     console.log(`Found ${years.length} unique years:`, years);
 
     // Calculate yearly averages for each row
-    return data.map(row => {
+    let calculatedCount = 0;
+    const enrichedData = data.map(row => {
       const enrichedRow = { ...row };
 
       years.forEach(year => {
@@ -371,8 +425,18 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
         }
       });
 
+      // IMPORTANT: Calculate "Avg. monthly searches" from the most recent 12 months
+      const calculatedAvg = calculateAvgMonthlySearches(row);
+      if (calculatedAvg !== null) {
+        enrichedRow['Avg. monthly searches'] = calculatedAvg;
+        calculatedCount++;
+      }
+
       return enrichedRow;
     });
+
+    console.log(`✓ Calculated "Avg. monthly searches" for ${calculatedCount} keywords from recent monthly data`);
+    return enrichedData;
   };
 
   const parseCSV = (text: string): Array<Record<string, any>> => {
@@ -452,11 +516,8 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
             record[header] = parsedValue;
           }
         } else if (header === 'Avg. monthly searches') {
-          const cleanValue = value.replace(/,/g, '');
-          const parsedValue = parseInt(cleanValue);
-          if (!isNaN(parsedValue)) {
-            record[header] = parsedValue;
-          }
+          // SKIP: We calculate this from monthly columns, ignore CSV value
+          // This ensures we always use calculated values from the most recent 12 months
         } else if (header === 'Competition (indexed value)' ||
                    header === 'Top of page bid (low range)' ||
                    header === 'Top of page bid (high range)') {
