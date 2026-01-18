@@ -308,8 +308,13 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
     const filtered = data.filter(record => !mergedKeywords.has(record.keyword));
 
     approvedMerges.forEach(group => {
+      console.log(`🔀 Applying merge: "${group.primaryKeyword}" (replacing ${group.variants.length} variants)`);
+      console.log(`   Primary keyword in mergedData:`, group.mergedData.keyword);
+      console.log(`   Variants removed:`, group.variants);
       filtered.push(group.mergedData);
     });
+
+    console.log(`✓ Applied ${approvedMerges.length} merges. Final data count: ${filtered.length}`);
 
     return filtered;
   };
@@ -614,6 +619,11 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
     try {
       // Brand matching - find exact match for brand name (case-insensitive)
       const brandLower = brandName.trim().toLowerCase();
+
+      console.log(`🔍 Brand matching: Looking for "${brandName}" (normalized: "${brandLower}")`);
+      console.log(`📊 Total keywords after processing: ${data.length}`);
+      console.log(`📝 Sample keywords:`, data.slice(0, 5).map(r => r.keyword));
+
       const brandMatch = data.find(record =>
         record.keyword.toLowerCase() === brandLower
       );
@@ -632,6 +642,7 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
       } else {
         // No exact match found - show top 20 by volume + first 20 rows for user selection
         console.log(`⚠ No exact match found for brand "${brandName}" (after merges)`);
+        console.log(`⚠ All keywords:`, data.map(r => r.keyword).slice(0, 30));
 
         // Group 1: Top 20 by search volume
         const top20ByVolume = [...data]
