@@ -215,11 +215,22 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
       });
 
       if (similar.length > 1) {
-        const primaryKeyword = similar.reduce((highest, current) => {
+        // First priority: keyword that exactly matches brand name (case-insensitive)
+        const brandLower = brandName.trim().toLowerCase();
+        const exactBrandMatch = similar.find(s => s.keyword.toLowerCase() === brandLower);
+
+        // Second priority: highest search volume
+        const highestVolumeKeyword = similar.reduce((highest, current) => {
           const currentVolume = current['Avg. monthly searches'] || 0;
           const highestVolume = highest['Avg. monthly searches'] || 0;
           return currentVolume > highestVolume ? current : highest;
-        }).keyword;
+        });
+
+        const primaryKeyword = (exactBrandMatch ? exactBrandMatch : highestVolumeKeyword).keyword;
+
+        if (exactBrandMatch) {
+          console.log(`✓ Preserving brand name "${primaryKeyword}" as primary keyword in merge (volume: ${exactBrandMatch['Avg. monthly searches']?.toLocaleString()})`);
+        }
 
         const mergedData: any = {
           keyword: primaryKeyword,
@@ -721,6 +732,13 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
       console.log(`✓ Filtered out ${excludedCount} zero-traffic keywords (trash)`);
       console.log(`✓ Processing ${data.length} keywords with valid traffic`);
 
+      if (excludedCount > 0) {
+        console.log('Sample of filtered keywords:', rawData.slice(0, 5).map(r => ({
+          keyword: r.keyword,
+          avgSearches: r['Avg. monthly searches']
+        })));
+      }
+
       if (data.length === 0) {
         throw new Error('All keywords have zero traffic. Please upload a file with valid search volume data.');
       }
@@ -790,6 +808,13 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
       const excludedCount = rawData.length - data.length;
       console.log(`✓ Filtered out ${excludedCount} zero-traffic keywords (trash)`);
       console.log(`✓ Processing ${data.length} keywords with valid traffic`);
+
+      if (excludedCount > 0) {
+        console.log('Sample of filtered keywords:', rawData.slice(0, 5).map(r => ({
+          keyword: r.keyword,
+          avgSearches: r['Avg. monthly searches']
+        })));
+      }
 
       if (data.length === 0) {
         throw new Error('All keywords have zero traffic. Please upload a file with valid search volume data.');
