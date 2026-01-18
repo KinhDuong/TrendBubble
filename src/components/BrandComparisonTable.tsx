@@ -383,18 +383,18 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
 
   return (
     <div className={`mb-6 rounded-xl border overflow-visible ${theme === 'dark' ? 'bg-gradient-to-br from-gray-800/50 to-gray-900/50 border-gray-700' : 'bg-gradient-to-br from-gray-50 to-white border-gray-200'}`}>
-      <div className={`px-6 py-4 border-b ${theme === 'dark' ? 'border-gray-700 bg-gray-800/30' : 'border-gray-200 bg-gray-100'} overflow-visible rounded-t-xl`}>
+      <div className={`px-3 md:px-6 py-3 md:py-4 border-b ${theme === 'dark' ? 'border-gray-700 bg-gray-800/30' : 'border-gray-200 bg-gray-100'} overflow-visible rounded-t-xl`}>
         <div className="flex items-center justify-center">
-          <h2 className="text-xl md:text-2xl font-black text-black tracking-wider">
+          <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-black text-black tracking-wider">
             BRAND COMPARE
           </h2>
         </div>
       </div>
 
       <div className="overflow-x-auto overflow-y-visible">
-        <div className="min-w-[600px]">
+        <div className="min-w-[500px]">
           <div className={`grid gap-0 border-b ${theme === 'dark' ? 'border-gray-700' : 'border-gray-300'}`} style={{ gridTemplateColumns: `repeat(${brandStats.length + 1}, 1fr)` }}>
-            <div className={`p-4 ${theme === 'dark' ? 'bg-gray-800/50' : 'bg-gray-100'}`}></div>
+            <div className={`p-2 md:p-4 ${theme === 'dark' ? 'bg-gray-800/50' : 'bg-gray-100'}`}></div>
             {brandStats.map((stats, index) => {
               const brandColor = getBrandColor(stats.brand, availableBrands);
               const intensityBoost = getIntensityBoost(stats);
@@ -402,7 +402,7 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
               return (
                 <div
                   key={stats.brand}
-                  className={`p-4 text-center border-l ${theme === 'dark' ? 'border-gray-700' : 'border-gray-300'} relative`}
+                  className={`p-2 md:p-4 text-center border-l ${theme === 'dark' ? 'border-gray-700' : 'border-gray-300'} relative`}
                   style={{
                     background: theme === 'dark'
                       ? `linear-gradient(135deg, ${brandColor}20, ${brandColor}10)`
@@ -411,19 +411,20 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
                 >
                   <div className="relative inline-block">
                     <div
-                      className="text-lg md:text-xl font-black uppercase tracking-wide px-4 py-2 rounded-full inline-block"
+                      className="text-xs sm:text-sm md:text-base lg:text-lg font-black uppercase tracking-wide px-2 sm:px-3 md:px-4 py-1.5 md:py-2 rounded-full inline-block max-w-full overflow-hidden text-ellipsis whitespace-nowrap"
                       style={{
                         background: brandColor,
                         color: 'white'
                       }}
+                      title={stats.brand}
                     >
                       {stats.brand}
                     </div>
 
                     {intensityBoost.hasBoost && (
-                      <div className="absolute -top-2 -right-2 animate-pulse">
+                      <div className="absolute -top-1 md:-top-2 -right-1 md:-right-2 animate-pulse">
                         <div
-                          className={`text-2xl ${intensityBoost.level === 'extreme' ? 'animate-bounce' : ''}`}
+                          className={`text-lg md:text-2xl ${intensityBoost.level === 'extreme' ? 'animate-bounce' : ''}`}
                           title={intensityBoost.reason}
                         >
                           {intensityBoost.level === 'extreme' ? '🚀' : '🔥'}
@@ -433,7 +434,7 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
                   </div>
 
                   {intensityBoost.hasBoost && (
-                    <div className={`text-xs mt-2 px-2 py-1 rounded ${
+                    <div className={`text-[10px] md:text-xs mt-1 md:mt-2 px-1.5 md:px-2 py-0.5 md:py-1 rounded ${
                       intensityBoost.level === 'extreme'
                         ? theme === 'dark' ? 'bg-emerald-900/40 text-emerald-300' : 'bg-emerald-100 text-emerald-700'
                         : theme === 'dark' ? 'bg-orange-900/40 text-orange-300' : 'bg-orange-100 text-orange-700'
@@ -454,11 +455,11 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
                 className={`grid gap-0 border-b ${theme === 'dark' ? 'border-gray-700/50' : 'border-gray-200'} hover:${theme === 'dark' ? 'bg-gray-700/20' : 'bg-gray-50'} transition-colors overflow-visible`}
                 style={{ gridTemplateColumns: `repeat(${brandStats.length + 1}, 1fr)` }}
               >
-                <div className={`p-4 flex items-center gap-3 ${theme === 'dark' ? 'bg-gray-800/30' : 'bg-gray-50/50'}`}>
-                  <div className={`p-2 rounded-lg ${theme === 'dark' ? 'bg-gray-700' : 'bg-white border border-gray-200'}`}>
-                    <Icon className={`w-5 h-5 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`} />
+                <div className={`p-2 md:p-4 flex items-center gap-2 md:gap-3 ${theme === 'dark' ? 'bg-gray-800/30' : 'bg-gray-50/50'}`}>
+                  <div className={`p-1.5 md:p-2 rounded-lg ${theme === 'dark' ? 'bg-gray-700' : 'bg-white border border-gray-200'}`}>
+                    <Icon className={`w-4 h-4 md:w-5 md:h-5 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`} />
                   </div>
-                  <span className={`text-sm font-semibold ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
+                  <span className={`text-xs md:text-sm font-semibold ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
                     {metric.label}
                   </span>
                 </div>
@@ -487,7 +488,7 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
                   return (
                     <div
                       key={`${stats.brand}-${metric.key}`}
-                      className={`p-4 flex items-center justify-center border-l ${theme === 'dark' ? 'border-gray-700/50' : 'border-gray-200'} relative`}
+                      className={`p-2 md:p-4 flex items-center justify-center border-l ${theme === 'dark' ? 'border-gray-700/50' : 'border-gray-200'} relative`}
                     >
                       {isTrending ? (
                         <div
@@ -496,15 +497,15 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
                         >
                           <button
                             onClick={() => toggleTooltip(stats.brand, metric.key)}
-                            className={`text-center transition-all hover:scale-105 ${theme === 'dark' ? 'hover:bg-gray-700/30' : 'hover:bg-gray-100/50'} rounded-lg px-3 py-2 cursor-pointer`}
+                            className={`text-center transition-all hover:scale-105 ${theme === 'dark' ? 'hover:bg-gray-700/30' : 'hover:bg-gray-100/50'} rounded-lg px-2 md:px-3 py-1 md:py-2 cursor-pointer`}
                           >
                             {(() => {
                               const trending = calculateTrending(stats);
                               const Icon = trending.ArrowIcon;
                               return (
-                                <div className="flex flex-col items-center gap-1">
-                                  <Icon className={`w-8 h-8 ${trending.color}`} strokeWidth={2.5} />
-                                  <div className={`text-sm md:text-base font-bold ${trending.color}`}>
+                                <div className="flex flex-col items-center gap-0.5 md:gap-1">
+                                  <Icon className={`w-5 h-5 md:w-8 md:h-8 ${trending.color}`} strokeWidth={2.5} />
+                                  <div className={`text-[10px] sm:text-xs md:text-sm lg:text-base font-bold ${trending.color}`}>
                                     {trending.label}
                                   </div>
                                 </div>
@@ -555,9 +556,9 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
                         >
                           <button
                             onClick={() => toggleTooltip(stats.brand, metric.key)}
-                            className={`text-center transition-all hover:scale-105 ${theme === 'dark' ? 'hover:bg-gray-700/30' : 'hover:bg-gray-100/50'} rounded-lg px-3 py-2 cursor-pointer`}
+                            className={`text-center transition-all hover:scale-105 ${theme === 'dark' ? 'hover:bg-gray-700/30' : 'hover:bg-gray-100/50'} rounded-lg px-2 md:px-3 py-1 md:py-2 cursor-pointer`}
                           >
-                            <div className={`text-lg md:text-xl font-bold ${getInterestLevelColor(value)}`}>
+                            <div className={`text-sm md:text-lg lg:text-xl font-bold ${getInterestLevelColor(value)}`}>
                               {value > 0 ? getInterestLevel(value) : 'N/A'}
                             </div>
                           </button>
@@ -591,9 +592,9 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
                         >
                           <button
                             onClick={() => toggleTooltip(stats.brand, metric.key)}
-                            className={`text-center transition-all hover:scale-105 ${theme === 'dark' ? 'hover:bg-gray-700/30' : 'hover:bg-gray-100/50'} rounded-lg px-3 py-2 cursor-pointer`}
+                            className={`text-center transition-all hover:scale-105 ${theme === 'dark' ? 'hover:bg-gray-700/30' : 'hover:bg-gray-100/50'} rounded-lg px-2 md:px-3 py-1 md:py-2 cursor-pointer`}
                           >
-                            <div className={`text-lg md:text-xl font-bold ${getDemandLevelColor(value)}`}>
+                            <div className={`text-sm md:text-lg lg:text-xl font-bold ${getDemandLevelColor(value)}`}>
                               {value > 0 ? getDemandLevel(value) : 'N/A'}
                             </div>
                           </button>
@@ -627,12 +628,12 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
                         >
                           <button
                             onClick={() => toggleTooltip(stats.brand, metric.key)}
-                            className={`text-center transition-all hover:scale-105 ${theme === 'dark' ? 'hover:bg-gray-700/30' : 'hover:bg-gray-100/50'} rounded-lg px-3 py-2 cursor-pointer`}
+                            className={`text-center transition-all hover:scale-105 ${theme === 'dark' ? 'hover:bg-gray-700/30' : 'hover:bg-gray-100/50'} rounded-lg px-2 md:px-3 py-1 md:py-2 cursor-pointer`}
                           >
                             {(() => {
                               const trendData = calculateLongTermTrend(stats);
                               return (
-                                <div className={`text-base md:text-lg font-bold ${trendData.color}`}>
+                                <div className={`text-xs sm:text-sm md:text-base lg:text-lg font-bold ${trendData.color}`}>
                                   {trendData.trend}
                                 </div>
                               );
@@ -666,11 +667,11 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
                         </div>
                       ) : (
                         <div className="text-center">
-                          <div className={`text-xl md:text-2xl font-bold ${textColor}`}>
+                          <div className={`text-base sm:text-lg md:text-xl lg:text-2xl font-bold ${textColor}`}>
                             {formattedValue}
                           </div>
                           {(metric.key === 'topPerformers' || metric.key === 'risingStars' || metric.key === 'risingStarsHistorical' || metric.key === 'declining' || metric.key === 'stable' || metric.key === 'highIntent') && (
-                            <div className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'} mt-1`}>
+                            <div className={`text-[10px] md:text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'} mt-0.5 md:mt-1`}>
                               keywords
                             </div>
                           )}
