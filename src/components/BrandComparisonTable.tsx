@@ -409,9 +409,9 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
                       : `linear-gradient(135deg, ${brandColor}15, ${brandColor}05)`
                   }}
                 >
-                  <div className="relative inline-block">
+                  <div className="relative w-full">
                     <div
-                      className="text-xs sm:text-sm md:text-base lg:text-lg font-black uppercase tracking-wide px-2 sm:px-3 md:px-4 py-1.5 md:py-2 rounded-full inline-block max-w-full overflow-hidden text-ellipsis whitespace-nowrap"
+                      className="text-xs sm:text-sm md:text-base lg:text-lg font-black uppercase tracking-wide px-2 sm:px-3 md:px-4 py-1.5 md:py-2 rounded-full text-center break-words"
                       style={{
                         background: brandColor,
                         color: 'white'
