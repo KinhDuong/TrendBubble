@@ -900,13 +900,16 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
       const finalData = applyMerges(pendingData, approvedMerges);
       // Brand matching happens AFTER merges are applied
       await performBrandMatchingAndUpload(finalData);
+      // Don't clear pendingDataRef here - it's needed for brand selection
+      // It will be cleared in handleBrandSelection or handleBrandSelectionCancel
     } catch (err) {
       console.error('Merge approval error:', err);
       setError(err instanceof Error ? err.message : 'Failed to process merges');
       setUploading(false);
-    } finally {
+      // Clear on error
       setPendingData([]);
       pendingDataRef.current = [];
+    } finally {
       setMergeGroups([]);
     }
   };
@@ -935,11 +938,16 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
       } else {
         // Brand matching happens AFTER duplicates removed and no merges needed
         await performBrandMatchingAndUpload(filteredData);
+        // Don't clear pendingDataRef here - it's needed for brand selection
+        // It will be cleared in handleBrandSelection or handleBrandSelectionCancel
       }
     } catch (err) {
       console.error('Duplicate review continue error:', err);
       setError(err instanceof Error ? err.message : 'Failed to process data');
       setUploading(false);
+      // Clear on error
+      setPendingData([]);
+      pendingDataRef.current = [];
     } finally {
       setDuplicateGroups([]);
       setZeroTrafficKeywords([]);
