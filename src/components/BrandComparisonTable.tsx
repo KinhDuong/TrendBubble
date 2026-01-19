@@ -402,7 +402,7 @@ export default function BrandComparisonTable({ brandStats, availableBrands, them
               return (
                 <div
                   key={stats.brand}
-                  className={`p-2 md:p-4 text-center border-l ${theme === 'dark' ? 'border-gray-700' : 'border-gray-300'} relative`}
+                  className={`p-2 md:p-4 flex flex-col items-center justify-center border-l ${theme === 'dark' ? 'border-gray-700' : 'border-gray-300'} relative`}
                   style={{
                     background: theme === 'dark'
                       ? `linear-gradient(135deg, ${brandColor}20, ${brandColor}10)`
