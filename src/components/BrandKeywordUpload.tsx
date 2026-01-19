@@ -215,48 +215,16 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
       });
 
       if (similar.length > 1) {
-        // First priority: keyword that matches brand name (with flexible matching)
+        // First priority: keyword that exactly matches brand name (case-insensitive)
         const brandLower = brandName.trim().toLowerCase();
 
-        // Helper function to check if keyword matches brand
-        const isBrandMatch = (keyword: string, brand: string): boolean => {
-          const kw = keyword.toLowerCase().trim();
-          const br = brand.toLowerCase().trim();
-
-          // Exact match
-          if (kw === br) return true;
-
-          // Brand contains qualifier - check if keyword matches core brand
-          // e.g., "Chatime Canada" → "chatime" or "HeyTea USA" → "heytea"
-          const commonQualifiers = ['canada', 'usa', 'us', 'uk', 'inc', 'corporation', 'corp', 'ltd', 'limited', 'co'];
-          const brandWords = br.split(/\s+/);
-
-          // Check if keyword matches first word(s) of brand (before qualifier)
-          if (brandWords.length > 1) {
-            const potentialQualifier = brandWords[brandWords.length - 1];
-            if (commonQualifiers.includes(potentialQualifier)) {
-              // Remove qualifier and compare
-              const coreBrand = brandWords.slice(0, -1).join(' ');
-              if (kw === coreBrand) return true;
-            }
-          }
-
-          // Check if keyword matches the first word (for brands like "Chatime Canada")
-          if (kw === brandWords[0]) return true;
-
-          // Check if brand starts with keyword (with word boundary)
-          if (br.startsWith(kw + ' ')) return true;
-
-          return false;
-        };
-
-        console.log(`🔍 Merge group candidates for brand "${brandName}":`, similar.map(s => ({
+        console.log(`🔍 Merge group candidates:`, similar.map(s => ({
           keyword: s.keyword,
           volume: s['Avg. monthly searches'],
-          matchesBrand: isBrandMatch(s.keyword, brandLower)
+          matchesBrand: s.keyword.toLowerCase() === brandLower
         })));
 
-        const exactBrandMatch = similar.find(s => isBrandMatch(s.keyword, brandLower));
+        const exactBrandMatch = similar.find(s => s.keyword.toLowerCase() === brandLower);
 
         // Second priority: highest search volume
         const highestVolumeKeyword = similar.reduce((highest, current) => {
