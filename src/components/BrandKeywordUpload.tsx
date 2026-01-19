@@ -1138,6 +1138,14 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
     });
 
     console.log(`✓ Aggregated ${Object.keys(monthlySearches).length} months of search data`);
+    console.log(`📊 Data structure check - first row columns:`, Object.keys(data[0] || {}).slice(0, 20));
+    console.log(`📊 Total rows in data:`, data.length);
+    console.log(`📊 Representative keyword to find:`, representativeKeyword);
+    console.log(`📊 Selected keyword data provided:`, selectedKeywordData ? 'YES' : 'NO');
+    if (selectedKeywordData) {
+      console.log(`📊 Selected keyword name:`, selectedKeywordData.keyword);
+      console.log(`📊 Selected keyword has these fields:`, Object.keys(selectedKeywordData).slice(0, 15));
+    }
 
     // Check tier limits
     if (getKeywordLimit) {
@@ -1169,6 +1177,13 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
     // Calculate demand scores for all keywords
     console.log('Calculating demand scores...');
     const scoredData = await calculateDemandScores(data);
+    console.log(`✅ Demand scores calculated. Scored data length:`, scoredData.length);
+    console.log(`🔍 First 5 keywords in scored data:`, scoredData.slice(0, 5).map(k => ({
+      keyword: k.keyword,
+      demand_score: k.demand_score,
+      interest_score: k.interest_score,
+      sentiment: k.sentiment
+    })));
 
     // Extract metrics from representative keyword AFTER scores are calculated
     let brandMetrics: {
@@ -1256,9 +1271,11 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
           interest_score: keywordData['interest_score'] || null,
           sentiment: keywordData['sentiment'] || null,
         };
-        console.log('✓ Extracted brand metrics with scores:', brandMetrics);
+        console.log('✅ FINAL: Extracted brand metrics with scores:', brandMetrics);
+        console.log(`✅ FINAL: Will save representative_keyword as:`, actualRepresentativeKeyword);
       } else {
-        console.warn(`⚠ Representative keyword "${representativeKeyword}" not found in scored data`);
+        console.error(`❌ CRITICAL: Representative keyword "${representativeKeyword}" not found in scored data`);
+        console.error(`❌ Available keywords (first 10):`, scoredData.slice(0, 10).map(k => k.keyword));
       }
     }
 
