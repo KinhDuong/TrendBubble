@@ -1187,42 +1187,61 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
     if (representativeKeyword) {
       let keywordData = null;
 
-      // Priority 1: If user explicitly selected a keyword, use that data directly
+      // Priority 1: If user explicitly selected a keyword, find it in the SCORED data
+      // (selectedKeywordData contains pre-scored data, we need the scored version)
       if (selectedKeywordData) {
-        keywordData = selectedKeywordData;
-        actualRepresentativeKeyword = selectedKeywordData.keyword;
-        console.log(`✓ Using explicitly selected keyword: "${actualRepresentativeKeyword}" (user selection)`);
-      } else {
-        // Priority 2: Try exact match in scored data
+        const selectedKeywordName = selectedKeywordData.keyword;
+        actualRepresentativeKeyword = selectedKeywordName;
+
+        // Find the scored version of the selected keyword (exact match first, then case-insensitive)
+        keywordData = scoredData.find(kw => kw.keyword === selectedKeywordName);
+
+        if (!keywordData) {
+          keywordData = scoredData.find(kw =>
+            kw.keyword.toLowerCase() === selectedKeywordName.toLowerCase()
+          );
+        }
+
+        if (keywordData) {
+          console.log(`✓ Using explicitly selected keyword: "${selectedKeywordName}" (user selection) with scores`);
+          console.log(`✓ Matched to scored keyword: "${keywordData.keyword}"`);
+          console.log(`✓ Metrics: demand=${keywordData.demand_score}, interest=${keywordData.interest_score}, sentiment=${keywordData.sentiment}`);
+        } else {
+          console.warn(`⚠ Selected keyword "${selectedKeywordName}" not found in scored data, trying fallback search`);
+        }
+      }
+
+      // Priority 2: If no keywordData yet, try exact match in scored data
+      if (!keywordData) {
         keywordData = scoredData.find(kw =>
           kw.keyword.toLowerCase() === representativeKeyword.toLowerCase()
         );
+      }
 
-        // Priority 3: If not found, try to find similar keywords
+      // Priority 3: If not found, try to find similar keywords
+      if (!keywordData) {
+        const brandLower = representativeKeyword.toLowerCase();
+        const normalized = brandLower.replace(/[^\w\s]/g, '').replace(/\s+/g, ' ').trim();
+
+        // Try to find keyword that matches when normalized (removes apostrophes, extra spaces, etc.)
+        keywordData = scoredData.find(kw => {
+          const kwNormalized = kw.keyword.toLowerCase().replace(/[^\w\s]/g, '').replace(/\s+/g, ' ').trim();
+          return kwNormalized === normalized;
+        });
+
+        // Priority 4: If still not found, find keyword that contains the brand name
         if (!keywordData) {
-          const brandLower = representativeKeyword.toLowerCase();
-          const normalized = brandLower.replace(/[^\w\s]/g, '').replace(/\s+/g, ' ').trim();
+          keywordData = scoredData
+            .filter(kw => {
+              const kwLower = kw.keyword.toLowerCase();
+              return kwLower.includes(brandLower) || brandLower.includes(kwLower);
+            })
+            .sort((a, b) => (b['Avg. monthly searches'] || 0) - (a['Avg. monthly searches'] || 0))[0];
+        }
 
-          // Try to find keyword that matches when normalized (removes apostrophes, extra spaces, etc.)
-          keywordData = scoredData.find(kw => {
-            const kwNormalized = kw.keyword.toLowerCase().replace(/[^\w\s]/g, '').replace(/\s+/g, ' ').trim();
-            return kwNormalized === normalized;
-          });
-
-          // Priority 4: If still not found, find keyword that contains the brand name
-          if (!keywordData) {
-            keywordData = scoredData
-              .filter(kw => {
-                const kwLower = kw.keyword.toLowerCase();
-                return kwLower.includes(brandLower) || brandLower.includes(kwLower);
-              })
-              .sort((a, b) => (b['Avg. monthly searches'] || 0) - (a['Avg. monthly searches'] || 0))[0];
-          }
-
-          if (keywordData) {
-            actualRepresentativeKeyword = keywordData.keyword;
-            console.log(`✓ Found alternative representative keyword: "${keywordData.keyword}" (searched for "${representativeKeyword}")`);
-          }
+        if (keywordData) {
+          actualRepresentativeKeyword = keywordData.keyword;
+          console.log(`✓ Found alternative representative keyword: "${keywordData.keyword}" (searched for "${representativeKeyword}")`);
         }
       }
 
