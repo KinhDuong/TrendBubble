@@ -680,6 +680,9 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
 
         const combinedKeywords = Array.from(keywordMap.values());
 
+        console.log(`🔍 DEBUG: Setting pendingData with ${data.length} keywords before showing selector`);
+        console.log(`🔍 DEBUG: First 3 keywords in data:`, data.slice(0, 3).map(k => k.keyword));
+
         setBrandSelectorKeywords(combinedKeywords);
         setPendingData(data); // Store data for final upload
         setShowBrandSelector(true);
@@ -948,6 +951,8 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
       const selectedAvgMonthlySearches = selectedKeyword['Avg. monthly searches'];
       const selectedKeywordName = selectedKeyword.keyword;
       console.log(`✓ User selected keyword: "${selectedKeywordName}" with ${selectedAvgMonthlySearches?.toLocaleString()} avg monthly searches (post-merge data)`);
+      console.log(`🔍 DEBUG: pendingData length at selection time:`, pendingData.length);
+      console.log(`🔍 DEBUG: pendingData first 3 keywords:`, pendingData.slice(0, 3).map(k => k.keyword));
 
       // At this point, pendingData has already been through duplicate removal and merge detection
       // Pass the entire selectedKeyword object so processUpload can extract metrics directly
