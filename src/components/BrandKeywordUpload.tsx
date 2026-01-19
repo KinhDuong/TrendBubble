@@ -648,8 +648,8 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
         representativeKeyword = brandName.trim();
         console.log(`✓ Found exact match for brand "${brandName}": ${avgMonthlySearches?.toLocaleString()} avg monthly searches (after merges)`);
 
-        // Proceed directly to upload
-        await processUpload(data, avgMonthlySearches, representativeKeyword);
+        // Proceed directly to upload, passing the brandMatch object for direct metric extraction
+        await processUpload(data, avgMonthlySearches, representativeKeyword, brandMatch);
       } else {
         // No exact match found - show top 20 by volume + first 20 rows for user selection
         console.log(`⚠ No exact match found for brand "${brandName}" (after merges)`);
@@ -950,8 +950,8 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
       console.log(`✓ User selected keyword: "${selectedKeywordName}" with ${selectedAvgMonthlySearches?.toLocaleString()} avg monthly searches (post-merge data)`);
 
       // At this point, pendingData has already been through duplicate removal and merge detection
-      // So we can proceed directly to upload
-      await processUpload(pendingData, selectedAvgMonthlySearches, selectedKeywordName);
+      // Pass the entire selectedKeyword object so processUpload can extract metrics directly
+      await processUpload(pendingData, selectedAvgMonthlySearches, selectedKeywordName, selectedKeyword);
       setPendingData([]);
     } catch (err) {
       console.error('Brand selection error:', err);
@@ -1104,7 +1104,7 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
     }
   };
 
-  const processUpload = async (data: Array<Record<string, any>>, manualAvgMonthlySearches?: number, representativeKeyword?: string) => {
+  const processUpload = async (data: Array<Record<string, any>>, manualAvgMonthlySearches?: number, representativeKeyword?: string, selectedKeywordData?: Record<string, any>) => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       throw new Error('You must be logged in to upload data');
@@ -1185,35 +1185,44 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
     let actualRepresentativeKeyword = representativeKeyword;
 
     if (representativeKeyword) {
-      // Try exact match first
-      let keywordData = scoredData.find(kw =>
-        kw.keyword.toLowerCase() === representativeKeyword.toLowerCase()
-      );
+      let keywordData = null;
 
-      // If not found, try to find similar keywords
-      if (!keywordData) {
-        const brandLower = representativeKeyword.toLowerCase();
-        const normalized = brandLower.replace(/[^\w\s]/g, '').replace(/\s+/g, ' ').trim();
+      // Priority 1: If user explicitly selected a keyword, use that data directly
+      if (selectedKeywordData) {
+        keywordData = selectedKeywordData;
+        actualRepresentativeKeyword = selectedKeywordData.keyword;
+        console.log(`✓ Using explicitly selected keyword: "${actualRepresentativeKeyword}" (user selection)`);
+      } else {
+        // Priority 2: Try exact match in scored data
+        keywordData = scoredData.find(kw =>
+          kw.keyword.toLowerCase() === representativeKeyword.toLowerCase()
+        );
 
-        // Try to find keyword that matches when normalized (removes apostrophes, extra spaces, etc.)
-        keywordData = scoredData.find(kw => {
-          const kwNormalized = kw.keyword.toLowerCase().replace(/[^\w\s]/g, '').replace(/\s+/g, ' ').trim();
-          return kwNormalized === normalized;
-        });
-
-        // If still not found, find keyword that contains the brand name
+        // Priority 3: If not found, try to find similar keywords
         if (!keywordData) {
-          keywordData = scoredData
-            .filter(kw => {
-              const kwLower = kw.keyword.toLowerCase();
-              return kwLower.includes(brandLower) || brandLower.includes(kwLower);
-            })
-            .sort((a, b) => (b['Avg. monthly searches'] || 0) - (a['Avg. monthly searches'] || 0))[0];
-        }
+          const brandLower = representativeKeyword.toLowerCase();
+          const normalized = brandLower.replace(/[^\w\s]/g, '').replace(/\s+/g, ' ').trim();
 
-        if (keywordData) {
-          actualRepresentativeKeyword = keywordData.keyword;
-          console.log(`✓ Found alternative representative keyword: "${keywordData.keyword}" (searched for "${representativeKeyword}")`);
+          // Try to find keyword that matches when normalized (removes apostrophes, extra spaces, etc.)
+          keywordData = scoredData.find(kw => {
+            const kwNormalized = kw.keyword.toLowerCase().replace(/[^\w\s]/g, '').replace(/\s+/g, ' ').trim();
+            return kwNormalized === normalized;
+          });
+
+          // Priority 4: If still not found, find keyword that contains the brand name
+          if (!keywordData) {
+            keywordData = scoredData
+              .filter(kw => {
+                const kwLower = kw.keyword.toLowerCase();
+                return kwLower.includes(brandLower) || brandLower.includes(kwLower);
+              })
+              .sort((a, b) => (b['Avg. monthly searches'] || 0) - (a['Avg. monthly searches'] || 0))[0];
+          }
+
+          if (keywordData) {
+            actualRepresentativeKeyword = keywordData.keyword;
+            console.log(`✓ Found alternative representative keyword: "${keywordData.keyword}" (searched for "${representativeKeyword}")`);
+          }
         }
       }
 
