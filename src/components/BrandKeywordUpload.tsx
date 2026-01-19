@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Upload, AlertCircle, CheckCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import KeywordMergeReview from './KeywordMergeReview';
@@ -56,6 +56,9 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
   const [brandSelectorKeywords, setBrandSelectorKeywords] = useState<Array<Record<string, any>>>([]);
   const [showUpdateConfirmation, setShowUpdateConfirmation] = useState(false);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
+
+  // Use ref to avoid closure issues with async state updates
+  const pendingDataRef = useRef<any[]>([]);
 
   const levenshteinDistance = (str1: string, str2: string): number => {
     const len1 = str1.length;
@@ -684,7 +687,8 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
         console.log(`🔍 DEBUG: First 3 keywords in data:`, data.slice(0, 3).map(k => k.keyword));
 
         setBrandSelectorKeywords(combinedKeywords);
-        setPendingData(data); // Store data for final upload
+        setPendingData(data); // Store data for final upload (keep for compatibility)
+        pendingDataRef.current = data; // Store in ref to avoid closure issues
         setShowBrandSelector(true);
         setUploading(false);
       }
@@ -775,6 +779,7 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
         setDuplicateGroups(detectedDuplicates);
         setZeroTrafficKeywords([]);
         setPendingData(data);
+        pendingDataRef.current = data;
         setShowDuplicateReview(true);
         setUploading(false);
         event.target.value = '';
@@ -787,6 +792,7 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
       if (detectedMerges.length > 0) {
         setMergeGroups(detectedMerges);
         setPendingData(data);
+        pendingDataRef.current = data;
         setShowMergeReview(true);
         setUploading(false);
       } else {
@@ -852,6 +858,7 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
         setDuplicateGroups(detectedDuplicates);
         setZeroTrafficKeywords([]);
         setPendingData(data);
+        pendingDataRef.current = data;
         setShowDuplicateReview(true);
         setUploading(false);
         return;
@@ -863,6 +870,7 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
       if (detectedMerges.length > 0) {
         setMergeGroups(detectedMerges);
         setPendingData(data);
+        pendingDataRef.current = data;
         setShowMergeReview(true);
         setUploading(false);
       } else {
@@ -898,6 +906,7 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
       setUploading(false);
     } finally {
       setPendingData([]);
+      pendingDataRef.current = [];
       setMergeGroups([]);
     }
   };
@@ -905,6 +914,7 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
   const handleMergeCancel = () => {
     setShowMergeReview(false);
     setPendingData([]);
+    pendingDataRef.current = [];
     setMergeGroups([]);
     setUploading(false);
   };
@@ -919,6 +929,7 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
       if (detectedMerges.length > 0) {
         setMergeGroups(detectedMerges);
         setPendingData(filteredData);
+        pendingDataRef.current = filteredData;
         setShowMergeReview(true);
         setUploading(false);
       } else {
@@ -940,6 +951,7 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
     setDuplicateGroups([]);
     setZeroTrafficKeywords([]);
     setPendingData([]);
+    pendingDataRef.current = [];
     setUploading(false);
   };
 
@@ -951,13 +963,14 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
       const selectedAvgMonthlySearches = selectedKeyword['Avg. monthly searches'];
       const selectedKeywordName = selectedKeyword.keyword;
       console.log(`✓ User selected keyword: "${selectedKeywordName}" with ${selectedAvgMonthlySearches?.toLocaleString()} avg monthly searches (post-merge data)`);
-      console.log(`🔍 DEBUG: pendingData length at selection time:`, pendingData.length);
-      console.log(`🔍 DEBUG: pendingData first 3 keywords:`, pendingData.slice(0, 3).map(k => k.keyword));
+      console.log(`🔍 DEBUG: pendingDataRef.current length at selection time:`, pendingDataRef.current.length);
+      console.log(`🔍 DEBUG: pendingDataRef.current first 3 keywords:`, pendingDataRef.current.slice(0, 3).map(k => k.keyword));
 
       // At this point, pendingData has already been through duplicate removal and merge detection
       // Pass the entire selectedKeyword object so processUpload can extract metrics directly
-      await processUpload(pendingData, selectedAvgMonthlySearches, selectedKeywordName, selectedKeyword);
+      await processUpload(pendingDataRef.current, selectedAvgMonthlySearches, selectedKeywordName, selectedKeyword);
       setPendingData([]);
+      pendingDataRef.current = []; // Clear ref as well
     } catch (err) {
       console.error('Brand selection error:', err);
       setError(err instanceof Error ? err.message : 'Failed to process upload');
@@ -971,6 +984,7 @@ export default function BrandKeywordUpload({ onUploadComplete, theme = 'light', 
     setShowBrandSelector(false);
     setBrandSelectorKeywords([]);
     setPendingData([]);
+    pendingDataRef.current = [];
     setUploading(false);
   };
 
